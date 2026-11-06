@@ -18,10 +18,54 @@ export class ProductPreview{
  }
  set(product,variant){if(this.product?.id===product.id&&this.variant===variant)return;this.releaseModel();this.product=product;this.variant=variant;this.model=furnitureModel(this.world,product.id,variant);this.scene.add(this.model);this.draw();}
  setModule(module,interior=false){this.interior=interior;this.releaseModel();this.product={id:module.id,w:6,d:2.5,h:2.9};this.model=this.world.office.clone();this.model.position.set(0,0,0);this.model.scale.setScalar(1);this.model.rotation.set(0,0,0);this.model.visible=true;this.model.traverse(o=>{if(o.isGroup)o.visible=true;if(o.name.includes('Identificación de zonas'))o.visible=false;if(o.isLight)o.visible=false;if(o.geometry)o.geometry=o.geometry.clone();if(o.isLineSegments)o.material=o.material.clone();});if(interior){for(const f of moduleFixtures(module.level||1)){const mesh=furnitureModel(this.world,f.product,f.variant);mesh.position.set(f.x,f.host?1.17:.42,f.z);mesh.rotation.y=f.rotation;this.model.add(mesh);}}this.scene.add(this.model);this.draw();}
+ // One real rendered scene, never a fictitious marketing thumbnail.
+ // Geometry is deep-copied because releaseModel() disposes its owned preview meshes;
+ // the live world mesh buffers remain untouched.
+ setBuilding(models){
+  this.interior=false;
+  this.releaseModel();
+  this.product={id:'building'};
+  this.model=new T.Group();
+  this.model.name='DRILL RUN · Catálogo visual del edificio real';
+  for(const source of (Array.isArray(models)?models:[models])){
+   if(!source)continue;
+   const copy=source.clone(true);
+   copy.traverse(o=>{
+    if(o.isLight)o.visible=false;
+    if(o.geometry)o.geometry=o.geometry.clone();
+    if(o.isLineSegments&&o.material)o.material=o.material.clone();
+   });
+   copy.visible=true;
+   this.model.add(copy);
+  }
+  this.scene.add(this.model);
+  this.draw();
+ }
  rotate(delta){this.angle+=delta;this.draw();}
  draw(){if(!this.model)return;if(this.interior){this.model.traverse(o=>{if(o.isGroup&&o.name.startsWith('03 ·'))o.visible=false;if(o.isGroup&&o.name.startsWith('04 ·'))o.visible=Math.cos(this.angle)<0;if(o.isGroup&&o.name.startsWith('05 ·'))o.visible=Math.cos(this.angle)>=0;if(o.isGroup&&o.name.startsWith('06 ·'))o.visible=Math.sin(this.angle)>=0;if(o.isGroup&&o.name.startsWith('07 ·'))o.visible=Math.sin(this.angle)<0;});}const width=this.host.clientWidth,height=this.host.clientHeight;if(width<2||height<2)return;this.renderer.setSize(width,height);fitPreviewCamera(this.camera,new T.Box3().setFromObject(this.model),width/height,this.angle);this.renderer.staticFrame=null;this.renderer.last=0;this.renderer.render(this.scene,this.camera);}
  releaseModel(){if(!this.model)return;this.model.traverse(o=>{o.geometry?.dispose();if(o.isLineSegments)o.material.dispose();});this.model.removeFromParent();this.model=null;}
  dispose(){this.observer.disconnect();this.releaseModel();this.scene.traverse(o=>o.geometry?.dispose());this.renderer.dispose?.();this.renderer.domElement.remove();this.host.onpointerdown=this.host.onpointermove=this.host.onpointerup=this.host.onpointercancel=null;}
+}
+
+// The workshop thumbnail is rendered from precisely the same makeWorkshop()
+// geometry used in the real world; level 2 adds the live extension when present.
+// It creates no new colliders, buildings, economic changes or saved state.
+export function workshopThumbnail(world,level=1){
+ const host=document.createElement('div');
+ host.style.cssText='position:fixed;left:-1500px;top:-1500px;width:480px;height:300px;pointer-events:none;visibility:hidden';
+ document.body.append(host);
+ let preview=null;
+ try{
+  const base=world.workshopModel||world.makeWorkshop(true);
+  const models=[base];
+  if(level>=2&&world._workshopExt)models.push(world._workshopExt);
+  preview=new ProductPreview(host,world,{transparent:true});
+  preview.setBuilding(models);
+  return cutoutPNG(preview.renderer.domElement);
+ }finally{
+  preview?.dispose();
+  host.remove();
+ }
 }
 
 export function cutoutPNG(source){
