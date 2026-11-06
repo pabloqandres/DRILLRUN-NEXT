@@ -50,6 +50,15 @@
 - `dist/config/` — Game configuration
 - `dist/assets/`, `dist/assets3d/` — 2D/3D assets
 
+## 2026-11-06 — Catalog + Mission 4 Hotfix Live
+
+- Production Git commit: `c9532a3135fce1c43959009681b2473a16e80827` (PR #3 squash merge), Vercel production deployment `dpl_Eocd4wVeYgSJGaXwCTX4Jjk6hhfF`, READY, source `git`, branch `main`.
+- Code corrections: Catalog camera continuity and tab-scroll retention; no automatic DrillTruck patrol toast; reduced passive M4 income from 2,500 to 500 per cycle per zone; offline accrual max 4 cycles per zone per return; no fictitious historical-income mission reward.
+- Historical saved cash and bank balances remain unchanged by these fixes; no save-key changes.
+- Verified via production HTTP 200 and source markers for `/chapter/game.mjs`, `/chapter/catalog-view.mjs`, `/mission4/production.mjs`, `/mission4/offline-progress.mjs`, `/manifest.json`.
+- Module economics passed isolated JavaScript execution assertions; full `npm test` and live browser-interaction smoke testing **not yet performed**. Test file: `tests/mission4-economy.test.mjs`.
+- See `CHANGES/2026-11-06_chatgpt_catalog-camera-truck-economy-fix.md`.
+
 ## Known Issues / Verification Gaps
 
 - No critical runtime issue was independently verified in this documentation audit; the listed mission completions reflect Claude Code's report, not independent end-to-end testing by ChatGPT.
