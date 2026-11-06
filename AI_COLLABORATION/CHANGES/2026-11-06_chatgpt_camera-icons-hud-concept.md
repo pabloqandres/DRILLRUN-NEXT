@@ -34,3 +34,10 @@ A proposed more readable landscape screen was generated from the user's screensh
 1. Merge PR on user authorization.
 2. Verify new production SHA and served source/manifest.
 3. User reviews visual HUD concept before implementing broader layout; user tests wheel/pinch, camera framing, Catalog inline actions and icon legibility.
+
+## Production deployment verified
+
+- PR #5 merged into `main` as `ecd61a3e40586a9bfa690e21e1e11cd86951310d`.
+- Vercel `dpl_B3tCwvYm7khDXaKApocH8RyoByQT` READY, production, exact matching SHA.
+- All six changed production source files and `/manifest.json` served HTTP 200 with expected new markers; no browser smoke test or full npm suite.
+- User still needs to review the **separate** overall HUD layout concept; only the SVG iconography and previously requested point fixes were released.
