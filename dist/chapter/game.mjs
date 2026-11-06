@@ -637,7 +637,12 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
  avatars?.updateSelector(phase==='character',selectedAvatar,s,dt,clock);characterStage?.update(phase==='character',clock,selectedAvatar);
  if(phase==='character'){world.chapterCamera={target:new T.Vector3(-4.55+Math.max(0,Math.min(.5,(730-innerWidth)/324)),1.0,5.35),offset:new T.Vector3(0,.55,6.1)};}
  if(phase!=='character')world.chapterCamera=null;
- world.avatarHeight=avatarDefinition(s.character).height;world.cameraMode=builderOpen||managingOffice?'builder':s.inside?'interior':'explore';world.cameraFocus=builderOpen?(hsecUI?.drawing?hsecUI.focus():hsecUI?.mode?{x:1,z:2}:{x:-6,z:0}):managingOffice?{x:-6,z:0}:null;
+ world.avatarHeight=avatarDefinition(s.character).height;
+// Catalog browsing (including collapsing) is UI-only: do not force a builder camera.
+// Only an actual HSEC in-world placement/drawing or office preview uses the overhead view.
+const inWorldConstruction=builderOpen&&!!(hsecUI?.drawing||hsecUI?.coneZone);
+world.cameraMode=inWorldConstruction||managingOffice?'builder':s.inside?'interior':'explore';
+world.cameraFocus=inWorldConstruction?hsecUI.focus():managingOffice?{x:-6,z:0}:null;
  if(qa&&hsecFollow&&s.hsec?.employee){const n=s.hsec.employee;world.chapterCamera={target:new T.Vector3(n.position.x,.95,n.position.z),offset:new T.Vector3(-Math.sin(n.yaw)*4.75,1.65,-Math.cos(n.yaw)*4.75)};}
  if(managingOffice){world.chapterCamera={target:new T.Vector3(-3.9,1,0),offset:world.chapterUpgradePreview?new T.Vector3(2.7,5.6,6.1):new T.Vector3(6.5,4.5,8.5)};}
  const movable=!cameraDebug?.freeze&&phase==='play'&&!builderOpen&&!modalOpen&&!phoneOpen&&!placement&&!busy&&innerWidth>innerHeight;let walking=false;if(movable)walking=locomotionReview?.active?locomotionReview.step(dt):move(dt);else motion.vx=motion.vz=motion.speed=0;
