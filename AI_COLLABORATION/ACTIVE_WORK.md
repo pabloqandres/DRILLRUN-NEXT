@@ -4,11 +4,11 @@
 
 ## Currently Active
 
-- **ChatGPT — World Art V1:** real office, workshop and HSEC shed 3D upgrades; real-model thumbnails by level in Catálogo; compact HUD styling, desert ambience and roads. Branch `chatgpt/world-art-building-catalog-v1` awaiting code PR and deployment verification. User explicitly requested direct implementation and production testing.
+_No active code edits. World Art V1 (PR #7) is released in main/production. Awaiting user **visual acceptance** and browser gameplay smoke tests before a second art pass or new product assets._
 
 ## Files in Progress
 
-- Visual files in scope: `dist/assets3d/office-shell.mjs`, `dist/scene.mjs`, `dist/hsec/shed-model.mjs`, `dist/chapter/product-preview.mjs`, `dist/chapter/builder-ui.mjs`, `dist/chapter/game.mjs` (only world binding), `dist/graphics/`, `dist/hsec/world.mjs` (road paint only), `dist/chapter/world-art-v1.css`, `dist/index.html`, regression tests. Keep existing mission, save, and purchase logic unchanged.
+_No active file locks. Future art changes should sync from `main` and continue to avoid economy, contracts and save mutations._
 
 ## Recently Completed
 
@@ -22,6 +22,7 @@
 | 2026-11-06 | ChatGPT | Catalog V2 visual design (PR #2) | Merged in main |
 | 2026-11-06 | ChatGPT | Camera/category scroll + DrillTruck/economy hotfix (PR #3) | Merged in main; Vercel READY |
 | 2026-11-06 | ChatGPT | Camera zoom, Catalog in-dock actions, iconography V3 (PR #5) | Merged in main; Vercel READY |
+| 2026-11-06 | ChatGPT | World Art V1: upgraded real buildings, Catalog renders, HUD/terrain/roads (PR #7) | Merged in main; Vercel READY; awaiting visual acceptance |
 
 ## Blocked / Waiting
 
