@@ -71,20 +71,46 @@ export class World{
  }
  window(g,x,y,z,w,h){for(const side of[-1,1]){this.box(g,.08,h+.16,.1,x+side*(w/2+.04),y,z,C.navy);this.box(g,w+.16,.08,.1,x,y+side*(h/2+.04),z,C.navy);}const glass=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({color:0x8fbdc4,transparent:true,opacity:.34,side:T.DoubleSide}));glass.position.set(x,y,z+.055);g.add(glass);this.box(g,.05,h,.1,x,y,z+.06,C.navy);}
  pot(g,x,y,z){this.cyl(g,.23,.4,x,y+.2,z,0x727d77,.31);for(let i=0;i<7;i++){const leaf=new T.Mesh(new T.ConeGeometry(.12,.65,4),this.mat(i%2?0x6c8052:0x89915b));leaf.position.set(x+Math.sin(i)*.14,y+.5,z+Math.cos(i)*.14);leaf.rotation.z=Math.sin(i)*.55;leaf.rotation.x=Math.cos(i)*.5;g.add(leaf);}}
- makeWorkshop(){const g=new T.Group();g.position.set(-7.6,0,-9.3);this.scene.add(g);this.pad(-7.6,-9.3,8.3,6.3);this.box(g,7.2,.3,5.4,0,.3,0,C.steel);this.box(g,7.2,4.1,.16,0,2.3,-2.7,C.cream,true);for(const x of[-3.6,3.6])this.box(g,.15,4.1,5.4,x,2.3,0,C.cream,true);this.box(g,7.3,.8,.2,0,4.05,2.7,C.cream);this.box(g,1.2,3.4,.2,-3,2,2.7,C.cream);this.box(g,1.2,3.4,.2,3,2,2.7,C.cream);this.box(g,7.6,.22,5.9,0,4.55,0,C.navy,true);for(let z=-2.5;z<2.6;z+=.24){this.box(g,.035,3.7,.03,3.7,2.35,z,0xb6b8ad);this.box(g,.035,3.7,.03,-3.7,2.35,z,0xb6b8ad);}for(let x=-3.4;x<3.5;x+=.32)this.box(g,.027,.03,5.5,x,4.68,0,0x476272);this.box(g,6.9,.04,5.1,0,.47,0,0xb5b8a8);for(const x of[-3.7,3.7])this.box(g,.16,4.2,.18,x,2.3,2.76,C.navy);this.box(g,4.7,.65,.18,0,3.75,2.82,0x8c9999);for(let y=3.47;y<4.05;y+=.14)this.box(g,4.7,.025,.03,0,y,2.93,C.steel);this.sign(g,'TALLER',2.3,.47,0,4.15,2.83,C.navy);for(let x=-3.2;x<3.5;x+=.5){this.box(g,.025,3.6,.02,x,2.2,-2.8,0xb7b7a7);}this.shelf(g,-2.5,0,-1.7);this.shelf(g,2.5,0,-1.7);this.box(g,2.7,.16,.8,0,1.2,-2,C.orange,true);for(let x=-.9;x<=.9;x+=.6){this.cyl(g,.13,.7,x,1.65,-1.9,C.steel);}this.toolbox(g,-1.5,.3,1.6);this.box(g,1,.2,.7,1.6,.4,1.2,C.navy);for(let i=0;i<3;i++)this.box(g,.7,.1,.3,1.6,.58+i*.13,1.2,C.yellow);// Wall colliders instead of solid — allows player to walk inside
+ makeWorkshop(previewOnly=false){const g=new T.Group();g.name='DR-BLD-002 · Taller de mantenimiento';g.position.set(-7.6,0,-9.3);
+  if(!previewOnly){this.scene.add(g);this.pad(-7.6,-9.3,8.3,6.3);this.workshopModel=g;}this.box(g,7.2,.3,5.4,0,.3,0,C.steel);this.box(g,7.2,4.1,.16,0,2.3,-2.7,C.cream,true);for(const x of[-3.6,3.6])this.box(g,.15,4.1,5.4,x,2.3,0,C.cream,true);this.box(g,7.3,.8,.2,0,4.05,2.7,C.cream);this.box(g,1.2,3.4,.2,-3,2,2.7,C.cream);this.box(g,1.2,3.4,.2,3,2,2.7,C.cream);this.box(g,7.6,.22,5.9,0,4.55,0,C.navy,true);for(let z=-2.5;z<2.6;z+=.24){this.box(g,.035,3.7,.03,3.7,2.35,z,0xb6b8ad);this.box(g,.035,3.7,.03,-3.7,2.35,z,0xb6b8ad);}for(let x=-3.4;x<3.5;x+=.32)this.box(g,.027,.03,5.5,x,4.68,0,0x476272);this.box(g,6.9,.04,5.1,0,.47,0,0xb5b8a8);for(const x of[-3.7,3.7])this.box(g,.16,4.2,.18,x,2.3,2.76,C.navy);this.box(g,4.7,.65,.18,0,3.75,2.82,0x8c9999);for(let y=3.47;y<4.05;y+=.14)this.box(g,4.7,.025,.03,0,y,2.93,C.steel);this.sign(g,'TALLER',2.3,.47,0,4.15,2.83,C.navy);
+  // Workshop V2: industrial facade, steel canopy, solar arrays and illuminated entry.
+  // Original usable floor, roof, player door clearances and collision geometry stay unchanged.
+  this.box(g,6.15,.13,.76,0,3.97,3.09,0x293e4c,true);
+  this.box(g,6.16,.035,.10,0,3.87,3.47,C.yellow);
+  for(const x of[-2.89,2.89]){
+   this.box(g,.075,.10,.68,x,3.83,3.18,0x708f97);
+   this.box(g,.14,.14,.12,x,3.95,3.35,C.steel);
+   for(let y=1.1;y<3.75;y+=.62)this.box(g,.04,.065,.065,x,y,2.90,0x648493);
+  }
+  for(const x of[-2.1,0,2.1])for(const z of[-1.22,1.22]){
+   this.box(g,1.72,.09,1.01,x,4.81,z,0x344d5d,true);
+   this.box(g,1.60,.025,.92,x,4.872,z,0x26526a);
+   for(let n=-2;n<=2;n++)this.box(g,.014,.028,.84,x+n*.26,4.895,z,0x75a2b1);
+   this.box(g,1.60,.021,.026,x,4.902,z+.40,0xb7d6d6);
+  }
+  // A modest maintenance extraction unit and rear weather gutter.
+  this.box(g,.98,.31,.88,2.57,4.82,-2.02,0x687b84,true);
+  for(let j=0;j<6;j++)this.box(g,.8,.019,.014,2.57,4.99,-2.34+j*.12,0x253745);
+  this.box(g,7.75,.10,.12,0,4.44,-2.96,0x405966);
+  for(const x of[-1.9,1.9]){
+   this.box(g,.68,.085,.085,x,3.84,2.91,C.steel);
+   const led=this.box(g,.50,.029,.012,x,3.785,2.98,0xffe1a4);
+   led.material=new T.MeshBasicMaterial({color:0xffe0a3});
+  }
+for(let x=-3.2;x<3.5;x+=.5){this.box(g,.025,3.6,.02,x,2.2,-2.8,0xb7b7a7);}this.shelf(g,-2.5,0,-1.7);this.shelf(g,2.5,0,-1.7);this.box(g,2.7,.16,.8,0,1.2,-2,C.orange,true);for(let x=-.9;x<=.9;x+=.6){this.cyl(g,.13,.7,x,1.65,-1.9,C.steel);}this.toolbox(g,-1.5,.3,1.6);this.box(g,1,.2,.7,1.6,.4,1.2,C.navy);for(let i=0;i<3;i++)this.box(g,.7,.1,.3,1.6,.58+i*.13,1.2,C.yellow);// Wall colliders instead of solid — allows player to walk inside
   // Back wall: world z = -9.3 + (-2.7) = -12.0
-  this.colliders.push({x:-7.6,z:-12.0,w:7.6,d:.4,_workshop:true,_wsWall:'back'});
+  if(!previewOnly)this.colliders.push({x:-7.6,z:-12.0,w:7.6,d:.4,_workshop:true,_wsWall:'back'});
   // Left wall: world x = -7.6 + (-3.6) = -11.2
-  this.colliders.push({x:-11.2,z:-9.3,w:.4,d:5.8,_workshop:true,_wsWall:'left'});
+  if(!previewOnly)this.colliders.push({x:-11.2,z:-9.3,w:.4,d:5.8,_workshop:true,_wsWall:'left'});
   // Right wall: world x = -7.6 + 3.6 = -4.0
-  this.colliders.push({x:-4.0,z:-9.3,w:.4,d:5.8,_workshop:true,_wsWall:'right'});
+  if(!previewOnly)this.colliders.push({x:-4.0,z:-9.3,w:.4,d:5.8,_workshop:true,_wsWall:'right'});
   // Front left pillar: world x = -7.6-3 = -10.6, z = -6.6
-  this.colliders.push({x:-10.6,z:-6.6,w:1.4,d:.4,_workshop:true,_wsWall:'frontL'});
+  if(!previewOnly)this.colliders.push({x:-10.6,z:-6.6,w:1.4,d:.4,_workshop:true,_wsWall:'frontL'});
   // Front right pillar: world x = -7.6+3 = -4.6, z = -6.6
-  this.colliders.push({x:-4.6,z:-6.6,w:1.4,d:.4,_workshop:true,_wsWall:'frontR'});
+  if(!previewOnly)this.colliders.push({x:-4.6,z:-6.6,w:1.4,d:.4,_workshop:true,_wsWall:'frontR'});
   // Interior floor walkSurface at visual floor height
-  this.walkSurfaces.push({x:-7.6,z:-9.3,w:7.0,d:5.2,y:.42});
-  this.labels.push({id:'workshop',text:'TALLER',icon:'wrench',point:new T.Vector3(-7.6,5.2,-8.5),access:{x:-7.6,z:-5.8}});}
+  if(!previewOnly)this.walkSurfaces.push({x:-7.6,z:-9.3,w:7.0,d:5.2,y:.42});
+  if(!previewOnly)this.labels.push({id:'workshop',text:'TALLER',icon:'wrench',point:new T.Vector3(-7.6,5.2,-8.5),access:{x:-7.6,z:-5.8}});return g;}
  shelf(g,x,y,z){this.box(g,1.6,2.6,.7,x,y+1.6,z,C.navy,true);for(const h of[.5,1.3,2.1]){this.box(g,1.7,.1,.85,x,y+h,z,C.yellow);for(let j=0;j<2;j++)this.box(g,.55,.5,.55,x-.4+j*.8,y+h+.3,z, j?0xb58f61:0x81949c,true);}}
  toolbox(g,x,y,z){this.box(g,1,.8,.6,x,y+.4,z,0xc85e39,true);for(let h=.2;h<.8;h+=.16){this.box(g,.85,.025,.03,x,y+h,z+.31,0x8f4a39);this.box(g,.3,.025,.04,x,y+h+.05,z+.33,0xc7c9b6);}for(const a of[-.38,.38])this.cyl(g,.08,.1,x+a,y+.02,z,C.dark);}
  makeRig(){const g=new T.Group();g.position.set(6,0,-4.6);this.scene.add(g);this.rig=g;this.pad(6,-4.6,7.8,7.5);this.rail(this.scene,6,-4.6,7.8,7.5,false);

@@ -1,7 +1,9 @@
 import * as T from '../vendor/three.module.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {OFFICE,officeBlocked,insideOffice,officeGround,doorShape,circleHitsRect} from './office-layout.mjs';
-const P={red:0x701e30,edge:0x461b28,panel:0xe6d5bc,trim:0xc4b6a1,inside:0xeee4d2,steel:0x68747b,dark:0x313e45,yellow:0xf4ba28,bolt:0xb9bfc0,floor:0x9b9c91};
+// DRILLCO field architecture: charcoal/graphite shell, warm off-white cladding, restrained HSEC yellow.
+// The burgundy of earlier prototype models is intentionally retired.
+const P={red:0x303e48,edge:0x182830,panel:0xe0e5df,trim:0x8faaa9,inside:0xf1eae0,steel:0x687d85,dark:0x23333e,yellow:0xf4c13c,bolt:0xc1cbd1,floor:0x87999a};
 
 // Static pieces are batched within their architectural component; doors stay independent.
 function batch(group){
@@ -77,6 +79,29 @@ export function createOffice(w){
  for(const spec of OFFICE.doors)makeDoor(spec);
  for(const x of[-2.54,-1.44])bevel(access,.065,2.23,.13,x,1.52,1.25,P.edge);bevel(access,1.16,.065,.13,-1.99,2.61,1.25,P.edge);box(access,1.08,.018,.20,-1.99,.431,1.25,P.steel);
 
+ // Architecture V2: realistic roof protection, solar arrays and rooftop services.
+ // These are only render meshes; the original office footprint, entry collider,
+ // liftable roof group, interior slots and animations are never modified.
+ const design=new T.Group();design.name='11 · Industrial finishes and roof equipment';roof.add(design);
+ for(const side of[-1,1])for(let j=0;j<3;j++){
+  const x=side*1.88,z=-.73+j*.72;
+  bevel(design,1.14,.045,.52,x,3.03,z,P.dark);
+  bevel(design,1.06,.018,.47,x,3.063,z,0x244b64);
+  for(let n=-1;n<=1;n++)box(design,.012,.019,.41,x+n*.245,3.078,z,0x5791a8);
+  box(design,1.08,.016,.025,x,3.082,z-.19,0x9acbd8);
+ }
+ // Contained ventilation and guarded service equipment.
+ bevel(design,.88,.2,.54,.02,3.06,-.60,P.steel);
+ for(let j=0;j<5;j++)box(design,.72,.017,.017,.02,3.18,-.81+j*.093,P.dark);
+ for(const x of[-2.80,2.80]){
+  bevel(design,.16,.16,.16,x,3.04,-1.10,P.steel);
+  cyl(design,.034,.29,x,3.27,-1.10,P.dark);
+ }
+ // Premium satin-metal corner details and floor-line safety band.
+ for(const x of[-2.83,2.83]){
+  box(chassis,.09,.035,2.36,x,.40,0,P.yellow);
+  for(const y of[.72,1.05,1.38,1.71,2.04,2.37])box(frame,.035,.018,2.34,x, y,0,0x56717c);
+ }
  // Liftable roof and low-cost LED panels visible from the window views.
  bevel(roof,5.94,.075,2.37,0,2.866,0,0xc5c7bc);for(let x=-2.76;x<2.8;x+=.24)box(roof,.018,.012,2.30,x,2.909,0,0xb2b8af);box(roof,5.77,.024,2.23,0,2.788,0,P.inside);
  for(const x of[-1.35,1.0]){bevel(roof,.86,.035,.28,x,2.767,0,P.trim);const diffuser=box(roof,.76,.012,.22,x,2.743,0,0xffe5b3);diffuser.material=new T.MeshBasicMaterial({color:0xffe5b3});}
@@ -105,6 +130,15 @@ export function createOffice(w){
  bevel(services,.24,.37,.12,-3.045,1.19,.60,0xb7c0ba);beam(services,[-3.10,.42,.60],[-3.10,1.0,.60],.016,P.steel);box(services,.012,.026,.045,-3.114,1.19,.64,P.dark);
  bevel(elevations.front,.32,.23,.045,2.28,2.35,1.272,P.trim);for(let i=0;i<5;i++)box(elevations.front,.26,.016,.026,2.28,2.27+i*.034,1.303,P.dark);
 
+ // Raised DRILLCO service band above the entry, and low-glare work lamps.
+ // All additions stay above the door clearance and do not affect navigation.
+ bevel(elevations.front,2.18,.12,.07,.88,2.58,1.33,P.dark);
+ for(const x of[.04,1.73]){
+  const fixture=bevel(elevations.front,.22,.075,.11,x,2.57,1.42,P.steel);
+  const diffuser=box(elevations.front,.17,.031,.016,x,2.535,1.48,0xffecb0);
+  diffuser.material=new T.MeshBasicMaterial({color:0xffe9af});
+ }
+ for(const z of[-.86,-.60,-.34,-.08,.18,.44,.70,.96])box(elevations.west,.018,.055,.12,-3.045,2.35,z,0x57707c);
  // Exact original PNG: white paper is masked and its original shapes rendered in grey ink.
  const logoMap=new T.TextureLoader().load(new URL('../assets/branding/drillco-original.png',import.meta.url).href,()=>{w.renderer.staticFrame=null;});logoMap.colorSpace=T.SRGBColorSpace;
  const logoMat=new T.MeshBasicMaterial({map:logoMap,color:0x4a4c4b,transparent:true,depthWrite:false,side:T.DoubleSide});logoMat.userData.brandInk=true;

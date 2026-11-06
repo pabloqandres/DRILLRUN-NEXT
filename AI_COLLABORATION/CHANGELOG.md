@@ -1,5 +1,14 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-06 — World Art V1: actual buildings and matching Catalog 3D cutouts (ChatGPT)
+
+- The office, workshop and HSEC maintenance shed have physically upgraded 3D facades, roof/detail assemblies and industrial finish materials. Original world positions, footprints, doors, HSEC walls, missions and saves unchanged.
+- Catalog thumbnails now render the **same model factory and, when present, L2 extensions** used by the playable world; workshop snapshot geometry is cloned to protect live renderer buffers.
+- HUD first polish in `chapter/world-art-v1.css` loaded after existing styles. Warm desert sky, terrain sediment variation and softer road/shoulder decals improve overall coherence.
+- Added Node regression suite `tests/world-art-regression.test.mjs`; direct isolated workshop-model checks PASS (preview creates no world/collider changes). Full live WebGL + mobile performance testing remains pending.
+- This is a **first real-code art pass**, not a claim of exact pixel identity with the cinematic reference image or implementation of future catalog products.
+- Detailed report: `CHANGES/2026-11-06_world-art-real-building-previews.md`.
+
 ## 2026-11-06 — Camera zoom + Catalog inline actions + iconography V3 (ChatGPT)
 
 - Branch: `chatgpt/camera-distance-wheel-zoom`. Production release after user authorization and verification.

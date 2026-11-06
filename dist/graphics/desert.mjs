@@ -10,7 +10,11 @@ export function reliefHeight(x,z){const outside=Math.max(-13-x,x-30,-13-z,z-9,0)
 export function soilPixels(size=512){const data=new Uint8Array(size*size*4),normal=new Uint8Array(size*size*4),heights=new Float32Array(size*size),period=size-1,wrap=v=>((v%period)+period)%period;
  for(let y=0;y<period;y++)for(let x=0;x<period;x++){
   const u=x/period,v=y/period,broad=periodicNoise(u*7,v*7,7),stone=periodicNoise(u*36,v*36,36),grain=hash(x,y),ridge=Math.sin(u*Math.PI*60+periodicNoise(u*9,v*9,9)*9)*.5+.5;
-  const h=broad*.5+stone*.3+ridge*.06+grain*.14;heights[y*size+x]=h;const pale=Math.max(0,broad-.53)*29,gravel=grain>.985?-43:grain>.96?18:0,shade=(stone-.5)*23+(grain-.5)*12+(broad-.5)*30+gravel;
+  const h=broad*.5+stone*.3+ridge*.06+grain*.14;heights[y*size+x]=h;// Periodic, wind-shaped sediment adds fine Atacama strata without changing
+  // the flat, navigable yard footprint or introducing collision geometry.
+  const windBand=Math.sin(Math.PI*2*(u*28+v*5+periodicNoise(u*5,v*5,5)*.6));
+  const pale=Math.max(0,broad-.53)*29,gravel=grain>.985?-43:grain>.96?18:0;
+  const shade=(stone-.5)*23+(grain-.5)*12+(broad-.5)*30+gravel+windBand*6;
   const i=(y*size+x)*4;data[i]=Math.max(0,Math.min(255,207+shade+pale));data[i+1]=Math.max(0,Math.min(255,148+shade*.94+pale));data[i+2]=Math.max(0,Math.min(255,91+shade*.83+pale));data[i+3]=255;
  }
  // Small embedded pebbles, warm highlights and cool contact edges; no photo texture.

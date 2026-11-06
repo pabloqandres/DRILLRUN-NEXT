@@ -4,11 +4,11 @@
 
 ## Currently Active
 
-_No code work pending. Overall HUD layout redesign remains a **concept mockup awaiting user approval**; core iconography V3 is already live._
+- **ChatGPT — World Art V1:** real office, workshop and HSEC shed 3D upgrades; real-model thumbnails by level in Catálogo; compact HUD styling, desert ambience and roads. Branch `chatgpt/world-art-building-catalog-v1` awaiting code PR and deployment verification. User explicitly requested direct implementation and production testing.
 
 ## Files in Progress
 
-_No active file locks; synchronize main before starting new tasks._
+- Visual files in scope: `dist/assets3d/office-shell.mjs`, `dist/scene.mjs`, `dist/hsec/shed-model.mjs`, `dist/chapter/product-preview.mjs`, `dist/chapter/builder-ui.mjs`, `dist/chapter/game.mjs` (only world binding), `dist/graphics/`, `dist/hsec/world.mjs` (road paint only), `dist/chapter/world-art-v1.css`, `dist/index.html`, regression tests. Keep existing mission, save, and purchase logic unchanged.
 
 ## Recently Completed
 

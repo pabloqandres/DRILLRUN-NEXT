@@ -65,6 +65,19 @@ export function buildShed({box,cyl,add,C,colliders,walls}){
   for(const z of[-2.58,2.58])beam([side*3.18,3,z],[0,3.75,z],.09,C.steel,.09);
  }
  box(.12,.09,5.24,0,3.75,0,C.steel);
+ // Visual V2: sloped photovoltaic cladding uses the same roof geometry and pitch.
+ // Flat, low-profile panels keep performance and the original shed collisions unchanged.
+ for(const side of[-1,1])for(const z of[-1.54,0,1.54]){
+  const pv=box(1.34,.045,1.22,side*1.39,3.48,z,C.steel);
+  pv.rotation.z=-side*pitch;
+  const glass=box(1.23,.014,1.11,side*1.39,3.526,z,C.black);
+  glass.rotation.z=-side*pitch;
+  for(let n=-1;n<=1;n++){const line=box(.012,.019,1.04,side*1.39+n*.29,3.544,z,C.silver);line.rotation.z=-side*pitch;}
+ }
+ // Integrated entry lighting and hazard-striped canopy, keeping doors unobstructed.
+ box(4.70,.14,.52,0,3.02,2.66,C.steel);
+ box(4.73,.035,.09,0,2.935,2.94,C.yellow);
+ for(const x of[-1.65,1.65]){box(.60,.06,.14,x,2.96,2.98,C.yellow);box(.49,.024,.10,x,2.916,2.98,C.white);}
  for(const x of[-1.7,1.7]){
   box(.5,.16,.52,x,3.47,-.65,C.steel);box(.63,.06,.65,x,3.6,-.65,C.silver);
  }
