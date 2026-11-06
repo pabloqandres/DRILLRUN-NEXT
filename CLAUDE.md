@@ -8,9 +8,13 @@ Three.js r170 WebGL2 browser game. ES modules (.mjs), no bundler, deployed on Ve
 
 ## Before Starting Any Work
 
-1. Read `AI_COLLABORATION/CURRENT_STATE.md` — understand what's deployed
-2. Read `AI_COLLABORATION/ACTIVE_WORK.md` — check for locked files or active tasks
-3. Read `AI_COLLABORATION/CHANGELOG.md` — see recent changes
+1. Synchronize the remote branch and identify the current commit; do not assume the chat context is current.
+2. Read `AI_COLLABORATION/RULES.md` — authoritative cross-agent protocol.
+3. Read `AI_COLLABORATION/CURRENT_STATE.md` — current confirmed code/deployment state.
+4. Read `AI_COLLABORATION/ACTIVE_WORK.md` — active branches and soft-locked files.
+5. Read `AI_COLLABORATION/COMPONENT_OWNERSHIP.md` — shared/owned files.
+6. Read `AI_COLLABORATION/CHANGELOG.md` and relevant `AI_COLLABORATION/CHANGES/` entries.
+7. Before modifying shared files, consult `AI_COLLABORATION/DECISIONS.md` and coordinate scope.
 
 ## Your Role
 
@@ -38,11 +42,12 @@ See `AI_COLLABORATION/COMPONENT_OWNERSHIP.md` for the full file ownership table.
 
 1. **Do not modify visual files** (graphics/, camera/, shaders, 3D assets) — those belong to ChatGPT
 2. **Shared CSS files** (premium.css, etc.): only add functional styles, never touch visual polish
-3. **After every session:** Update `AI_COLLABORATION/CHANGELOG.md` and `AI_COLLABORATION/CURRENT_STATE.md`
+3. **After each change:** Record it in `AI_COLLABORATION/CHANGELOG.md` and `CHANGES/`; update `CURRENT_STATE.md` only when confirmed project state changes. Include changed paths, tests actually run, and Git commit/PR when available.
 4. **For cross-agent work:** Document in `AI_COLLABORATION/DECISIONS.md` first
-5. **Branch naming:** Use `claude/<feature-name>` for feature branches
+5. **Branch naming:** Use `claude/<feature-name>`. Do not commit/push feature work directly to `main`; submit a pull request and validate before merge.
 6. **Save format changes:** Always include migration in `restore()` for backward compatibility
 7. **i18n:** All user-facing strings must go through the translation system (5 languages)
+8. **Production safety:** No production deploy, merge to `main`, or project deployment-setting changes without the user's explicit authorization. A deployment being READY does not prove the latest `main` commit is live. Verify deployment ID, source and commit.
 
 ## Collaboration with ChatGPT
 
@@ -51,15 +56,23 @@ See `AI_COLLABORATION/COMPONENT_OWNERSHIP.md` for the full file ownership table.
 - ChatGPT will implement visual changes in their owned files
 - Shared files require coordination — check ownership table first
 
-## Quick Commands
+## Safe local workflow (examples)
 
 ```bash
-# Local dev (just open in browser, no build step)
-open dist/index.html
+# Run locally via HTTP: ES modules/assets do not work reliably from file://
+python3 -m http.server 8000 --directory dist
+# In a separate terminal, run tests when relevant
+npm test
 
-# Deploy
-npx vercel --prod --yes
-
-# Push changes
-git add -A && git commit -m "description" && git push
+# After syncing main, work on a dedicated branch
+git switch -c claude/<feature-name>
+git status
+# Stage only intended files; review the diff before committing
+git add <explicit-file-paths>
+git diff --cached
+git commit -m "Describe the scoped change"
+git push -u origin claude/<feature-name>
+# Open a pull request for review. Do not merge/deploy without user authorization.
 ```
+
+Deployment instructions are deliberately not included here. Consult the current verified Vercel configuration and request explicit authorization before a production release.

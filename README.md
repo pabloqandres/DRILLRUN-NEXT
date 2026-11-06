@@ -1,5 +1,7 @@
 # DRILL RUN NEXT GENERATION
 
+> **Estado del repositorio (6 de noviembre de 2026):** este repositorio ya se utiliza como fuente de código de DRILL RUN NEXT GENERATION. El párrafo histórico siguiente describe una etapa de desarrollo anterior y no debe interpretarse como el estado publicado actual. Para el estado vigente, misiones, commits y despliegue, consultar [AI_COLLABORATION/CURRENT_STATE.md](AI_COLLABORATION/CURRENT_STATE.md). Antes de modificar código, leer [CLAUDE.md](CLAUDE.md) o [AGENTS.md](AGENTS.md), según el asistente, y [AI_COLLABORATION/RULES.md](AI_COLLABORATION/RULES.md). El último deployment de producción verificado se generó mediante Vercel CLI; no asumir autodeploy desde GitHub hasta confirmar la integración.
+
 Juego web 3D para mobile horizontal. Esta copia de desarrollo parte de la versión publicada 23, commit `af7bb50a802f255efbc1e2f222ae609fe1a265d5`, y contiene los cambios locales de Builder, UX/UI y hologramas de construcción de noviembre de 2026. Estos cambios todavía no están publicados y no tienen un número de versión publicado nuevo.
 
 ## Ejecutar localmente
