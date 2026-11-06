@@ -312,7 +312,7 @@ function autoDispatchTruck(s){
   }
  }
  if(!nextZone)return;
- try{assignTruckToZone(s,nextZone.id);startMaintenance(s,nextZone.id);nextZone.lastMaintenanceAt=Date.now();if(nextZone.status!=='maintenance')return;notices.push({title:'DrillTruck en ronda de mantenimiento',symbol:'bell'});}catch(e){console.error('autoDispatch:',e);}
+ try{assignTruckToZone(s,nextZone.id);startMaintenance(s,nextZone.id);nextZone.lastMaintenanceAt=Date.now();if(nextZone.status!=='maintenance')return;/* Routine automatic rounds do not need repeated toast messages. */}catch(e){console.error('autoDispatch:',e);}
 }
 async function replayCinematic(orbitOnly,record){if(!s)return;if(!orbitOnly&&!reviewBackup)await cameraReviewScene(s.character);closeModal();closePhone();closeBuilder();startCinematic(orbitOnly,true);if(record||orbitOnly){scene.update(s,0,Date.now());world.update(s,0,clock,false);world.renderer.last=0;world.renderer.render(world.scene,world.camera);const a=document.createElement('a');a.id='handoffDownload';a.download='DrillRun_Primer_Frame_3D.png';a.textContent='Descargar primer frame 3D';const data=world.renderer.domElement.toDataURL('image/png').split(',')[1],bytes=Uint8Array.from(atob(data),c=>c.charCodeAt(0));a.href=URL.createObjectURL(new Blob([bytes],{type:'image/png'}));cameraDebug.host.querySelector('#handoffDownload')?.remove();cameraDebug.host.append(a);if(record)cinemaRecorder.start();}}
 function beginPlay(resuming=false){phase='play';blueprint=false;world.inspect=false;world.chapterCamera=null;world.zoom=1;resetOrbit(world.orbit);avatars.activate(s.character);world.setCharacter(s.character);motion.yaw=Number.isFinite(s.facing)?s.facing:Math.PI;world.player.rotation.y=motion.yaw;world.worker.reset();hidden($('#startScreen'),true);hidden($('#characterScreen'),true);hidden($('#intro'),true);hidden($('#hud'),false);world.avatarHeight=avatarDefinition(s.character).height;world.orbit.yaw=motion.yaw-Math.PI;world.snapCamera=true;world.cameraRig.finishEntrance();document.body.classList.remove('hudReveal');void $('#hud').offsetWidth;document.body.style.setProperty('--hud-duration',world.cameraRig.settings.transition.hudSeconds+'s');document.body.classList.add('hudReveal');wind.set(prefs.sound);s.introSeen=true;stop();scene.update(s,0,Date.now());hsecWorld?.update(s,0,'play');initM3Visuals();ensureSafe();save();if(!resuming){hidden($('#chapterBanner'),false);setTimeout(()=>hidden($('#chapterBanner'),true),2600);}else toast('resumeNote');syncUIEvents();renderHUD();}
@@ -366,10 +366,10 @@ function showNextReward(){if(!rewardQueue.length||modalOpen||phoneOpen||placemen
  const boosterBadge=event.id==='mission:clear'?`<div class="rewardBadge"><span class="badgeIcon">${icon('boost')}</span><b>×3 Acelerador de Construcción</b></div>`:'';
  sound('finish');modal(`<div class="rewardCard"><div class="rewardSeal">${icon(event.icon)}</div><span class="eyebrow">${esc(t('missionCompleted'))}</span><h2>${esc(t(event.detail))}</h2>${boosterBadge}<div class="rewardUnlock">${icon('check')}<span><small>${esc(t('reward'))}</small><b>${esc(t(detail))}</b></span></div><div class="modalActions">${button('continue','continueReward',true)}</div></div>`);$('#continueReward').onclick=closeModal;
 }
-function showMissionComplete(name,cash,boosters){
+function showMissionComplete(name,cash,boosters,detail=''){
  document.querySelectorAll('.missionCompleteOverlay').forEach(el=>el.remove());
  const overlay=document.createElement('div');overlay.className='missionCompleteOverlay';
- overlay.innerHTML=`<div class="missionCompleteContent"><span class="missionCompleteLabel">COMPLETADO</span><span class="missionCompleteName">${esc(name)}</span><div class="missionCompleteRewards"><span>${icon('wallet')} +${money(cash)}</span>${boosters?`<span>${icon('boost')} +${boosters} Acelerador</span>`:''}</div></div>`;
+ overlay.innerHTML=`<div class="missionCompleteContent"><span class="missionCompleteLabel">COMPLETADO</span><span class="missionCompleteName">${esc(name)}</span><div class="missionCompleteRewards">${Number.isFinite(cash)&&cash>0?`<span>${icon('wallet')} +${money(cash)}</span>`:''}${boosters?`<span>${icon('boost')} +${boosters} Acelerador</span>`:''}${detail?`<span>${esc(detail)}</span>`:''}</div></div>`;
  document.body.append(overlay);requestAnimationFrame(()=>overlay.classList.add('visible'));
  const dismiss=()=>{overlay.classList.remove('visible');setTimeout(()=>overlay.remove(),600);};
  setTimeout(dismiss,4000);
@@ -629,7 +629,7 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
   if(phoneOpen&&(phoneApp==='m3-geology'||phoneApp==='m3-contract'||phoneApp==='m3-catalog'||phoneApp==='m3-orders'||phoneApp==='m4-drilltruck'||phoneApp==='m4-zones')){geoRefreshTimer=(geoRefreshTimer||0)+dt;if(geoRefreshTimer>=2){geoRefreshTimer=0;const c=$('#phoneContent');const scrollTop=c?.scrollTop||0;renderPhone();if(c)c.scrollTop=scrollTop;}}else geoRefreshTimer=0;
   if(drillCardOpen)showDrillCard();
   // === M4 tick ===
-  initM4Visuals();const m4events=tickMission4(s,dt,wall);if(m4events){for(const e of m4events){if(e==='incomeGenerated')notices.push({title:'Ingreso automatizado recibido',symbol:'bell'});else if(e==='maintenanceComplete'){notices.push({title:'Mantenimiento completado',symbol:'bell'});if(phoneOpen)renderPhone();}else if(e==='truckDispatch'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'out');}else if(e==='truckReturn'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'return');}else if(e==='missionComplete'){sound('finish');showMissionComplete('Automatiza tu operación',s.mission4.totalAutomatedIncome,0);}}save();}
+  initM4Visuals();const m4events=tickMission4(s,dt,wall);if(m4events){for(const e of m4events){if(e==='incomeGenerated')notices.push({title:'Ingreso automatizado recibido',symbol:'bell'});else if(e==='maintenanceComplete'){notices.push({title:'Mantenimiento completado',symbol:'bell'});if(phoneOpen)renderPhone();}else if(e==='truckDispatch'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'out');}else if(e==='truckReturn'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'return');}else if(e==='missionComplete'){sound('finish');showMissionComplete('Automatiza tu operación',null,0,'Producción automatizada habilitada');}}save();}
   updateM4Visuals(dt);
   // Auto-start M4 when M3 completes
   if(s.mission3?.phase==='complete'&&s.contract?.status==='delivered'&&isMissionAccepted(s,'m4')&&canStartMission4(s)&&(!s.mission4||s.mission4.phase==='inactive')){startMission4(s);notices.push({title:'Misión 3 desbloqueada — Automatiza tu operación',symbol:'bell'});save();}
@@ -637,7 +637,12 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
  avatars?.updateSelector(phase==='character',selectedAvatar,s,dt,clock);characterStage?.update(phase==='character',clock,selectedAvatar);
  if(phase==='character'){world.chapterCamera={target:new T.Vector3(-4.55+Math.max(0,Math.min(.5,(730-innerWidth)/324)),1.0,5.35),offset:new T.Vector3(0,.55,6.1)};}
  if(phase!=='character')world.chapterCamera=null;
- world.avatarHeight=avatarDefinition(s.character).height;world.cameraMode=builderOpen||managingOffice?'builder':s.inside?'interior':'explore';world.cameraFocus=builderOpen?(hsecUI?.drawing?hsecUI.focus():hsecUI?.mode?{x:1,z:2}:{x:-6,z:0}):managingOffice?{x:-6,z:0}:null;
+ world.avatarHeight=avatarDefinition(s.character).height;
+// Catalog browsing (including collapsing) is UI-only: do not force a builder camera.
+// Only an actual HSEC in-world placement/drawing or office preview uses the overhead view.
+const inWorldConstruction=builderOpen&&!!(hsecUI?.drawing||hsecUI?.coneZone);
+world.cameraMode=inWorldConstruction||managingOffice?'builder':s.inside?'interior':'explore';
+world.cameraFocus=inWorldConstruction?hsecUI.focus():managingOffice?{x:-6,z:0}:null;
  if(qa&&hsecFollow&&s.hsec?.employee){const n=s.hsec.employee;world.chapterCamera={target:new T.Vector3(n.position.x,.95,n.position.z),offset:new T.Vector3(-Math.sin(n.yaw)*4.75,1.65,-Math.cos(n.yaw)*4.75)};}
  if(managingOffice){world.chapterCamera={target:new T.Vector3(-3.9,1,0),offset:world.chapterUpgradePreview?new T.Vector3(2.7,5.6,6.1):new T.Vector3(6.5,4.5,8.5)};}
  const movable=!cameraDebug?.freeze&&phase==='play'&&!builderOpen&&!modalOpen&&!phoneOpen&&!placement&&!busy&&innerWidth>innerHeight;let walking=false;if(movable)walking=locomotionReview?.active?locomotionReview.step(dt):move(dt);else motion.vx=motion.vz=motion.speed=0;

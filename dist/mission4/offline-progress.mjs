@@ -1,6 +1,6 @@
 // Mission 4 — Offline progress system
 // Calculates automated production income while player was away.
-import {CYCLE_DURATION,zoneIncomePerCycle} from './production.mjs';
+import {CYCLE_DURATION,MAX_OFFLINE_PRODUCTION_CYCLES,zoneIncomePerCycle} from './production.mjs';
 
 export function calculateOfflineProduction(s,now=Date.now()){
  const elapsed=Math.max(0,now-(s.savedAt||now));
@@ -9,7 +9,10 @@ export function calculateOfflineProduction(s,now=Date.now()){
  for(const zone of (s.mission4?.zones||[])){
   if(zone.status!=='producing'||!zone.lastCycleAt)continue;
   const sinceLastCycle=now-zone.lastCycleAt;
-  const cyclesCompleted=Math.floor(sinceLastCycle/(CYCLE_DURATION*1000));
+  // Prevent unbounded offline accumulation that overwhelms contract rewards.
+  // Preserve already earned wallet funds; apply the limit to future returns only.
+  const cyclesCompleted=Math.min(MAX_OFFLINE_PRODUCTION_CYCLES,
+   Math.max(0,Math.floor(sinceLastCycle/(CYCLE_DURATION*1000))));
   if(cyclesCompleted>0){
    const incomePerCycle=zoneIncomePerCycle(zone);
    const totalZoneIncome=incomePerCycle*cyclesCompleted;

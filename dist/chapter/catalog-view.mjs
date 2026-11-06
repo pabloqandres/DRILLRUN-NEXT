@@ -4,13 +4,17 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 
 // One bottom surface: selection and inspection are read-only; only the explicit CTA buys.
 export class CatalogView{
- constructor(host){this.host=host;this.detailId=null;this.collapsed=false;this.scroll=new Map();}
- close(){this.detailId=null;this.collapsed=false;this.host.classList.remove('catalogTray','catalogPreview','catalogExpanded','catalogCollapsed');}
+ constructor(host){this.host=host;this.detailId=null;this.collapsed=false;this.scroll=new Map();this.categoryScrollLeft=0;}
+ close(){this.detailId=null;this.collapsed=false;this.categoryScrollLeft=0;this.host.classList.remove('catalogTray','catalogPreview','catalogExpanded','catalogCollapsed');}
  hideDetail(){this.detailId=null;}
  render(options){
   this.options=options;
   const {products,categories,category,selected,onCategory,onSelect,onClose,format,thumbnail,lang,onStaff}=options,c=catalogCopy(lang),items=products.filter(p=>p.category===category),picked=items.find(p=>p.id===selected)||items[0],expanded=!!picked&&this.detailId===picked.id;
   this.host.classList.remove('hsecTray','hsecDraftMode','catalogPreview');this.host.classList.add('catalogTray');this.host.classList.toggle('catalogExpanded',expanded);this.host.classList.toggle('catalogCollapsed',this.collapsed);
+  // The category nav is recreated by innerHTML on every selection: preserve its viewport.
+  // Skip reading the hidden nav while collapsed so reopening retains the prior position.
+  const previousCategoryNav=this.host.querySelector('.catalogCategories');
+  if(previousCategoryNav&&!this.host.classList.contains('catalogCollapsed'))this.categoryScrollLeft=previousCategoryNav.scrollLeft;
   const status=p=>c[p.status==='available'&&p.insufficient?'insufficient':p.status];
   const quote=p=>`<span class="buildCost">${Number.isFinite(p.price)?icon('wallet')+esc(format(p.price))+(p.route?c.perMeter:''):esc(c[p.status])}</span>${Number.isFinite(p.seconds)?`<span class="catalogTime">${icon('time')}${catalogDuration(p.seconds)}</span>`:''}`;
   const canAct=p=>p.action==='manage'||p.canStart&&!p.insufficient;
@@ -22,6 +26,18 @@ export class CatalogView{
    const image=p.status==='future'?null:thumbnail(p);const fallbackIcon=p.status==='locked'||p.status==='future'?'lock':'hsec:'+p.category;
    return `<button data-catalog-product="${p.id}" class="catalogProduct ${picked?.id===p.id?'selected':''} ${p.status==='locked'||p.status==='future'?'locked':''}" aria-pressed="${picked?.id===p.id}" aria-label="${esc(p.title+' · '+status(p))}"><span class="catalogArt">${image?`<img src="${image}" alt="" draggable="false">`:icon(fallbackIcon)}${p.status==='locked'||p.status==='future'?`<i aria-hidden="true">${icon('lock')}</i>`:''}</span><span class="catalogName">${esc(p.title)}</span><span class="catalogLevel">${esc(c.level)} ${p.level}</span></button>`;
   }).join('')||`<div class="constructionEmpty">${icon(category==='management'?'player':'lock')}<b>${esc(category==='management'?c.staffHint:c.empty)}</b>${category==='management'?`<button id="catalogStaff" class="primary">${esc(c.staff)}</button>`:''}</div>`}</div><button class="catalogStep" id="catalogNext" aria-label="${esc(c.next)}">${icon('arrow')}</button></div>`}`;
+  const categoryNav=this.host.querySelector('.catalogCategories');
+  if(categoryNav&&!this.collapsed){
+   categoryNav.scrollLeft=this.categoryScrollLeft;
+   const activeCategory=categoryNav.querySelector('[aria-selected="true"]');
+   if(activeCategory){
+    const navRect=categoryNav.getBoundingClientRect(),tabRect=activeCategory.getBoundingClientRect();
+    if(tabRect.left<navRect.left)categoryNav.scrollLeft-=navRect.left-tabRect.left+5;
+    else if(tabRect.right>navRect.right)categoryNav.scrollLeft+=tabRect.right-navRect.right+5;
+   }
+   this.categoryScrollLeft=categoryNav.scrollLeft;
+   categoryNav.addEventListener('scroll',()=>{this.categoryScrollLeft=categoryNav.scrollLeft;},{passive:true});
+  }
   const rail=this.host.querySelector('.catalogProducts');
   if(rail){rail.scrollLeft=this.scroll.get(category)||0;const prev=this.host.querySelector('#catalogPrevious'),next=this.host.querySelector('#catalogNext');const sync=()=>{prev.disabled=rail.scrollLeft<2;next.disabled=rail.scrollLeft+rail.clientWidth>=rail.scrollWidth-2;};rail.onscroll=()=>{this.scroll.set(category,rail.scrollLeft);sync();};requestAnimationFrame(sync);prev.onclick=()=>rail.scrollBy({left:-Math.max(160,rail.clientWidth*.75),behavior:'smooth'});next.onclick=()=>rail.scrollBy({left:Math.max(160,rail.clientWidth*.75),behavior:'smooth'});}
   this.host.querySelector('#closeBuilder').onclick=onClose;
