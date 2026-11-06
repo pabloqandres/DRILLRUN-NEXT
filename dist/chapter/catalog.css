@@ -194,3 +194,472 @@
  .catalogCollapsedTitle .buildCost{font-size:13px}
 }
 @media(prefers-reduced-motion:reduce){.catalogCollapse>.uiIcon{transition:none}}
+
+
+/* ================================================================
+   DRILL RUN NEXT GENERATION — CATALOG V2 • CHATGPT VISUAL PASS
+   2026-11-06. CSS presentation only. No gameplay, state, data, IDs,
+   handlers, purchase logic, catalogue contents or Three.js changes.
+   Inspired by the approved DRILL RUN landscape constructor reference.
+   ================================================================ */
+
+/* Minimize obstruction: the existing component becomes an integrated
+   landscape game dock; original buttons, scrolling and handlers stay. */
+#builderPanel.catalogTray:not(.catalogCollapsed):not(.hidden) {
+  --v2Gold:#ffd261;
+  --v2Cyan:#65d8ff;
+  --v2Blue:#8bcef2;
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  width:100%;
+  height:clamp(214px,35svh,278px);
+  max-height:54svh;
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  grid-template-rows:57px minmax(0,1fr);
+  grid-template-areas:"header" "products";
+  padding:0;
+  margin:0;
+  gap:0;
+  border:1px solid #9ccfff6a;
+  border-bottom:0;
+  border-radius:23px 23px 0 0;
+  overflow:visible;
+  background:linear-gradient(175deg,#1b3952ed,#0b2135f7 36%,#071525fd);
+  box-shadow:0 -10px 42px #01101cb8,inset 0 1px #d1f0ff5c,0 0 21px #5ec8ff1a;
+  backdrop-filter:blur(17px) saturate(1.1);
+  -webkit-backdrop-filter:blur(17px) saturate(1.1);
+  isolation:isolate;
+}
+#builderPanel.catalogTray.hidden{display:none!important}
+
+/* Identity rail: part of the original header, visually vertical. */
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogHeader {
+  grid-area:header;
+  position:static;
+  min-height:0;
+  display:flex;
+  align-items:center;
+  padding:6px 11px 6px 143px;
+  gap:7px;
+  border-radius:23px 23px 0 0;
+  border-bottom:1px solid #93cff943;
+  background:linear-gradient(180deg,#1d3850d9,#0e253ae8);
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogBrand {
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:0;
+  width:129px;
+  z-index:3;
+  box-sizing:border-box;
+  display:flex!important;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:12px;
+  padding:12px 10px;
+  border:0;
+  border-right:1px solid #ffd57685;
+  border-radius:22px 0 0 0;
+  background:linear-gradient(155deg,#244a64fc,#102d44fc 64%,#091c2ff9);
+  box-shadow:8px 0 26px #01132091,inset -1px 0 #ffe29e44;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogBrand::after {
+  content:"";
+  position:absolute;
+  top:10%;
+  bottom:10%;
+  right:-2px;
+  width:3px;
+  border-radius:3px;
+  background:linear-gradient(180deg,transparent,#ffe08a 25%,#ffc247 70%,transparent);
+  box-shadow:0 0 12px #ffc83da6;
+  pointer-events:none;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogBrand>.uiIcon {
+  width:43px;
+  height:43px;
+  color:#ffda73;
+  filter:drop-shadow(0 0 7px #ffca508b);
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogBrand b {
+  color:#fff0c0;
+  font-size:13px;
+  line-height:1.2;
+  letter-spacing:.35px;
+  text-align:center;
+  white-space:normal;
+  text-shadow:0 0 13px #ffc83d6e;
+}
+
+/* Premium game navigation tabs; keep native pointer and touch behavior. */
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogCategories {
+  flex:1;
+  align-self:stretch;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  padding:0 5px 0 0;
+  margin:0;
+  overflow-x:auto;
+  overflow-y:hidden;
+  touch-action:pan-x;
+  scrollbar-width:none;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogCategories button {
+  flex:0 0 auto;
+  display:flex;
+  gap:7px;
+  min-height:41px;
+  padding:7px 12px;
+  border:1px solid #84bee080;
+  border-radius:11px;
+  background:linear-gradient(180deg,#2b4d68ef,#122b44ed);
+  color:#d5e7f5;
+  font-size:11px;
+  font-weight:750;
+  box-shadow:inset 0 1px #d5f1ff36,0 3px 10px #0005;
+  text-shadow:0 1px 2px #0013;
+  transition:background .2s,border-color .2s,box-shadow .2s;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogCategories button:hover {
+  color:#fff;
+  border-color:#9fe6ff;
+  box-shadow:0 0 12px #3abfff43,inset 0 1px #e4f7ff44;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogCategories button.selected {
+  color:#ffefba;
+  border-color:#ffe08d;
+  background:linear-gradient(180deg,#65512dbd,#38352bbd);
+  box-shadow:0 0 14px #ffc83d77,inset 0 0 12px #ffcb4c30;
+  text-shadow:0 0 10px #ffcf5388;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogCategories button>.uiIcon {
+  width:20px;
+  height:20px;
+  color:#c5e3f3;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogCategories button.selected>.uiIcon{color:#ffe18a}
+
+/* Controls remain native JS-driven buttons; only their visual treatment changes. */
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogCollapse,
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogClose {
+  flex:0 0 41px;
+  width:41px;
+  min-height:41px;
+  height:41px;
+  padding:10px;
+  align-self:center;
+  border:1px solid #75b3d37d;
+  border-radius:10px;
+  background:linear-gradient(180deg,#1f435de9,#10283ce9);
+  color:#c2e9fa;
+  box-shadow:inset 0 1px #e9fcff33;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogCollapse:hover,
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogClose:hover{
+  color:#fff;
+  border-color:#b1ebff;
+  box-shadow:0 0 12px #6cdaff44;
+}
+
+/* Large image-led cards on a horizontal shelf, leaving the world visible. */
+#builderPanel.catalogTray:not(.catalogCollapsed) .constructionRail {
+  grid-area:products;
+  display:flex;
+  min-width:0;
+  min-height:0;
+  padding:11px 15px 13px 144px;
+  gap:9px;
+  border:0;
+  background:linear-gradient(0deg,#061525d0,#0b243aba 100%);
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogProducts {
+  display:flex;
+  min-width:0;
+  min-height:0;
+  align-items:stretch;
+  flex:1;
+  gap:10px;
+  padding:2px 3px 5px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scroll-snap-type:x mandatory;
+  overscroll-behavior-x:contain;
+  touch-action:pan-x;
+  scrollbar-width:none;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogProduct {
+  flex:0 0 clamp(134px,13.2vw,184px);
+  width:clamp(134px,13.2vw,184px);
+  min-width:0;
+  height:100%;
+  min-height:0;
+  padding:8px 10px;
+  gap:3px;
+  border:1px solid #7194ae75;
+  border-radius:12px;
+  background:linear-gradient(165deg,#254360e6,#0c2339ef 70%,#0a1d30f5);
+  box-shadow:inset 0 1px #e8f9ff30,0 5px 13px #010d2073;
+  color:#f4faff;
+  scroll-snap-align:start;
+  transition:border-color .2s,box-shadow .2s,transform .2s;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogProduct:hover {
+  border-color:#a2e6ff;
+  box-shadow:0 0 16px #7edcff40,inset 0 1px #fff5;
+  transform:translateY(-2px);
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogProduct.selected {
+  border:1px solid #ffe4a0;
+  background:linear-gradient(165deg,#40536a,#172b40 64%,#102435);
+  box-shadow:0 0 0 1px #ffcf62a3,0 0 20px #ffca4b5e,inset 0 0 18px #ffdb6329;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogProduct.selected::before {
+  border-color:#ffd97b9c;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogProduct.locked {
+  opacity:.63;
+  filter:saturate(.72);
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogArt {
+  position:relative;
+  flex:1;
+  min-height:0;
+  border-radius:9px;
+  background:radial-gradient(ellipse at 50% 64%,#83b8d337,transparent 73%);
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogArt>img {
+  object-fit:contain;
+  padding:3px;
+  filter:drop-shadow(0 6px 8px #0009);
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogName {
+  font-size:12px;
+  line-height:1.2;
+  font-weight:800;
+  color:#f6fbff;
+  text-align:center;
+  text-shadow:0 1px 3px #000b;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogLevel {
+  flex:none;
+  font-size:10px;
+  text-align:center;
+  color:#8fbcd5;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogStep {
+  flex:0 0 35px;
+  height:58px;
+  min-height:58px;
+  align-self:center;
+  border:1px solid #7bafca82;
+  border-radius:10px;
+  background:linear-gradient(180deg,#20415b,#10263b);
+  color:#d7f2ff;
+  box-shadow:inset 0 1px #fff3;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogStep:hover{
+  color:#fff;
+  border-color:#97ddff;
+  box-shadow:0 0 13px #6adaff53;
+}
+
+/* Selected asset information floats ABOVE the dock like an in-world
+   context panel. The real purchase/management CTA is never duplicated. */
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogSummary {
+  grid-area:auto;
+  position:absolute;
+  right:20px;
+  bottom:calc(100% + 12px);
+  width:clamp(300px,28vw,405px);
+  max-width:calc(100vw - 40px);
+  max-height:min(238px,46svh);
+  z-index:6;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  padding:15px 18px;
+  gap:8px;
+  border:1px solid #82c9eeaa;
+  border-radius:16px;
+  overflow-y:auto;
+  touch-action:pan-y;
+  background:linear-gradient(160deg,#17354df5,#091c30fb 70%);
+  box-shadow:0 10px 33px #000b,0 0 15px #4cbeff38,inset 0 1px #e9f9ff42;
+  backdrop-filter:blur(13px);
+  -webkit-backdrop-filter:blur(13px);
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogSummary::before{display:none}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogSummaryText b{
+  color:#f7fbff;
+  font-size:clamp(16px,1.7vw,22px);
+  line-height:1.15;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogSummaryText p{
+  color:#b0ccda;
+  font-size:11px;
+  line-height:1.3;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogQuote{gap:12px;flex-wrap:wrap}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogQuote .buildCost {
+  color:#ffe193;
+  font-size:clamp(19px,1.8vw,25px);
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogRequirement{color:#b4c8d6}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogSummaryActions{
+  position:static;
+  margin-top:auto;
+  padding-top:4px;
+  background:none;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) #catalogPurchase{
+  color:#142331;
+  border:1px solid #fff0a1;
+  border-radius:10px;
+  background:linear-gradient(180deg,#ffe6a1,#f4bc39);
+  box-shadow:0 0 16px #ffc83d42,inset 0 1px #fff8;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogDetailsToggle{
+  border-radius:10px;
+  background:linear-gradient(180deg,#275069,#14334d);
+  color:#c9edff;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed) #catalogPurchase:disabled{
+  background:#183043;
+  color:#839bad;
+  border-color:#597184;
+  box-shadow:none;
+}
+
+/* Full-width technical details remain read-only, within the bottom dock. */
+#builderPanel.catalogTray:not(.catalogCollapsed) .catalogInlineDetails {
+  grid-area:products;
+  min-height:0;
+  min-width:0;
+  margin:9px 13px 10px 143px;
+  border-radius:12px;
+  background:linear-gradient(170deg,#16334a,#0b2134);
+  border:1px solid #83c1e369;
+}
+#builderPanel.catalogTray:not(.catalogCollapsed):has(.constructionEmpty) .constructionRail{
+  padding-left:144px;
+}
+#builderPanel.catalogTray button:focus-visible{
+  outline:2px solid #ffdc7f;
+  outline-offset:2px;
+}
+
+/* Preserves current collapsed state; makes the small bar game-native. */
+#builderPanel.catalogTray.catalogCollapsed:not(.hidden){
+  left:max(10px,env(safe-area-inset-left));
+  right:max(10px,env(safe-area-inset-right));
+  bottom:max(10px,env(safe-area-inset-bottom));
+  border:1px solid #93cef19a;
+  background:linear-gradient(160deg,#1d3d57f4,#091b2df6);
+  box-shadow:0 7px 24px #000a,0 0 12px #45bfff32,inset 0 1px #ffffff44;
+}
+#builderPanel.catalogTray.catalogCollapsed .catalogCollapsedTitle b{color:#eef8ff}
+
+/* Landscape mobile and smaller phones: reduce blocking of the world,
+   retain horizontal swipe and readable floating actions. */
+@media(max-width:900px), (max-height:510px) {
+  #builderPanel.catalogTray:not(.catalogCollapsed):not(.hidden){
+    height:clamp(167px,42svh,212px);
+    max-height:58svh;
+    grid-template-rows:45px minmax(0,1fr);
+    border-radius:17px 17px 0 0;
+  }
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogHeader {
+    padding:4px 8px 4px 100px;
+    border-radius:17px 17px 0 0;
+  }
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogBrand {
+    width:92px;
+    gap:5px;
+    padding:8px 6px;
+    border-radius:17px 0 0 0;
+  }
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogBrand>.uiIcon{width:30px;height:30px}
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogBrand b{font-size:10px}
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogCategories{gap:6px}
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogCategories button{
+    min-height:34px;
+    padding:4px 8px;
+    border-radius:8px;
+    gap:4px;
+    font-size:10px;
+  }
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogCategories button>.uiIcon{width:16px;height:16px}
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogCollapse,
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogClose{
+    flex-basis:34px;
+    width:34px;
+    height:34px;
+    min-height:34px;
+    padding:7px;
+    border-radius:8px;
+  }
+  #builderPanel.catalogTray:not(.catalogCollapsed) .constructionRail{
+    padding:8px 9px 10px 101px;
+    gap:6px;
+  }
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogProducts{gap:7px}
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogProduct{
+    flex-basis:118px;
+    width:118px;
+    padding:5px 7px;
+    border-radius:9px;
+  }
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogName{font-size:10px}
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogLevel{font-size:9px}
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogStep{
+    flex-basis:25px;
+    height:42px;
+    min-height:42px;
+    padding:3px;
+  }
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogSummary{
+    right:10px;
+    bottom:calc(100% + 7px);
+    width:min(305px,48vw);
+    max-height:min(135px,34svh);
+    padding:8px 10px;
+    gap:4px;
+    border-radius:11px;
+  }
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogSummaryText b{font-size:14px}
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogSummaryText p{display:none}
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogQuote .buildCost{font-size:17px}
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogTime{font-size:10px}
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogRequirement{font-size:9px}
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogSummaryActions{padding:0;gap:5px}
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogSummaryActions button{
+    min-height:32px;
+    padding:4px 8px;
+    font-size:10px;
+  }
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogInlineDetails{
+    margin:6px 9px 7px 101px;
+    padding:8px;
+  }
+}
+@media(max-width:570px){
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogBrand b{font-size:9px}
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogSummary{
+    width:min(270px,62vw);
+  }
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogCategories button>span{
+    max-width:75px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogProduct,
+  #builderPanel.catalogTray:not(.catalogCollapsed) .catalogCategories button{transition:none}
+}
