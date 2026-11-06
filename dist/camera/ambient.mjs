@@ -1,0 +1,4 @@
+export class DesertWind{
+ constructor(getContext){this.getContext=getContext;this.enabled=false;}
+ set(enabled){this.enabled=enabled;try{if(enabled&&!this.gain){const ctx=this.getContext();this.context=ctx;const buffer=ctx.createBuffer(1,ctx.sampleRate*4,ctx.sampleRate),data=buffer.getChannelData(0);let last=0;for(let i=0;i<data.length;i++){last=last*.98+(Math.random()*2-1)*.02;data[i]=last;}this.source=ctx.createBufferSource();this.source.buffer=buffer;this.source.loop=true;const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=650;this.gain=ctx.createGain();this.gain.gain.value=0;this.source.connect(filter);filter.connect(this.gain);this.gain.connect(ctx.destination);this.source.start();}if(this.gain){this.context.resume();this.gain.gain.setTargetAtTime(enabled?.045:0,this.context.currentTime,.4);}}catch{}}
+}

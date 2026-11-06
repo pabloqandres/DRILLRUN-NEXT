@@ -1,0 +1,65 @@
+{
+  "results": [
+    {
+      "intensity": 1,
+      "outbound": 4.026228878295111,
+      "returned": 4.0280128863284945,
+      "metrics": {
+        "distance": 8.08159825646465,
+        "steps": 13,
+        "maxContactError": 0.012554791279948565,
+        "clampedFrames": 3,
+        "phaseTravel": 6.4775971436597315
+      }
+    },
+    {
+      "intensity": 0.55,
+      "outbound": 4.007708078144345,
+      "returned": 4.013199652855241,
+      "metrics": {
+        "distance": 8.05902764517773,
+        "steps": 16,
+        "maxContactError": 1.0190492755571723e-15,
+        "clampedFrames": 0,
+        "phaseTravel": 8.05074322714434
+      }
+    },
+    {
+      "intensity": 0.3,
+      "outbound": 4.001066333502407,
+      "returned": 4.000347269836779,
+      "metrics": {
+        "distance": 8.018184470307553,
+        "steps": 19,
+        "maxContactError": 9.485749680535094e-16,
+        "clampedFrames": 0,
+        "phaseTravel": 9.346442041562133
+      }
+    }
+  ],
+  "model": {
+    "vertices": 9095,
+    "triangles": 15100,
+    "materials": 10,
+    "bones": 18,
+    "height": 1.94,
+    "headRatio": 7.0576923076923075
+  },
+  "meanFramesPerSecond": 29.600631973492685,
+  "renderer": "Canvas 2D compatible",
+  "note": "La prueba utiliza el mismo controlador y el mismo personaje de la escena jugable.",
+  "metrics_last_round_original": {
+    "distance": 8.018529248943963,
+    "steps": 19,
+    "maxContactError": 9.485749680535094e-16,
+    "clampedFrames": 0,
+    "phaseTravel": 9.346442041562133
+  },
+  "metrics": {
+    "distance": 24.158810371949933,
+    "steps": 48,
+    "maxContactError": 0.012554791279948565,
+    "clampedFrames": 3
+  },
+  "aggregation_note": "El total se calculó de las tres rondas registradas. Se conserva la métrica original de la última ronda para trazabilidad."
+}

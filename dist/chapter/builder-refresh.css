@@ -1,0 +1,80 @@
+/* One bottom tray for selection; a shallow toolbar while placing in the world. */
+#builderPanel{height:clamp(164px,43svh,216px);max-height:46svh;padding:8px 10px;gap:7px;display:flex;flex-direction:column;background:linear-gradient(135deg,#122d42e6,#081c2be8);backdrop-filter:blur(10px);border:1px solid #7ccce2b3;border-radius:16px;overflow:hidden;box-shadow:inset 0 1px #e4faff30,0 -4px 25px #00111f55}
+#builderPanel.hidden{display:none}
+#builderPanel .builderTop{display:flex;align-items:center;gap:8px;height:38px;min-height:38px}
+#builderPanel .builderTop>span{flex:none;display:flex;align-items:center;gap:6px}
+#builderPanel .builderTop>span b{font-size:10px;letter-spacing:.6px}
+#builderPanel .builderCategories{display:flex;flex:1;min-width:0;overflow-x:auto;overflow-y:hidden;gap:4px;scrollbar-width:none;align-items:stretch;height:38px;touch-action:pan-x}
+#builderPanel .builderCategories button{flex:1 0 66px;width:auto;min-height:38px;gap:4px;padding:4px 7px;flex-direction:row;font-size:10px;line-height:1.15;border-radius:9px}
+#builderPanel .builderCategories button>span{display:block;overflow-wrap:normal}
+#builderPanel .builderCategories button svg{width:19px;height:19px;flex-shrink:0}
+#builderPanel .builderTop>.iconButton{width:38px;height:38px;min-height:38px;flex:none;display:grid;place-items:center}
+#builderPanel .compactModuleSheet{display:none}
+#builderPanel .builderContent{display:flex;gap:12px;flex:1;min-height:0}
+#builderPanel .moduleInfo{display:none}
+#builderPanel .moduleCards{display:flex!important;flex:1;min-width:0;max-height:none;gap:8px;overflow-x:auto;overflow-y:hidden;padding:0 0 3px;scrollbar-width:thin;touch-action:pan-x}
+#builderPanel .moduleCard{display:flex;flex-direction:column;flex:0 0 150px;width:150px!important;min-width:150px!important;max-width:none;height:100%;padding:4px 8px;gap:2px;min-height:0;border:1px solid #80b7d159;background:#102a3b66;border-radius:11px;text-align:left;overflow:hidden}
+#builderPanel .moduleCard.selected{background:linear-gradient(140deg,#24475b99,#152a3b99);border-color:#ffcf55;box-shadow:inset 0 0 14px #ffc83d0d,0 0 8px #ffc83d20}
+#builderPanel .moduleThumb{display:block;position:relative;flex:1;min-height:20px;height:auto!important;background:none;overflow:hidden;padding:0;border:0}
+#builderPanel .moduleThumb>img{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:2px 8px}
+#builderPanel .moduleThumb i{right:0;top:0;bottom:auto}
+#builderPanel .moduleCard>span:last-child{flex:none;width:100%}
+#builderPanel .moduleCard b{font-size:11px;line-height:1.2;white-space:normal;overflow-wrap:normal;display:block}
+#builderPanel .moduleCard small{font-size:10px;margin:2px 0 0;line-height:1.2}
+#builderPanel .moduleAction{flex:0 0 min(35%,240px);gap:5px;justify-content:center;min-width:180px;display:flex;flex-direction:column;border-left:1px solid #8acbdd33;padding-left:12px}
+#builderPanel .modulePrice{display:flex;align-items:center;gap:7px}
+#builderPanel .modulePrice b{font-size:19px}
+#builderPanel .moduleAction .primary{min-height:40px;font-size:12px}
+#builderPanel .zoneChoice{min-height:24px;padding:3px 6px;font-size:9px}
+#builderPanel .zoneChoice small,#builderPanel .buildRequirement{display:none}
+.buildCost{display:inline-flex!important;align-items:center;gap:5px;color:#ffda72;white-space:nowrap;font-variant-numeric:tabular-nums}
+.buildCost .uiIcon{width:18px;height:18px;flex:none;color:#ffcb45}
+.buildDuration{display:inline-flex;align-items:center;gap:5px;color:#bfd3df;font-size:12px;margin-left:12px}
+.buildDuration .uiIcon{width:16px;height:16px}
+#builderPanel.hsecTray{display:grid;grid-template-rows:38px minmax(0,1fr) 40px;gap:6px}
+#builderPanel .hsecItems{display:flex;gap:7px;overflow-x:auto;overflow-y:hidden;min-height:0;padding-bottom:2px;scrollbar-width:thin;scroll-snap-type:x proximity;touch-action:pan-x}
+#builderPanel .hsecItems .moduleCard{flex-basis:124px!important;min-width:124px!important;width:124px!important;scroll-snap-align:start}
+#builderPanel .hsecItems .moduleCard b{font-size:10px}
+#builderPanel .hsecSelection{display:flex;align-items:center;gap:16px;border-top:1px solid #8dc8e33b;padding-top:5px;min-width:0}
+.hsecSelection>span{flex:1;min-width:0;line-height:1.2}
+.hsecSelection>span b{font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hsecSelection>span small{display:block;font-size:10px;color:#b8cfdd;margin-top:2px}
+.hsecSelection strong{font-size:17px}
+#builderPanel .hsecSelection .primary{display:flex;align-items:center;justify-content:center;gap:5px;min-height:36px;font-size:12px;min-width:150px;padding:5px 14px}
+.hsecSelection .uiIcon{width:18px;height:18px}
+.staffShortcut{display:flex;align-items:center;gap:12px;width:100%;padding:10px 18px;border:1px solid #6da1bb;background:#153448;color:white;border-radius:10px}
+.staffShortcut>span{flex:1;text-align:left}.staffShortcut b,.staffShortcut small{display:block}.staffShortcut small{color:#acc8d8;margin-top:4px}
+#builderPanel.hsecDraftMode{height:auto!important;max-height:none;min-height:76px;padding:9px 12px!important;bottom:var(--safe-b)!important;display:grid;grid-template-columns:minmax(140px,1fr) auto auto auto 38px;grid-template-rows:auto auto;gap:4px 10px}
+.draftIdentity{display:flex;align-items:center;gap:9px;min-width:0}.draftIdentity>span{min-width:0}.draftIdentity b{display:block;font-size:12px;line-height:1.2}.draftIdentity small{display:block;color:#a9e9d5;font-size:10px;margin-top:3px}.draftIdentity .draftError{color:#ffb4a4}.draftIdentity>.hsecIcon{width:25px;height:25px}
+.draftTools{display:flex;align-items:center;gap:5px}
+#builderPanel.hsecDraftMode button{min-height:38px;padding:6px 10px;font:inherit;font-size:11px;display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap}
+#builderPanel.hsecDraftMode button>.uiIcon{width:18px;height:18px}
+#builderPanel.hsecDraftMode .buildCost{font-size:16px;align-self:center}
+#builderPanel.hsecDraftMode #hsecCancel{width:38px;height:38px;padding:8px}
+.draftGestureHint{grid-column:1/-1;font-size:10px;color:#b8d4e2;text-align:center;line-height:1.2;pointer-events:none}
+body.builderOpen #objective,body.builderOpen #joystick,body.builderOpen #handButton,body.builderOpen #builderButton,body.builderOpen #buildHud,body.builderOpen .playerStatus,body.builderOpen .resources{display:none!important}
+body.builderOpen #cameraHome{bottom:auto;top:calc(var(--safe-t) + 64px);left:auto;right:var(--safe-r)}
+/* Office quick panel — compact right-side card like reference image */
+#modal.officeQuick{background:none!important;backdrop-filter:none!important;pointer-events:none;align-items:flex-start;justify-content:flex-end}
+#modal.officeQuick #modalCard{pointer-events:auto;position:absolute;right:var(--safe-r,22px);top:var(--safe-t,18px);left:auto;bottom:auto;transform:none;width:240px!important;max-height:calc(100vh - 100px)!important;padding:0!important;overflow:hidden;background:linear-gradient(160deg,#142e43f0,#081c2af2);border:1px solid #5ab8e888;border-radius:16px;box-shadow:0 8px 32px #061e2f66,inset 0 1px #c8ecff22;animation:officeSlide .25s cubic-bezier(.2,.8,.2,1)}
+@keyframes officeSlide{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+#modal.officeQuick .modalDismiss{width:28px;height:28px;top:8px;right:8px;padding:6px;z-index:2;background:#0c1e2e99;border:1px solid #5ab8e844;border-radius:8px}
+.officeQuickLayout{display:flex;flex-direction:column;gap:0}
+#modal.officeQuick .officePanelPreview{height:140px!important;margin:0!important;border:0;background:linear-gradient(180deg,#1a3a50,#0e2538);border-radius:14px 14px 0 0;min-width:0;border-bottom:1px solid #5ab8e844}
+#modal.officeQuick .eyebrow{font-size:8px;letter-spacing:1.5px;color:#5ec8f0}
+#modal.officeQuick h2{font-size:16px!important;margin:4px 0 6px!important;line-height:1.2;color:#fff}
+#modal.officeQuick p{font-size:10px!important;margin:0 0 8px;line-height:1.4;color:#a7c3d8}
+.officeQuickInfo{padding:14px 16px 8px;min-width:0}.officeQuickInfo>.buildCost{font-size:18px;display:flex;align-items:center;gap:4px}.officeQuickInfo>.buildCost .uiIcon{width:16px;height:16px}.officeQuickInfo>.buildDuration{font-size:10px;color:#a7c3d8;display:flex;align-items:center;gap:3px;margin-top:4px}.officeQuickInfo>.buildDuration .uiIcon{width:13px;height:13px}.officeQuickInfo>small{display:block;color:#ffd677;font-size:10px;margin-top:4px}
+.officeQuickActions{display:flex;flex-direction:column;gap:6px;padding:0 16px 16px}
+.officeQuickActions button{display:flex;align-items:center;gap:8px;min-height:42px;padding:9px 12px;font-size:11px;white-space:normal;line-height:1.2;border-radius:11px;background:linear-gradient(135deg,#1b3a52,#102a3e);border:1px solid #5ab8e866;color:#e0f2fc;text-align:left}
+.officeQuickActions button:hover{border-color:#5ab8e8aa;background:linear-gradient(135deg,#1f4260,#14324a)}
+.officeQuickActions button>.uiIcon{width:18px;height:18px;flex-shrink:0;color:#5ec8f0}.officeQuickActions button.primary{border-color:#ffc83daa;background:linear-gradient(135deg,#ffe78a,#f7b830);color:#1a2800}.officeQuickActions small{font-size:9px;color:#7aa0b8;text-align:center}
+@media(max-width:900px){#builderPanel .builderTop>span b{display:none}#builderPanel .builderCategories button{font-size:9px;flex-basis:62px;padding-inline:5px}}
+@media(max-height:420px){#builderPanel{height:174px;max-height:47svh}#modal.officeQuick #modalCard{width:210px!important}#modal.officeQuick .officePanelPreview{height:110px!important}#builderPanel .builderCategories button{min-height:36px;height:36px}.hsecSelection strong{font-size:15px}#builderPanel .hsecSelection .primary{min-width:130px}}
+@media(max-width:700px){#builderPanel .builderCategories button{flex-basis:48px;font-size:8px;flex-direction:column;gap:1px;padding:2px 4px}#builderPanel .builderCategories button svg{width:16px;height:16px}#builderPanel .builderTop>span{display:none}#builderPanel.hsecDraftMode{grid-template-columns:minmax(115px,1fr) auto auto 36px;column-gap:7px}.draftTools{grid-row:2;grid-column:1/3}.draftGestureHint{grid-column:3/-1;grid-row:2;max-width:180px;align-self:center;font-size:8px}#builderPanel.hsecDraftMode .buildCost{font-size:13px}.draftIdentity b{font-size:11px}#modal.officeQuick #modalCard{width:200px!important}}
+
+body:has(#modal.officeQuick:not(.hidden)) #bottomNav{display:none!important}
+@media(max-height:350px){#builderPanel.hsecTray{height:160px;max-height:50svh;padding:6px 8px;grid-template-rows:34px minmax(0,1fr) 36px;gap:4px}#builderPanel.hsecTray .builderTop,#builderPanel.hsecTray .builderCategories{height:34px;min-height:34px}#builderPanel.hsecTray .builderCategories button{height:34px;min-height:34px}#builderPanel .hsecItems .moduleCard{flex-basis:144px!important;min-width:144px!important;width:144px!important}.hsecSelection>span small{display:none}#builderPanel .hsecSelection .primary{min-height:32px}}
+/* Touch carousels keep their full preview height; scrolling is horizontal and native. */
+#builderPanel .hsecItems,#builderPanel .moduleCards{scrollbar-width:none}
+#builderPanel .hsecItems::-webkit-scrollbar,#builderPanel .moduleCards::-webkit-scrollbar{display:none}

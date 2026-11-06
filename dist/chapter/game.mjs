@@ -1,0 +1,681 @@
+import {ConstructionCallout} from './construction-callout.mjs';
+import {tickMission3,restoreMission3} from '../mission3/tick.mjs';
+import {tickMission4,restoreMission4} from '../mission4/tick.mjs';
+import {canStartMission4,startMission4,updateMission4Phase,mission4Phase,mission4Objectives} from '../mission4/mission4-state.mjs';
+import {purchaseDthDrill,installDthTool,assignDthDrillToZone,DTH_DRILLS,DTH_HAMMERS,DTH_BITS,dthHammerDefinition,dthBitDefinition} from '../mission4/drills-dth.mjs';
+import {purchaseDrillTruck,drillTruckInfo,DRILLTRUCK_COST} from '../mission4/drilltruck.mjs';
+import {convertBoreholeToZone,assignTruckToZone} from '../mission4/zones.mjs';
+import {buildParking} from '../mission4/parking.mjs';
+import {startMaintenance,advanceMaintenancePhase} from '../mission4/maintenance.mjs';
+import {startProductionCycle} from '../mission4/production.mjs';
+import {initTruckRouteState,startTruckRoute,updateTruckRoute,truckRouteActive} from '../mission4/truck-routes.mjs';
+import {GLTFLoader} from '../vendor/GLTFLoader.js';
+import {DRACOLoader} from '../vendor/DRACOLoader.js';
+import {addToInventory} from '../mission3/inventory.mjs';
+import {hirePersonnel} from '../mission3/personnel.mjs';
+import {acceptContract,startDrilling,completeContract,contractDeadline} from '../mission3/contracts.mjs';
+import {toolCondition} from '../mission3/wear.mjs';
+import {drillDefinition,bitDefinition,hammerDefinition,HAMMERS,BITS} from '../mission3/drills.mjs';
+import {requestAnalysis,accelerateAnalysis,technicianArrives,startAnalysisTimer} from '../mission3/geology.mjs';
+import {purchaseDrill,installTool} from '../mission3/drills.mjs';
+import {placeOrder,placeMachineryOrder} from '../mission3/headquarters.mjs';
+import {upgradeWorkshop,workshopLevel,workshopCapacity,workshopUsed,workshopFree,WORKSHOP_LEVELS,workshopUpgradeJob,workshopUpgradeProgress,finishWorkshopUpgrade,accelerateWorkshop,canDemolishWorkshop,demolishWorkshop} from '../mission3/inventory.mjs';
+import {canStartMission3,startMission3,updateMission3Phase} from '../mission3/mission3-state.mjs';
+import {createDrillModel,animateDrill} from '../mission3/drill-models.mjs';
+import {createBoreholeMarker,updateMarkerProgress} from '../mission3/borehole-marker.mjs';
+import {createDeliveryVehicle,startDelivery,updateDelivery,departDelivery} from '../mission3/delivery-vehicle.mjs';
+import {createDrillingEffects,updateDrillingEffects} from '../mission3/drilling-effects.mjs';
+import {BOREHOLE_SITES} from '../mission3/contracts.mjs';
+import {HsecWorld} from '../hsec/world.mjs';
+import {HsecUI} from '../hsec/ui.mjs';
+import {ensureHsec,restoreHsec,active as hsecActive,tickHsec,moveNpc,evaluation,missionStep,assignOrder,upgradeAsset,retireAsset,inspectAsset} from '../hsec/state.mjs';
+import {suggestedPose} from '../hsec/layout.mjs';
+import {buildAsset} from '../hsec/state.mjs';
+import {HSEC_STEPS,HSEC_BALANCE as B} from '../hsec/catalog.mjs';
+import {applyQuality,loadQuality} from '../graphics/quality.mjs';
+import {syncOfficeAccess} from './office-access.mjs';
+import {ObjectiveGuide} from './guidance.mjs';
+import {CAMERA_KEY,cameraSettings} from '../camera/config.mjs';
+import {installWorldGestures} from '../camera/gestures.mjs';
+import {CinematicDirector} from '../camera/cinematic.mjs';
+import {CameraDebug} from '../camera/debug.mjs';
+import {CinematicRecorder} from '../camera/recorder.mjs';
+import {DesertWind} from '../camera/ambient.mjs';
+import * as T from '../vendor/three.module.js';
+import {World} from '../scene.mjs';
+import {createMotion,moveController} from '../animation/movement.mjs';
+import {installCameraDrag,rotateOrbit,resetOrbit,cameraRelativeIntent} from '../animation/camera-controls.mjs';
+import {CONFIG,CLEARABLES,PRODUCTS,CATEGORIES,INTRO_SHOTS,INTRO_VARIANTS} from './config.mjs';
+import {newGame,setPlayerIdentity,restore,tick,startModule,useOfficeComputer,constructionSeconds,clearObject,landReady,transfer,startOffice,accelerate,purchase,placeItem,validatePlacement,objective,progress} from './state.mjs';
+import {LANGUAGES,deviceLanguage,translator} from './i18n.mjs';
+import {ChapterScene} from './world.mjs';
+import {prepareAuth} from './auth.mjs';
+import {initCloudSave,cloudLoad,cloudSave} from './cloud-save.mjs';
+import {LocomotionReview} from './review-locomotion.mjs';
+import {AvatarRoster} from './avatar-roster.mjs';
+import {avatarDefinition} from './avatars.mjs';
+import {BuilderUI} from './builder-ui.mjs';
+import {MODULES,moduleDefinition,pendingConstruction,moduleAvailability} from './module-catalog.mjs';
+import {ProductPreview,officeThumbnail} from './product-preview.mjs';
+import {CharacterStage} from './selector-stage.mjs';
+import {renderPlayerPortrait} from './portrait.mjs';
+import {reviewPath} from './qa-path.mjs';
+import {PhoneUI} from './phone-ui.mjs';
+import {NotificationSystem} from './notifications.mjs';
+import {icon,workerAvatar} from './icons.mjs';
+import {unreadMessages,collectUIEvents} from './ui-state.mjs';
+import {pendingMessage,deliverMessage,acceptMission,confirmCompletion,isMissionAccepted,isMissionCollected,ensureNarrative,narrativeUnread,MISSION_NARRATIVES} from './narrative.mjs';
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],hidden=(el,v)=>el.classList.toggle('hidden',v);
+let prefs={lang:deviceLanguage(navigator.language),sound:true};try{prefs={...prefs,...JSON.parse(localStorage.getItem('drillrun-preferences')||'{}')};}catch{}
+if(!LANGUAGES.some(([l])=>l===prefs.lang))prefs.lang='es';let t=translator(prefs.lang),s=null,hasSave=false;
+function readSave(){try{const raw=localStorage.getItem(CONFIG.saveKey),data=JSON.parse(raw||'null');if(data&&data.schema!=='modular-1'&&!localStorage.getItem(CONFIG.saveKey+'-before-modular'))localStorage.setItem(CONFIG.saveKey+'-before-modular',raw);const value=restore(data);if(value){restoreHsec(value);restoreMission3(value);restoreMission4(value);}return value;}catch{return null;}}
+s=readSave();hasSave=!!s;if(s)prefs.lang=s.lang;t=translator(prefs.lang);
+let hsecWorld=null,hsecUI=null,hsecElapsed=0,hsecLastSignature='',hsecFollow=false,hsecRecorder=null;
+let constructionCallout=null,guidance=null,cinematic=null,cameraDebug=null,cinemaRecorder=null,reviewBackup=null,cinemaReview=false,locomotionReview=null,qaComputerPath=null,qaWalkRoute=null,characterStage=null,avatars=null,builderOpen=false,managingOffice=false,officePanelPreview=null,selectedBuildModule=null,lastPortraitId=null,selectedAvatar='operator01';
+let m3DrillModel=null,m3BoreholeMarkers=[],m3DeliveryVehicle=null,m3DrillingFx=null,m3VisualsReady=false;
+let m4DrillTruckModel=null,m4ParkingSpot=null,m4VisualsReady=false,m4TruckLoading=false,m4TruckCollider=null;
+let world,scene,phase='start',phoneApp=null,phoneOpen=false,category='desks',modalOpen=false,blueprint=false,placement=null,busy=null,keys={},joy={x:0,y:0},pointer=null,target=null,auth={configured:false},account=null,audioContext=null,last=performance.now(),clock=0,lastSave=0,lastHud=0,introAt=0,lastObjective='',qaRoute=false;
+const motion=createMotion(),qa=new URLSearchParams(location.search).has('chapterqa'),cameraDev=new URLSearchParams(location.search).get('dev')==='camera';
+function loadCameraSettings(){try{return cameraSettings(JSON.parse(localStorage.getItem(CAMERA_KEY)));}catch{return cameraSettings();}}
+function persistCamera(){try{localStorage.setItem(CAMERA_KEY,JSON.stringify(world.cameraRig.settings));}catch{}}
+const wind=new DesertWind(()=>{audioContext??=new (window.AudioContext||window.webkitAudioContext)();return audioContext;});
+document.documentElement.style.setProperty('--cover',`url('${new URL(CONFIG.cover,document.baseURI).href}')`);
+const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function setText(el,value){const text=String(value);if(el.textContent!==text)el.textContent=text;}
+const notices=new NotificationSystem($('#toast')),rewardQueue=[];
+$$('[data-icon]').forEach(el=>el.innerHTML=icon(el.dataset.icon));$('#playerAvatar').innerHTML=workerAvatar();
+const money=value=>new Intl.NumberFormat(prefs.lang).format(Math.floor(value));
+function toast(key){notices.push({title:t(key),symbol:['noMoney','noEnergy','invalid','outside','accessBlocked','overlap'].includes(key)?'lock':'bell'});}
+function persistPrefs(){try{localStorage.setItem('drillrun-preferences',JSON.stringify(prefs));}catch{}}
+function save(){if(!s||!hasSave||phase==='character'||reviewBackup!==null)return;try{s.savedAt=Date.now();localStorage.setItem(CONFIG.saveKey,JSON.stringify(s));cloudSave(CONFIG.saveKey);setText($('#saveStatus'),t('saved'));}catch{setText($('#saveStatus'),t('saveError'));}}
+function language(value){prefs.lang=value;t=translator(value);if(s)s.lang=value;persistPrefs();applyText();save();if(phoneOpen)renderPhone();}
+function languageOptions(){return LANGUAGES.map(([l,name])=>`<option value="${l}" ${l===prefs.lang?'selected':''}>${name}</option>`).join('');}
+function updateLangDropdown(){const toggle=$('#langToggle'),opts=$('#langOptions');if(!toggle||!opts)return;const cur=LANGUAGES.find(([l])=>l===prefs.lang);toggle.textContent=cur?cur[1]:'Español';opts.innerHTML=LANGUAGES.map(([l,name])=>`<button data-lang="${l}" class="${l===prefs.lang?'active':''}">${name}</button>`).join('');opts.querySelectorAll('[data-lang]').forEach(b=>b.onclick=e=>{e.stopPropagation();language(b.dataset.lang);$('#startLanguage').classList.remove('open');});}
+function applyText(){document.documentElement.lang=prefs.lang;$$('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));$$('[data-i18n-placeholder]').forEach(el=>el.placeholder=t(el.dataset.i18nPlaceholder));updateLangDropdown();setText($('#play'),t(hasSave?'continue':'play'));hidden($('#newGame'),!hasSave);for(const [id,key]of[['phoneButton','phone'],['settingsButton','settings'],['cameraHome','home'],['handButton','hand'],['joystick','controls'],['menuButton','player'],['closePhone','close'],['phoneBack','back'],['backStart','back']])$('#'+id).setAttribute('aria-label',t(key));$('#energyValue').parentElement.title=t('energy');$('#boostValue').parentElement.title=t('boosters');$('#money').title=t('cash');updateStartAccount();updateStartCard();if(s)renderHUD();}
+function updateStartCard(){
+ const card=$('.startCard'),brand=$('.startBrand');if(!card||!brand)return;
+ const m3On=s?.mission3&&s.mission3.phase!=='inactive';
+ const hsecDone=!!s?.hsec?.completedAt;
+ const chapterDone=!!s?.chapterCompletedAt;
+ // Dynamic eyebrow + title based on progress
+ const eyebrow=card.querySelector('.eyebrow');
+ const heading=card.querySelector('h2');
+ const brandP=brand.querySelector('p');
+ const m4On=s?.mission4&&s.mission4.phase!=='inactive';
+ if(m4On&&eyebrow&&heading){eyebrow.textContent='MISIÓN 3';heading.textContent='Automatiza tu operación';if(brandP)brandP.textContent='Producción DTH automatizada';}
+ else if(m3On&&eyebrow&&heading){eyebrow.textContent='MISIÓN 2';heading.textContent='Tu Primer Contrato';if(brandP)brandP.textContent='Exploración RC · 180 metros';}
+ else if(hsecDone&&eyebrow&&heading){eyebrow.textContent='MISIÓN 2 · COMPLETADA';heading.textContent='Prepara tu operación';if(brandP)brandP.textContent='Operación lista';}
+ else if(chapterDone&&eyebrow&&heading){eyebrow.textContent='CAPÍTULO 01 · COMPLETADO';heading.textContent=t('firstSteps');if(brandP)brandP.textContent=t('firstSteps');}
+}
+
+function sound(kind){if(!prefs.sound)return;try{audioContext??=new (window.AudioContext||window.webkitAudioContext)();audioContext.resume();const at=audioContext.currentTime,tones=kind==='build'?[210,145,320]:kind==='finish'?[330,440,660]:kind==='transition'?[140,210]:[180];tones.forEach((freq,i)=>{const o=audioContext.createOscillator(),g=audioContext.createGain();o.type=kind==='finish'?'sine':'triangle';o.frequency.setValueAtTime(freq,at+i*.10);o.frequency.exponentialRampToValueAtTime(freq*.65,at+i*.10+.10);g.gain.setValueAtTime(kind==='transition'?.025:.07,at+i*.10);g.gain.exponentialRampToValueAtTime(.001,at+i*.10+.13);o.connect(g);g.connect(audioContext.destination);o.start(at+i*.10);o.stop(at+i*.10+.14);o.onended=()=>{o.disconnect();g.disconnect();};});}catch{}}
+function resetJoy(){joy={x:0,y:0};pointer=null;$('#joyKnob').style.transform='translate(0,0)';}
+function stop(){resetJoy();keys={};target=null;motion.vx=motion.vz=motion.speed=0;}
+function closeModal(){if(hsecUI)hsecUI.panelOpen=false;$('#modalCard').classList.remove('hsecModal');officePanelPreview?.dispose();officePanelPreview=null;scene?.setUpgradePreview(null);managingOffice=false;hidden($('#modal'),true);$('#modal').classList.remove('buildPreview','moduleSheet','upgradeSheet','officeQuick');modalOpen=false;blueprint=builderOpen&&!!selectedBuildModule;}
+function modal(html){$('#modalCard').classList.remove('hsecModal');$('#modal').classList.remove('buildPreview');hsecWorld?.showAssetCard(null);stop();modalOpen=true;hidden($('#modal'),false);$('#modalCard').innerHTML=`<button id="modalDismiss" class="modalDismiss" aria-label="${esc(t('close'))}">${icon('close')}</button>`+html;$('#modalDismiss').onclick=closeModal;$('#modalCard').scrollTop=0;$('#modalCard').setAttribute('role','dialog');$('#modalCard').setAttribute('aria-modal','true');const heading=$('#modalCard h2');if(heading){heading.id='modalHeading';$('#modalCard').setAttribute('aria-labelledby','modalHeading');}}
+function button(key,id,primary=false){return `<button id="${id}" class="${primary?'primary':'secondary'}">${esc(t(key))}</button>`;}
+function showSettings(){const curLang=LANGUAGES.find(([l])=>l===prefs.lang);const curQ=loadQuality();const qLabels={low:t('quality_low'),balanced:t('quality_balanced'),high:t('quality_high')};modal(`<span class="eyebrow">${esc(t('settings'))}</span><h2>${esc(t('settings'))}</h2><div class="selectRow"><label for="profileName">${esc(t('yourName'))}</label><input id="profileName" maxlength="20" value="${esc(s?.playerName||'')}" placeholder="${esc(t('operatorName'))}"></div><div class="selectRow"><label>${esc(t('language'))}</label><div class="langDropdown" id="settingsLangDrop"><div class="langToggle" id="settingsLangToggle">${curLang?curLang[1]:'Español'}</div><div class="langOptions" id="settingsLangOpts">${LANGUAGES.map(([l,name])=>`<button data-lang="${l}" class="${l===prefs.lang?'active':''}">${name}</button>`).join('')}</div></div></div><div class="selectRow"><label>${esc(t('sound'))}</label><input id="soundToggle" type="checkbox" ${prefs.sound?'checked':''}></div><div class="selectRow"><label>${esc(t('graphicsQuality'))}</label><div class="langDropdown" id="settingsQualityDrop"><div class="langToggle" id="settingsQualityToggle">${esc(qLabels[curQ]||qLabels.balanced)}</div><div class="langOptions" id="settingsQualityOpts">${['low','balanced','high'].map(id=>`<button data-quality="${id}" class="${curQ===id?'active':''}">${esc(qLabels[id])}</button>`).join('')}</div></div></div><small class="qualityReadout">${esc(t('qualityHelp'))}</small><p>${esc(t('controls'))}</p><button id="resetCamera" class="textButton">${esc(t('home'))}</button><p>${esc(account?t('linked')+' · '+(account.email||''):t('guestNote'))}</p>${auth.configured?button('google','googleLink'): `<small>${esc(t('googleOff'))}</small>`}<div class="modalActions">${button('titleScreen','goTitle')}${button('close','closeSettings',true)}</div>`);$('#profileName').onchange=e=>{if(!s||phase!=='play')return;try{setPlayerIdentity(s,s.character,e.target.value);save();renderHUD();if(phoneOpen)renderPhone();}catch(err){toast(err.key);}};$('#settingsLangToggle').onclick=e=>{e.stopPropagation();$('#settingsLangDrop').classList.toggle('open');$('#settingsQualityDrop')?.classList.remove('open');};$('#settingsLangOpts').querySelectorAll('[data-lang]').forEach(b=>b.onclick=e=>{e.stopPropagation();language(b.dataset.lang);showSettings();});$('#settingsQualityToggle').onclick=e=>{e.stopPropagation();$('#settingsQualityDrop').classList.toggle('open');$('#settingsLangDrop')?.classList.remove('open');};$('#settingsQualityOpts').querySelectorAll('[data-quality]').forEach(b=>b.onclick=e=>{e.stopPropagation();if(world)applyQuality(world,b.dataset.quality);else try{localStorage.setItem('drillrun-graphics-v1',b.dataset.quality);}catch{}$('#settingsQualityDrop').classList.remove('open');$('#settingsQualityToggle').textContent=b.textContent;$('#settingsQualityOpts').querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');});$('#soundToggle').onchange=e=>{prefs.sound=e.target.checked;wind.set(prefs.sound&&phase==='play');if(s)s.sound=prefs.sound;persistPrefs();save();};$('#closeSettings').onclick=closeModal;$('#resetCamera').onclick=()=>{world&&(world.zoom=1,resetOrbit(world.orbit),world.cameraRig.reset(),persistCamera());closeModal();};$('#goTitle').onclick=()=>{closeModal();stop();save();phase='start';closePhone();closeBuilder();hidden($('#hud'),true);hidden($('#startScreen'),false);applyText();};if($('#googleLink'))$('#googleLink').onclick=async()=>{try{await auth.signIn();showSettings();}catch{toast('authError');}}; document.querySelector('#modalCard')?.addEventListener('click',()=>{$('#settingsLangDrop')?.classList.remove('open');$('#settingsQualityDrop')?.classList.remove('open');});}
+$('#langToggle').onclick=e=>{e.stopPropagation();$('#startLanguage').classList.toggle('open');};document.addEventListener('click',()=>$('#startLanguage')?.classList.remove('open'));$('#startSettings').onclick=$('#settingsButton').onclick=showSettings;
+function updateStartAccount(){const info=$('#startAccountInfo'),btn=$('#startGoogle');if(account){info.textContent=t('linked')+' · '+(account.email||'');hidden(btn,true);}else if(auth.configured){info.textContent=t('guestNote');hidden(btn,false);}else{info.textContent=t('guestNote');hidden(btn,true);}}
+$('#startGoogle').onclick=async()=>{try{await auth.signIn();}catch{toast('authError');}};
+prepareAuth(user=>{account=user;updateStartAccount();if(user)toast('linked');}).then(async value=>{auth=value;updateStartAccount();await initCloudSave(value);const cloud=await cloudLoad(CONFIG.saveKey);if(cloud){const recovered=restore(cloud);if(recovered&&(!s||recovered.savedAt>s.savedAt)){s=recovered;hasSave=true;prefs.lang=s.lang;t=translator(s.lang);applyText();toast('cloudRestored');}}});
+function loadingProgress(done,total){$('#loadProgress').value=done/total;setText($('#loadStage'),new Intl.NumberFormat(prefs.lang,{style:'percent',maximumFractionDigits:0}).format(done/total));}
+async function ensureWorld(forSelection=false){
+ if(world){if(forSelection){hidden($('#loading'),false);await avatars.loadAll((n,total)=>{loadingProgress(n,total);});hidden($('#loading'),true);}return;}
+ hidden($('#loading'),false);loadingProgress(0,forSelection?4:2);
+ world=new World($('#world'),{chapter:true,cameraSettings:loadCameraSettings()});scene=new ChapterScene(world);hsecWorld=new HsecWorld(world);hsecWorld.onBuilt=a=>{scene.burst(a.x,a.z);sound('finish');};hsecWorld.onAlert=(text,sym)=>{notices.push({title:text,symbol:sym||'bell'});};
+ hsecWorld.onRepair=(orderId)=>{const h=ensureHsec(s);const o=h.orders.find(o=>o.id===orderId);if(!o)return;try{assignOrder(s,orderId,'player');save();renderHUD();notices.push({title:'Reparación iniciada',symbol:'🔧'});}catch(e){notices.push({title:e.message,symbol:'⚠️'});}};
+ hsecWorld.onInspect=(assetId)=>{try{const h=ensureHsec(s),before=h.orders.filter(o=>o.assetId===assetId&&o.status==='pending').length;inspectAsset(s,assetId);save();renderHUD();const after=h.orders.filter(o=>o.assetId===assetId&&o.status==='pending').length,created=after-before;notices.push({title:created>0?`${created} reparación${created>1?'es':''} detectada${created>1?'s':''} — toca para reparar`:'Sin problemas detectados',symbol:'🔍'});}catch(e){notices.push({title:e.message,symbol:'⚠️'});}};
+ hsecWorld.onUpgrade=(assetId)=>{try{upgradeAsset(s,assetId);save();renderHUD();notices.push({title:'Superficie mejorada',symbol:'⬆'});}catch(e){notices.push({title:e.message,symbol:'⚠️'});}};
+ hsecWorld.onRemove=(assetId)=>{try{retireAsset(s,assetId);save();renderHUD();notices.push({title:'Activo retirado',symbol:'🗑'});}catch(e){notices.push({title:e.message,symbol:'⚠️'});};};hsecUI=new HsecUI({state:()=>s,world:hsecWorld,format:money,onSave:()=>{scene.update(s,0,Date.now());hsecWorld.update(s,0,'play');ensureSafe();save();renderHUD();},onStop:stop,notify:text=>notices.push({title:text,symbol:'bell'}),showModal:modal,hideModal:closeModal,openBuilder,closeBuilder,manageOffice,onGoto:p=>{target={x:p.x,z:p.z};}});builderUI.hsec=hsecUI;guidance=new ObjectiveGuide(world,$('#hud'),()=>t);constructionCallout=new ConstructionCallout(world,$('#buildHud'));characterStage=new CharacterStage(world);await world.characterReady;avatars=new AvatarRoster(world);loadingProgress(1,forSelection?4:2);
+ if(forSelection)await avatars.loadAll((done,total)=>{loadingProgress(done,total);});else await avatars.load(s?.character||'operator01');
+ avatars.activate(s?.character||'operator01');builderUI.thumbnail=officeThumbnail(world);world.inspect=false;motion.turnBeforeMove=true;world.player.userData.validationCanvas=world.renderer.domElement;
+ installWorldGestures(world.renderer.domElement,{canLook:()=>phase==='play'&&!locomotionReview?.active&&(!modalOpen||managingOffice)&&!phoneOpen&&!busy,dragAnywhere:()=>builderOpen||managingOffice,onLook:(dx,dy)=>{target=null;if(builderOpen&&hsecUI?.drawing){const zoom=world.cameraRig.builderZoom||14,panScale=zoom*.0012;hsecUI.panFocus(-dx*panScale,dy*panScale);return;}if(!world.orbit.manual)world.orbit.yaw=world.cameraRig.heading;rotateOrbit(world.orbit,dx*world.cameraRig.settings.controls.touchSensitivity,dy*world.cameraRig.settings.controls.touchSensitivity);},onZoom:delta=>world.cameraRig.zoomBy(delta),onEnd:persistCamera,onTap:(x,y)=>{if(phase==='play'&&hsecUI?.drawing&&!modalOpen&&!phoneOpen){const p=world.pick(x,y,0);if(p)hsecUI.pick(p);return;}if(phase!=='play'||builderOpen||modalOpen||phoneOpen||busy)return;const p=world.pick(x,y,placement?.42:0);if(!s.inside&&s.office.status==='built'&&world.office.visible&&world.ray.intersectObject(world.office,true).some(h=>{for(let o=h.object;o;o=o.parent)if(!o.visible)return false;return true;})){manageOffice();return;}if(!p)return;if(placement){placement.pose.x=Math.round((p.x+6)/CONFIG.grid)*CONFIG.grid;placement.pose.z=Math.round(p.z/CONFIG.grid)*CONFIG.grid;renderPlacement();}else if(hsecActive(s)&&hsecWorld){const hitAsset=hsecWorld.hitTestAsset(p.x,p.z);if(hitAsset){hsecWorld.showAssetCard(hitAsset);return;}}if(m3DrillModel&&s.drill&&Math.hypot(p.x-m3DrillModel.position.x,p.z-m3DrillModel.position.z)<3.5&&Math.hypot(s.position.x-m3DrillModel.position.x,s.position.z-m3DrillModel.position.z)<6){hideDrillCard();hideWorkshopCard();showDrillCard();return;}if(s.workshop&&s.mission3&&s.mission3.phase!=='inactive'&&Math.hypot(p.x+7.6,p.z+9.3)<6&&Math.hypot(s.position.x+7.6,s.position.z+9.3)<9){hideDrillCard();hideWorkshopCard();showWorkshopCard();return;}if(drillCardOpen)hideDrillCard();if(workshopCardOpen)hideWorkshopCard();if(!world.isBlocked(p.x,p.z,avatarDefinition(s.character).radius))target={x:p.x,z:p.z};}});
+ cinematic=new CinematicDirector({world,host:$('#intro'),translate:()=>t,sound:()=>prefs.sound,onSound:()=>{sound('transition');wind.set(prefs.sound);},onComplete:()=>{beginPlay(cinemaReview);if(cinemaRecorder)setTimeout(()=>cinemaRecorder.stop(),500);}});
+ if(cameraDev){cameraDebug=new CameraDebug({onOfficeThumbnail:()=>builderUI.thumbnail,onRecordGraphics:()=>{cinemaRecorder.start();setTimeout(()=>cinemaRecorder.stop(),12000);},rig:world.cameraRig,world,onPreset:()=>{stop();world.snapCamera=true;resetOrbit(world.orbit);},onFreeze:stop,onReplay:(orbitOnly,record)=>replayCinematic(orbitOnly,record),onFixture:cameraReviewScene,onRestore:restoreReviewScene,onCapture:id=>{world.cameraRig.setPreset(id);world.snapCamera=true;resetOrbit(world.orbit);world.update(s,0,clock,false);world.renderer.last=0;world.renderer.render(world.scene,world.camera);return world.renderer.domElement.toDataURL('image/png');}});cinemaRecorder=new CinematicRecorder(world,cinematic,cameraDebug.host);}
+ if(qa)installQA();last=performance.now();if(qa)setInterval(()=>frame(performance.now()),1000/30);else requestAnimationFrame(frame);loadingProgress(1,1);hidden($('#loading'),true);
+}
+async function chooseCharacter(){try{await ensureWorld(true);s=newGame(prefs.lang,'operator01');selectedAvatar='operator01';avatars.activate(selectedAvatar);world.playerGround=0;$('#playerNameInput').value='';s.sound=prefs.sound;notices.clear();rewardQueue.length=0;phase='character';world.inspect=true;world.inspectMode='worker';world.inspectAngle='three';world.zoom=.8;world.player.rotation.y=0;motion.yaw=0;hidden($('#startScreen'),true);hidden($('#characterScreen'),false);renderCharacters();}catch(e){console.error(e);setText($('#loadStage'),t('invalid'));}}
+function renderCharacters(){const node=$('#characterSlots');node.innerHTML=CONFIG.protagonists.map((p,i)=>`<button data-character="${p.id}" class="avatarChoice ${selectedAvatar===p.id?'selected':''}" aria-pressed="${selectedAvatar===p.id}"><span class="avatarThumb">${avatars.portrait(p.id)||icon('player')}</span><span><b>${esc(t(p.roleKey))}</b><small>${esc(t(p.labelKey))}</small></span><i>${String(i+1).padStart(2,'0')}</i></button>`).join('');node.querySelectorAll('button').forEach(b=>b.onclick=()=>{selectedAvatar=b.dataset.character;avatars.activate(selectedAvatar);renderCharacters();});const p=avatarDefinition(selectedAvatar);setText($('#avatarTitle'),t(p.roleKey));setText($('#avatarDetail'),t(p.summaryKey));$('#avatarPerk').innerHTML=`<span class="perkSymbol">${icon(p.perkIcon)}</span><div><span class="perkHeading">${esc(t('specialtyBonus'))}</span><strong>${esc(t(p.perkKey))}</strong><small class="perkStatus">${icon(p.id==='operator04'?'check':'lock')}${esc(t(p.id==='operator04'?'bonusActive':'bonusFuture'))}</small></div>`;$('#startAdventure').disabled=!avatars.entries.has(p.id)||$('#playerNameInput').value.trim().length<2;hidden($('#provisionalNote'),true);}
+$('#playerNameInput').oninput=renderCharacters;
+$('#play').onclick=async()=>{if(!hasSave)return chooseCharacter();try{requestImmersive();await ensureWorld();s=readSave();if(!s){hasSave=false;return chooseCharacter();}prefs.lang=s.lang;prefs.sound=s.sound;t=translator(s.lang);applyText();hasSave=true;beginPlay(true);}catch(e){console.error(e);toast('invalid');}};
+$('#newGame').onclick=()=>{modal(`<h2>${esc(t('newGame'))}</h2><p>${esc(t('resetAsk'))}</p><div class="modalActions">${button('cancel','keepSave')}${button('confirm','replaceSave',true)}</div>`);$('#keepSave').onclick=closeModal;$('#replaceSave').onclick=()=>{closeModal();chooseCharacter();};};
+$('#backStart').onclick=()=>{phase='start';hidden($('#characterScreen'),true);hidden($('#startScreen'),false);s=readSave();hasSave=!!s;applyText();};
+$('#startAdventure').onclick=()=>{try{setPlayerIdentity(s,selectedAvatar,$('#playerNameInput').value);}catch(e){toast(e.key);return;}hasSave=true;avatars.activate(s.character);world.setCharacter(s.character);world.inspect=false;hidden($('#characterScreen'),true);hidden($('#provisionalNote'),true);s.facing=Math.PI;s.position={...CONFIG.spawn};requestImmersive();startCinematic(false,false);save();};
+function requestImmersive(){const el=document.documentElement;if(!document.fullscreenElement&&el.requestFullscreen)el.requestFullscreen({navigationUI:'hide'}).catch(()=>{});}
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+function startCinematic(orbitOnly=false,review=false){stop();phase='intro';cinemaReview=review;blueprint=false;world.inspect=false;world.chapterCamera=null;world.avatarHeight=avatarDefinition(s.character).height;world.player.rotation.y=s.facing;motion.yaw=s.facing;world.worker.reset();resetOrbit(world.orbit);world.orbit.yaw=s.facing-Math.PI;hidden($('#hud'),true);hidden($('#characterScreen'),true);hidden($('#startScreen'),true);notices.clear();wind.set(false);cinematic.start(s.character,{orbitOnly});}
+async function cameraReviewScene(id,mode=null){if(!world)return;cinematic.stop();cinemaRecorder?.stop();if(!reviewBackup)reviewBackup={state:s?JSON.parse(JSON.stringify(s)):null,hasSave};await avatars.load(id);s=newGame(prefs.lang,id);s.character=id;s.playerName='Revisión';s.facing=Math.PI;s.position={...CONFIG.spawn};s.introSeen=true;s.messageReads=['welcome'];if(mode==='office'){s.cleared=CLEARABLES.map(o=>o.id);startOffice(s,'office01');accelerate(s);s.position={...CONFIG.officeSlot.access};s.uiEvents=['message:welcome','mission:clear','mission:office','message:office-store'];}hasSave=true;avatars.activate(id);world.playerGround=0;world.worker.reset();rewardQueue.length=0;beginPlay(true);notices.clear();}
+function restoreReviewScene(){if(!reviewBackup)return;rewardQueue.length=0;closeModal();notices.clear();cinematic.stop();cinemaRecorder?.stop();const backup=reviewBackup;reviewBackup=null;s=backup.state;hasSave=backup.hasSave;if(s){avatars.activate(s.character);world.playerGround=0;beginPlay(true);}else{phase='start';hidden($('#hud'),true);hidden($('#startScreen'),false);applyText();}}
+function initM3Visuals(){
+ if(m3VisualsReady||!world||!s?.mission3||s.mission3.phase==='inactive')return;
+ // Borehole markers
+ if(!m3BoreholeMarkers.length){for(const site of BOREHOLE_SITES){const marker=createBoreholeMarker(site.id,site.x,site.z);world.scene.add(marker);m3BoreholeMarkers.push(marker);}}
+ // Delivery vehicle
+ if(!m3DeliveryVehicle){m3DeliveryVehicle=createDeliveryVehicle();world.scene.add(m3DeliveryVehicle);}
+ // Drilling effects
+ if(!m3DrillingFx){m3DrillingFx=createDrillingEffects();world.scene.add(m3DrillingFx);}
+ m3VisualsReady=true;
+}
+let m3DrillCollider=null,m3TruckCollider=null;
+function spawnM3Drill(drillId){
+ if(m3DrillModel){world.scene.remove(m3DrillModel);m3DrillModel=null;}
+ m3DrillModel=createDrillModel(drillId);
+ const activeBH=s.contract?.activeBoreholeIndex!=null?BOREHOLE_SITES[s.contract.activeBoreholeIndex]:null;
+ const dx=activeBH?.x||22,dz=activeBH?.z||0;
+ m3DrillModel.position.set(dx,0,dz);
+ world.scene.add(m3DrillModel);
+ // Dynamic collider for drill rig
+ if(!m3DrillCollider){m3DrillCollider={x:dx,z:dz,w:3.6,d:4.5};world.colliders.push(m3DrillCollider);}
+ m3DrillCollider.x=dx;m3DrillCollider.z=dz;
+}
+function updateM3Visuals(dt){
+ if(!m3VisualsReady||!s?.mission3)return;
+ // Ensure drill model exists if player owns a drill
+ if(s.drill&&!m3DrillModel)spawnM3Drill(s.drill.id);
+ // Move drill to active borehole
+ if(m3DrillModel&&s.contract?.activeBoreholeIndex!=null){
+  const site=BOREHOLE_SITES[s.contract.activeBoreholeIndex];
+  if(site){m3DrillModel.position.x+=(site.x-m3DrillModel.position.x)*dt*2;m3DrillModel.position.z+=(site.z-m3DrillModel.position.z)*dt*2;}
+ }
+ // Sync drill collider position
+ if(m3DrillCollider&&m3DrillModel){m3DrillCollider.x=m3DrillModel.position.x;m3DrillCollider.z=m3DrillModel.position.z;}
+ // Sync truck collider position
+ if(m3DeliveryVehicle){if(!m3TruckCollider){m3TruckCollider={x:m3DeliveryVehicle.position.x,z:m3DeliveryVehicle.position.z,w:2.4,d:5};world.colliders.push(m3TruckCollider);}m3TruckCollider.x=m3DeliveryVehicle.position.x;m3TruckCollider.z=m3DeliveryVehicle.position.z;}
+ // Animate drill
+ const drilling=s.drill?.state==='drilling';
+ animateDrill(m3DrillModel,dt,drilling);
+ // Update borehole markers
+ for(let i=0;i<m3BoreholeMarkers.length;i++){
+  const bh=s.boreholes?.[i],marker=m3BoreholeMarkers[i];
+  if(!bh){updateMarkerProgress(marker,0,'idle');continue;}
+  const progress=bh.depthCompleted/(bh.depthTarget||60);
+  const status=bh.status==='complete'?'complete':s.contract?.activeBoreholeIndex===i&&drilling?'active':'idle';
+  updateMarkerProgress(marker,progress,status);
+ }
+ // Drilling effects at active borehole
+ if(m3DrillingFx&&drilling&&s.contract?.activeBoreholeIndex!=null){
+  const site=BOREHOLE_SITES[s.contract.activeBoreholeIndex];
+  if(site){m3DrillingFx.position.set(site.x,0,site.z);}
+ }
+ updateDrillingEffects(m3DrillingFx,dt,drilling);
+ // Delivery vehicle animation
+ updateDelivery(m3DeliveryVehicle,dt);
+}
+function initM4Visuals(){
+ if(m4VisualsReady||!world||!s?.mission4||s.mission4.phase==='inactive')return;
+ // Parking spot — exterior left side of workshop
+ if(!m4ParkingSpot&&s.mission4.parkingBuilt){
+  const g=new T.Group();g.name='parking-spot';
+  const ground=new T.Mesh(new T.BoxGeometry(4,0.02,5),new T.MeshToonMaterial({color:0x3a3a3a}));
+  ground.position.set(-13.5,0.12,-9.3);ground.receiveShadow=true;g.add(ground);
+  // Yellow border lines
+  for(const z of [-1,1]){const line=new T.Mesh(new T.BoxGeometry(3.6,0.03,0.08),new T.MeshToonMaterial({color:0xf6bc43}));line.position.set(-13.5,0.14,-9.3+z*2.2);g.add(line);}
+  for(const x of [-1,1]){const line=new T.Mesh(new T.BoxGeometry(0.08,0.03,4.4),new T.MeshToonMaterial({color:0xf6bc43}));line.position.set(-13.5+x*1.8,0.14,-9.3);g.add(line);}
+  world.scene.add(g);m4ParkingSpot=g;
+  // Add walk surface for parking area
+  world.walkSurfaces.push({x:-13.5,z:-9.3,w:4,d:5,y:0.12});
+ }
+ // DrillTruck model — load GLB
+ if(!m4DrillTruckModel&&!m4TruckLoading&&s.mission4.drillTruck){
+  m4TruckLoading=true;
+  const draco=new DRACOLoader();draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
+  const loader=new GLTFLoader();loader.setDRACOLoader(draco);
+  loader.loadAsync(new URL('../assets3d/DRILLTRUCK_optimized.glb',import.meta.url).href).then(gltf=>{
+   const mdl=gltf.scene;mdl.name='drilltruck';
+   // Measure bounding box to auto-scale
+   const box=new T.Box3().setFromObject(mdl);const sz=new T.Vector3();box.getSize(sz);
+   console.log('DrillTruck GLB loaded, size:',sz.x.toFixed(2),sz.y.toFixed(2),sz.z.toFixed(2));
+   // Target ~5m long truck (real pickup scale)
+   const maxDim=Math.max(sz.x,sz.y,sz.z);if(maxDim>0){const scale=5/maxDim;mdl.scale.setScalar(scale);console.log('DrillTruck scale:',scale.toFixed(3));}
+   // Re-center so bottom sits on ground at parking surface y=0.12
+   const box2=new T.Box3().setFromObject(mdl);mdl.position.y=-box2.min.y;
+   mdl.traverse(c=>{if(c.isMesh){c.castShadow=true;c.receiveShadow=true;}});
+   const wrapper=new T.Group();wrapper.name='drilltruck-wrapper';wrapper.add(mdl);
+   m4DrillTruckModel=wrapper;
+   initTruckRouteState(m4DrillTruckModel);
+   // Position at saved truck position or parking
+   const truckPos=s.mission4?.drillTruck?.position||{x:-13.5,z:-9.3};
+   m4DrillTruckModel.position.set(truckPos.x,0.12,truckPos.z);
+   world.scene.add(m4DrillTruckModel);
+   // If truck was dispatched/in maintenance, restart route animation
+   if(s.mission4?.drillTruck?.maintenancePhase==='dispatch'){
+    const zone=s.mission4.drillTruck.maintenanceZone;
+    if(zone)startTruckRoute(m4DrillTruckModel,zone,'out');
+   }else if(s.mission4?.drillTruck?.maintenancePhase==='return'){
+    const zone=s.mission4.drillTruck.maintenanceZone;
+    if(zone)startTruckRoute(m4DrillTruckModel,zone,'return');
+   }
+   // Dynamic collider for truck
+   m4TruckCollider={x:truckPos.x,z:truckPos.z,w:2.5,d:5,_truck:true};
+   world.colliders.push(m4TruckCollider);
+  }).catch(e=>{console.error('DrillTruck GLB load failed, using procedural:',e);m4DrillTruckModel=createProceduralTruck();initTruckRouteState(m4DrillTruckModel);const tp=s.mission4?.drillTruck?.position||{x:-13.5,z:-9.3};m4DrillTruckModel.position.set(tp.x,0.12,tp.z);world.scene.add(m4DrillTruckModel);if(s.mission4?.drillTruck?.maintenancePhase==='dispatch'){const z2=s.mission4.drillTruck.maintenanceZone;if(z2)startTruckRoute(m4DrillTruckModel,z2,'out');}else if(s.mission4?.drillTruck?.maintenancePhase==='return'){const z2=s.mission4.drillTruck.maintenanceZone;if(z2)startTruckRoute(m4DrillTruckModel,z2,'return');}m4TruckCollider={x:tp.x,z:tp.z,w:2.5,d:5,_truck:true};world.colliders.push(m4TruckCollider);});
+ }
+ m4VisualsReady=true;
+}
+function createProceduralTruck(){
+ const g=new T.Group();g.name='drilltruck';
+ const body=new T.Mesh(new T.BoxGeometry(2.2,1.4,4.5),new T.MeshToonMaterial({color:0xf6bc43}));
+ body.position.set(0,0.9,0);body.castShadow=true;g.add(body);
+ const cab=new T.Mesh(new T.BoxGeometry(2,1,1.5),new T.MeshToonMaterial({color:0x233c53}));
+ cab.position.set(0,1.7,1.8);cab.castShadow=true;g.add(cab);
+ for(const z of [1.5,0,-1.5])for(const x of [-1.1,1.1]){
+  const wh=new T.Mesh(new T.CylinderGeometry(0.35,0.35,0.18,10),new T.MeshToonMaterial({color:0x222222}));
+  wh.position.set(x,0.35,z);wh.rotation.z=Math.PI/2;wh.castShadow=true;g.add(wh);
+ }
+ return g;
+}
+function updateM4Visuals(dt){
+ if(!m4VisualsReady||!s?.mission4)return;
+ // Ensure parking and truck are initialized on state change
+ if(s.mission4.parkingBuilt&&!m4ParkingSpot)initM4Visuals();
+ if(s.mission4.drillTruck&&!m4DrillTruckModel){m4VisualsReady=false;initM4Visuals();}
+ // Animate truck route
+ if(m4DrillTruckModel&&truckRouteActive(m4DrillTruckModel)){
+  const routeEvent=updateTruckRoute(m4DrillTruckModel,dt);
+  if(routeEvent==='arrived'){
+   advanceMaintenancePhase(s);
+  }else if(routeEvent==='returned'){
+   advanceMaintenancePhase(s);
+   autoDispatchTruck(s);
+  }
+ }
+ // Fix stuck: dispatch/return phase but no visual route → advance past it
+ if(m4DrillTruckModel&&s.mission4.drillTruck?.maintenancePhase==='dispatch'&&!truckRouteActive(m4DrillTruckModel)){
+  const zone=s.mission4.drillTruck.maintenanceZone;
+  if(zone)startTruckRoute(m4DrillTruckModel,zone,'out');
+ }
+ if(m4DrillTruckModel&&s.mission4.drillTruck?.maintenancePhase==='return'&&!truckRouteActive(m4DrillTruckModel)){
+  const zone=s.mission4.drillTruck.maintenanceZone;
+  if(zone)startTruckRoute(m4DrillTruckModel,zone,'return');
+ }
+ // Auto-dispatch idle zones
+ if(s.mission4.drillTruck&&!s.mission4.drillTruck.maintenancePhase&&s.mission4.drillTruck.state==='parked'){
+  autoDispatchTruck(s);
+ }
+ // Sync truck collider position
+ if(m4TruckCollider&&m4DrillTruckModel){
+  m4TruckCollider.x=m4DrillTruckModel.position.x;
+  m4TruckCollider.z=m4DrillTruckModel.position.z;
+ }
+}
+function autoDispatchTruck(s){
+ if(!s.mission4?.drillTruck||s.mission4.drillTruck.state!=='parked')return;
+ let nextZone=s.mission4.zones.find(z=>z.status==='idle');
+ // If no idle zones but mission complete, cycle through producing zones for ongoing maintenance rounds
+ if(!nextZone&&s.mission4.phase==='complete'){
+  const producing=s.mission4.zones.filter(z=>z.status==='producing');
+  if(producing.length){
+   // Round-robin: pick zone with oldest lastCycleAt
+   producing.sort((a,b)=>(a.lastMaintenanceAt||0)-(b.lastMaintenanceAt||0));
+   nextZone=producing[0];
+  }
+ }
+ if(!nextZone)return;
+ try{assignTruckToZone(s,nextZone.id);startMaintenance(s,nextZone.id);nextZone.lastMaintenanceAt=Date.now();if(nextZone.status!=='maintenance')return;notices.push({title:'DrillTruck en ronda de mantenimiento',symbol:'bell'});}catch(e){console.error('autoDispatch:',e);}
+}
+async function replayCinematic(orbitOnly,record){if(!s)return;if(!orbitOnly&&!reviewBackup)await cameraReviewScene(s.character);closeModal();closePhone();closeBuilder();startCinematic(orbitOnly,true);if(record||orbitOnly){scene.update(s,0,Date.now());world.update(s,0,clock,false);world.renderer.last=0;world.renderer.render(world.scene,world.camera);const a=document.createElement('a');a.id='handoffDownload';a.download='DrillRun_Primer_Frame_3D.png';a.textContent='Descargar primer frame 3D';const data=world.renderer.domElement.toDataURL('image/png').split(',')[1],bytes=Uint8Array.from(atob(data),c=>c.charCodeAt(0));a.href=URL.createObjectURL(new Blob([bytes],{type:'image/png'}));cameraDebug.host.querySelector('#handoffDownload')?.remove();cameraDebug.host.append(a);if(record)cinemaRecorder.start();}}
+function beginPlay(resuming=false){phase='play';blueprint=false;world.inspect=false;world.chapterCamera=null;world.zoom=1;resetOrbit(world.orbit);avatars.activate(s.character);world.setCharacter(s.character);motion.yaw=Number.isFinite(s.facing)?s.facing:Math.PI;world.player.rotation.y=motion.yaw;world.worker.reset();hidden($('#startScreen'),true);hidden($('#characterScreen'),true);hidden($('#intro'),true);hidden($('#hud'),false);world.avatarHeight=avatarDefinition(s.character).height;world.orbit.yaw=motion.yaw-Math.PI;world.snapCamera=true;world.cameraRig.finishEntrance();document.body.classList.remove('hudReveal');void $('#hud').offsetWidth;document.body.style.setProperty('--hud-duration',world.cameraRig.settings.transition.hudSeconds+'s');document.body.classList.add('hudReveal');wind.set(prefs.sound);s.introSeen=true;stop();scene.update(s,0,Date.now());hsecWorld?.update(s,0,'play');initM3Visuals();ensureSafe();save();if(!resuming){hidden($('#chapterBanner'),false);setTimeout(()=>hidden($('#chapterBanner'),true),2600);}else toast('resumeNote');syncUIEvents();renderHUD();}
+$('#skipIntro').onclick=()=>{if(phase!=='intro')return;cinematic.stop();world.cameraRig.reset();beginPlay(cinemaReview);cinemaRecorder?.stop();};$('#menuButton').onclick=showSettings;
+function ensureSafe(){syncOfficeAccess(s);scene.state=s;const r=avatarDefinition(s.character).radius;if(!world.isBlocked(s.position.x,s.position.z,r))return;if(s.inside){for(const z of[-.65,.1,.65])for(const x of[-1.9,-1.1,0,1,2.2])if(!world.isBlocked(-6+x,z,r)){s.position={x:-6+x,z};world.worker.reset();return;}}const cx=s.position.x,cz=s.position.z;for(let d=.5;d<=10;d+=.5)for(let a=0;a<16;a++){const angle=a*Math.PI/8,tx=cx+Math.cos(angle)*d,tz=cz+Math.sin(angle)*d;if(!world.isBlocked(tx,tz,r)){s.position={x:tx,z:tz};s.inside=false;world.worker.reset();return;}}s.position={...CONFIG.officeSlot.access};s.inside=false;world.worker.reset();}
+// ─── Narrative tick & actions ────────────────────────────
+let narrativeTimer=0;
+function narrativeTick(dt){
+ if(!s||phase!=='play')return;narrativeTimer+=dt;if(narrativeTimer<1.5)return;narrativeTimer=0;
+ ensureNarrative(s);
+ const msg=pendingMessage(s);
+ if(msg&&deliverMessage(s,msg.id)){
+  const char=MISSION_NARRATIVES[msg.missionId]?.character;
+  const charName=char?t(MISSION_NARRATIVES[msg.missionId].character==='benefactor'?'char_benefactor':char==='safetySpecialist'?'char_safety':'char_contract'):'';
+  notices.push({title:charName||'Nuevo mensaje',detail:t(msg.bodyKey)?.slice(0,60)+'…',symbol:'messages',action:()=>{phoneUI.narrativeCharacter=msg.characterId;phoneUI.conversation=true;openPhone('messages');}});
+  sound('transition');save();
+  if(phoneOpen&&phoneApp==='messages')renderPhone();
+ }
+}
+function handleNarrativeAction(actionType,missionId){
+ if(!s)return;
+ if(actionType==='accept'){
+  if(acceptMission(s,missionId)){
+   sound('build');
+   // Start the actual mission system
+   if(missionId==='m2'&&s.hsec){/* HSEC already active from beginPlay or restore */}
+   if(missionId==='m3'&&canStartMission3(s)&&(!s.mission3||s.mission3.phase==='inactive')){
+    startMission3(s);notices.push({title:'Misión 2 desbloqueada — Tu Primer Contrato',symbol:'bell'});
+   }
+   if(missionId==='m4'&&canStartMission4(s)&&(!s.mission4||s.mission4.phase==='inactive')){
+    startMission4(s);notices.push({title:'Misión 3 desbloqueada — Automatiza tu operación',symbol:'bell'});
+   }
+   save();if(phoneOpen)renderPhone();renderHUD();
+  }
+ }else if(actionType==='collect'){
+  const result=confirmCompletion(s,missionId);
+  if(result){
+   sound('finish');
+   showMissionComplete(t(result.name)||'Misión completada',result.cash,result.boosters);
+   save();if(phoneOpen)renderPhone();renderHUD();
+  }
+ }
+}
+function syncUIEvents(){
+ if(!s)return;for(const event of collectUIEvents(s)){
+  if(event.reward){if(event.id==='mission:clear'){s.boosters+=3;}rewardQueue.push(event);}
+  else notices.push({id:event.id,title:t(event.title),detail:t(event.detail),symbol:event.icon,action:()=>{phoneUI.conversation=false;openPhone('messages');}});
+ }save();
+}
+function showNextReward(){if(!rewardQueue.length||modalOpen||phoneOpen||placement||builderOpen||busy||phase!=='play')return;const event=rewardQueue.shift(),detail=event.id==='mission:clear'?'landReward':event.id==='mission:office'?'officeReward':'workstationReward';
+ const boosterBadge=event.id==='mission:clear'?`<div class="rewardBadge"><span class="badgeIcon">${icon('boost')}</span><b>×3 Acelerador de Construcción</b></div>`:'';
+ sound('finish');modal(`<div class="rewardCard"><div class="rewardSeal">${icon(event.icon)}</div><span class="eyebrow">${esc(t('missionCompleted'))}</span><h2>${esc(t(event.detail))}</h2>${boosterBadge}<div class="rewardUnlock">${icon('check')}<span><small>${esc(t('reward'))}</small><b>${esc(t(detail))}</b></span></div><div class="modalActions">${button('continue','continueReward',true)}</div></div>`);$('#continueReward').onclick=closeModal;
+}
+function showMissionComplete(name,cash,boosters){
+ document.querySelectorAll('.missionCompleteOverlay').forEach(el=>el.remove());
+ const overlay=document.createElement('div');overlay.className='missionCompleteOverlay';
+ overlay.innerHTML=`<div class="missionCompleteContent"><span class="missionCompleteLabel">COMPLETADO</span><span class="missionCompleteName">${esc(name)}</span><div class="missionCompleteRewards"><span>${icon('wallet')} +${money(cash)}</span>${boosters?`<span>${icon('boost')} +${boosters} Acelerador</span>`:''}</div></div>`;
+ document.body.append(overlay);requestAnimationFrame(()=>overlay.classList.add('visible'));
+ const dismiss=()=>{overlay.classList.remove('visible');setTimeout(()=>overlay.remove(),600);};
+ setTimeout(dismiss,4000);
+ overlay.onclick=dismiss;
+}
+function action(fn){const oldBuilt=s.office.status==='built',oldLevel=s.office.level;try{fn();scene.update(s,0,Date.now());ensureSafe();syncUIEvents();save();renderHUD();if(phoneOpen)renderPhone();if(!oldBuilt&&s.office.status==='built')onBuilt();if(oldLevel&&s.office.level>oldLevel)toast('upgradeComplete');if(builderOpen)builderUI.render();return true;}catch(e){toast(e.key||'invalid');return false;}}
+function onBuilt(){scene.builtAt=Date.now();scene.burst(-6,0);sound('finish');}
+function transition(key){setText($('#transitionText'),t(key));hidden($('#entryTransition'),false);clearTimeout(transition.timer);transition.timer=setTimeout(()=>hidden($('#entryTransition'),true),550);}
+function nearInteraction(){if(!s)return null;const nearest=CLEARABLES.filter(o=>!s.cleared.includes(o.id)).map(o=>({...o,distance:Math.hypot(o.x-s.position.x,o.z-s.position.z)})).filter(o=>o.distance<1.6).sort((a,b)=>a.distance-b.distance)[0];if(nearest)return {kind:'clear',object:nearest,label:'clearAction',blocked:s.energy<CONFIG.clearCost};
+ if(!s.inside&&Math.hypot(s.position.x+7.99,s.position.z-2.9)<1.55)return pendingConstruction(s)?{kind:'boost',label:'accelerate'}:{kind:s.office.status==='built'?'enter':'build',label:s.office.status==='built'?'enter':'buildAction'};
+ if(!s.inside&&s.workshop&&Math.hypot(s.position.x+6.8,s.position.z+5.4)<2.5)return {kind:'workshop',label:'TALLER'};
+ if(s.inside){if(Math.hypot(s.position.x+7.99,s.position.z-.8)<1.0)return {kind:'exit',label:'exit'};const computer=s.furniture.find(f=>s.inventory.find(v=>v.id===f.id)?.product==='computer');if(computer&&Math.hypot(s.position.x+6-computer.x,s.position.z-computer.z)<1.5)return {kind:'computer',label:'useComputer'};}
+ if(hsecActive(s)&&!s.inside){const h=ensureHsec(s);if(h.employee&&Math.hypot(s.position.x-h.employee.position.x,s.position.z-h.employee.position.z)<1.8)return {kind:'hsecStaff',label:'Prevencionista HSEC',object:{...h.employee.position,id:h.employee.id,r:.5},category:'main'};const a=h.assets.filter(a=>!['vehicle','pedestrian','marking'].includes(a.type)&&Math.hypot(a.x-s.position.x,a.z-s.position.z)<2.8).sort((a,b)=>Math.hypot(a.x-s.position.x,a.z-s.position.z)-Math.hypot(b.x-s.position.x,b.z-s.position.z))[0];if(a)return {kind:'hsecAsset',label:'Inspeccionar activo',object:{...a,r:.6},category:'main'};}
+ return null;
+}
+$('#handButton').onclick=()=>{if(busy||modalOpen||phoneOpen||builderOpen||placement)return;const a=phase==='play'?nearInteraction():null;if(!a)return;if(a.kind==='hsecStaff'){hsecUI.open('staff');return;}if(a.kind==='hsecAsset'){hsecUI.open('assets');return;}if(a.kind==='clear'){if(s.energy<CONFIG.clearCost)return toast('noEnergy');busy={object:a.object,elapsed:0};stop();sound('clear');}else if(a.kind==='build')showBuild();else if(a.kind==='boost')action(()=>accelerate(s));else if(a.kind==='workshop'){showWorkshopCard();return;}else if(a.kind==='enter')enterOffice();else if(a.kind==='exit'){transition('exitTransition');s.inside=false;s.position={...CONFIG.officeSlot.access};world.worker.reset();stop();save();}else if(a.kind==='computer'){if(!s.chapterCompletedAt){action(()=>useOfficeComputer(s));sound('finish');/* reward modal deferred to narrative confirmCompletion */return;}hsecUI.open();return;modal(`<span class="eyebrow">${esc(t('computer'))}</span><h2>${esc(t('next'))}</h2><p>${esc(t('nextDetail'))}</p><div class="modalActions">${button('close','closeComputer',true)}</div>`);$('#closeComputer').onclick=closeModal;}};
+function openBuilder(){if(phase!=='play'||placement||busy)return;closePhone();hsecWorld?.showAssetCard(null);stop();builderOpen=true;hidden($('#builderPanel'),false);document.body.classList.add('builderOpen');if(hsecUI)hsecUI.mode=hsecActive(s);builderUI.open();}
+function closeBuilder(){builderUI.close();if(hsecUI?.drawing)hsecUI.cancelDraft();builderUI.close();builderOpen=false;blueprint=false;hidden($('#builderPanel'),true);document.body.classList.remove('builderOpen');if(world)world.chapterCamera=null;}
+function showBuild(){openBuilder();}
+function buildTime(seconds){return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');}
+function confirmModule(m,zone){if(m.locked)return;if(action(()=>startModule(s,m.id,zone))){closeBuilder();sound('build');}}
+function inspectModule(m,zone){modal(`<span class="eyebrow">${esc(t('technicalSheet'))}</span><h2>${esc(t(m.nameKey))}</h2><p>${esc(t(m.descriptionKey))}</p>${m.locked?`<p>${esc(t('futureChapter'))}</p>`:`<div class="moduleFacts"><span>${esc(t('cost'))}<b>${money(m.price)}</b></span><span>${esc(t('duration'))}<b>${buildTime(constructionSeconds(s,m))}</b></span><span>${esc(t('dimensions'))}<b>${m.width} × ${m.depth} m</b></span><span>${esc(t('capacity'))}<b>${m.capacity} ${esc(t(m.capacityKey))}</b></span></div><h3>${esc(t('includes'))}</h3><p>${m.components.map(k=>esc(t(k))).join(' · ')}</p><h3>${esc(t('benefits'))}</h3><p>${esc(t(m.benefitKey))}</p><small>${m.attributes.map(k=>esc(t(k))).join(' · ')}</small><h3>${esc(t('requirements'))}</h3><p>${m.requirements.map(k=>esc(t(k))).join(' · ')}</p><small>${esc(t('nextUpgrade'))}: ${esc(t(moduleDefinition(m.next)?.nameKey||'futureChapter'))}</small>`}<div class="modalActions">${button('close','closeModuleInfo',true)}</div>`);$('#modal').classList.add('moduleSheet');$('#closeModuleInfo').onclick=closeModal;}
+function officeQuickCard(module,{upgrade=false}={}){
+ const job=pendingConstruction(s),next=moduleDefinition(module.next),canUpgrade=next&&!next.locked;
+ const lvlLabel=upgrade?t('upgradePreview'):`OFICINA · ${t('level').toUpperCase()} ${module.level||s.office.level||1}`;
+ const price=upgrade?`<span class="buildCost">${icon('wallet')}<b>${money(module.price)}</b></span><span class="buildDuration">${icon('time')}${buildTime(constructionSeconds(s,module))}</span>`:'';
+ modal(`<div class="officeQuickLayout"><div id="officePanelPreview" class="officePanelPreview" data-preview-label="${esc(t(module.nameKey))}"></div><div class="officeQuickInfo"><span class="eyebrow">${esc(lvlLabel)}</span><h2>${esc(t(module.nameKey))}</h2><p>${esc(t(module.benefitKey))}</p>${price}${job?`<small>${esc(t('constructionPending'))}</small>`:''}</div><div class="officeQuickActions">${upgrade?`<button id="buyOfficeUpgrade" class="primary" ${job||s.cash<module.price?'disabled':''}>${icon('wallet')}${esc(t('buyUpgrade'))}</button>${s.cash<module.price?`<small>${esc(t('noMoney'))}</small>`:''}${button('cancel','cancelOfficeUpgrade')}`:`${canUpgrade&&!job?`<button id="officeUpgrade">${icon('boost')}${esc(t('upgrade'))} · ${esc(t('level'))} ${next.level}</button>`:''}<button id="officeQuickEnter">${icon('arrow')}${esc(t(s.inside?'close':'enter'))}</button>${!canUpgrade?`<small>${esc(t('futureChapter'))}</small>`:''}`}</div></div>`);
+ managingOffice=true;$('#modal').classList.add('officeQuick');if(upgrade)$('#modal').classList.add('upgradeSheet');
+ officePanelPreview=new ProductPreview($('#officePanelPreview'),world,{transparent:true});officePanelPreview.setModule(module,true);
+ $('#officeUpgrade')?.addEventListener('click',()=>{closeModal();previewOfficeUpgrade(next);});
+ $('#officeQuickEnter')?.addEventListener('click',()=>{const inside=s.inside;closeModal();if(!inside)enterOffice();});
+ $('#cancelOfficeUpgrade')?.addEventListener('click',()=>{closeModal();manageOffice();});
+ $('#buyOfficeUpgrade')?.addEventListener('click',()=>{if(action(()=>startModule(s,module.id,'office01'))){closeModal();sound('build');}});
+}
+function manageOffice(){
+ if(s.office.status!=='built')return;closePhone();closeBuilder();stop();officeQuickCard(moduleDefinition('office-l'+s.office.level));
+}
+function previewOfficeUpgrade(next){
+ officeQuickCard(next,{upgrade:true});scene.setUpgradePreview(next.level);
+}
+function showMission(){const m4On=s.mission4&&s.mission4.phase!=='inactive';const m3On=s.mission3&&s.mission3.phase!=='inactive';if(m4On){openPhone('m4-objectives');return;}if(hsecActive(s)&&!(s.hsec.completedAt&&m3On)){hsecUI.open();return;}if(m3On){openPhone('m3-objectives');return;}const obj=objective(s);modal(`<span class="eyebrow">${esc(t('chapter'))}</span><h2>${esc(t(obj))}</h2><p>${esc(t(obj+'Detail'))}</p><div class="modalActions">${button('close','closeMission',true)}</div>`);$('#closeMission').onclick=closeModal;}
+$('#boostButton').onclick=()=>action(()=>accelerate(s));
+function enterOffice(){if(s.office.status!=='built'||pendingConstruction(s))return;transition('entryTransition');stop();world.office.userData.api.opened.entry=true;world.office.userData.api.angles.entry=Math.PI/2;s.position={x:-7.99,z:-.5};s.inside=true;s.hasEntered=true;world.worker.reset();$('#shade').classList.remove('entryFade');void $('#shade').offsetWidth;$('#shade').classList.add('entryFade');resetOrbit(world.orbit);syncUIEvents();save();renderHUD();}
+function playerLevel(s){let lvl=1;if(s.cleared.length>=16)lvl=2;if(s.office.status==='built')lvl=3;if(s.chapterCompletedAt)lvl=4;if(s.hsec?.completedAt)lvl=5;if(s.mission3&&s.mission3.phase!=='inactive')lvl=6;if(s.mission3?.phase==='drilling'||s.mission3?.phase==='delivery')lvl=7;if(s.mission3?.phase==='complete')lvl=8;if(s.mission4&&s.mission4.phase!=='inactive')lvl=9;if(s.mission4?.phase==='complete')lvl=10;return lvl;}
+/* Drill status card — shown on tap */
+let drillCardOpen=false;
+function showDrillCard(){
+ const dc=$('#drillCard');if(!dc||!s?.drill)return;
+ const d=s.drill,def=drillDefinition(d.id);
+ const state=d.state||'idle';
+ const stateLabel=state==='drilling'?'Perforando':state==='moving'?'Reposicionando':'Inactiva';
+ const stateClass=state;
+ const bhi=s.contract?.activeBoreholeIndex||0;
+ const bh=s.boreholes?.[bhi];
+ const depth=bh?Math.round(bh.depthDrilled):0;
+ const target=bh?bh.depthTarget:0;
+ const totalM=s.contract?Math.round(s.contract.metersCompleted):0;
+ const totalT=s.contract?s.contract.totalMeters:180;
+ // Tool conditions
+ const bit=d.installedBit?(s.toolInventory||[]).find(t=>t.id===d.installedBit):null;
+ const hammer=d.installedHammer?(s.toolInventory||[]).find(t=>t.id===d.installedHammer):null;
+ const bitPct=bit?Math.round(toolCondition(bit)):0;
+ const hamPct=hammer?Math.round(toolCondition(hammer)):0;
+ const barClass=v=>v>40?'good':v>15?'warn':'crit';
+ const bitName=bit?bitDefinition(bit.model)?.nameKey||bit.model:'—';
+ const hamName=hammer?hammerDefinition(hammer.model)?.nameKey||hammer.model:'—';
+ dc.innerHTML=`<button class="dcClose" id="drillCardClose">${icon('close')}</button>`
+  +`<div class="dcHead">${icon('drill')||icon('build')}<div><b>${def?.labelKey?'Perforadora RC':'Perforadora'}</b><small>${def?.id==='rig_rc_advanced'?'Alta Capacidad':'Compacta'} · ${def?.bitDiameter||6.5}" Ø</small></div></div>`
+  +`<span class="dcState ${stateClass}">${stateLabel}</span>`
+  +`<div class="dcGrid"><div class="dcStat"><span>Sondaje</span><b>${bh?bh.id.replace('BH-','#'):'—'}</b></div><div class="dcStat"><span>Profundidad</span><b>${depth}/${target}m</b></div><div class="dcStat"><span>Total avance</span><b>${totalM}/${totalT}m</b></div><div class="dcStat"><span>Progreso</span><b>${totalT>0?Math.round(totalM/totalT*100):0}%</b></div></div>`
+  +`<div class="dcTool">${icon('wrench')}<span>Bit</span><div class="dcTrack"><div class="dcFill ${barClass(bitPct)}" style="width:${bitPct}%"></div></div><b>${bitPct}%</b></div>`
+  +`<div class="dcTool">${icon('wrench')}<span>Martillo</span><div class="dcTrack"><div class="dcFill ${barClass(hamPct)}" style="width:${hamPct}%"></div></div><b>${hamPct}%</b></div>`;
+ dc.querySelector('#drillCardClose').onclick=e=>{e.stopPropagation();hideDrillCard();};
+ dc.hidden=false;drillCardOpen=true;
+}
+function hideDrillCard(){const dc=$('#drillCard');if(dc)dc.hidden=true;drillCardOpen=false;}
+/* Workshop status card — shown on tap */
+let workshopCardOpen=false,workshopDemolishPending=false;
+function showWorkshopCard(){
+ const wc=$('#workshopCard');if(!wc||!s)return;
+ const lvl=workshopLevel(s),cap=workshopCapacity(s),used=workshopUsed(s),free=workshopFree(s);
+ const lvlDef=WORKSHOP_LEVELS.find(w=>w.level===lvl);
+ const nextDef=WORKSHOP_LEVELS.find(w=>w.level===lvl+1);
+ const pct=cap>0?Math.round(used/cap*100):0;
+ const barColor=pct>85?'#ef5350':pct>60?'#ffb74d':'#4caf50';
+ const bits=(s.toolInventory||[]).filter(t=>t.type==='bit'&&t.status!=='spent').length;
+ const hammers=(s.toolInventory||[]).filter(t=>t.type==='hammer'&&t.status!=='spent').length;
+ const spent=(s.spentMaterials||[]).length;
+ const job=workshopUpgradeJob(s);
+ const buildPct=job?Math.round((workshopUpgradeProgress(s)||0)*100):0;
+ const buildTime=v=>{const m=Math.floor(v/60),ss=v%60;return String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');};
+ const canDemolish=canDemolishWorkshop(s)===null;
+ const canUpgrade=!job&&nextDef&&s.cash>=nextDef.upgradeCost;
+ wc.innerHTML=`<button class="dcClose" id="workshopCardClose">${icon('close')}</button>`
+  +`<div class="dcHead">${icon('wrench')}<div><b>TALLER</b><small>Nv.${lvl} · ${lvlDef?.label||'Básico'}</small></div><span class="dcLevel">Nv.${lvl}</span></div>`
+  +`<div class="dcGrid"><div class="dcStat"><span>Capacidad</span><b>${used}/${cap}</b></div><div class="dcStat"><span>Libres</span><b>${free}</b></div><div class="dcStat"><span>Bits</span><b>${bits}</b></div><div class="dcStat"><span>Martillos</span><b>${hammers}</b></div></div>`
+  +`<div class="dcTool">${icon('store')}<span>Ocupación</span><div class="dcTrack"><div class="dcFill" style="width:${pct}%;background:${barColor}"></div></div><b>${pct}%</b></div>`
+  +(spent?`<div style="font-size:9px;color:#9ec5dd;margin-top:4px;text-align:center">${spent} material${spent>1?'es':''} usado${spent>1?'s':''}</div>`:'')
+  +(job?`<div class="dcConstruction"><div class="dcConstructLabel">${icon('time')} Ampliación a Nv.${job.targetLevel} en curso</div><div class="dcTrack"><div class="dcFill" style="width:${buildPct}%;background:#64b5f6"></div></div><b>${buildPct}%</b><small>Restante: ${buildTime(Math.max(0,Math.ceil((job.ends-Date.now())/1000)))}</small><button class="dcBoost" id="workshopBoost">${icon('boost')} Acelerar</button></div>`:'')
+  +`<div class="dcActions">`
+  +(canUpgrade&&!job?`<button class="dcUpgrade" id="workshopUpgradeBtn">${icon('boost')} Ampliar a Nv.${nextDef.level}<small>${money(nextDef.upgradeCost)} · ${buildTime(nextDef.constructionSeconds)}</small></button>`:'')
+  +(!nextDef&&!job?`<small class="dcMaxLevel">${icon('check')} Nivel máximo alcanzado</small>`:'')
+  +(job?'':(canDemolish?`<button class="dcDemolish" id="workshopDemolishBtn">${icon('close')} Demoler</button>`:''))
+  +`</div>`;
+ wc.querySelector('#workshopCardClose').onclick=e=>{e.stopPropagation();hideWorkshopCard();};
+ wc.querySelector('#workshopUpgradeBtn')?.addEventListener('click',()=>{workshopStartUpgrade();});
+ wc.querySelector('#workshopBoost')?.addEventListener('click',()=>{accelerateWorkshop(s,60);save();showWorkshopCard();notices.push({title:'Construcción acelerada',symbol:'boost'});});
+ wc.querySelector('#workshopDemolishBtn')?.addEventListener('click',()=>{workshopConfirmDemolish();});
+ wc.hidden=false;workshopCardOpen=true;
+}
+function detectWorkshopObstacles(){
+ // Scan 3D scene for objects in the extension zone (right side: world x=-4.2 to -0.3, z=-12.2 to -6.4)
+ const found=[];const seen=new Set();
+ world.scene.traverse(o=>{
+  if(!o.isMesh||!o.visible)return;
+  const wp=new T.Vector3();o.getWorldPosition(wp);
+  if(wp.x>-4.5&&wp.x<0&&wp.z>-12.5&&wp.z<-6.2&&wp.y>0.1&&wp.y<6){
+   // Find label for this object
+   let label=null,parent=o;
+   while(parent){if(parent.name){label=parent.name;break;}parent=parent.parent;}
+   const key=`${Math.round(wp.x)},${Math.round(wp.z)}`;
+   if(!seen.has(key)&&wp.y>0.3){seen.add(key);
+    // Identify what it is by height/shape
+    if(wp.y>2)found.push({x:wp.x,z:wp.z,type:'Poste de luz',icon:'light'});
+    else if(wp.y>0.5)found.push({x:wp.x,z:wp.z,type:'Obstáculo',icon:'lock'});
+   }
+  }
+ });
+ return found;
+}
+function workshopStartUpgrade(){
+ const nextDef=WORKSHOP_LEVELS.find(w=>w.level===workshopLevel(s)+1);
+ if(!nextDef)return;
+ const buildTime=v=>{const m=Math.floor(v/60),ss=v%60;return String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');};
+ const obstacles=detectWorkshopObstacles();
+ const obstacleHtml=obstacles.length?`<div style="margin:10px 0;padding:8px 12px;background:#ff980015;border:1px solid #ff980044;border-radius:10px"><small style="color:#ffb74d;font-weight:600">⚠ Objetos en la zona de ampliación (se retirarán automáticamente):</small>${obstacles.map(o=>`<div style="font-size:11px;color:#fff;margin-top:4px">${icon(o.icon)} ${esc(o.type)} (${o.x.toFixed(1)}, ${o.z.toFixed(1)})</div>`).join('')}</div>`:'';
+ modal(`<span class="eyebrow">TALLER · AMPLIACIÓN</span><h2>Ampliar a Nv.${nextDef.level} — ${nextDef.label}</h2><p>Aumenta la capacidad del taller de ${workshopCapacity(s)} a ${nextDef.capacity} espacios para herramientas.</p>${obstacleHtml}<div class="moduleFacts"><span>Costo<b>${money(nextDef.upgradeCost)}</b></span><span>Duración<b>${buildTime(nextDef.constructionSeconds)}</b></span><span>Capacidad<b>${nextDef.capacity} espacios</b></span></div><div class="modalActions"><button id="cancelWsUpgrade">${icon('close')} Cancelar</button><button id="confirmWsUpgrade" class="primary" ${s.cash<nextDef.upgradeCost?'disabled':''}>${icon('wallet')} Confirmar ampliación</button></div>${s.cash<nextDef.upgradeCost?'<small style="color:#ef5350;text-align:center;display:block;margin-top:8px">Fondos insuficientes</small>':''}`);
+ $('#cancelWsUpgrade').onclick=closeModal;
+ $('#confirmWsUpgrade')?.addEventListener('click',()=>{try{upgradeWorkshop(s);save();closeModal();hideWorkshopCard();showWorkshopCard();scene.update(s,0,Date.now());renderHUD();sound('build');notices.push({title:`Ampliación a Nv.${nextDef.level} iniciada`,symbol:'bell'});}catch(e){notices.push({title:e.message==='noMoney'?'Fondos insuficientes':e.message,symbol:'lock'});}});
+}
+function workshopConfirmDemolish(){
+ modal(`<span class="eyebrow" style="color:#ef5350">⚠ DEMOLICIÓN</span><h2>¿Demoler taller?</h2><p>El taller volverá a Nv.1 (${WORKSHOP_LEVELS[0].capacity} espacios). Las herramientas excedentes se perderán. Esta acción <b>no tiene reembolso</b>.</p><div class="modalActions"><button id="cancelWsDemolish">${icon('close')} Cancelar</button><button id="confirmWsDemolish" style="background:#ef5350;color:white">${icon('close')} Confirmar demolición</button></div>`);
+ $('#cancelWsDemolish').onclick=closeModal;
+ $('#confirmWsDemolish')?.addEventListener('click',()=>{
+  closeModal();
+  // Second confirmation
+  modal(`<span class="eyebrow" style="color:#ef5350">⚠ CONFIRMACIÓN FINAL</span><h2>¿Estás seguro?</h2><p>Esta acción es irreversible. El taller volverá a nivel básico.</p><div class="modalActions"><button id="cancelWsDemolish2">${icon('close')} No, cancelar</button><button id="finalWsDemolish" style="background:#ef5350;color:white">Sí, demoler</button></div>`);
+  $('#cancelWsDemolish2').onclick=closeModal;
+  $('#finalWsDemolish')?.addEventListener('click',()=>{try{demolishWorkshop(s);save();closeModal();hideWorkshopCard();showWorkshopCard();scene.update(s,0,Date.now());renderHUD();notices.push({title:'Taller demolido a Nv.1',symbol:'bell'});}catch(e){notices.push({title:e.message,symbol:'lock'});}});
+ });
+}
+function hideWorkshopCard(){const wc=$('#workshopCard');if(wc)wc.hidden=true;workshopCardOpen=false;workshopDemolishPending=false;}
+function renderHUD(){if(!s)return;setText($('#cashValue'),money(s.cash));setText($('#energyValue'),Math.floor(s.energy)+' / '+CONFIG.maxEnergy);setText($('#boostValue'),s.boosters);const unread=unreadMessages(s).length;hidden($('#phoneBadge'),!unread);setText($('#phoneBadge'),unread);if(avatars&&lastPortraitId!==s.character){lastPortraitId=s.character;$('#playerAvatar').innerHTML=avatars.portrait(s.character);}$('#hud').dataset.avatar=s.character;setText($('#playerName'),s.playerName||t('operatorName'));const lvl=playerLevel(s);setText($('#levelValue'),lvl);const m3On=s.mission3&&s.mission3.phase!=='inactive';const m4HudOn=s.mission4&&s.mission4.phase!=='inactive';const missionSub=m4HudOn?(s.mission4.phase==='complete'?'Misión 3 · Completada':'Misión 3 · Automatiza tu operación'):m3On?(s.mission3.phase==='complete'?'Misión 2 · Completada':'Misión 2 · Tu Primer Contrato'):s.hsec?.completedAt?'Misión 1 · Completada':s.chapterCompletedAt?'Cap. 1 · Completado':'Cap. 1 · '+t('firstSteps');setText($('#playerMission'),missionSub);$('#playerProgress').style.width=(s.chapterCompletedAt?100:s.office.status==='built'?66:s.cleared.length===16?33:Math.round(s.cleared.length/16*33))+'%';
+ /* Geo analysis floating card */
+ const geo=s.geoAnalysis;const geoCard=$('#geoCard');if(geoCard){const geoActive=!!(geo&&geo.requested&&!geo.completed);const geoDone=!!(geo&&geo.completed);const m3DrillingOrLater=s.mission3&&['drilling','delivery','complete'].includes(s.mission3.phase);const geoDismissed=!!(geo&&geo.cardDismissed)||!!(s.mission3?.reportRead)||m3DrillingOrLater;const showCard=(geoActive||(geoDone&&!s.mission3?.reportRead))&&!geoDismissed;if(geoCard._shown!==showCard){geoCard._shown=showCard;hidden(geoCard,!showCard);}if(showCard){hidden($('#geoDismiss'),!geoDone);if(geoActive){const elapsed=(Date.now()-(geo.analysisStartedAt||Date.now()))/1000;const dur=geo.analysisDuration||75;const pct=Math.min(1,elapsed/dur);setText($('#geoTitle'),'Análisis geológico');setText($('#geoDetail'),Math.round(pct*100)+'% completado');$('#geoProgressBar').style.width=(pct*100)+'%';geoCard.classList.remove('complete');}else if(geoDone){setText($('#geoTitle'),'Informe disponible');setText($('#geoDetail'),'Toca para revisar');$('#geoProgressBar').style.width='100%';geoCard.classList.add('complete');}}}const obj=objective(s);setText($('#objectiveTitle'),t(obj));setText($('#objectiveDetail'),t(obj+'Detail'));let value=0,count='';if(obj==='clear'){value=s.cleared.length/CLEARABLES.length;count=s.cleared.length+' / '+CLEARABLES.length;}else if(obj==='equip'){const n=CONFIG.requiredProducts.filter(sku=>s.furniture.some(f=>s.inventory.find(v=>v.id===f.id)?.product===sku)).length;value=n/3;count=n+' / 3';}else value=obj==='next'?1:progress(s);$('#objectiveProgress').style.width=(value*100)+'%';setText($('#objectiveCount'),count);
+ const m3Active=s.mission3&&s.mission3.phase!=='inactive';
+ if(hsecActive(s)&&!(s.hsec.completedAt&&m3Active)){const step=missionStep(s);const completed=!!s.hsec.completedAt;const eyebrow=$('#objective .eyebrow');if(eyebrow)eyebrow.textContent=completed?'MISIÓN COMPLETADA':'MISIÓN ACTUAL';const title=$('#objectiveTitle');if(title)title.textContent=completed?'Operación preparada':'Prepara tu operación';const detail=$('#objectiveDetail');if(detail){if(completed){detail.classList.add('hidden');}else{detail.classList.remove('hidden');detail.innerHTML=HSEC_STEPS.map((text,i)=>`<span class="hsecStep ${i<step?'done':i===step?'active':''}">${text}</span>`).join('');}}setText($('#objectiveCount'),completed?'✓':`${Math.min(5,Math.max(0,step))}/5`);$('#objectiveProgress').style.width=completed?'100%':(Math.min(5,Math.max(0,step))*20)+'%';}
+ if(m3Active){const phase=s.mission3.phase;const eyebrow=$('#objective .eyebrow');if(eyebrow)eyebrow.textContent='MISIÓN 3';const title=$('#objectiveTitle');if(title)title.textContent='Tu Primer Contrato';const detail=$('#objectiveDetail');if(detail){detail.classList.remove('hidden');if(phase==='drilling'&&s.contract){const m=Math.round(s.contract.metersCompleted);const t2=s.contract.totalMeters;const bh=(s.boreholes||[]).filter(b=>b.status==='completed').length;detail.textContent=`${m}/${t2}m · Sondaje ${bh+1}/6`;}else{detail.textContent=phase==='briefing'?'Revisa los mensajes del mentor':phase==='setup'?'Compra una perforadora y contrata personal':phase==='survey'?'Solicita el análisis geológico':phase==='equip'?'Instala herramientas en la perforadora':phase==='drilling'?'Perforación en progreso':phase==='delivery'?'Entrega el contrato completado':phase==='complete'?'¡Contrato completado!':'Preparando misión';}}let prog;if(phase==='drilling'&&s.contract){prog=.45+.45*(s.contract.metersCompleted/s.contract.totalMeters);}else{prog=phase==='complete'?1:phase==='delivery'?.9:phase==='drilling'?.6:phase==='equip'?.45:phase==='survey'?.3:phase==='setup'?.15:phase==='briefing'?.05:0;}$('#objectiveProgress').style.width=(prog*100)+'%';setText($('#objectiveCount'),phase==='complete'?'✓':'');}
+ /* Mission timer card */
+ const timerEl=$('#missionTimer');if(timerEl){const showTimer=m3Active&&s.contract?.drillingStartedAt&&(s.contract.status==='active'||s.contract.status==='completed');hidden(timerEl,!showTimer);if(showTimer){const deadline=contractDeadline(s);const now2=Date.now();const remaining=Math.max(0,deadline-now2);const totalDur=s.contract.duration*1000;const secs=Math.ceil(remaining/1000);const mins=Math.floor(secs/60);const ss=secs%60;$('#timerValue').textContent=String(mins).padStart(2,'0')+':'+String(ss).padStart(2,'0');const pct=totalDur>0?remaining/totalDur:0;$('#timerProgress').style.width=(pct*100)+'%';const bh=(s.boreholes||[]).filter(b=>b.status==='completed').length;$('#timerDetail').textContent=`Sondaje ${bh+1}/6 · ${Math.round(s.contract.metersCompleted)}/${s.contract.totalMeters}m`;timerEl.classList.toggle('warning',pct<.3&&pct>=.1);timerEl.classList.toggle('danger',pct<.1);}}
+ // M4 objective panel
+ const m4Active=s.mission4&&s.mission4.phase!=='inactive';
+ if(m4Active){const phase4=s.mission4.phase;const eyebrow=$('#objective .eyebrow');if(eyebrow)eyebrow.textContent=phase4==='complete'?'MISIÓN COMPLETADA':'MISIÓN 3';const title=$('#objectiveTitle');if(title)title.textContent=phase4==='complete'?'Operación automatizada':'Automatiza tu operación';const detail=$('#objectiveDetail');if(detail){if(phase4==='complete'){detail.classList.add('hidden');}else{detail.classList.remove('hidden');const m4objs=mission4Objectives(s);const currentObj=m4objs.find(o=>o.id===s.mission4.currentObjective)||m4objs[0];const objNames={upgradeWorkshop:'Ampliar taller',equipDth:'Equipamiento DTH',deployProduction:'Desplegar producción',automateDrillTruck:'Automatizar DrillTruck',automatedProduction:'Producción activa'};const checkNames={upgradeToNv2:'Taller Nv.2',purchaseDthDrill:'Comprar perforadora DTH',orderPumaTools:'Pedir herramientas PUMA',installDthTools:'Instalar martillo + bit',convertBorehole:'Convertir sondaje a zona',assignDthToZone:'Asignar DTH a zona',hireTecnicoDrillco:'Contratar Técnico DRILLCO',purchaseDrillTruck:'Comprar DrillTruck',linkTruckToZone:'Vincular DrillTruck a zona',completeProductionCycle:'Completar ciclo',convertAllZones:'Automatizar todas las zonas'};if(currentObj){detail.innerHTML=`<b style="font-size:10px;color:#e7c886;display:block;margin-bottom:4px">${objNames[currentObj.nameKey]||currentObj.nameKey}</b>`+currentObj.checks.map(c=>`<span class="hsecStep ${c.done?'done':'active'}">${c.done?'✓ ':'○ '}${checkNames[c.labelKey]||c.labelKey}</span>`).join('');}else{detail.textContent='Preparando misión';}}}const totalChecks=mission4Objectives(s).reduce((n,o)=>n+o.checks.length,0);const doneChecks=mission4Objectives(s).reduce((n,o)=>n+o.checks.filter(c=>c.done).length,0);const prog4=totalChecks>0?doneChecks/totalChecks:0;$('#objectiveProgress').style.width=(prog4*100)+'%';setText($('#objectiveCount'),phase4==='complete'?'✓':`${doneChecks}/${totalChecks}`);}
+ const m4Playing=m4Active&&s.mission4.phase!=='complete';const m3Playing=m3Active&&s.mission3.phase!=='complete';
+ hsecUI?.update();hidden($('#bottomNav'),!m3Playing&&!m4Playing);
+ const job=pendingConstruction(s),building=!!job;hidden($('#buildHud'),!building);if(building){const seconds=Math.max(0,Math.ceil((job.ends-Date.now())/1000));setText($('#buildTime'),String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0'));$('#buildProgress').value=progress(s);$('#boostButton').disabled=s.boosters<1;}
+ const a=phase==='play'?nearInteraction():null;$('#handButton').disabled=!a||!!busy||!!a?.blocked;$('#handButton').classList.toggle('available',!!a&&!a.blocked);$('#handButton').classList.toggle('blocked',!!a?.blocked);scene?.setInteraction(a,s);$('#handButton').setAttribute('aria-label',a?t(a.blocked?'noEnergy':a.kind==='boost'?'boostAction':a.label):t('hand'));$('#handButton').style.setProperty('--action-progress',busy?Math.min(1,busy.elapsed/CONFIG.clearSeconds):0);$('#handButton').style.opacity=a||busy?'1':'.45';document.body.classList.toggle('interior',s.inside);if(obj!==lastObjective){lastObjective=obj;$('#hud').dataset.objective=obj;}$('#hud').dataset.cleared=s.cleared.length;$('#hud').dataset.chapterComplete=String(!!s.chapterCompletedAt);
+}
+function openPhone(app='home'){if(placement||phase!=='play')return;closeBuilder();hsecWorld?.showAssetCard(null);hideDrillCard();hideWorkshopCard();if(!['home','messages','store','bank','inventory','objectives'].includes(app)&&!app.startsWith('m3-')&&!app.startsWith('m4-'))app='messages';stop();phoneApp=app;phoneOpen=true;hidden($('#phone'),false);hidden($('#phoneShade'),false);document.body.classList.add('phoneOpen');renderPhone();}
+function closePhone(){phoneUI.release();phoneOpen=false;hidden($('#phoneShade'),true);hidden($('#phone'),true);document.body.classList.remove('phoneOpen');}
+const phoneUI=new PhoneUI({shell:$('#phone'),content:$('#phoneContent'),title:$('#phoneTitle'),back:$('#phoneBack'),state:()=>s,translate:()=>t,format:money,getWorld:()=>world,onSave:save,onHUD:renderHUD,onNavigate:app=>{if(app==='builder'){openBuilder();return;}phoneApp=app;renderPhone();},onPlace:startPlacement,onBuy:confirmPurchase,onClose:closePhone,onTransfer:(direction,amount)=>{if(action(()=>transfer(s,direction,amount)))notices.push({title:t('transactionDone'),detail:money(s.cash),symbol:'bank'});},
+onM3Action:(type,data)=>{try{
+ if(type==='hire'){hirePersonnel(s,data,data+'-01');notices.push({title:'Personal contratado',symbol:'bell'});}
+ else if(type==='buyDrill'){const d=drillDefinition(data);if(d){placeMachineryOrder(s,'drill',data,d.price);notices.push({title:'Perforadora solicitada · en camino',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}}
+ else if(type==='acceptContract'){acceptContract(s,data);notices.push({title:'Contrato aceptado',symbol:'bell'});}
+ else if(type==='completeContract'){const result=completeContract(s);notices.push({title:`Contrato entregado · ${money(result.reward)}`,symbol:'bell'});sound('finish');showMissionComplete('Tu primer contrato',result.reward,0);}
+ else if(type==='requestGeo'){requestAnalysis(s);technicianArrives(s);startAnalysisTimer(s);notices.push({title:'Análisis geológico solicitado',symbol:'bell'});}
+ else if(type==='accelerateGeo'){accelerateAnalysis(s);notices.push({title:'Análisis acelerado',symbol:'bell'});}
+ else if(type==='addToCart'){const [type,model,price]=data.split(':');placeOrder(s,[{type,model,qty:1,unitPrice:Number(price)}]);notices.push({title:'Pedido enviado a Casa Matriz',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}
+ else if(type==='installTool'){installTool(s,data);notices.push({title:'Herramienta instalada',symbol:'bell'});}
+ else if(type==='startDrilling'){startDrilling(s);notices.push({title:'Perforación iniciada',symbol:'bell'});}
+ else if(type==='upgradeWorkshop'){upgradeWorkshop(s);notices.push({title:'Ampliación del taller iniciada',symbol:'bell'});}
+ else if(type==='locateMachinery'){closePhone();const pos=data==='drill'&&m3DrillModel?{x:m3DrillModel.position.x,z:m3DrillModel.position.z}:data==='drillTruck'&&s.mission4?.drillTruck?s.mission4.drillTruck.position:null;if(pos)target={x:pos.x,z:pos.z};return;}
+ updateMission3Phase(s);save();renderHUD();renderPhone();
+}catch(e){const msg=e.message==='noCapacity'?'Sin espacio en el taller — amplía capacidad':e.message==='noMoney'?'Fondos insuficientes':e.message==='constructionPending'?'Ampliación en curso':e.message;notices.push({title:msg,symbol:'lock'});}},
+onM4Action:(type,data)=>{try{
+ if(type==='buyDthDrill'){placeMachineryOrder(s,'dthDrill',data||'rig_dth_production',DTH_DRILLS[0]?.price||28000);notices.push({title:'Perforadora DTH solicitada · en camino',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}
+ else if(type==='orderDthTool'){const h=dthHammerDefinition(data);const b=dthBitDefinition(data);const def=h||b;if(!def)throw new Error('invalid');if(s.cash<def.price)throw new Error('noMoney');s.cash-=def.price;addToInventory(s,{type:h?'hammer':'bit',model:def.id,name:def.label||def.id,lifeTotal:def.lifeTotal});s.ledger.push({id:s.nextId++,key:'dthToolPurchase',amount:-def.price,at:Date.now()});notices.push({title:(def.label||def.id)+' adquirido',symbol:'bell'});}
+ else if(type==='installDthTool'){installDthTool(s,data);notices.push({title:'Herramienta DTH instalada',symbol:'bell'});}
+ else if(type==='convertZone'){convertBoreholeToZone(s,data);notices.push({title:data+' convertido a zona',symbol:'bell'});}
+ else if(type==='assignDthDrill'){assignDthDrillToZone(s,data);notices.push({title:'DTH instalada en zona',symbol:'bell'});}
+ else if(type==='buyTruck'){placeMachineryOrder(s,'drillTruck','drilltruck',DRILLTRUCK_COST);notices.push({title:'DrillTruck solicitado · en camino',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}
+ else if(type==='linkTruck'){assignTruckToZone(s,data);startMaintenance(s,data);notices.push({title:'DrillTruck vinculado a '+data,symbol:'bell'});}
+ else if(type==='buildParking'){buildParking(s);notices.push({title:'Estacionamiento construido',symbol:'bell'});m4VisualsReady=false;initM4Visuals();}
+ else if(type==='upgradeWorkshop'){upgradeWorkshop(s);notices.push({title:'Ampliación del taller iniciada',symbol:'bell'});}
+ else if(type==='hireTecnico'){hirePersonnel(s,'tecnicoDrillco','tecnico-01');notices.push({title:'Técnico DRILLCO contratado',symbol:'bell'});}
+ updateMission4Phase(s);save();renderHUD();renderPhone();
+}catch(e){const msg=e.message==='noMoney'?'Fondos insuficientes':e.message;notices.push({title:msg,symbol:'lock'});}},
+onNarrativeAction:handleNarrativeAction,
+});
+$('#builderButton').onclick=openBuilder;$$('#bottomNav [data-nav]').forEach(b=>b.onclick=()=>{const nav=b.dataset.nav;if(nav==='builder')openBuilder();else openPhone(nav);});$('#phoneButton').onclick=()=>phoneOpen?closePhone():openPhone();$('#closePhone').onclick=$('#phoneShade').onclick=closePhone;$('#phoneBack').onclick=()=>phoneUI.backApp();$('#money').onclick=()=>notices.push({title:t('cash'),detail:money(s.cash),symbol:'wallet'});
+$('#objective').onclick=e=>{if(e.target.closest('#objToggle'))return;showMission();};$('#objective').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showMission();}};
+$('#objToggle').onclick=e=>{e.stopPropagation();$('#objective').classList.toggle('collapsed');const gc=$('#geoCard');if(gc&&gc._shown===false)gc.classList.add('hidden');};
+$('#geoDismiss').onclick=e=>{e.stopPropagation();if(s?.geoAnalysis){s.geoAnalysis.cardDismissed=true;save();renderHUD();}};
+$('#geoCard').onclick=()=>{if(s?.geoAnalysis?.completed){openPhone('m3-geology');if(s.geoAnalysis){s.geoAnalysis.cardDismissed=true;save();}}};
+$('#hsecInline').onclick=e=>{e.stopPropagation();if(hsecUI)hsecUI.open();};
+let geoRefreshTimer=0;
+const builderUI=new BuilderUI({host:$('#builderPanel'),state:()=>s,translate:()=>t,format:money,onClose:closeBuilder,onSelection:m=>{selectedBuildModule=m;blueprint=!!m;},onConfirm:confirmModule,onInspect:inspectModule,onManage:manageOffice,onWorkshopManage:()=>{showWorkshopCard();},
+onPhoneNav:app=>{closeBuilder();openPhone(app);},
+onCatalogAction:(type,data)=>{try{
+ if(type==='buyDrill'){const d=drillDefinition(data);if(!d)throw new Error('invalid');placeMachineryOrder(s,'drill',data,d.price);notices.push({title:'Perforadora solicitada · en camino',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}
+ else if(type==='buyDthDrill'){const id=data||'rig_dth_production';placeMachineryOrder(s,'dthDrill',id,DTH_DRILLS[0]?.price||28000);notices.push({title:'Perforadora DTH solicitada · en camino',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}
+ else if(type==='buyTruck'){placeMachineryOrder(s,'drillTruck','drilltruck',DRILLTRUCK_COST);notices.push({title:'DrillTruck solicitado · en camino',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}
+ else if(type==='buyFurniture'){closeBuilder();openPhone('store');return;}
+ else if(type==='hire'){if(data==='tecnicoDrillco'){hirePersonnel(s,'tecnicoDrillco','tecnico-01');updateMission4Phase(s);}else{hirePersonnel(s,data,data+'-01');updateMission3Phase(s);}notices.push({title:'Personal contratado',symbol:'bell'});}
+ save();renderHUD();builderUI.render();
+}catch(e){const msg=e.message==='noMoney'?'Fondos insuficientes':e.message==='noCapacity'?'Sin espacio en el taller':e.message;notices.push({title:msg,symbol:'lock'});}}
+});
+function renderPhone(){if(s){phoneUI.render(phoneApp);if(phoneApp==='m3-geology'&&s.mission3?.reportRead){updateMission3Phase(s);save();renderHUD();}}}
+function confirmPurchase(sku,variant){
+ const p=PRODUCTS.find(p=>p.id===sku),v=p.variants.find(v=>v.id===variant)||p.variants[0];
+ modal(`<span class="eyebrow">OFFICE STORE</span><h2>${esc(t('purchaseConfirm'))}</h2><p>${esc(t('purchaseQuestion'))}</p><div class="purchaseLine">${icon(p.id)}<span><b>${esc(t(p.nameKey))}</b><small>${esc(t(v.nameKey))}</small></span></div><div class="purchaseAmount"><span>${esc(t('cost'))}</span><b>${money(p.price)}</b></div><div class="modalActions">${button('cancel','cancelPurchase')}${button('buy','confirmPurchase',true)}</div>`);
+ $('#cancelPurchase').onclick=closeModal;$('#confirmPurchase').disabled=s.cash<p.price;
+ $('#confirmPurchase').onclick=()=>{const btn=$('#confirmPurchase');btn.disabled=true;let item;if(!action(()=>item=purchase(s,sku,Date.now(),v.id))){btn.disabled=false;return;}closeModal();sound('finish');notices.push({id:'purchase:'+item.id,title:t('purchaseDone'),detail:t(p.nameKey),symbol:'inventory'});
+  modal(`<div class="rewardCard"><div class="rewardSeal">${icon(p.id)}</div><span class="eyebrow">${esc(t('purchaseDone'))}</span><h2>${esc(t(p.nameKey))}</h2><p>${esc(t(v.nameKey))}</p><div class="rewardUnlock">${icon('inventory')}<span><small>${esc(t('inventoryUpdated'))}</small><b>${esc(t('readyToPlace'))}</b></span></div><div class="modalActions">${button('keepInventory','keepItem')}${button('placeNow','placeBought',true)}</div></div>`);$('#keepItem').onclick=closeModal;$('#placeBought').onclick=()=>{closeModal();startPlacement(item.id);};
+ };
+}
+function startPlacement(id){if(!s.inside){toast('enterFirst');return;}const item=s.inventory.find(i=>i.id===id);if(!item)return;closePhone();stop();let current=s.furniture.find(f=>f.id===id),pose=current?{x:current.x,z:current.z,rotation:current.rotation}:item.product==='desk'?{x:0,z:-.65,rotation:0}:item.product==='chair'?{x:0,z:.15,rotation:0}: {x:0,z:-.65,rotation:0};if(item.product==='computer'&&!current){const desk=s.furniture.find(f=>s.inventory.find(v=>v.id===f.id)?.product==='desk');if(desk)pose={x:desk.x,z:desk.z,rotation:desk.rotation};}placement={item,pose};scene.setPlacement(item,pose);document.body.classList.add('placing');hidden($('#placementBar'),false);renderPlacement();}
+function renderPlacement(){if(!placement)return;const result=validatePlacement(s,placement.item.id,placement.pose);setText($('#placementTitle'),t(placement.item.product));setText($('#placementFeedback'),result.valid?t('validSymbol'):'× '+t(result.key));$('#placementFeedback').style.color=result.valid?'var(--mint)':'var(--danger)';$('#confirmPlace').disabled=!result.valid;}
+function cancelPlacement(){placement=null;scene.cancelPlacement();document.body.classList.remove('placing');hidden($('#placementBar'),true);}
+$('#cancelPlace').onclick=cancelPlacement;$('#confirmPlace').onclick=()=>{if(!placement)return;const {item,pose}=placement;if(action(()=>placeItem(s,item.id,pose))){cancelPlacement();sound('finish');}};$('#rotateItem').onclick=()=>{if(placement){placement.pose.rotation=(placement.pose.rotation+Math.PI/2)%(Math.PI*2);renderPlacement();}};
+$$('[data-nudge]').forEach(b=>b.onclick=()=>{if(!placement)return;const d=b.dataset.nudge;placement.pose.x=Math.round((placement.pose.x+(d==='left'?-.1:d==='right'?.1:0))*10)/10;placement.pose.z=Math.round((placement.pose.z+(d==='up'?-.1:d==='down'?.1:0))*10)/10;renderPlacement();});
+function joyMove(e){const r=$('#joystick').getBoundingClientRect(),max=r.width*.30;let x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2,l=Math.hypot(x,y);if(l>max){x*=max/l;y*=max/l;}joy={x:x/max,y:y/max};$('#joyKnob').style.transform=`translate(${x}px,${y}px)`;}
+$('#joystick').onpointerdown=e=>{pointer=e.pointerId;e.currentTarget.setPointerCapture(pointer);target=null;joyMove(e);};$('#joystick').onpointermove=e=>{if(pointer===e.pointerId)joyMove(e);};$('#joystick').onpointerup=$('#joystick').onpointercancel=$('#joystick').onlostpointercapture=resetJoy;
+$('#cameraHome').onclick=()=>{world.zoom=1;resetOrbit(world.orbit);world.cameraRig.reset();persistCamera();};
+addEventListener('keydown',e=>{if(e.target.matches('input,select'))return;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();keys[e.key.toLowerCase()]=true;if(e.key==='Escape'){closeModal();closePhone();closeBuilder();if(placement)cancelPlacement();}if(e.key.toLowerCase()==='e'&&!e.repeat&&phase==='play')$('#handButton').click();});addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);addEventListener('blur',()=>{stop();save();});addEventListener('pagehide',save);
+function move(dt){let x=joy.x,y=joy.y;if(keys.w||keys.arrowup)y--;if(keys.s||keys.arrowdown)y++;if(keys.a||keys.arrowleft)x--;if(keys.d||keys.arrowright)x++;const len=Math.hypot(x,y);x/=Math.max(1,len);y/=Math.max(1,len);let intent=cameraRelativeIntent(x,y,world.cameraRig.heading);
+ if(len>.025)target=null;else if(target){const dx=target.x-s.position.x,dz=target.z-s.position.z,d=Math.hypot(dx,dz);if(d<.08)target=null;else intent={x:dx/d*Math.min(1,d/.3),z:dz/d*Math.min(1,d/.3)};}
+ return applyMovement(intent,dt);
+}
+function applyMovement(intent,dt){
+ const result=moveController(s.position,motion,intent,dt,(xx,zz)=>world.isBlocked(xx,zz,avatarDefinition(s.character).radius+.045));world.player.rotation.y=result.yaw;s.facing=result.yaw;if(target&&result.speed<.01&&Math.hypot(intent.x,intent.z)>.1&&Math.cos(Math.atan2(intent.x,intent.z)-result.yaw)>.95)target=null;return result.speed>.025;
+}
+function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Math.max(0,(now-last)/1000));last=now;clock+=dt;if(document.body.dataset.phase!==phase)document.body.dataset.phase=phase;if(!s)return;const wall=Date.now(),result=phase==='play'?tick(s,wall):{};if(result.built||result.upgraded){if(result.built)onBuilt();if(result.upgraded){scene.burst(-6,0);toast('upgradeComplete');}syncUIEvents();if(phoneOpen)renderPhone();if(builderOpen)builderUI.render();}
+ if(phase==='intro')cinematic.update(dt);
+ if(phase==='play'&&hsecActive(s)&&!document.hidden){ensureHsec(s);hsecElapsed+=dt;if(hsecElapsed>=1){tickHsec(s,hsecElapsed);if(!s.hsec.grantNotified){s.hsec.grantNotified=true;notices.push({title:'Misión 2 · Prepara tu operación',detail:`Capital de desarrollo: ${money(B.startingGrant)} · abre el panel HSEC para comenzar.`,symbol:'hsec:management'});}hsecElapsed=0;hsecUI.cachedEval=evaluation(s);const signature=[s.hsec.revision,s.hsec.orders.map(o=>o.status).join(','),s.hsec.inspection?.id,s.hsec.employee?.blocked,s.hsec.completedAt].join('|');if(signature!==hsecLastSignature){hsecLastSignature=signature;if(s.hsec.employee?.blocked)notices.push({title:'Prevencionista detenido',detail:s.hsec.employee.blocked,symbol:'lock'});if(hsecUI.panelOpen)hsecUI.refresh();if(s.hsec.completedAt&&!s.hsec.completionNotified){s.hsec.completionNotified=true;/* reward modal deferred to narrative confirmCompletion */}
+ if(s.hsec.completedAt&&isMissionAccepted(s,'m3')&&canStartMission3(s)&&(!s.mission3||s.mission3.phase==='inactive')){startMission3(s);notices.push({title:'Misión 2 desbloqueada — Tu Primer Contrato',symbol:'bell'});save();}save();}}moveNpc(s,dt);}
+ if(phase==='play'){narrativeTick(dt);/* Workshop upgrade construction tick */const wsJob=workshopUpgradeJob(s);if(wsJob&&Date.now()>=wsJob.ends){finishWorkshopUpgrade(s);save();renderHUD();if(workshopCardOpen)showWorkshopCard();notices.push({title:`Taller ampliado a Nv.${workshopLevel(s)}`,symbol:'bell'});sound('finish');updateMission4Phase(s);}if(workshopCardOpen&&wsJob)showWorkshopCard();world.updateWorkshop(s.workshop);
+ initM3Visuals();const m3events=tickMission3(s,dt,wall);if(m3events){for(const e of m3events){if(typeof e==='object'&&e.type==='machineryDelivered'){
+  const m=e.machinery;
+  if(m.type==='drill'){try{purchaseDrill(s,m.model,true);spawnM3Drill(m.model);notices.push({title:'Perforadora entregada',detail:'Localizar en faena',symbol:'bell',action:'locateDrill'});updateMission3Phase(s);}catch(err){console.error('drill delivery:',err);}}
+  else if(m.type==='dthDrill'){try{purchaseDthDrill(s,m.model,true);notices.push({title:'Perforadora DTH entregada',symbol:'bell'});updateMission4Phase(s);}catch(err){console.error('dth delivery:',err);}}
+  else if(m.type==='drillTruck'){try{purchaseDrillTruck(s,true);m4VisualsReady=false;initM4Visuals();notices.push({title:'DrillTruck entregado',detail:'Ubicar en faena',symbol:'bell',action:'locateTruck'});updateMission4Phase(s);}catch(err){console.error('truck delivery:',err);}}
+  if(m3DeliveryVehicle)startDelivery(m3DeliveryVehicle,'in');
+ }else if(e==='deliveryArrived'){notices.push({title:'Pedido entregado',symbol:'bell'});if(m3DeliveryVehicle)startDelivery(m3DeliveryVehicle,'in');}else if(e==='analysisComplete'){notices.push({title:'Informe geológico disponible',symbol:'bell'});if(phoneOpen)renderPhone();}else if(e==='bitExhausted')notices.push({title:'Bit agotado — requiere recambio',symbol:'lock'});else if(e==='hammerExhausted')notices.push({title:'Martillo agotado — requiere recambio',symbol:'lock'});else if(e==='contractReady')notices.push({title:'Contrato completado — entrega disponible',symbol:'bell'});}save();}updateM3Visuals(dt);
+  /* Refresh phone geo/contract every ~2s while open */
+  if(phoneOpen&&(phoneApp==='m3-geology'||phoneApp==='m3-contract'||phoneApp==='m3-catalog'||phoneApp==='m3-orders'||phoneApp==='m4-drilltruck'||phoneApp==='m4-zones')){geoRefreshTimer=(geoRefreshTimer||0)+dt;if(geoRefreshTimer>=2){geoRefreshTimer=0;const c=$('#phoneContent');const scrollTop=c?.scrollTop||0;renderPhone();if(c)c.scrollTop=scrollTop;}}else geoRefreshTimer=0;
+  if(drillCardOpen)showDrillCard();
+  // === M4 tick ===
+  initM4Visuals();const m4events=tickMission4(s,dt,wall);if(m4events){for(const e of m4events){if(e==='incomeGenerated')notices.push({title:'Ingreso automatizado recibido',symbol:'bell'});else if(e==='maintenanceComplete'){notices.push({title:'Mantenimiento completado',symbol:'bell'});if(phoneOpen)renderPhone();}else if(e==='truckDispatch'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'out');}else if(e==='truckReturn'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'return');}else if(e==='missionComplete'){sound('finish');showMissionComplete('Automatiza tu operación',s.mission4.totalAutomatedIncome,0);}}save();}
+  updateM4Visuals(dt);
+  // Auto-start M4 when M3 completes
+  if(s.mission3?.phase==='complete'&&s.contract?.status==='delivered'&&isMissionAccepted(s,'m4')&&canStartMission4(s)&&(!s.mission4||s.mission4.phase==='inactive')){startMission4(s);notices.push({title:'Misión 3 desbloqueada — Automatiza tu operación',symbol:'bell'});save();}
+  }
+ avatars?.updateSelector(phase==='character',selectedAvatar,s,dt,clock);characterStage?.update(phase==='character',clock,selectedAvatar);
+ if(phase==='character'){world.chapterCamera={target:new T.Vector3(-4.55+Math.max(0,Math.min(.5,(730-innerWidth)/324)),1.0,5.35),offset:new T.Vector3(0,.55,6.1)};}
+ if(phase!=='character')world.chapterCamera=null;
+ world.avatarHeight=avatarDefinition(s.character).height;world.cameraMode=builderOpen||managingOffice?'builder':s.inside?'interior':'explore';world.cameraFocus=builderOpen?(hsecUI?.drawing?hsecUI.focus():hsecUI?.mode?{x:1,z:2}:{x:-6,z:0}):managingOffice?{x:-6,z:0}:null;
+ if(qa&&hsecFollow&&s.hsec?.employee){const n=s.hsec.employee;world.chapterCamera={target:new T.Vector3(n.position.x,.95,n.position.z),offset:new T.Vector3(-Math.sin(n.yaw)*4.75,1.65,-Math.cos(n.yaw)*4.75)};}
+ if(managingOffice){world.chapterCamera={target:new T.Vector3(-3.9,1,0),offset:world.chapterUpgradePreview?new T.Vector3(2.7,5.6,6.1):new T.Vector3(6.5,4.5,8.5)};}
+ const movable=!cameraDebug?.freeze&&phase==='play'&&!builderOpen&&!modalOpen&&!phoneOpen&&!placement&&!busy&&innerWidth>innerHeight;let walking=false;if(movable)walking=locomotionReview?.active?locomotionReview.step(dt):move(dt);else motion.vx=motion.vz=motion.speed=0;
+ if(phase==='play'&&busy){busy.elapsed+=dt;if(busy.elapsed>=CONFIG.clearSeconds){const obj=busy.object;busy=null;if(action(()=>clearObject(s,obj.id,wall))){scene.burst(obj.x,obj.z);if(s.cleared.length===CLEARABLES.length){qaRoute=false;qaWalkRoute=null;target=null;}}}}
+ if(phase==='play'&&syncOfficeAccess(s)){syncUIEvents();save();}
+ // Auto-dismiss cards when player walks away from objects
+ if(phase==='play'){
+  if(drillCardOpen&&m3DrillModel&&Math.hypot(s.position.x-m3DrillModel.position.x,s.position.z-m3DrillModel.position.z)>8)hideDrillCard();
+  if(workshopCardOpen&&s.workshop&&Math.hypot(s.position.x+7.6,s.position.z+9.3)>11)hideWorkshopCard();
+  if(hsecWorld&&hsecWorld.assetCardId&&s.hsec){const _ac=s.hsec.assets?.find(a=>a.id===hsecWorld.assetCardId);if(_ac){const _ad=Math.hypot(s.position.x-_ac.x,s.position.z-_ac.z);if(_ad>8)hsecWorld.showAssetCard(null);}}
+ }
+ if(world.worker)world.worker.clearing=busy?1:0;
+ scene.update(s,dt,wall,{blueprint,interactive:phase==='play'});hsecWorld?.update(s,dt,phase);if(phase==='play'&&world.isBlocked(s.position.x,s.position.z,avatarDefinition(s.character).radius))ensureSafe();world.update(s,dt,clock,walking,false,false);constructionCallout?.update(s,phase==='play'&&!builderOpen&&!modalOpen&&!phoneOpen,t);world.player.visible=phase!=='start'&&(phase!=='character'||!!CONFIG.protagonists.find(p=>p.id===selectedAvatar)?.available);
+ guidance?.update(s,phase==='play'&&!builderOpen&&!modalOpen&&!phoneOpen&&!placement);if(phase==='play')showNextReward();
+ if(now-lastHud>150){renderHUD();cameraDebug?.update();lastHud=now;}if(now-lastSave>2000){save();lastSave=now;}
+ if(qaComputerPath&&phase==='play'&&!phoneOpen&&!modalOpen){while(qaComputerPath.length&&Math.hypot(qaComputerPath[0].x-s.position.x,qaComputerPath[0].z-s.position.z)<.12)qaComputerPath.shift();if(qaComputerPath.length)target={...qaComputerPath[0]};else qaComputerPath=null;}
+ if(qaRoute&&phase==='play'&&!busy&&!phoneOpen&&!modalOpen){
+  const obj=CLEARABLES.filter(o=>!s.cleared.includes(o.id)).sort((a,b)=>Math.hypot(a.x-s.position.x,a.z-s.position.z)-Math.hypot(b.x-s.position.x,b.z-s.position.z))[0];
+  if(!obj){qaRoute=false;qaWalkRoute=null;target=null;}
+  else if(Math.hypot(s.position.x-obj.x,s.position.z-obj.z)<1.5){qaWalkRoute=null;$('#handButton').click();}
+  else {if(qaWalkRoute?.id!==obj.id)qaWalkRoute={id:obj.id,path:reviewPath(s.position,obj,(x,z)=>world.isBlocked(x,z,.33),1.25)};while(qaWalkRoute.path.length&&Math.hypot(qaWalkRoute.path[0].x-s.position.x,qaWalkRoute.path[0].z-s.position.z)<.12)qaWalkRoute.path.shift();if(qaWalkRoute.path.length)target={...qaWalkRoute.path[0]};}
+ }
+
+}
+function installQA(){
+ const bar=document.createElement('div');bar.id='chapterQA';bar.style.cssText='position:absolute;z-index:95;bottom:12px;left:145px;display:flex;gap:6px';
+ bar.innerHTML='<button id="qaHide">Ocultar revisión</button><button id="qaHsecSave">QA · guardar muestra</button><button id="qaHsecRestore">QA · recuperar muestra</button><button id="qaHsecFollow">QA · seguir prevencionista</button><button id="qaHsecRecord">QA · grabar recorrido 12 s</button><button id="qaHsec">QA · comenzar Misión 2</button><button id="qaHsecSetup">QA · montar infraestructura</button><button id="qaHsecWear">QA · desgaste barrera</button><button id="qaHsecNight">QA · noche</button><button id="qaClear">QA · recorrido de limpieza</button><button id="qaBuild">QA · punto de obra</button><button id="qaComputer">QA · computador</button><select id="qaAvatar" aria-label="Avatar de revisión">'+CONFIG.protagonists.map(p=>`<option value="${p.id}">${p.id}</option>`).join('')+'</select><button id="qaWalk">QA · grabar caminata 4 m</button>';
+ document.body.append(bar);$('#qaHide').onclick=()=>bar.classList.add('hidden');locomotionReview=new LocomotionReview({world,state:()=>s,avatars,motion,applyMovement,onChange:id=>{s.specialty=avatarDefinition(id).roleKey;s.bonuses={...avatarDefinition(id).bonuses};renderHUD();}});
+ $('#qaHsecSave').onclick=()=>{if(hsecActive(s)){localStorage.setItem(CONFIG.saveKey+'-hsec-review',JSON.stringify(s));notices.push({title:'Muestra guardada por separado',symbol:'check'});}};
+ $('#qaHsecRestore').onclick=async()=>{const recovered=restore(JSON.parse(localStorage.getItem(CONFIG.saveKey+'-hsec-review')||'null'));if(!recovered)return;if(!reviewBackup)reviewBackup={state:s?JSON.parse(JSON.stringify(s)):null,hasSave};restoreHsec(recovered);s=recovered;await avatars.load(s.character);beginPlay(true);hsecUI.open();};
+ $('#qaHsecFollow').onclick=()=>{hsecFollow=!hsecFollow;};
+ $('#qaHsecRecord').onclick=()=>{hsecRecorder??=new CinematicRecorder(world,cinematic,bar);hsecFollow=true;hsecRecorder.start();setTimeout(()=>hsecRecorder.stop(),12000);};
+ $('#qaHsec').onclick=async()=>{await cameraReviewScene(s.character,'office');s.inside=true;useOfficeComputer(s);s.inside=false;s.position={...CONFIG.officeSlot.access};tickHsec(s,0);hsecUI.open();};
+ $('#qaHsecSetup').onclick=()=>{if(!hsecActive(s))return;const first=!s.hsec.assets.length;if(!first)return;if(s.office.level<2){startModule(s,'office-l2','office01');accelerate(s);}for(const type of ['shed','vehicle','pedestrian','crossing','railing','tower','tower','tower','tower','cone','cone','cone','cone','cone','cone','sign','extinguisher']){buildAsset(s,type,suggestedPose(s,type));tickHsec(s,26);}hsecUI.refresh();};
+ $('#qaHsecWear').onclick=()=>{const a=s.hsec?.assets.find(a=>a.type==='railing');if(a){a.condition.visual=35;s.position={x:a.x-1,z:a.z+1};s.hsec.revision++;hsecUI.open('assets');}};
+ $('#qaHsecNight').onclick=()=>{if(s.hsec){const day=Math.floor(s.hsec.time/600);s.hsec.time=day*600+300;hsecUI.refresh();}};
+ $('#qaClear').onclick=()=>{qaRoute=true;};$('#qaBuild').onclick=()=>{qaRoute=false;target={...CONFIG.officeSlot.access};};$('#qaComputer').onclick=()=>{const f=s.furniture.find(f=>s.inventory.find(i=>i.id===f.id)?.product==='computer');if(!f||!s.inside)return;qaComputerPath=reviewPath(s.position,{x:-6+f.x,z:f.z},(x,z)=>world.isBlocked(x,z,avatarDefinition(s.character).radius),1.4);};
+ $('#qaWalk').onclick=()=>{stop();locomotionReview.start($('#qaAvatar').value,true);};
+}
+
+function rotateHint(){hidden($('#rotateHint'),!(innerHeight>innerWidth&&innerWidth<900));}addEventListener('resize',rotateHint);rotateHint();applyText();

@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Propuesta 4 · Cel Shading</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { width:100vw; height:100vh; overflow:hidden; background:#F2E8D4; font-family:'Segoe UI',system-ui,sans-serif; }
+canvas { display:block; }
+
+/* CEL SHADING HUD - Flat design, bold outlines */
+#topbar {
+  position:fixed; top:0; left:0; right:0;
+  padding:10px 14px;
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(242,232,212,0.9);
+  border-bottom:2px solid #2C1810;
+  pointer-events:all;
+}
+.cel-pill {
+  display:flex; align-items:center; gap:5px;
+  background:#2C1810;
+  border:2px solid #2C1810;
+  border-radius:6px;
+  padding:5px 12px;
+  font-size:13px; font-weight:900; color:#F2E8D4;
+}
+.cel-pill .cv { color:#FFD700; }
+.cel-accent { background:#E74C3C; }
+.cel-accent .cv { color:#fff; }
+
+/* CONTRACT - Manga panel style */
+#contract {
+  position:fixed; top:56px; left:12px;
+  background:#F2E8D4;
+  border:3px solid #2C1810;
+  border-radius:0;
+  padding:8px 12px;
+  min-width:170px;
+  box-shadow:4px 4px 0 #2C1810;
+  pointer-events:all;
+}
+.cc-head {
+  background:#2C1810;
+  color:#FFD700;
+  margin:-8px -12px 6px;
+  padding:4px 10px;
+  font-size:9px; font-weight:900;
+  letter-spacing:2px; text-transform:uppercase;
+}
+.cc-t { font-size:12px; font-weight:900; color:#2C1810; margin-bottom:4px; }
+.cc-bar { height:8px; background:#D4C4A8; border:2px solid #2C1810; }
+.cc-fill { height:100%; background:#E74C3C; width:35%; }
+.cc-meta { display:flex; justify-content:space-between; margin-top:4px; font-size:10px; font-weight:700; color:#2C1810; }
+
+/* SPEED LINES - manga effect */
+#speed-effect {
+  position:fixed; top:0; left:0; right:0; bottom:0;
+  pointer-events:none; opacity:0.06;
+  background: repeating-conic-gradient(
+    from 0deg at 50% 50%,
+    #2C1810 0deg 1deg,
+    transparent 1deg 8deg
+  );
+}
+
+/* BOTTOM TABS - thick border panels */
+#bottomnav {
+  position:fixed; bottom:0; left:0; right:0;
+  height:62px;
+  background:#F2E8D4;
+  border-top:3px solid #2C1810;
+  display:flex;
+  pointer-events:all;
+}
+.nav-tab {
+  flex:1;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:2px;
+  border-right:2px solid #2C1810;
+  cursor:pointer;
+}
+.nav-tab:last-child { border-right:none; }
+.nav-tab.active { background:#2C1810; }
+.nav-tab .ti { font-size:20px; }
+.nav-tab .tl { font-size:8px; font-weight:900; text-transform:uppercase; color:#2C1810; }
+.nav-tab.active .tl { color:#FFD700; }
+
+/* FAB */
+#fab {
+  position:fixed; bottom:74px; right:14px;
+  width:56px; height:56px;
+  background:#E74C3C;
+  border:3px solid #2C1810;
+  border-radius:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px;
+  box-shadow:4px 4px 0 #2C1810;
+  cursor:pointer; pointer-events:all;
+}
+
+#back { position:fixed; top:12px; right:14px; background:#2C1810; border:none; border-radius:4px; padding:5px 14px; font-size:11px; font-weight:700; color:#F2E8D4; cursor:pointer; text-decoration:none; }
+#style-tag { position:fixed; top:56px; right:12px; background:#E74C3C; border:2px solid #2C1810; padding:4px 10px; font-size:9px; font-weight:900; color:#fff; letter-spacing:1px; text-transform:uppercase; box-shadow:2px 2px 0 #2C1810; }
+</style>
+</head>
+<body>
+<div id="speed-effect"></div>
+<canvas id="c"></canvas>
+
+<div id="topbar">
+  <div style="display:flex;gap:8px">
+    <div class="cel-pill">💰<span class="cv">$4,280</span></div>
+    <div class="cel-pill cel-accent">⚡<span class="cv">NV.3</span></div>
+  </div>
+</div>
+
+<div id="contract">
+  <div class="cc-head">■ Contrato Activo</div>
+  <div class="cc-t">Sondaje 45m · Zona Norte</div>
+  <div class="cc-bar"><div class="cc-fill"></div></div>
+  <div class="cc-meta"><span>35%</span><span>$1,200</span></div>
+</div>
+
+<div id="style-tag">Cel Shading</div>
+<div id="fab">⛏️</div>
+
+<nav id="bottomnav">
+  <div class="nav-tab active"><span class="ti">🏕️</span><span class="tl">Faena</span></div>
+  <div class="nav-tab"><span class="ti">📋</span><span class="tl">Contratos</span></div>
+  <div class="nav-tab"><span class="ti">🔧</span><span class="tl">Taller</span></div>
+  <div class="nav-tab"><span class="ti">📦</span><span class="tl">Bodega</span></div>
+  <div class="nav-tab"><span class="ti">👤</span><span class="tl">Perfil</span></div>
+</nav>
+<a href="../index.html" id="back">← Volver</a>
+
+<script>
+const c = document.getElementById('c');
+const ctx = c.getContext('2d');
+let W, H;
+function resize() { W = c.width = window.innerWidth; H = c.height = window.innerHeight; }
+resize();
+window.addEventListener('resize', resize);
+
+// CEL SHADING - flat fills, hard shadow bands, thick outlines
+// Palette: warm parchment bg, deep brown outlines, flat colors with 1-step shadow
+
+const CEL = {
+  bg: '#F2E8D4',
+  outline: '#2C1810',
+  sky1: '#7EC8E3',
+  sky2: '#B8E4F0',
+  ground: '#C4956A',
+  groundShadow: '#A07850',
+  groundDark: '#8B6640',
+  grass: '#7DC67E',
+  grassDark: '#5AA65B',
+  bldGreen: '#52B788',
+  bldGreenShadow: '#3A8A60',
+  bldBlue: '#4A9CC9',
+  bldBlueShadow: '#2A6A90',
+  bldBrown: '#C47A3A',
+  bldBrownShadow: '#8B5020',
+  rigDark: '#2C3A4A',
+  rigMid: '#3A4A5A',
+  accent: '#E74C3C',
+  accentLight: '#F07060',
+  drillco: '#FF6B00',
+  white: '#F2E8D4',
+  yellow: '#FFD700',
+  shadowFlat: '#2C1810'
+};
+
+// CEL STROKE
+function cs(w=3) {
+  ctx.strokeStyle = CEL.outline;
+  ctx.lineWidth = w;
+  ctx.stroke();
+}
+function fs(fill, sw=3) {
+  ctx.fillStyle = fill;
+  ctx.fill();
+  cs(sw);
+}
+
+let t = 0;
+
+function drawCelSky() {
+  // Flat sky gradient - CEL style = just 2 bands
+  ctx.fillStyle = CEL.sky1;
+  ctx.fillRect(0, 0, W, H * 0.55);
+  ctx.fillStyle = CEL.sky2;
+  ctx.fillRect(0, H * 0.32, W, H * 0.23);
+
+  // Outline at horizon
+  ctx.beginPath();
+  ctx.moveTo(0, H*0.55);
+  ctx.lineTo(W, H*0.55);
+  cs(2);
+
+  // Mountains - hard flat shapes (CEL = no gradients, just 2 values)
+  function mountain(pts, col, shadowCol) {
+    ctx.beginPath();
+    ctx.moveTo(0, H*0.56);
+    pts.forEach(([x,y]) => ctx.lineTo(x,y));
+    ctx.lineTo(W, H*0.56);
+    ctx.closePath();
+    ctx.fillStyle = col;
+    ctx.fill();
+    cs(2);
+  }
+  mountain([[0,H*0.5],[W*0.1,H*0.32],[W*0.2,H*0.42],[W*0.35,H*0.26],[W*0.5,H*0.38],[W*0.6,H*0.22],[W*0.75,H*0.32],[W*0.88,H*0.24],[W,H*0.36]], '#6B9AB8', 3);
+  mountain([[0,H*0.55],[W*0.08,H*0.44],[W*0.2,H*0.5],[W*0.32,H*0.4],[W*0.5,H*0.48],[W*0.65,H*0.42],[W*0.8,H*0.5],[W,H*0.52]], '#8ABDD4', 2);
+
+  // Sun (flat, hard edge)
+  ctx.beginPath();
+  ctx.arc(W*0.78, H*0.12, 32, 0, Math.PI*2);
+  fs(CEL.yellow, 3);
+
+  // Flat cloud panels
+  function celCloud(x, y, s) {
+    ctx.beginPath();
+    ctx.arc(x, y, s*0.8, 0, Math.PI*2);
+    ctx.arc(x+s*0.7, y-s*0.1, s*0.6, 0, Math.PI*2);
+    ctx.arc(x+s*1.4, y, s*0.7, 0, Math.PI*2);
+    fs('#fff', 2.5);
+    // Shadow band on bottom
+    ctx.fillStyle = '#D8D8D8';
+    ctx.fillRect(x-s*0.7, y+s*0.2, s*2.2, s*0.4);
+  }
+  celCloud(W*0.05, H*0.1, 20);
+  celCloud(W*0.4, H*0.07, 16);
+}
+
+function drawCelGround() {
+  // Flat ground
+  ctx.beginPath();
+  ctx.moveTo(0, H*0.54);
+  ctx.lineTo(W, H*0.54);
+  ctx.lineTo(W, H);
+  ctx.lineTo(0, H);
+  ctx.closePath();
+  fs(CEL.ground, 2);
+
+  // Shadow band (CEL = hard shadow, no gradient)
+  ctx.fillStyle = CEL.groundShadow;
+  ctx.fillRect(0, H*0.68, W, H*0.32);
+  cs(1.5);
+
+  // Dirt path (flat)
+  ctx.beginPath();
+  ctx.moveTo(W*0.38, H*0.55);
+  ctx.lineTo(W*0.52, H*0.55);
+  ctx.lineTo(W*0.65, H*0.7);
+  ctx.lineTo(W*0.46, H*0.7);
+  ctx.closePath();
+  ctx.fillStyle = CEL.groundDark;
+  ctx.fill();
+  cs(2);
+
+  // Grass patches (flat, hard)
+  function celGrass(x, y, s) {
+    ctx.beginPath();
+    ctx.moveTo(x-s, y);
+    ctx.lineTo(x-s*0.5, y-s*2);
+    ctx.lineTo(x, y-s*2.5);
+    ctx.lineTo(x+s*0.5, y-s*2);
+    ctx.lineTo(x+s, y);
+    ctx.closePath();
+    fs(CEL.grass, 2);
+    // Hard shadow side
+    ctx.fillStyle = CEL.grassDark;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x, y-s*2.5);
+    ctx.lineTo(x+s*0.5, y-s*2);
+    ctx.lineTo(x+s, y);
+    ctx.closePath();
+    ctx.fill();
+  }
+  celGrass(W*0.05, H*0.59, 8);
+  celGrass(W*0.18, H*0.6, 7);
+  celGrass(W*0.75, H*0.59, 9);
+  celGrass(W*0.9, H*0.6, 7);
+}
+
+// CEL BUILDING (hard flat shadows, outline panels)
+function celBuilding(x, y, w, h, col, shadow, label, icon) {
+  // Hard drop shadow (CEL style)
+  ctx.fillStyle = 'rgba(44,24,16,0.3)';
+  ctx.fillRect(x - w/2 + 6, y - h + 8, w, h);
+
+  // Body - lit face
+  ctx.beginPath();
+  ctx.rect(x - w/2, y - h, w, h);
+  fs(col, 3);
+
+  // Body - shadow face (hard band, right half)
+  ctx.fillStyle = shadow;
+  ctx.fillRect(x, y - h, w/2, h);
+  cs(3);
+
+  // Roof
+  ctx.beginPath();
+  ctx.moveTo(x - w/2 - 5, y - h);
+  ctx.lineTo(x, y - h - h*0.3);
+  ctx.lineTo(x + w/2 + 5, y - h);
+  ctx.closePath();
+  fs(shadow, 3);
+  // Roof light strip
+  ctx.fillStyle = col;
+  ctx.beginPath();
+  ctx.moveTo(x - w/2 - 5, y - h);
+  ctx.lineTo(x - w*0.1, y - h - h*0.28);
+  ctx.lineTo(x, y - h - h*0.3);
+  ctx.lineTo(x - w/2 - 5, y - h);
+  ctx.closePath();
+  ctx.fill();
+  cs(3);
+
+  // Window (flat, cel)
+  ctx.beginPath();
+  ctx.rect(x - w*0.15, y - h*0.72, w*0.3, h*0.24);
+  fs('#B8E4F0', 2.5);
+  // Window shadow
+  ctx.fillStyle = '#7EC8E3';
+  ctx.fillRect(x + w*0.02, y - h*0.72, w*0.13, h*0.24);
+  cs(2.5);
+
+  // Door
+  ctx.beginPath();
+  ctx.rect(x - w*0.1, y - h*0.36, w*0.2, h*0.36);
+  fs(CEL.groundDark, 2.5);
+
+  // Label (manga box style)
+  ctx.fillStyle = CEL.outline;
+  ctx.fillRect(x - w*0.5, y - h - 26, w, 20);
+  ctx.fillStyle = CEL.yellow;
+  ctx.font = `bold ${Math.max(9,w*0.11)}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillText(icon + ' ' + label, x, y - h - 11);
+}
+
+// CEL RIG
+let rigT2 = 0;
+function celRig(x, y) {
+  rigT2 += 0.04;
+  const h = H * 0.38;
+  const tw = 25;
+
+  // Hard shadow
+  ctx.fillStyle = 'rgba(44,24,16,0.25)';
+  ctx.fillRect(x - 40 + 6, y - 14 + 8, 80, 20);
+
+  // Base (flat)
+  ctx.beginPath();
+  ctx.rect(x - 40, y - 14, 80, 18);
+  fs(CEL.rigDark, 3);
+  // Lit top strip
+  ctx.fillStyle = CEL.rigMid;
+  ctx.fillRect(x - 40, y - 14, 80, 6);
+  cs(3);
+
+  // Tracks
+  [x-26, x+10].forEach(tx => {
+    ctx.beginPath();
+    ctx.rect(tx, y-8, 16, 10);
+    fs('#111', 2.5);
+  });
+
+  // Tower legs (flat, no taper — CEL = boxy)
+  const tw2 = 18;
+  ctx.beginPath();
+  ctx.rect(x - tw2, y - 14, tw2*2, -(h-14));
+  fs(CEL.rigDark, 3);
+
+  // Shadow strip on tower
+  ctx.fillStyle = CEL.outline;
+  ctx.fillRect(x + tw2 * 0.3, y - 14, tw2*0.7, -(h-14));
+  cs(3);
+
+  // Cross braces (flat lines)
+  ctx.strokeStyle = CEL.rigMid;
+  ctx.lineWidth = 3;
+  for (let i = 0.1; i < 1; i += 0.22) {
+    ctx.beginPath();
+    ctx.moveTo(x - tw2, y - 14 - (h-14)*i);
+    ctx.lineTo(x + tw2, y - 14 - (h-14)*(i+0.2));
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x + tw2, y - 14 - (h-14)*i);
+    ctx.lineTo(x - tw2, y - 14 - (h-14)*(i+0.2));
+    ctx.stroke();
+  }
+
+  // Crown (flat box)
+  ctx.beginPath();
+  ctx.rect(x - 16, y - h - 16, 32, 18);
+  fs(CEL.rigMid, 3);
+
+  // DRILLCO band (thick, solid)
+  ctx.beginPath();
+  ctx.rect(x - 38, y - 26, 76, 8);
+  fs(CEL.drillco, 3);
+
+  // Drill string (chunky)
+  ctx.beginPath();
+  ctx.rect(x - 4, y - h*0.1, 8, H*0.14 + Math.sin(rigT2)*4);
+  fs('#95A5A6', 3);
+
+  // Drill sparks (bold flashes)
+  const gy = y + H*0.14 + Math.sin(rigT2)*4;
+  if (Math.random() < 0.4) {
+    for (let i = 0; i < 5; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const d = Math.random() * 22;
+      ctx.beginPath();
+      ctx.rect(
+        x + Math.cos(angle)*d - 2,
+        gy + Math.sin(angle)*d*0.4 - 2,
+        4, 4
+      );
+      ctx.fillStyle = Math.random() < 0.5 ? CEL.yellow : CEL.drillco;
+      ctx.fill();
+      cs(1.5);
+    }
+  }
+
+  // Label
+  ctx.fillStyle = CEL.outline;
+  ctx.fillRect(x - 45, y - h - 34, 90, 18);
+  ctx.fillStyle = CEL.yellow;
+  ctx.font = 'bold 9px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('⛏ FRENTE DE PERFORACIÓN', x, y - h - 21);
+}
+
+// CEL CHARACTER (anime proportions: big head, flat shading)
+let charX3 = 0, charWalk3 = 0;
+function celChar(x, y, walk) {
+  const s = Math.min(W,H) * 0.065;
+  const bob = Math.sin(walk*0.2)*2;
+  const leg = Math.sin(walk*0.35)*10;
+
+  // Shadow (hard flat)
+  ctx.fillStyle = 'rgba(44,24,16,0.3)';
+  ctx.beginPath();
+  ctx.ellipse(x, y+4, s*0.3, s*0.08, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // LEGS - flat with 1 shadow strip
+  function celLeg(lx, ly, swing) {
+    ctx.beginPath();
+    ctx.rect(lx - s*0.11, ly - s*0.55+bob, s*0.15, s*0.5+swing*0.1);
+    fs('#2C3E50', 2.5);
+    // Shadow strip
+    ctx.fillStyle = '#1A252F';
+    ctx.fillRect(lx - s*0.01, ly - s*0.55+bob, s*0.06, s*0.5+swing*0.1);
+  }
+  celLeg(x - s*0.1, y, leg);
+  celLeg(x + s*0.06, y, -leg);
+
+  // Boots (chunky, flat)
+  [x-s*0.1, x+s*0.1].forEach((bx,i) => {
+    ctx.beginPath();
+    ctx.rect(bx - s*0.15, y - s*0.04+bob, s*0.22, s*0.1);
+    fs('#1A252F', 2.5);
+  });
+
+  // BODY (flat orange vest)
+  ctx.beginPath();
+  ctx.rect(x - s*0.22, y - s*1.32+bob, s*0.44, s*0.77);
+  fs('#E67E22', 3);
+  // Shadow strip on right
+  ctx.fillStyle = '#C05A10';
+  ctx.fillRect(x + s*0.05, y - s*1.32+bob, s*0.17, s*0.77);
+  cs(3);
+
+  // Safety stripes (flat)
+  ctx.fillStyle = CEL.yellow;
+  ctx.fillRect(x - s*0.22, y - s*0.98+bob, s*0.44, s*0.08);
+  cs(2);
+  ctx.fillStyle = CEL.yellow;
+  ctx.fillRect(x - s*0.22, y - s*0.74+bob, s*0.44, s*0.06);
+  cs(1.5);
+
+  // Arms
+  function celArm(ax, sw) {
+    ctx.beginPath();
+    ctx.rect(ax - s*0.06, y - s*1.28+bob+sw, s*0.15, s*0.42);
+    fs('#E67E22', 2.5);
+    ctx.fillStyle = '#C05A10';
+    ctx.fillRect(ax + s*0.02, y - s*1.28+bob+sw, s*0.07, s*0.42);
+    cs(2.5);
+  }
+  celArm(x - s*0.28, -leg*0.05);
+  celArm(x + s*0.13, leg*0.05);
+
+  // HEAD (big anime head)
+  ctx.beginPath();
+  ctx.ellipse(x, y - s*1.58+bob, s*0.25, s*0.28, 0, 0, Math.PI*2);
+  fs('#F5CBA7', 3);
+  // Head shadow (flat band)
+  ctx.fillStyle = '#D4A07A';
+  ctx.beginPath();
+  ctx.ellipse(x + s*0.08, y - s*1.52+bob, s*0.15, s*0.26, 0.3, 0, Math.PI*2);
+  ctx.fill();
+  cs(3);
+
+  // BIG ANIME EYES (flat)
+  function celEye(ex, ey) {
+    ctx.beginPath();
+    ctx.ellipse(ex, ey, s*0.08, s*0.1, 0, 0, Math.PI*2);
+    fs('#fff', 1.5);
+    ctx.beginPath();
+    ctx.ellipse(ex + s*0.01, ey, s*0.055, s*0.08, 0, 0, Math.PI*2);
+    fs('#1A252F', 1);
+    // Shine
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(ex - s*0.015, ey - s*0.03, s*0.02, 0, Math.PI*2);
+    ctx.fill();
+  }
+  celEye(x - s*0.1, y - s*1.6+bob);
+  celEye(x + s*0.1, y - s*1.6+bob);
+
+  // Mouth (anime simple)
+  ctx.beginPath();
+  ctx.arc(x, y - s*1.42+bob, s*0.08, 0.05*Math.PI, 0.95*Math.PI);
+  ctx.strokeStyle = '#C47A50';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // HELMET (big, flat anime)
+  ctx.beginPath();
+  ctx.arc(x, y - s*1.75+bob, s*0.3, Math.PI, 0);
+  fs(CEL.yellow, 3);
+  // Helmet shadow strip
+  ctx.fillStyle = '#CC9000';
+  ctx.beginPath();
+  ctx.arc(x+s*0.1, y-s*1.72+bob, s*0.25, Math.PI*0.05, Math.PI*0.9);
+  ctx.fill();
+  cs(3);
+  // Brim
+  ctx.beginPath();
+  ctx.rect(x - s*0.36, y - s*1.6+bob, s*0.72, s*0.08);
+  fs('#CC9000', 2.5);
+  // Helmet stripe
+  ctx.fillStyle = CEL.accent;
+  ctx.fillRect(x - s*0.28, y - s*1.82+bob, s*0.56, s*0.05);
+  cs(2);
+}
+
+// SAFETY CONE (CEL flat)
+function celCone(x, y) {
+  const s = 16;
+  ctx.beginPath();
+  ctx.moveTo(x, y - s*2.2);
+  ctx.lineTo(x - s*0.65, y);
+  ctx.lineTo(x + s*0.65, y);
+  ctx.closePath();
+  fs(CEL.drillco, 2.5);
+  // Shadow strip
+  ctx.fillStyle = '#CC4400';
+  ctx.beginPath();
+  ctx.moveTo(x, y-s*2.2);
+  ctx.lineTo(x+s*0.65, y);
+  ctx.lineTo(x, y);
+  ctx.closePath();
+  ctx.fill();
+  cs(2.5);
+  // White stripe
+  ctx.fillStyle = '#F2E8D4';
+  ctx.fillRect(x - s*0.55, y - s*0.95, s*1.1, s*0.22);
+  cs(1.5);
+}
+
+// SIGN
+function celSign(x, y) {
+  ctx.fillStyle = CEL.groundDark;
+  ctx.fillRect(x-3, y-H*0.11, 6, H*0.11);
+  cs(2.5);
+  ctx.beginPath();
+  ctx.rect(x-42, y-H*0.13, 84, 24);
+  fs(CEL.yellow, 3);
+  ctx.fillStyle = CEL.outline;
+  ctx.font = 'bold 10px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('DRILLCO® ZONA SEGURA', x, y-H*0.085);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  // BG
+  ctx.fillStyle = CEL.bg;
+  ctx.fillRect(0, 0, W, H);
+
+  drawCelSky();
+  drawCelGround();
+
+  const bY = H * 0.595;
+  celBuilding(W*0.13, bY, W*0.14, H*0.18, CEL.bldBrown, CEL.bldBrownShadow, 'TALLER', '🔧');
+  celBuilding(W*0.30, bY - H*0.015, W*0.16, H*0.22, CEL.bldGreen, CEL.bldGreenShadow, 'OFICINA', '📋');
+  celBuilding(W*0.74, bY, W*0.13, H*0.16, CEL.bldBlue, CEL.bldBlueShadow, 'BODEGA', '📦');
+
+  celRig(W * 0.54, H * 0.59);
+
+  // Safety
+  celCone(W*0.44, H*0.615);
+  celCone(W*0.63, H*0.615);
+  celSign(W*0.37, H*0.625);
+
+  // Character
+  charWalk3 += 0.55;
+  charX3 += 0.45;
+  if (charX3 > W * 0.62) charX3 = W * 0.28;
+  celChar(charX3, H * 0.62, charWalk3);
+
+  t++;
+  requestAnimationFrame(draw);
+}
+
+document.querySelectorAll('.nav-tab').forEach(el=>{
+  el.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-tab').forEach(e=>e.classList.remove('active'));
+    el.classList.add('active');
+  });
+});
+
+draw();
+</script>
+</body>
+</html>

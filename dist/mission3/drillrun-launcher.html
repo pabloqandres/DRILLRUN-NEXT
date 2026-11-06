@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DRILL RUN — Minigame Bridge</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#fff;font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh}
+.bridge{text-align:center;max-width:400px;padding:2rem}
+.bridge h1{font-size:1.4rem;margin-bottom:1rem;color:#f0c040}
+.bridge p{font-size:.9rem;opacity:.7;margin-bottom:1.5rem}
+iframe{border:none;width:100vw;height:100vh;position:fixed;top:0;left:0;z-index:10}
+</style>
+</head>
+<body>
+<div class="bridge" id="bridge">
+ <h1>DRILL RUN</h1>
+ <p>Minigame integration bridge — Phase 1 skeleton.<br>
+ The full minigame will be loaded here during gameplay via the drillrun-bridge.mjs module.</p>
+ <p style="font-size:.75rem;opacity:.5">Config received via postMessage from parent window.</p>
+</div>
+<script type="module">
+// Listen for config from parent (main game) window
+window.addEventListener('message',e=>{
+ if(e.data?.type==='drillrun-config'){
+  document.getElementById('bridge').innerHTML='<h1>Launching DRILL RUN...</h1><p>Config received: depth='+e.data.depth+'m, layers='+e.data.layers+'</p>';
+  // In production, this will redirect to the actual minigame with config params
+ }
+});
+// Notify parent we're ready
+if(window.parent!==window)window.parent.postMessage({type:'drillrun-ready'},'*');
+</script>
+</body>
+</html>

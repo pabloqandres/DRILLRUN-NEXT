@@ -1,0 +1,105 @@
+{
+  "hotfix": 3,
+  "camera": "Inspección cercana, fija",
+  "model": {
+    "vertices": 25406,
+    "triangles": 29998,
+    "normalizedError": 0.0009295516647398472,
+    "originalVertices": 311642,
+    "originalTriangles": 499880,
+    "bones": 21,
+    "materials": 1,
+    "height": 1.85,
+    "source": "Artlist GLB",
+    "fileBytes": 4703824
+  },
+  "stages": [
+    {
+      "stage": "Quieto",
+      "time": 0.08,
+      "position": {
+        "x": -0.8,
+        "z": 4.5
+      },
+      "distance": 0
+    },
+    {
+      "stage": "Caminar",
+      "time": 2.02,
+      "position": {
+        "x": -0.8,
+        "z": 4.5
+      },
+      "distance": 0
+    },
+    {
+      "stage": "Frenar",
+      "time": 4.307,
+      "position": {
+        "x": 2.3307946960672514,
+        "z": 4.5
+      },
+      "distance": 3.1307946960672517
+    },
+    {
+      "stage": "Girar 180°",
+      "time": 5.406,
+      "position": {
+        "x": 2.4201494245240163,
+        "z": 4.5
+      },
+      "distance": 3.2201494245240165
+    },
+    {
+      "stage": "Regresar",
+      "time": 6.7,
+      "position": {
+        "x": 2.4201494245240163,
+        "z": 4.5
+      },
+      "distance": 3.2201494245240165
+    },
+    {
+      "stage": "Detenerse",
+      "time": 9.006,
+      "position": {
+        "x": -0.7196899475968529,
+        "z": 4.5
+      },
+      "distance": 6.359988796644886
+    },
+    {
+      "stage": "Joystick circular",
+      "time": 10.041,
+      "position": {
+        "x": -0.8032285406072578,
+        "z": 4.5
+      },
+      "distance": 6.443527389655291
+    },
+    {
+      "stage": "Reposo final",
+      "time": 15.025,
+      "position": {
+        "x": -0.1311176426264472,
+        "z": 4.445527272361079
+      },
+      "distance": 9.923153309285576
+    }
+  ],
+  "statesSeen": {
+    "Idle": 115,
+    "Walk": 250,
+    "Turn": 26
+  },
+  "metrics": {
+    "distance": 9.972618795239798,
+    "steps": 14,
+    "phaseTravel": 7.176658056720428,
+    "soleProbes": 352
+  },
+  "durationSeconds": 17.357299999999814,
+  "simulationUpdatesPerSecond": 22.526545027164605,
+  "renderer": "Canvas 2D compatible",
+  "note": "Prueba de integración. Sin anclajes mundiales de pies. Turn es una adaptación corta de la caminata, no captura de un pivote dedicado."
+}

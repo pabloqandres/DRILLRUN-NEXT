@@ -1,0 +1,7 @@
+DRILL RUN · HSEC V4 — APROBADOS
+
+6 pictogramas originales: Infraestructura, Movilidad, Delimitación, Iluminación, Emergencias, Inspecciones.
+SVG vectoriales con viewBox 32 × 32, trazo 2,25, extremos y uniones redondeados.
+Variantes Blanco y Neón comparten exactamente la misma geometría.
+PNG 1024 × 1024 con transparencia. Sin marcos, fondos ni pines incorporados.
+Los colores indican categorías HSEC, no prioridades de misión.

@@ -1,0 +1,11 @@
+/* A roof-linked world callout, never a viewport-centred player HUD. */
+#buildHud.constructionWorldTag{position:absolute;transform:none;left:0;top:0;width:350px;min-width:0;max-width:calc(100vw - 24px);min-height:66px;gap:9px;padding:8px 10px;display:flex;align-items:center;background:linear-gradient(135deg,#153754e8,#0c223ae6);border:1px solid #91dcffb3;border-radius:12px;box-shadow:inset 0 1px #ecfaff40,0 3px 16px #051a2a55;overflow:visible;z-index:7;pointer-events:auto}
+#buildHud.constructionWorldTag[hidden]{display:none!important}
+#buildHud.constructionWorldTag>div{width:auto;flex:1;min-width:0}
+.constructionTargetName{display:block;font-size:11px;line-height:1.15;color:#f3f9ff;margin-bottom:4px;white-space:normal}
+#buildHud.constructionWorldTag b{font-size:9px;color:#d6e6f0}#buildHud.constructionWorldTag #buildTime{font-size:10px;color:#ffe087;margin-left:5px}
+#buildHud.constructionWorldTag progress{height:3px;margin:4px 0 0;width:100%}
+#buildHud.constructionWorldTag>span{display:none}
+#buildHud.constructionWorldTag button{width:115px;max-width:115px;flex:none;min-height:42px;font-size:9px;padding:6px;line-height:1.2}
+.constructionTether{position:absolute;height:1px;background:#a2e6ff;transform-origin:0 50%;box-shadow:0 0 4px #54cfff88;pointer-events:none}.constructionTether::after{content:'';position:absolute;right:-2px;top:-2px;width:5px;height:5px;border-radius:50%;background:#d5f5ff;box-shadow:0 0 6px #68dfff}
+@media(max-width:700px){#buildHud.constructionWorldTag{width:300px;padding:7px 9px;gap:7px;min-height:63px}.constructionTargetName{font-size:10px}#buildHud.constructionWorldTag button{width:103px;max-width:103px;font-size:8px}#buildHud.constructionWorldTag #buildTime{font-size:9px}}

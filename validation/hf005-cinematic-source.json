@@ -1,0 +1,14 @@
+{
+  "sourceName": "male_mining_worker_model_37543_Seedance_25.mp4",
+  "runtimeFile": "dist/cinematics/avatar01-seedance.mp4",
+  "bytes": 14395838,
+  "sha256": "ea686c0ab59d893edb584f1027e59200772f5ab09111be8b0265046e7985f4e1",
+  "durationSeconds": 13.056,
+  "width": 1280,
+  "height": 720,
+  "fps": 24,
+  "videoCodec": "h264",
+  "audioCodec": "aac",
+  "unalteredCopy": true,
+  "avatar": "operator01"
+}

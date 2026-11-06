@@ -1,0 +1,196 @@
+/* ═══ DRILL RUN · BUILDER CATALOG ═══ Glassmorphism with margins ═══ */
+#builderPanel.catalogTray{--glow:#2dccff;--glow-gold:#ffc83d;position:absolute;left:var(--safe-left,16px);right:var(--safe-right,16px);bottom:max(16px,env(safe-area-inset-bottom));width:auto;max-width:none;box-sizing:border-box;margin:0;height:clamp(225px,46svh,295px);max-height:58svh;padding:0;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);grid-template-areas:'header header' 'products summary';gap:0;background:linear-gradient(180deg,#0a1a28e8,#060e16ee);border:1px solid #2dccff33;border-radius:16px;box-shadow:0 -4px 24px #0008,0 0 1px #2dccff44;backdrop-filter:blur(20px) saturate(1.3);-webkit-backdrop-filter:blur(20px) saturate(1.3);color:#e8f4ff;overflow:hidden}
+#builderPanel.catalogTray.hidden{display:none}
+
+/* ── Header ── */
+.catalogHeader{grid-area:header;display:flex;align-items:center;gap:0;min-width:0;min-height:0;padding:0;background:linear-gradient(180deg,#0f1f2e44,#0a162033);border-bottom:1px solid #2dccff22;position:relative;z-index:1;border-radius:16px 16px 0 0}
+
+/* ── Brand — hard hat + "Constructor" ── */
+.catalogBrand{display:flex!important;align-items:center;gap:10px;padding:10px 20px;min-width:0;flex:none;border-right:1px solid #2dccff22;position:relative}
+.catalogBrand>.uiIcon{width:30px;height:30px;flex:none;color:#ffc83d;filter:drop-shadow(0 0 8px #ffc83d88) drop-shadow(0 0 3px #ffc83d55)}
+.catalogBrand b{font-size:13px;font-weight:800;color:#ffd960;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;text-shadow:0 0 12px #ffc83d66}
+
+/* ── Category tabs ── */
+.catalogCategories{display:flex;gap:0;min-width:0;flex:1;overflow-x:auto;scrollbar-width:none;padding:0 6px;align-items:stretch;touch-action:pan-x}
+#builderPanel .catalogCategories button{flex:0 0 auto;min-width:0;min-height:44px;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;border-radius:0;border:none;border-bottom:3px solid transparent;border-right:1px solid #2dccff15;background:transparent;color:#6a9cad;font-size:11px;font-weight:650;line-height:1.15;white-space:nowrap;box-shadow:none;transition:color .25s,border-color .25s,text-shadow .25s}
+#builderPanel .catalogCategories button:last-child{border-right:none}
+#builderPanel .catalogCategories button:hover{color:#b8e0f0;text-shadow:0 0 8px #2dccff44}
+.catalogCategories button>.uiIcon{width:18px;height:18px;flex:none;transition:filter .25s}
+#builderPanel .catalogCategories button.selected{color:#ffe99e;border-bottom-color:#ffc83d;font-weight:800;text-shadow:0 0 14px #ffc83d55;background:linear-gradient(0deg,#ffc83d08,transparent 60%)}
+#builderPanel .catalogCategories button.selected>.uiIcon{filter:drop-shadow(0 0 6px #ffc83d77)}
+.catalogCategories::-webkit-scrollbar,.catalogProducts::-webkit-scrollbar{display:none}
+
+/* ── Close / collapse ── */
+#builderPanel .catalogClose{width:44px;height:44px;min-height:44px;flex:none;padding:10px;border:none;border-radius:0;background:transparent;display:grid;place-items:center;color:#4a8a9e;border-left:1px solid #2dccff18;transition:color .2s}
+#builderPanel .catalogClose:hover{color:#2dccff;text-shadow:0 0 8px #2dccff88}
+
+/* ── Summary panel (right) ── */
+.catalogSummary{grid-area:summary;display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:8px;padding:14px 18px;min-width:0;min-height:0;border-left:1px solid #2dccff22;background:linear-gradient(180deg,#0c1a2800,#0a141e88);overflow-y:auto;scrollbar-width:thin;position:relative;touch-action:pan-y}
+.catalogSummary::before{content:'';position:absolute;left:0;top:15%;bottom:15%;width:1px;background:linear-gradient(180deg,transparent,#2dccff44,transparent);filter:blur(2px)}
+.catalogSummaryText{min-width:0;flex:none}.catalogSummaryText b{font-size:21px;line-height:1.12;display:block;color:#fff;letter-spacing:-.3px;font-weight:800;text-shadow:0 1px 6px #00000066}.catalogSummaryText p{font-size:12px;line-height:1.3;color:#7aabb8;margin:5px 0 0}
+
+/* ── Price / quote ── */
+.catalogQuote{display:flex;align-items:center;gap:14px;flex:none;line-height:1.1}
+.catalogQuote .buildCost{font-size:26px;font-weight:800;color:#ffd960;gap:8px;text-shadow:0 0 14px #ffc83d55}
+.catalogQuote .buildCost>.uiIcon{width:25px;height:25px;filter:drop-shadow(0 0 6px #ffc83d88)}
+.catalogTime{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;color:#7aabb8;font-size:13px}
+.catalogTime>.uiIcon{width:18px;height:18px;flex:none}
+.catalogRequirement{display:flex;gap:6px;align-items:center;color:#5a8a9a;font-size:11px;line-height:1.2;margin:0;flex:none}
+.catalogRequirement>.uiIcon{width:15px;height:15px;flex:none;color:#4a7a8a}
+
+/* ── Action buttons ── */
+.catalogSummaryActions{display:flex;gap:8px;flex:none;margin-top:auto;padding-top:8px;position:sticky;bottom:0;background:linear-gradient(0deg,#0a141eee 60%,#0a141e00);z-index:1}
+#builderPanel .catalogDetailsToggle,#builderPanel #catalogPurchase{min-height:44px;display:flex;align-items:center;justify-content:center;gap:7px;border-radius:8px;font-size:12px;line-height:1.15;padding:9px 16px;flex:1;min-width:0;white-space:normal;font-weight:700;position:relative;overflow:hidden}
+#builderPanel .catalogDetailsToggle{border:1px solid #2dccff44;background:linear-gradient(180deg,#0f2a3a,#0a1e2c);color:#8ac8d8;transition:border-color .2s,box-shadow .2s}
+#builderPanel .catalogDetailsToggle:hover{border-color:#2dccff88;box-shadow:0 0 12px #2dccff22,inset 0 0 12px #2dccff08}
+.catalogDetailsToggle>.uiIcon,#catalogPurchase>.uiIcon{width:20px;height:20px;flex:none}
+#builderPanel .catalogDetailsToggle[aria-expanded=true]{border-color:#2dccff;box-shadow:0 0 14px #2dccff33,inset 0 0 14px #2dccff0a}
+
+/* ── BUY button — golden glow ── */
+#builderPanel #catalogPurchase{background:linear-gradient(180deg,#ffe080,#e8a820);color:#1a2830;border:1px solid #ffdd66;font-weight:800;box-shadow:0 0 18px #ffc83d55,0 0 6px #ffc83d33,inset 0 1px #ffffff88;text-shadow:0 1px 0 #ffffff44;letter-spacing:.4px}
+#builderPanel #catalogPurchase::after{content:'';position:absolute;inset:-1px;border-radius:inherit;background:linear-gradient(180deg,#ffffff33,transparent 50%);pointer-events:none}
+#builderPanel #catalogPurchase:hover{background:linear-gradient(180deg,#ffea99,#f0b830);box-shadow:0 0 28px #ffc83d77,0 0 10px #ffc83d44}
+#builderPanel #catalogPurchase:disabled{background:linear-gradient(180deg,#1a2e3c,#142430);border-color:#2a4a5c;color:#4a6a78;opacity:1;box-shadow:none;text-shadow:none}
+#builderPanel #catalogPurchase:disabled::after{display:none}
+
+/* ── Product rail ── */
+.constructionRail{grid-area:products;display:flex;gap:6px;align-items:stretch;min-height:0;min-width:0;padding:10px 10px;position:relative;z-index:1}
+#builderPanel .catalogStep{flex:0 0 28px;align-self:center;height:52px;min-height:52px;border:1px solid #2dccff33;background:#0a1a2888;border-radius:8px;display:grid;place-items:center;color:#4a8a9e;padding:4px;transition:all .2s}
+#builderPanel .catalogStep:hover{border-color:#2dccff88;color:#2dccff;box-shadow:0 0 10px #2dccff22}
+.catalogStep .uiIcon{width:18px;height:18px}.catalogStep:disabled{display:none!important}
+
+/* ── Product cards ── */
+.catalogProducts{min-width:0;min-height:0;flex:1;display:flex;align-items:stretch;gap:10px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;scrollbar-width:none;padding:2px 6px 4px;overscroll-behavior-x:contain;touch-action:pan-x}
+#builderPanel .catalogProduct{min-width:0;width:158px;flex:0 0 158px;height:100%;min-height:0;display:flex;flex-direction:column;align-items:stretch;position:relative;text-align:left;padding:6px 10px 9px;border:1px solid #2a4a5c;border-radius:12px;background:linear-gradient(170deg,#12283a,#0a1822);color:white;gap:3px;scroll-snap-align:start;transition:border-color .25s,box-shadow .25s,transform .15s}
+#builderPanel .catalogProduct:hover{border-color:#2dccff55;box-shadow:0 0 12px #2dccff15;transform:translateY(-2px)}
+#builderPanel .catalogProduct.selected{border-color:#ffc83d;box-shadow:0 0 0 1px #ffc83daa,0 0 20px #ffc83d33,inset 0 0 16px #ffc83d0a;background:linear-gradient(170deg,#1a3248,#102030)}
+#builderPanel .catalogProduct.selected::before{content:'';position:absolute;inset:-1px;border-radius:inherit;border:1px solid #ffc83d55;pointer-events:none;filter:blur(2px)}
+#builderPanel .catalogProduct.locked{opacity:.45}
+
+/* ── Product thumbnail ── */
+.catalogArt{position:relative;display:flex;align-items:center;justify-content:center;flex:1;min-height:42px;width:100%;overflow:hidden;background:radial-gradient(ellipse at 50% 60%,#ffffff08,transparent 70%);border-radius:8px}
+.catalogArt>img{display:block;width:100%;height:100%;position:absolute;inset:0;object-fit:contain;object-position:center;padding:4px 6px;filter:drop-shadow(0 3px 6px #000000aa)}
+.catalogArt>.uiIcon{width:38px;height:38px;opacity:.3}
+.catalogArt i{position:absolute;right:3px;top:3px;background:#0a1822dd;padding:4px;border-radius:6px;color:#5a8a9a;z-index:1;display:flex}
+.catalogArt i>.uiIcon{width:13px;height:13px}
+
+/* ── Product text ── */
+.catalogName{display:block;flex:none;font-size:13px;font-weight:750;line-height:1.12;overflow-wrap:normal;color:#e0f0ff;letter-spacing:-.1px}
+.catalogLevel{font-size:10px;line-height:1.1;color:#4a7a8a;flex:none;font-weight:600}
+
+/* ── Empty state ── */
+.constructionEmpty{display:flex;align-items:center;gap:14px;width:100%;padding:14px 20px;border:1px dashed #2dccff33;border-radius:12px;color:#6a9aaa;font-size:13px;background:#0a182208}
+.constructionEmpty>.uiIcon{width:32px;height:32px;filter:drop-shadow(0 0 6px #2dccff44)}
+.constructionEmpty b{flex:1}
+.constructionEmpty button{min-height:44px;max-width:170px}
+#builderPanel.catalogTray:has(.constructionEmpty){grid-template-columns:1fr;grid-template-areas:'header' 'products'}
+
+/* ── Detail panel ── */
+.catalogInlineDetails{grid-area:products;display:flex;min-width:0;min-height:0;gap:14px;padding:12px 16px;background:#0a182208;border:1px solid #2dccff22;border-radius:12px;overflow-y:auto;scrollbar-width:thin;margin:8px;touch-action:pan-y}
+.catalogDetailVisual{flex:0 0 35%;min-width:80px;min-height:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#ffffff08,transparent 70%);border-radius:10px}
+.catalogDetailVisual>img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 4px 8px #000000aa);padding:8px}
+.catalogDetailVisual>.uiIcon{width:38px;height:38px;opacity:.3}
+.catalogFacts{display:grid;grid-template-columns:1fr 1fr;gap:9px 14px;align-content:center;margin:0;flex:1;min-width:0}
+.catalogFacts>div{min-width:0}
+.catalogFacts dt{font-size:9px;color:#4a7a8a;margin:0 0 3px;text-transform:uppercase;letter-spacing:.6px;font-weight:700}
+.catalogFacts dd{font-size:12px;color:#c8e0f0;margin:0;font-weight:700;line-height:1.25;overflow-wrap:anywhere}
+.catalogFacts>div:last-child{grid-column:1/-1}
+.catalogFacts>div:last-child dd{font-weight:400;font-size:11px;color:#6a9aaa}
+
+#builderPanel.catalogTray button:focus-visible{outline:2px solid #2dccff;outline-offset:-2px}
+
+/* ══ Desktop ══ */
+@media(min-width:1100px) and (min-height:650px){
+ #builderPanel.catalogTray{height:clamp(245px,34svh,315px)}
+ .catalogBrand b{font-size:15px;letter-spacing:1.5px}
+ .catalogBrand>.uiIcon{width:34px;height:34px}
+ .catalogCategories button>.uiIcon{width:20px;height:20px}
+ #builderPanel .catalogCategories button{font-size:12px;min-height:48px;padding:12px 18px;gap:8px}
+ .catalogSummary{gap:12px;padding:18px 24px}
+ .catalogSummaryText b{font-size:28px}
+ .catalogSummaryText p{font-size:15px}
+ .catalogQuote .buildCost{font-size:32px}
+ .catalogTime{font-size:16px}
+ .catalogRequirement{font-size:13px}
+ #builderPanel .catalogDetailsToggle,#builderPanel #catalogPurchase{min-height:48px;font-size:15px;padding:10px 20px}
+ #builderPanel .catalogProduct{width:180px;flex-basis:180px}
+ .catalogName{font-size:17px}
+ .catalogLevel{font-size:13px}
+}
+
+/* ══ Mobile ══ */
+@media(max-width:760px){
+ #builderPanel.catalogTray{height:205px;grid-template-rows:auto minmax(0,1fr)}
+ .catalogBrand{padding:6px 12px;gap:7px}
+ .catalogBrand b{font-size:10px;letter-spacing:.8px}
+ .catalogBrand>.uiIcon{width:22px;height:22px}
+ .catalogCategories{gap:0;padding:0 4px}
+ #builderPanel .catalogCategories button{font-size:9px;padding:5px 8px;gap:4px;min-height:38px}
+ .catalogCategories button>.uiIcon{width:16px;height:16px}
+ .catalogHeader{gap:0;padding:0}
+ #builderPanel .catalogClose{width:38px;height:38px;min-height:38px}
+ .catalogSummary{padding:8px 12px;gap:6px}
+ .catalogSummaryText b{font-size:17px}
+ .catalogSummaryText p{font-size:10px;margin-top:4px}
+ .catalogQuote{gap:8px}
+ .catalogQuote .buildCost{font-size:20px;gap:5px}
+ .catalogQuote .buildCost>.uiIcon{width:20px;height:20px}
+ .catalogTime{font-size:11px;gap:3px}
+ .catalogTime>.uiIcon{width:15px;height:15px}
+ .catalogRequirement{font-size:9px}
+ #builderPanel .catalogDetailsToggle,#builderPanel #catalogPurchase{font-size:11px;padding:6px 10px;gap:5px;min-height:38px}
+ .catalogDetailsToggle>.uiIcon,#catalogPurchase>.uiIcon{width:17px;height:17px}
+ .catalogSummaryActions{gap:6px}
+ .catalogProducts{gap:8px;padding:2px 4px 4px}
+ #builderPanel .catalogProduct{width:132px;flex-basis:132px;padding:4px 7px 7px}
+ .catalogName{font-size:11px}
+ .catalogLevel{font-size:9px}
+ .catalogFacts dt{font-size:8px}
+ .catalogFacts dd,.catalogFacts>div:last-child dd{font-size:10px}
+ .catalogDetailVisual{flex-basis:28%}
+ .constructionRail{padding:6px}
+}
+
+@media(max-height:350px){
+ #builderPanel.catalogTray{height:195px;max-height:60svh}
+ .catalogBrand{display:none!important}
+ .catalogSummary{gap:5px;padding:6px 8px}
+ .catalogSummaryText b{font-size:14px}
+ .catalogSummaryText p{font-size:9px;margin-top:3px}
+ .catalogName{font-size:10px}
+ .catalogRequirement{font-size:8px}
+ .catalogSummaryActions{min-height:34px}
+ #builderPanel .catalogDetailsToggle,#builderPanel #catalogPurchase{min-height:34px}
+ .catalogQuote .buildCost{font-size:17px}
+ .catalogArt{min-height:28px}
+}
+
+@media(prefers-reduced-transparency:reduce){#builderPanel.catalogTray{background:#080e16fa;backdrop-filter:none}}
+
+/* ── Collapsing ── */
+.catalogCollapsedTitle{display:none}
+#builderPanel .catalogCollapse{flex:none;width:44px;height:44px;min-height:44px;display:grid;place-items:center;padding:10px;border:none;border-radius:0;color:#4a8a9e;background:transparent;border-left:1px solid #2dccff18}
+#builderPanel .catalogCollapse:hover{color:#2dccff}
+.catalogCollapse>.uiIcon{width:20px;height:20px;transform:rotate(-90deg);transition:transform .2s ease}
+#builderPanel.catalogTray.catalogCollapsed{height:50px;min-height:50px;max-height:none;padding:0 14px;display:flex;gap:0;border-radius:14px;align-items:stretch}
+#builderPanel.catalogCollapsed .catalogHeader{flex:1;min-width:0;gap:8px}
+#builderPanel.catalogCollapsed .catalogCategories,#builderPanel.catalogCollapsed .constructionRail,#builderPanel.catalogCollapsed .catalogInlineDetails{display:none}#builderPanel.catalogCollapsed .catalogSummary{display:none}
+#builderPanel.catalogCollapsed .catalogBrand{display:none!important}
+.catalogCollapsed .catalogCollapsedTitle{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.catalogCollapsedTitle b{font-size:14px;line-height:1.15;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:800}
+.catalogCollapsedTitle .catalogDetailsToggle,.catalogCollapsedTitle .primary{display:none}
+.catalogCollapsed .catalogCollapsedTitle .catalogDetailsToggle,.catalogCollapsed .catalogCollapsedTitle .primary{display:flex;align-items:center;gap:5px;min-height:34px;padding:6px 12px;font-size:11px;font-weight:700;border-radius:8px;flex:none;white-space:nowrap}
+.catalogCollapsed .catalogCollapsedTitle .catalogDetailsToggle{border:1px solid #2dccff44;background:#0f2a3a;color:#8ac8d8}
+.catalogCollapsed .catalogCollapsedTitle .primary{background:linear-gradient(180deg,#ffe080,#e8a820);color:#1a2830;border:1px solid #ffdd66;font-weight:800;box-shadow:0 0 12px #ffc83d44}
+.catalogCollapsedTitle .buildCost{font-size:15px;font-weight:700;flex:none;text-shadow:0 0 8px #ffc83d44}
+.catalogCollapsedTitle .uiIcon{width:18px;height:18px}
+.catalogCollapsed .catalogCollapse>.uiIcon{transform:rotate(90deg)}
+
+@media(max-width:700px){
+ .catalogHeader{gap:0;padding:0}
+ #builderPanel .catalogCollapse{width:38px;height:38px;min-height:38px;padding:8px}
+ .catalogCollapsedTitle b{font-size:12px}
+ .catalogCollapsed .catalogCollapsedTitle{gap:10px}
+ .catalogCollapsedTitle .buildCost{font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){.catalogCollapse>.uiIcon{transition:none}}

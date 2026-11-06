@@ -1,0 +1,32 @@
+[
+  {
+    "avatar": "operator02",
+    "sourceFile": "01-Avatar2.glb",
+    "sourceSHA256": "285aa7002166159b6373b86227b769c591b0f12546dc8df791d7b1057e05b511",
+    "sourceBytes": 50224744,
+    "runtimeFile": "dist/assets3d/operator-02.glb",
+    "runtimeSHA256": "11ba8dabe97db38f7e95826610d9bd6b31ebffe52ac20fe2d8c83a7fcd66ea20",
+    "runtimeBytes": 4483892,
+    "height": 1.83
+  },
+  {
+    "avatar": "operator03",
+    "sourceFile": "02-Avatar-3.glb",
+    "sourceSHA256": "33db339abe14e933b03849bee4db7f7b336c00e8800e18bab3bd1593967a25f7",
+    "sourceBytes": 52504888,
+    "runtimeFile": "dist/assets3d/operator-03.glb",
+    "runtimeSHA256": "a7e18f0b50a67109dfc3ad4a5178587351219d997ca8410ec4d3287ec5a3e3a2",
+    "runtimeBytes": 4766316,
+    "height": 1.88
+  },
+  {
+    "avatar": "operator04",
+    "sourceFile": "03-Avatar-4.glb",
+    "sourceSHA256": "33ad400ac8c9da4ed2ee5e55d91a86932052daffeabc99d5935eac1f82061aab",
+    "sourceBytes": 52813340,
+    "runtimeFile": "dist/assets3d/operator-04.glb",
+    "runtimeSHA256": "717bbb476a3ebc077dc83119c1b7b366ea99cac7f6d3cbbdb14b7240bd5c78b6",
+    "runtimeBytes": 4845104,
+    "height": 1.66
+  }
+]

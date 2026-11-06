@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE DRILL RUN — Next Generation · Exploración Visual</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0A0E1A;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: #fff;
+    min-height: 100vh;
+  }
+  header {
+    text-align: center;
+    padding: 48px 24px 32px;
+    border-bottom: 1px solid #1E2A40;
+  }
+  .logo-text {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #FF6B00;
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 900;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #FFD700, #FF6B00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  .subtitle {
+    color: #6B8AB0;
+    font-size: 14px;
+    max-width: 540px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+    padding: 40px 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .card {
+    background: #0F1627;
+    border: 1px solid #1E2A40;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+    cursor: pointer;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: #FF6B00;
+  }
+  .card-preview {
+    width: 100%;
+    aspect-ratio: 16/9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-preview.iso { background: linear-gradient(135deg, #1B4332, #2D6A4F, #C4956A); }
+  .card-preview.cartoon { background: linear-gradient(135deg, #FF006E, #FB5607, #FFBE0B); }
+  .card-preview.real { background: linear-gradient(135deg, #1B3A6B, #2C5F8A, #8B6914); }
+  .card-preview.cel { background: linear-gradient(135deg, #2D1B69, #5A4FCF, #F72585); }
+  .card-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(0,0,0,0.7);
+    color: #FFD700;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+  }
+  .card-rec {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #FF6B00;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+  }
+  .card-body { padding: 20px; }
+  .card-num {
+    font-size: 11px;
+    color: #FF6B00;
+    letter-spacing: 2px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .card-title {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: #fff;
+  }
+  .card-desc {
+    font-size: 13px;
+    color: #6B8AB0;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .tag {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .tag.green { background: #1B4332; color: #52B788; }
+  .tag.yellow { background: #3D3000; color: #FFD700; }
+  .tag.red { background: #3D0000; color: #FF6B6B; }
+  .card-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #FF6B00, #FFD700);
+    color: #000;
+    font-weight: 800;
+    font-size: 13px;
+    text-align: center;
+    border-radius: 10px;
+    text-decoration: none;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: opacity 0.2s;
+  }
+  .card-btn:hover { opacity: 0.85; }
+  footer {
+    text-align: center;
+    padding: 32px;
+    color: #2A3A50;
+    font-size: 12px;
+    border-top: 1px solid #1E2A40;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-text">DRILLCO® · Exploración Visual 2025</div>
+  <h1>THE DRILL RUN<br>NEXT GENERATION</h1>
+  <p class="subtitle">Cuatro propuestas visuales para el nuevo juego. Cada mockup es interactivo — ábrelo en tu teléfono en horizontal para ver el feeling real.</p>
+</header>
+
+<div class="grid">
+
+  <div class="card">
+    <div class="card-preview iso">
+      <span style="font-size:64px">⛏️</span>
+      <div class="card-badge">Propuesta 3</div>
+      <div class="card-rec">★ Recomendada</div>
+    </div>
+    <div class="card-body">
+      <div class="card-num">01 / 04</div>
+      <div class="card-title">Isométrico 2.5D Ilustrado</div>
+      <div class="card-desc">Vista isométrica con tiles dibujados en Canvas. Paleta cálida, mundo vivo, legible en pantalla pequeña. Referencia: Monument Valley + Sunday City.</div>
+      <div class="card-tags">
+        <span class="tag green">Más viable</span>
+        <span class="tag green">Sunday City feel</span>
+        <span class="tag yellow">Requiere ilustrador</span>
+      </div>
+      <a href="mockups/01-isometrico.html" class="card-btn">Ver mockup →</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-preview cartoon">
+      <span style="font-size:64px">💥</span>
+      <div class="card-badge">Propuesta 2</div>
+    </div>
+    <div class="card-body">
+      <div class="card-num">02 / 04</div>
+      <div class="card-title">Cartoon Bold / Supercell Style</div>
+      <div class="card-desc">Proporciones exageradas, bordes gruesos, colores saturados. Reconocible al instante en pantalla pequeña. Referencia: Brawl Stars, Clash of Clans.</div>
+      <div class="card-tags">
+        <span class="tag green">Muy reconocible</span>
+        <span class="tag green">Animaciones económicas</span>
+        <span class="tag yellow">Requiere artista 2D</span>
+      </div>
+      <a href="mockups/02-cartoon.html" class="card-btn">Ver mockup →</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-preview real">
+      <span style="font-size:64px">🏔️</span>
+      <div class="card-badge">Propuesta 1</div>
+    </div>
+    <div class="card-body">
+      <div class="card-num">03 / 04</div>
+      <div class="card-title">3D Estilizado Realista</div>
+      <div class="card-desc">Proporciones humanas, materiales suaves, iluminación cálida. El más premium visualmente. Referencia: estudio indie con Unity URP.</div>
+      <div class="card-tags">
+        <span class="tag yellow">Más premium</span>
+        <span class="tag red">Requiere modelador 3D</span>
+        <span class="tag red">Mayor costo</span>
+      </div>
+      <a href="mockups/03-realista.html" class="card-btn">Ver mockup →</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-preview cel">
+      <span style="font-size:64px">✨</span>
+      <div class="card-badge">Propuesta 4</div>
+    </div>
+    <div class="card-body">
+      <div class="card-num">04 / 04</div>
+      <div class="card-title">Cel Shading / Anime</div>
+      <div class="card-desc">Sombreado plano con líneas duras, paleta limitada, aspecto de animación. Muy distintivo. Referencia: Wind Waker, Genshin Impact simplificado.</div>
+      <div class="card-tags">
+        <span class="tag yellow">Muy distintivo</span>
+        <span class="tag yellow">Requiere shader 3D</span>
+        <span class="tag red">Más complejo</span>
+      </div>
+      <a href="mockups/04-celshading.html" class="card-btn">Ver mockup →</a>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  THE DRILL RUN NEXT GENERATION · DRILLCO® · Exploración visual — no programar todavía
+</footer>
+
+</body>
+</html>

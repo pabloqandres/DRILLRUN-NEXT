@@ -1,0 +1,8 @@
+import * as T from '../vendor/three.module.js';
+export function createAtmosphere(w){
+ const canvas=document.createElement('canvas');canvas.width=8;canvas.height=256;const ctx=canvas.getContext('2d'),gradient=ctx.createLinearGradient(0,0,0,256);gradient.addColorStop(0,'#5b9dd5');gradient.addColorStop(.55,'#a6cce6');gradient.addColorStop(1,'#ead7bd');ctx.fillStyle=gradient;ctx.fillRect(0,0,8,256);const sky=new T.CanvasTexture(canvas);sky.colorSpace=T.SRGBColorSpace;w.scene.background=sky;
+ const dustGeometry=new T.BufferGeometry(),positions=new Float32Array(24*3);for(let i=0;i<24;i++){positions[i*3]=-12+(i*7.43%15);positions[i*3+1]=.3+(i*.31%1.7);positions[i*3+2]=-6+(i*3.73%14);}dustGeometry.setAttribute('position',new T.BufferAttribute(positions,3));
+ const spriteCanvas=document.createElement('canvas');spriteCanvas.width=spriteCanvas.height=32;const c=spriteCanvas.getContext('2d'),g=c.createRadialGradient(16,16,0,16,16,16);g.addColorStop(0,'rgba(255,230,190,.35)');g.addColorStop(1,'rgba(255,230,190,0)');c.fillStyle=g;c.fillRect(0,0,32,32);const map=new T.CanvasTexture(spriteCanvas);
+ const dust=new T.Points(dustGeometry,new T.PointsMaterial({color:0xf5c68c,size:.18,map,transparent:true,opacity:.24,depthWrite:false,blending:T.NormalBlending}));dust.name='wind-dust';dust.userData.isWorker=true;w.scene.add(dust);w.dust=dust;
+ w.animateAtmosphere=time=>{const a=dust.geometry.attributes.position;for(let i=0;i<a.count;i++){a.setX(i,-12+((i*7.43+time*.13)%15));a.setY(i,.3+(i*.31%1.7)+Math.sin(time*.3+i)*.04);}a.needsUpdate=true;};
+}
