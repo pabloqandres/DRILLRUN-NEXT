@@ -224,6 +224,10 @@ export class HsecWorld{
   const paintOrder=[...mergeChains('vehicle').map(pts=>({type:'vehicle',points:pts})),...mergeChains('pedestrian').map(pts=>({type:'pedestrian',points:pts}))];
   for(const a of paintOrder){const d=assetDefinition(a.type),pts=a.points;
    ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+   // Gravel shoulders add a premium road edge without changing navigation geometry.
+   ctx.globalAlpha=.42;ctx.lineWidth=tw(d.w+.76);
+   ctx.strokeStyle=d.id==='vehicle'?'#927f69':'#9c9783';
+   tracePath(ctx,pts);ctx.stroke();ctx.globalAlpha=1;
    // 1) Dark edge/shoulder stroke (widest)
    ctx.lineWidth=tw(d.w+.4);
    ctx.strokeStyle=d.id==='vehicle'?'#2a2d2a':'#3a4a42';
@@ -232,15 +236,15 @@ export class HsecWorld{
    if(d.id==='vehicle'){ctx.lineWidth=tw(d.w+.1);ctx.strokeStyle='#d0d4d0';tracePath(ctx,pts);ctx.stroke();}
    // 3) Road surface stroke
    ctx.lineWidth=tw(d.w);
-   ctx.strokeStyle=d.id==='vehicle'?'#505550':'#8a9590';
+   ctx.strokeStyle=d.id==='vehicle'?'#535e63':'#9ba8a5';
    tracePath(ctx,pts);ctx.stroke();
    // 4) Subtle worn center
    ctx.lineWidth=tw(d.w*.35);ctx.globalAlpha=.15;
-   ctx.strokeStyle=d.id==='vehicle'?'#626862':'#9aa8a0';
+   ctx.strokeStyle=d.id==='vehicle'?'#6f7a7b':'#cad0c5';
    tracePath(ctx,pts);ctx.stroke();ctx.globalAlpha=1;
    // 5) Center dashed line
    ctx.setLineDash([tw(.45),tw(.45)]);ctx.lineWidth=tw(.06);
-   ctx.strokeStyle=d.id==='vehicle'?'#c8a030':'#c8ccc8';
+   ctx.strokeStyle=d.id==='vehicle'?'#f0c46b':'#e8efdf';
    tracePath(ctx,pts);ctx.stroke();
    // 6) Pedestrian edge dashes
    if(d.id==='pedestrian'){ctx.lineWidth=tw(d.w+.08);ctx.strokeStyle='#c8ccc8';tracePath(ctx,pts);ctx.stroke();}
