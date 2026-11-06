@@ -1,5 +1,17 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-06 — Hotfix Catálogo + DrillTruck + Economía M4 (ChatGPT)
+
+- **Branch:** `chatgpt/catalog-camera-and-category-scroll-fix`.
+- Files: `dist/chapter/game.mjs`, `dist/chapter/catalog-view.mjs`, `dist/mission4/production.mjs`, `dist/mission4/offline-progress.mjs`, `tests/mission4-economy.test.mjs`.
+- Camera: preserve player view when opening, collapsing and switching Catalog. Special builder camera only for real HSEC placement and office management.
+- Category tabs: preserve horizontal scroll and reveal selected category (e.g., Seguridad).
+- DrillTruck: silence repeated automatic maintenance round toast without stopping truck operation.
+- Passive income: max 500 per 15-minute zone cycle (formerly 2,500), cap catch-up to four cycles per zone per offline session, clamp geology/depth. **No retroactive changes to saved cash or ledger.**
+- M4 completion now describes automation activated; historical passive income no longer masquerades as a new cash reward.
+- Regression test file added. Direct execution of updated economic module functions in isolated JavaScript assertions **passed**; full `npm test` and interactive gameplay testing remain unexecuted.
+- Detailed change record: `CHANGES/2026-11-06_chatgpt_catalog-camera-truck-economy-fix.md`.
+
 ## 2026-11-06 — Catálogo V2: first in-game visual pass (ChatGPT)
 
 ### Preview verified; user subsequently authorized production testing
