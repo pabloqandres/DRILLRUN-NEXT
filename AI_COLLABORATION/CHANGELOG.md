@@ -1,5 +1,13 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-06 — Restore PUMA burgundy and remove invisible workshop parking wall (ChatGPT)
+
+- User spotted an impassable, apparently empty approach between buildings; workshop level 2 had an unconditional 3.8×2.6m collider over an open parking bay. Remove this stale/phantom `_workshopNv2` blocker while preserving all real workshop/HSEC wall colliders.
+- Restore the office's originally preferred PUMA burgundy and warm cladding; apply corresponding red accents to workshop and HSEC shed.
+- New isolated regression test validates external approach, front door, retained real walls, old ghost AABB and no ghost re-addition. Actual World.isBlocked harness: 6/6 PASS. Full browser smoke test remains pending.
+- **Architectural approvals:** newly generated visual reference concepts are *not* implemented meshes; extensive office stair/rack/railing and complete HUD redesign remain pending user visual approval.
+- Report: `CHANGES/2026-11-06_puma-office-workshop-collider-hotfix.md`.
+
 ## 2026-11-06 — World Art V1: actual buildings and matching Catalog 3D cutouts (ChatGPT)
 
 - The office, workshop and HSEC maintenance shed have physically upgraded 3D facades, roof/detail assemblies and industrial finish materials. Original world positions, footprints, doors, HSEC walls, missions and saves unchanged.
