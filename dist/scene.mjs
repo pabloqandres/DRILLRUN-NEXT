@@ -75,7 +75,7 @@ export class World{
   if(!previewOnly){this.scene.add(g);this.pad(-7.6,-9.3,8.3,6.3);this.workshopModel=g;}this.box(g,7.2,.3,5.4,0,.3,0,C.steel);this.box(g,7.2,4.1,.16,0,2.3,-2.7,C.cream,true);for(const x of[-3.6,3.6])this.box(g,.15,4.1,5.4,x,2.3,0,C.cream,true);this.box(g,7.3,.8,.2,0,4.05,2.7,C.cream);this.box(g,1.2,3.4,.2,-3,2,2.7,C.cream);this.box(g,1.2,3.4,.2,3,2,2.7,C.cream);this.box(g,7.6,.22,5.9,0,4.55,0,C.navy,true);for(let z=-2.5;z<2.6;z+=.24){this.box(g,.035,3.7,.03,3.7,2.35,z,0xb6b8ad);this.box(g,.035,3.7,.03,-3.7,2.35,z,0xb6b8ad);}for(let x=-3.4;x<3.5;x+=.32)this.box(g,.027,.03,5.5,x,4.68,0,0x476272);this.box(g,6.9,.04,5.1,0,.47,0,0xb5b8a8);for(const x of[-3.7,3.7])this.box(g,.16,4.2,.18,x,2.3,2.76,C.navy);this.box(g,4.7,.65,.18,0,3.75,2.82,0x8c9999);for(let y=3.47;y<4.05;y+=.14)this.box(g,4.7,.025,.03,0,y,2.93,C.steel);this.sign(g,'TALLER',2.3,.47,0,4.15,2.83,C.navy);
   // Workshop V2: industrial facade, steel canopy, solar arrays and illuminated entry.
   // Original usable floor, roof, player door clearances and collision geometry stay unchanged.
-  this.box(g,6.15,.13,.76,0,3.97,3.09,0x293e4c,true);
+  this.box(g,6.15,.13,.76,0,3.97,3.09,0x701e30,true);
   this.box(g,6.16,.035,.10,0,3.87,3.47,C.yellow);
   for(const x of[-2.89,2.89]){
    this.box(g,.075,.10,.68,x,3.83,3.18,0x708f97);
@@ -91,7 +91,7 @@ export class World{
   // A modest maintenance extraction unit and rear weather gutter.
   this.box(g,.98,.31,.88,2.57,4.82,-2.02,0x687b84,true);
   for(let j=0;j<6;j++)this.box(g,.8,.019,.014,2.57,4.99,-2.34+j*.12,0x253745);
-  this.box(g,7.75,.10,.12,0,4.44,-2.96,0x405966);
+  this.box(g,7.75,.10,.12,0,4.44,-2.96,0x701e30);
   for(const x of[-1.9,1.9]){
    this.box(g,.68,.085,.085,x,3.84,2.91,C.steel);
    const led=this.box(g,.50,.029,.012,x,3.785,2.98,0xffe1a4);
@@ -280,8 +280,10 @@ for(let x=-3.2;x<3.5;x+=.5){this.box(g,.025,3.6,.02,x,2.2,-2.8,0xb7b7a7);}this.s
     this.colliders.push({x:-3.65,z:-6.6,w:1.0,d:.4,_workshop:true,_wsWall:'extFrontL'});
    // Extension interior walkSurface
    if(!this._wsExtWalk){this.walkSurfaces.push({x:-2.25,z:-9.3,w:4.0,d:5.2,y:.42});this._wsExtWalk=true;}
-   // Parking collider (so player walks around it) — avoid duplicates
-   if(!this.colliders.some(c=>c._workshopNv2))this.colliders.push({x:-7.6+8.5,z:-9.3+5.8,w:3.8,d:2.6,_workshopNv2:true});
+   // The paved parking bay is NOT a solid object. Previous code introduced a
+   // phantom 3.8 x 2.6 m obstacle in the pedestrian approach to the workshop.
+   // Keep walls/pillars solid; vehicles must register their own actual footprint.
+   this.colliders=this.colliders.filter(c=>!c._workshopNv2);
    // Clear obstacles in extension zone
    this.clearObstaclesInZone('workshop-nv2',-4.2,-0.3,-12.2,-6.4,g);
   }else{
