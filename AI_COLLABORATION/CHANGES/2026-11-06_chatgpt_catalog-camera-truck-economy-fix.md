@@ -35,3 +35,10 @@ No save key changes, schema migrations, reset or rollback of existing money. Exi
 ## Collaboration
 
 These adjustments are explicit user-approved, scoped exceptions to Claude Code's usual economic/game logic ownership and are recorded in `AI_COLLABORATION/DECISIONS.md`. Claude must review before later changes to these functions.
+
+## Post-merge production verification
+
+- PR #3 merged to `main` as `c9532a3135fce1c43959009681b2473a16e80827`.
+- Vercel deployment `dpl_Eocd4wVeYgSJGaXwCTX4Jjk6hhfF` READY, target production, branch `main`, exact matching commit.
+- Production files `/chapter/game.mjs`, `/chapter/catalog-view.mjs`, `/mission4/production.mjs`, `/mission4/offline-progress.mjs` served HTTP 200 with the expected fixes; `/manifest.json` also HTTP 200.
+- Browser UI interaction and full `npm test` still not performed. No false claim of player-save testing.
