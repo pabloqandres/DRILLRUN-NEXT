@@ -2,20 +2,22 @@
 export const HSEC_ICON_VERSION=5;
 
 // Shapes for all known category IDs (scoring + builder + legacy).
+// DRILL RUN HSEC visual V3: consistent 32px construction/safety pictograms.
+// Category IDs, scoring logic, colors and helper APIs remain unchanged.
 const ICON_SHAPES={
- infrastructure:{color:'#FFC83D',shape:'<path d="M4 8h24v18H4Z"/><path d="M3 5h26v3H3M8 26v2m16-2v2M8 26V14h6v12"/><rect x="18" y="13" width="6" height="6" rx=".5"/>'},
- mobility:{color:'#2CDCF1',shape:'<path d="M5 28 9 4m18 24L23 4M16 5v4m0 5v4m0 5v5"/>'},
- boundaries:{color:'#FF756C',shape:'<rect x="4" y="10" width="24" height="9" rx="1"/><path d="m8 10 6 9m3-9 6 9M7 19v9m18-9v9M4 28h6m12 0h6"/>'},
- lighting:{color:'#B891FF',shape:'<rect x="4" y="5" width="10" height="8" rx="1.5"/><rect x="18" y="5" width="10" height="8" rx="1.5"/><path d="M9 13v3h14v-3m-7 3v12m-5 0h10M5 17l-2 3m24-3 2 3"/>'},
- emergencies:{color:'#40E4A3',shape:'<path d="M8 24v-9a8 8 0 0 1 16 0v9M16 11v6M16 2v2M5 7l2 2m18 0 2-2M2 17h3m22 0h3"/><rect x="5" y="24" width="22" height="5" rx="1.5"/>'},
- management:{color:'#FF9B51',shape:'<path d="M10 6H6a2 2 0 0 0-2 2v19a2 2 0 0 0 2 2h9M18 6h4a2 2 0 0 1 2 2v3"/><rect x="10" y="3" width="8" height="5" rx="1.5"/><path d="m9 15 3 3 5-5m-8 11h5M25 14a4 4 0 0 0-5 5l-4 4a2 2 0 0 0 3 3l4-4a4 4 0 0 0 5-5l-2 2-3-3 2-2Z"/>'},
- fire:{color:'#FF9B51',shape:'<path d="M16 3c0 5-6 8-6 14a6 6 0 0 0 12 0c0-3-2-5-3-7s-1-4 1-7h-1"/><circle cx="16" cy="22" r="2.5"/>'},
- roads:{color:'#2CDCF1',shape:'<path d="M5 28 9 4m18 24L23 4M16 5v4m0 5v4m0 5v5"/>'},
- protection:{color:'#FF756C',shape:'<rect x="4" y="10" width="24" height="9" rx="1"/><path d="m8 10 6 9m3-9 6 9M7 19v9m18-9v9M4 28h6m12 0h6"/>'},
- signage:{color:'#40E4A3',shape:'<path d="M8 4h16l3 6-3 6H8V4Z"/><path d="M8 4v24"/>'},
- equipment:{color:'#E8A040',shape:'<path d="M16 4v7m0 0-3 3h6l-3-3Z"/><rect x="14" y="14" width="4" height="12" rx=".5"/><path d="M10 26h12"/><circle cx="16" cy="8" r="2.5"/><path d="M8 18h3m9 0h3"/>'},
- vehicles:{color:'#5B9FE8',shape:'<rect x="3" y="14" width="26" height="10" rx="2"/><path d="M7 14V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5"/><circle cx="9" cy="24" r="2.5"/><circle cx="23" cy="24" r="2.5"/><path d="M12 10h8"/>'},
- furniture:{color:'#C896E8',shape:'<rect x="5" y="14" width="22" height="2" rx=".5"/><path d="M7 16v8m18-8v8M8 14v-4a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v4"/><path d="M10 24h12"/>'}
+ infrastructure:{color:'#FFC83D',shape:"<path d=\"M4 12 16 5l12 7v16H4V12Z\"/><path d=\"M11 28v-9h10v9M3 12h26M8 16h2m12 0h2\"/>"},
+ mobility:{color:'#2CDCF1',shape:"<circle cx=\"16\" cy=\"5.5\" r=\"2.5\"/><path d=\"m16 8.5-4 7 7 3 3 9m-8-12-5 5-5 1m11-2-5 9\"/><path d=\"M3 30h26\" stroke-dasharray=\"3 4\"/>"},
+ boundaries:{color:'#FF756C',shape:"<path d=\"M3 12h26v10H3zM7 22v7m18-7v7M3 29h8m10 0h8m-19-17 7 10m1-10 7 10\"/>"},
+ lighting:{color:'#B891FF',shape:"<path d=\"M4 8h10v7H4zM18 8h10v7H18zM9 15l2 5h10l2-5M16 20v9m-5 0h10M5 18l-2 3m24-3 2 3\"/>"},
+ emergencies:{color:'#40E4A3',shape:"<path d=\"M16 3 27 8v9c0 6-5.5 10-11 12C10.5 27 5 23 5 17V8L16 3Z\"/><path d=\"M16 10v12m-6-6h12\"/>"},
+ management:{color:'#FF9B51',shape:"<rect x=\"7\" y=\"6\" width=\"18\" height=\"23\" rx=\"2\"/><path d=\"M12 6V4h8v2M11 15l3 3 6-6M11 24h10\"/>"},
+ fire:{color:'#FF9B51',shape:"<rect x=\"11\" y=\"11\" width=\"11\" height=\"18\" rx=\"2\"/><path d=\"M14 11V7h6m-4-1V3m4 10h-9M10 19h13M22 16l5 2v5M15 25h3\"/>"},
+ roads:{color:'#2CDCF1',shape:"<path d=\"M10 3 5 29m17-26 5 26M16 4v5m0 5v5m0 5v5\" stroke-linecap=\"round\"/>"},
+ protection:{color:'#FF756C',shape:"<path d=\"M16 3 27 8v9c0 6-4.5 10-11 12C9.5 27 5 23 5 17V8L16 3Z\"/><path d=\"m10.5 16.5 3.5 3.5 7.5-8\"/>"},
+ signage:{color:'#40E4A3',shape:"<path d=\"M7 5h18l4 6-4 6H7V5ZM7 5v24M12 11h11\"/>"},
+ equipment:{color:'#E8A040',shape:"<path d=\"M5 29h22M14 29 16 4l3 25M11 13h10M9 20h14M13 4h6M5 23v6m22-6v6\"/><path d=\"M16 4v25\"/>"},
+ vehicles:{color:'#5B9FE8',shape:"<path d=\"M4 11h16v12H4V11Zm16 5h5l4 5v2h-9m-10-12V7h5v4M9 23a3 3 0 1 0 6 0m8 0a3 3 0 1 0 6 0\"/>"},
+ furniture:{color:'#C896E8',shape:"<path d=\"M4 14h24v4H4v-4Zm3 4v11m18-11v11M10 14V8h12v6M11 24h10\"/>"},
 };
 
 // 5 scoring categories (HSEC v2) — displayed in the overview panel.
