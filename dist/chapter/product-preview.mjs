@@ -73,4 +73,30 @@ export function cutoutPNG(source){
  for(let y=0;y<sample.height;y++)for(let x=0;x<sample.width;x++)if(data[(y*sample.width+x)*4+3]){left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}
  if(right<left)return sample.toDataURL('image/png');const out=document.createElement('canvas');out.width=right-left+21;out.height=bottom-top+21;out.getContext('2d').drawImage(sample,left,top,right-left+1,bottom-top+1,10,10,right-left+1,bottom-top+1);return out.toDataURL('image/png');
 }
-export function officeThumbnail(world){const host=document.createElement('div');host.style.cssText='position:fixed;left:-1000px;top:-1000px;width:480px;height:300px;pointer-events:none';document.body.append(host);const preview=new ProductPreview(host,world,{transparent:true});preview.setModule({id:'office'});preview.draw();const url=cutoutPNG(preview.renderer.domElement);preview.dispose();host.remove();return url;}
+export function officeThumbnail(world,level=1){
+ const host=document.createElement('div');
+ host.style.cssText='position:fixed;left:-1000px;top:-1000px;width:480px;height:300px;pointer-events:none';
+ document.body.append(host);
+ let preview=null;
+ try{
+  preview=new ProductPreview(host,world,{transparent:true});
+  preview.setModule({id:'office-l'+level,level});
+  // When level 2 is built, include the exact installed office extension as well.
+  if(level>=2&&world.extension?.children.length){
+   const extension=world.extension.clone(true);
+   extension.position.sub(world.office.position);
+   extension.visible=true;
+   extension.traverse(o=>{
+    if(o.isLight)o.visible=false;
+    if(o.geometry)o.geometry=o.geometry.clone();
+    if(o.isLineSegments&&o.material)o.material=o.material.clone();
+   });
+   preview.model.add(extension);
+  }
+  preview.draw();
+  return cutoutPNG(preview.renderer.domElement);
+ }finally{
+  preview?.dispose();
+  host.remove();
+ }
+}
