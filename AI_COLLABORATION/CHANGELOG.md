@@ -1,5 +1,16 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-06 — Catálogo V2: first in-game visual pass (ChatGPT)
+
+### Preview only — not approved for production
+- Branch: `chatgpt/catalog-v2-visual-first-pass` (based on `main` `77c4c33`).
+- `dist/chapter/catalog.css`: CSS-only design update, preserving original catalog handlers and economy.
+- Layout: bottom horizontal asset dock, left identity rail, dark blue/cyan/gold tabs, floating selected product panel, responsive landscape and collapse states.
+- CSS code commit: `03f3e672`; Vercel preview `dpl_98Sdej3RypL5i1T1p3CmUes8YKCf` READY.
+- Validated: HTTP 200 preview stylesheet, visual CSS marker present, original CSS remains unchanged as prefix, braces balanced.
+- **Not independently tested:** rendered UI in a browser or purchase/gameplay interactions.
+- Detailed report: `CHANGES/2026-11-06_chatgpt_catalog-v2-visual.md`. Awaiting visual review and smoke testing before merge.
+
 ## 2026-11-06 — Collaboration protocol documentation hardening (ChatGPT)
 
 ### Documentation-only, pending review
