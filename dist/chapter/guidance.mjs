@@ -29,7 +29,9 @@ export function edgeBearing(dx,dz,heading,width,height){
  return {x:width/2+x*k,y:height/2+y*k,angle:Math.atan2(x,-y)*180/Math.PI,behind:forward<0};
 }
 export function markerClearance(x,y,width,height,rects){
- const half=22,tall=54,pad=8,clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),candidates=[{x,y}];
+ // V2 objective markers include a 60px icon, distance pill and glowing halo.
+ // Reserve their full area, not the old 22px/54px glyph size.
+ const half=39,tall=97,pad=10,clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),candidates=[{x,y}];
  for(const r of rects)candidates.push({x:r.left-half-pad,y},{x:r.right+half+pad,y},{x,y:r.top-pad},{x,y:r.bottom+tall+pad});
  const valid=p=>p.x>=half+12&&p.x<=width-half-12&&p.y>=tall+12&&p.y<=height-14&&!rects.some(r=>p.x+half>r.left-pad&&p.x-half<r.right+pad&&p.y>r.top-pad&&p.y-tall<r.bottom+pad);
  const clear=candidates.map(p=>({x:clamp(p.x,half+12,width-half-12),y:clamp(p.y,tall+12,height-14)})).filter(valid);
