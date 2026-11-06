@@ -18,7 +18,7 @@ const paths={
  store:"<path d=\"M4 8V5h16v3m-16 0-2 5h20l-2-5H4ZM5 13v8h14v-8M9 21v-5h6v5\"/>",
  inventory:"<path d=\"m12 2 9 5v10l-9 5-9-5V7l9-5Z\"/><path d=\"m3 7 9 5 9-5M12 12v10\"/>",
  objectives:"<rect x=\"5.5\" y=\"4\" width=\"13\" height=\"17\" rx=\"2\"/><path d=\"M9 4V2h6v2M9 11l2.3 2.2L15 9M9 17h6\"/>",
- settings:"<circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M9.2 3.2 9.8 2h4.4l.6 1.2 1.3 1.3 1.3-.3 3.1 3.1-.4 1.4.8 1.8 1.1.6v4.3l-1.1.6-.8 1.8.4 1.4-3.1 3.1-1.3-.4-1.3.8-.6 1.1H9.8l-.6-1.1-1.8-.8-1.4.4-3.1-3.1.4-1.4-.8-1.8L1.4 14v-4l1.1-.6.8-1.8-.4-1.4 3.1-3.1 1.4.4 1.8-.3Z\" transform=\"translate(1 0) scale(.92)\"/>",
+ settings:"<circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M9.5 3h5l.7 2.2 2 1.1 2.2-.6 2.3 4-1.7 1.7v2.2l1.7 1.7-2.3 4-2.2-.6-2 1.1-.7 2.2h-5l-.7-2.2-2-1.1-2.2.6-2.3-4L4 13.6v-2.2L2.3 9.7l2.3-4 2.2.6 2-1.1L9.5 3Z\"/>",
  desk:"<path d=\"M3 8h18v4H3V8Zm2 4v9m14-9v9M7.5 17h9m-3-5v5\"/>",
  chair:"<rect x=\"7\" y=\"3\" width=\"10\" height=\"10\" rx=\"2\"/><path d=\"M5 13h14v4H5v-4Zm7 4v4M8 22h8M6 7v5m12-5v5\"/>",
  computer:"<rect x=\"3\" y=\"3.5\" width=\"18\" height=\"12\" rx=\"1.8\"/><path d=\"M12 15.5V20m-5 1h10M7 8h10\"/>",
@@ -42,7 +42,7 @@ const paths={
  finishes:"<rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"1.4\"/><path d=\"M3 10h18M3 16h18M10 3v7m5 6v5\"/>",
  google:"<path d=\"M21.8 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.5a4.7 4.7 0 0 1-2 3.1v2.6h3.3c1.9-1.8 3-4.4 3-7.5Z\" fill=\"#4285F4\" stroke=\"none\"/><path d=\"M12 22c2.7 0 5-.9 6.6-2.3l-3.3-2.6c-.9.6-2 1-3.3 1-2.6 0-4.7-1.7-5.5-4.1H3.1v2.6A10 10 0 0 0 12 22Z\" fill=\"#34A853\" stroke=\"none\"/><path d=\"M6.5 14a6 6 0 0 1 0-3.8V7.6H3.1a10 10 0 0 0 0 9l3.4-2.6Z\" fill=\"#FBBC05\" stroke=\"none\"/><path d=\"M12 5.9c1.5 0 2.8.5 3.8 1.5l2.9-2.8A10 10 0 0 0 3.1 7.6l3.4 2.6C7.3 7.7 9.4 5.9 12 5.9Z\" fill=\"#EA4335\" stroke=\"none\"/>",
 };
-export function icon(name,cls=''){if(name?.startsWith('hsec:'))return hsecSymbol(name.slice(5),'uiIcon hsecIcon '+cls,true);return `<svg class="uiIcon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.inventory}</svg>`;}
+export function icon(name,cls=''){if(name?.startsWith('hsec:'))return hsecSymbol(name.slice(5),'uiIcon hsecIcon '+cls,true);return `<svg class="uiIcon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.05" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.inventory}</svg>`;}
 export function workerAvatar(){return '<svg viewBox="0 0 64 64" aria-hidden="true"><path fill="#283e48" d="M3 64c0-18 12-25 29-25s29 7 29 25"/><path fill="#ef8b3e" d="m16 44 9-4 7 9 7-9 9 4 4 20H12Z"/><path stroke="#e1e2d6" stroke-width="4" d="M19 45v19m26-19v19M14 57h36"/><path fill="#bd8c68" d="M22 25h20v12c-1 7-6 11-10 11s-9-4-10-11Z"/><path fill="#6d5544" d="M22 25h20v6H22Z"/><path fill="#eae7d9" d="M16 27C16 9 22 5 32 5s16 4 16 22Z"/><path stroke="#b9bdb4" stroke-width="3" d="M26 8v17m12-17v17"/><path fill="#fff8e7" d="M12 24h40v6H12Z"/><path fill="#607c80" d="M21 31h10v5H21zm12 0h10v5H33Z"/><path stroke="#6a7776" stroke-width="2" d="M31 33h2"/></svg>';}
 // Character avatars — colored circle + role icon for narrative system
 const CHAR_AVATARS={
