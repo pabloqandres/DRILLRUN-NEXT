@@ -4,11 +4,11 @@
 
 ## Currently Active
 
-- **ChatGPT:** Documentation audit and collaboration safety fixes; branch `chatgpt/collaboration-protocol-hardening`; status: documentation ready for PR review, not merged. Files: `CLAUDE.md`, `AGENTS.md`, `README.md`, `AI_COLLABORATION/RULES.md`, `CURRENT_STATE.md`, `CHANGELOG.md`, `ACTIVE_WORK.md`, `CHANGES/2026-11-06_chatgpt_collaboration-audit.md`. This is a record of proposed changes, not a hard lock.
+- **ChatGPT — Catálogo Visual V2:** rama `chatgpt/catalog-v2-visual-first-pass`; objetivo: rediseñar exclusivamente CSS del Catálogo existente para alinearlo con la referencia de interfaz de juego aprobada. Estado: en desarrollo y validación preview. No modificar lógica, economía, DOM, scripts ni archivos de Claude.
 
 ## Files in Progress
 
-_No files locked._
+- `dist/chapter/catalog.css` — edición visual ChatGPT (bloqueo blando durante la tarea). Evitar edición simultánea desde Claude Code.
 
 ## Recently Completed
 
@@ -18,6 +18,7 @@ _No files locked._
 | 2026-11-06 | Claude Code | Touch Scroll Fix (all panels) | Done |
 | 2026-11-06 | Claude Code | GitHub + Vercel Setup | Done |
 | 2026-11-06 | Claude Code | AI Collaboration Infrastructure | Done |
+| 2026-11-06 | ChatGPT | Collaboration protocol hardening (PR #1) | Merged in main |
 
 ## Blocked / Waiting
 
