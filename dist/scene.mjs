@@ -283,7 +283,7 @@ for(let x=-3.2;x<3.5;x+=.5){this.box(g,.025,3.6,.02,x,2.2,-2.8,0xb7b7a7);}this.s
    // The paved parking bay is NOT a solid object. Previous code introduced a
    // phantom 3.8 x 2.6 m obstacle in the pedestrian approach to the workshop.
    // Keep walls/pillars solid; vehicles must register their own actual footprint.
-   this.colliders=this.colliders.filter(c=>!c._workshopNv2);
+   for(let i=this.colliders.length-1;i>=0;i--)if(this.colliders[i]._workshopNv2)this.colliders.splice(i,1);
    // Clear obstacles in extension zone
    this.clearObstaclesInZone('workshop-nv2',-4.2,-0.3,-12.2,-6.4,g);
   }else{
