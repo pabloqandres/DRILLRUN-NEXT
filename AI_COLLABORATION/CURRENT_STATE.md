@@ -59,6 +59,16 @@
 - Module economics passed isolated JavaScript execution assertions; full `npm test` and live browser-interaction smoke testing **not yet performed**. Test file: `tests/mission4-economy.test.mjs`.
 - See `CHANGES/2026-11-06_chatgpt_catalog-camera-truck-economy-fix.md`.
 
+## 2026-11-06 — Camera + Catalog V2.1 + iconography V3 release
+
+- Production commit: `ecd61a3e40586a9bfa690e21e1e11cd86951310d` (PR #5), deployment `dpl_B3tCwvYm7khDXaKApocH8RyoByQT`, target production, branch `main`, READY.
+- Corrected gameplay camera distance (preset B 3.8m, FOV 57°), added desktop wheel/trackpad zoom while preserving touchscreen pinch.
+- Integrated Catalog action rail inside existing dock; no free-floating selected-product card. The general HUD redesign remains **only a visual concept, not released code**.
+- Removed repeated automated-income toast; passive earnings and saves untouched in this release.
+- New custom game iconography V3: 39 UI keys (including unchanged Google OAuth icon) and 13 HSEC symbols; same API and semantic keys.
+- Confirmed production HTTP 200 and expected source markers for camera config/gestures, catalog.css, game.mjs, icons.mjs, hsec/icons.mjs and manifest.json.
+- Unit-level isolated JS checks passed for camera defaults/preferences, wheel/pinch controls and icon output. Full `npm test` and interactive browser QA still outstanding.
+
 ## Known Issues / Verification Gaps
 
 - No critical runtime issue was independently verified in this documentation audit; the listed mission completions reflect Claude Code's report, not independent end-to-end testing by ChatGPT.

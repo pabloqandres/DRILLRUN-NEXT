@@ -4,11 +4,11 @@
 
 ## Currently Active
 
-- **ChatGPT — Cámara zoom / Catálogo V2.1 / aviso ingreso M4:** rama `chatgpt/camera-distance-wheel-zoom`. Cambios en código aplicados; pendiente de PR y verificación de despliegue en main. Funcionalidades: cámara más cercana, rueda/trackpad + gesto táctil, CTA dentro del dock, sin tarjeta flotante y sin toast repetitivo de ingresos automáticos.
+_No code work pending. Overall HUD layout redesign remains a **concept mockup awaiting user approval**; core iconography V3 is already live._
 
 ## Files in Progress
 
-- `dist/camera/config.mjs`, `dist/camera/gestures.mjs`, `dist/chapter/catalog.css`, `dist/chapter/game.mjs`, `tests/camera-zoom.test.mjs` — cambios acotados ChatGPT; evita edición simultánea sin sincronizar.
+_No active file locks; synchronize main before starting new tasks._
 
 ## Recently Completed
 
@@ -21,6 +21,7 @@
 | 2026-11-06 | ChatGPT | Collaboration protocol hardening (PR #1) | Merged in main |
 | 2026-11-06 | ChatGPT | Catalog V2 visual design (PR #2) | Merged in main |
 | 2026-11-06 | ChatGPT | Camera/category scroll + DrillTruck/economy hotfix (PR #3) | Merged in main; Vercel READY |
+| 2026-11-06 | ChatGPT | Camera zoom, Catalog in-dock actions, iconography V3 (PR #5) | Merged in main; Vercel READY |
 
 ## Blocked / Waiting
 
