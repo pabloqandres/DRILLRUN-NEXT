@@ -4,7 +4,7 @@
 **Agent:** ChatGPT
 **Type:** CSS-only visual improvement
 **Branch:** `chatgpt/catalog-v2-visual-first-pass`
-**Status:** Preview deployed, awaiting visual/user acceptance; not integrated into `main`.
+**Status:** Preview deployed; user explicitly authorized deploying this visual change to `main` for testing on the stable production domain. Integration and gameplay results should be verified separately.
 
 ## Purpose
 Implement the approved DRILL RUN NEXT GENERATION builder/catalog visual language inside the **existing** real game without rewriting behavior.
@@ -38,5 +38,5 @@ Implement the approved DRILL RUN NEXT GENERATION builder/catalog visual language
 ## Review and next steps
 - User reviews landscape preview.
 - If approved, test category switching, selected cards, details, collapse/expand, cash-disabled CTA, purchases, scroll, plus mobile landscape.
-- Do not merge or redeploy production before user approval, even though GitHub->Vercel production autodeploy works.
+- User approved integration into main/production on 2026-11-06. Verify production commit, working Google authentication, catalog rendering and save continuity after the merge.
 - Claude Code must not change `catalog.css` while reviewing overlapping changes without reading this record and the associated PR.
