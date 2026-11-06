@@ -1,7 +1,7 @@
 import {moduleDefinition,moduleAvailability} from './module-catalog.mjs';
 import {landReady} from './state.mjs';
 import {CatalogView} from './catalog-view.mjs';
-import {workshopThumbnail} from './product-preview.mjs';
+import {officeThumbnail,workshopThumbnail} from './product-preview.mjs';
 import {catalogProducts,catalogCategories} from './construction-catalog.mjs';
 export class BuilderUI{
  constructor(options){Object.assign(this,options);this.category='infrastructure';this.selected='office';this.zone='office01';this.store=new CatalogView(this.host);this.buildingThumbnails=new Map();}
@@ -14,6 +14,15 @@ export class BuilderUI{
  }
  // Lazy, one-shot snapshots of the real 3D construction geometry by workshop level.
  // No invented stock images or extra live render loops.
+ getOfficeThumbnail(level=1){
+  if(level<2||!this.world?.extension?.children.length)return this.thumbnail||null;
+  const key='office-'+level;
+  if(!this.buildingThumbnails.has(key)){
+   try{this.buildingThumbnails.set(key,officeThumbnail(this.world,level));}
+   catch(error){console.warn('[Catalog] office L'+level+' snapshot unavailable',error);return this.thumbnail||null;}
+  }
+  return this.buildingThumbnails.get(key);
+ }
  getWorkshopThumbnail(level=1){
   if(!this.world)return null;
   const key='workshop-'+level;
@@ -27,7 +36,7 @@ export class BuilderUI{
   const s=this.state(),t=this.translate();this.onSelection(null);
   let products;try{products=catalogProducts(s,t);}catch(e){console.error('catalogProducts error:',e);products=[];}
   this.store.render({lang:s.lang,products,categories:catalogCategories(s.lang),category,selected,format:this.format,
-   thumbnail:p=>p.kind==='module'?this.thumbnail:p.kind==='workshop'?this.getWorkshopThumbnail(p.level):p.kind==='hsec'&&p.status!=='future'&&this.hsec?.world?this.hsec.world.thumbnail(p.id):null,
+   thumbnail:p=>p.kind==='module'?this.getOfficeThumbnail(p.level):p.kind==='workshop'?this.getWorkshopThumbnail(p.level):p.kind==='hsec'&&p.status!=='future'&&this.hsec?.world?this.hsec.world.thumbnail(p.id):null,
    onCategory,onSelect,onClose:this.onClose,onStaff:()=>this.hsec?.open('staff'),
    onManage:p=>{
     if(p.kind==='module')return s.office.status==='building'?this.onClose():this.onManage();
