@@ -212,6 +212,19 @@ for(let x=-3.2;x<3.5;x+=.5){this.box(g,.025,3.6,.02,x,2.2,-2.8,0xb7b7a7);}this.s
 
    // Roof extension (with slight overhang)
    this.box(g,3.9,.22,5.9,5.4,4.55,0,C.navy,true);
+   // True level-2 architecture: PUMA red front fascia, drainage and service lighting.
+   // No new collision volumes or route edits are introduced by these finish meshes.
+   this.box(g,3.88,.18,.26,5.4,4.47,2.95,0x701e30,true);
+   this.box(g,3.8,.034,.055,5.4,4.39,3.10,C.yellow);
+   for(const xx of[4.14,6.66]){
+    this.box(g,.12,.11,.55,xx,4.30,2.88,C.steel);
+    const luminaire=this.box(g,.40,.035,.12,xx,4.24,3.05,0xffe7b9);
+    luminaire.material=new T.MeshBasicMaterial({color:0xffe2a0});
+   }
+   for(const zz of[-1.98,-.97,.04,1.05]){
+    this.box(g,.052,2.85,.05,7.19,2.0,zz,0x6a8391);
+    this.box(g,.08,.06,.06,7.24,3.23,zz,C.steel);
+   }
    // Roof beams
    for(let x=3.8;x<7.2;x+=.32)this.box(g,.027,.03,5.5,x,4.68,0,0x476272);
    // Gutter/fascia
