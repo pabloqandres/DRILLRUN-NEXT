@@ -36,7 +36,7 @@ test('real workshop side walls and front pillars are still solid',()=>{
 });
 test('actual workshop update removes old phantom parking collision instead of recreating it',()=>{
  const source=readFileSync(new URL('../dist/scene.mjs',import.meta.url),'utf8');
- assert.match(source,/this\.colliders=this\.colliders\.filter\(c=>!c\._workshopNv2\)/);
+ assert.match(source,/if\(this\.colliders\[i\]\._workshopNv2\)this\.colliders\.splice\(i,1\)/);
  assert.doesNotMatch(source,/this\.colliders\.push\(\{[^}]*_workshopNv2:true/);
 });
 test('original PUMA red office color is restored, without replacing architecture',()=>{
