@@ -1,9 +1,9 @@
 import * as T from '../vendor/three.module.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {OFFICE,officeBlocked,insideOffice,officeGround,doorShape,circleHitsRect} from './office-layout.mjs';
-// DRILLCO field architecture: charcoal/graphite shell, warm off-white cladding, restrained HSEC yellow.
-// The burgundy of earlier prototype models is intentionally retired.
-const P={red:0x303e48,edge:0x182830,panel:0xe0e5df,trim:0x8faaa9,inside:0xf1eae0,steel:0x687d85,dark:0x23333e,yellow:0xf4c13c,bolt:0xc1cbd1,floor:0x87999a};
+// Preserve the originally approved PUMA burgundy office, with upgraded technical detailing.
+// Architectural redesigns beyond this reversible palette restoration require visual approval.
+const P={red:0x701e30,edge:0x461b28,panel:0xe6d5bc,trim:0xc4b6a1,inside:0xeee4d2,steel:0x68747b,dark:0x313e45,yellow:0xf4ba28,bolt:0xb9bfc0,floor:0x9b9c91};
 
 // Static pieces are batched within their architectural component; doors stay independent.
 function batch(group){
