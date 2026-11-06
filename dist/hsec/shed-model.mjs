@@ -70,7 +70,7 @@ export function buildShed({box,cyl,add,C,colliders,walls}){
  for(const side of[-1,1])for(const z of[-1.54,0,1.54]){
   const pv=box(1.34,.045,1.22,side*1.39,3.48,z,C.steel);
   pv.rotation.z=-side*pitch;
-  const glass=box(1.23,.014,1.11,side*1.39,3.526,z,C.navy||C.steel);
+  const glass=box(1.23,.014,1.11,side*1.39,3.526,z,C.black);
   glass.rotation.z=-side*pitch;
   for(let n=-1;n<=1;n++){const line=box(.012,.019,1.04,side*1.39+n*.29,3.544,z,C.silver);line.rotation.z=-side*pitch;}
  }
