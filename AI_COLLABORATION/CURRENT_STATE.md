@@ -69,6 +69,17 @@
 - Confirmed production HTTP 200 and expected source markers for camera config/gestures, catalog.css, game.mjs, icons.mjs, hsec/icons.mjs and manifest.json.
 - Unit-level isolated JS checks passed for camera defaults/preferences, wheel/pinch controls and icon output. Full `npm test` and interactive browser QA still outstanding.
 
+## 2026-11-06 — World Art V1: real buildings and Catalog previews LIVE
+
+- Release: PR #7 `https://github.com/pabloqandres/DRILLRUN-NEXT/pull/7`, production commit `1b314880b20559aad2d7a46e7bc19af51e30e5c3`, Vercel deployment `dpl_2QJ2CsffiSvTd8E59mEFpoaYb13C` `READY`, branch `main`.
+- Actual 3D: office graphite + roof solar/ventilation/lighting; workshop facade/canopy/solar/lights; HSEC shed matching photovoltaics and canopy.
+- Catalog: actual rendered Three.js office L1/L2 and workshop L1/L2 views (only where extension is built) and existing HSEC assetModel-based images; preview-only workshop does not alter scene, collision, flooring, labels or save. Images are generated on demand and cached.
+- Visual environment: compact premium HUD stylesheet, cinematic desert sky, subtle sediment and higher contrast physically built roads.
+- Verified production HTTP 200, source markers and matching JS/CSS bytes for `/index.html`, `/chapter/world-art-v1.css`, `/assets3d/office-shell.mjs`, `/scene.mjs`, `/hsec/shed-model.mjs`, `/chapter/product-preview.mjs`, `/chapter/builder-ui.mjs`, `/graphics/desert.mjs`, `/graphics/atmosphere.mjs`, `/hsec/world.mjs`, `/manifest.json`.
+- Workshop factory method executed in JS stub: preview 178 detail calls with no world/collider/ground/label side effects, live 5 collision walls and pad unchanged. Syntax of modified JS modules parsed; CSS balanced. New regression test: `tests/world-art-regression.test.mjs`.
+- Not yet tested: full `npm test`, real WebGL picture on user devices, frame rate and asset layout at every camera angle. These need human/browser acceptance, not inferred from deployment success.
+- No economy, mission, Firebase, purchases or saved-state changes.
+
 ## Known Issues / Verification Gaps
 
 - No critical runtime issue was independently verified in this documentation audit; the listed mission completions reflect Claude Code's report, not independent end-to-end testing by ChatGPT.

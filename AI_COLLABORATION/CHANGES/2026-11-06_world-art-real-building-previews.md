@@ -38,3 +38,10 @@
 
 ## Next release / approval
 User should review architecture and true-product catalog renders on the **stable production domain** using the existing saved game. Only after approval expand scope to additional buildings, products, vehicles and full world art direction. No second-party handoff required.
+
+## Production release verification
+
+- PR #7 merged into `main` as `1b314880b20559aad2d7a46e7bc19af51e30e5c3`.
+- Vercel `dpl_2QJ2CsffiSvTd8E59mEFpoaYb13C` READY, production, exact source SHA matching merged commit.
+- Production `/`, `/index.html`, `/manifest.json` and the nine changed game art source/CSS paths each served HTTP 200 with expected markers and size.
+- Pending visual review and live gameplay/performance smoke tests. Do not claim the image concept has been perfectly replicated.
