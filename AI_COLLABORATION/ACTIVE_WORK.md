@@ -4,11 +4,11 @@
 
 ## Currently Active
 
-- **ChatGPT — Catálogo Visual V2:** rama `chatgpt/catalog-v2-visual-first-pass`; objetivo: rediseñar exclusivamente CSS del Catálogo existente para alinearlo con la referencia de interfaz de juego aprobada. Estado: CSS implementado; usuario autorizó explícitamente integrar PR #2 a main/producción para probar en el dominio estable. Pruebas visuales/jugabilidad pendientes en producción. No modificar lógica, economía, DOM, scripts ni archivos de Claude.
+- **ChatGPT — Hotfix Catálogo + M4:** rama `chatgpt/catalog-camera-and-category-scroll-fix`; estado: código implementado, pendiente de integración y verificación en producción. Alcance: cámara de catálogo sin cambio de modo, categoría seleccionada visible, quitar toast repetitivo DrillTruck, limitar la acumulación de ingresos M4 y corregir presentación del premio final. Pruebas económicas agregadas en `tests/mission4-economy.test.mjs`; todavía sin ejecutar desde un entorno del repositorio.
 
 ## Files in Progress
 
-- `dist/chapter/catalog.css` — cambio de CSS publicado en rama de ChatGPT y autorizado por el usuario para integración en producción; bloqueo blando hasta confirmar merge. Evitar edición simultánea desde Claude Code.
+- `dist/chapter/game.mjs` (línea de cámara, toast de DrillTruck y visualización de fin M4), `dist/chapter/catalog-view.mjs`, `dist/mission4/production.mjs`, `dist/mission4/offline-progress.mjs`, `tests/mission4-economy.test.mjs` — hotfix de ChatGPT. No modificar en paralelo sin sincronizar la rama.
 
 ## Recently Completed
 
@@ -19,6 +19,7 @@
 | 2026-11-06 | Claude Code | GitHub + Vercel Setup | Done |
 | 2026-11-06 | Claude Code | AI Collaboration Infrastructure | Done |
 | 2026-11-06 | ChatGPT | Collaboration protocol hardening (PR #1) | Merged in main |
+| 2026-11-06 | ChatGPT | Catalog V2 visual design (PR #2) | Merged in main |
 
 ## Blocked / Waiting
 
