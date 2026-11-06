@@ -4,11 +4,11 @@
 
 ## Currently Active
 
-_No active code edits. World Art V1 (PR #7) is released in main/production. Awaiting user **visual acceptance** and browser gameplay smoke tests before a second art pass or new product assets._
+- **ChatGPT — full visual overhaul V2:** branch `chatgpt/full-visual-overhaul-v2`; real CSS/HTML/JS/3D implementation finished, code checked, awaiting PR and production validation. Includes HUD, settings gear, profile/level, six functional bottom nav tabs, mission modals, 3D beacons, tiered workshop roof, real L1/L2 Catalog geometry.
 
 ## Files in Progress
 
-_No active file locks. Future art changes should sync from `main` and continue to avoid economy, contracts and save mutations._
+- Scoped files: `dist/chapter/visual-overhaul-v2.css`, `dist/index.html`, `dist/chapter/game.mjs` (UI routing only), `dist/chapter/action-halo.mjs`, `dist/scene.mjs` (workshop art only), `dist/chapter/product-preview.mjs` and tests. Avoid overlapping edits; state/mission/economy and Firebase off limits.
 
 ## Recently Completed
 

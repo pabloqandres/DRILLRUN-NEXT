@@ -82,15 +82,19 @@ export class World{
    this.box(g,.14,.14,.12,x,3.95,3.35,C.steel);
    for(let y=1.1;y<3.75;y+=.62)this.box(g,.04,.065,.065,x,y,2.90,0x648493);
   }
+  // Advanced solar and extraction appear only after building Taller level 2.
+  // This keeps the early-game building simple and makes future upgrades visible.
+  const roofUpgrade=new T.Group();roofUpgrade.name='taller-nv2-premium-roof';roofUpgrade.visible=false;g.add(roofUpgrade);
+  if(!previewOnly)this._workshopRoofUpgrade=roofUpgrade;
   for(const x of[-2.1,0,2.1])for(const z of[-1.22,1.22]){
-   this.box(g,1.72,.09,1.01,x,4.81,z,0x344d5d,true);
-   this.box(g,1.60,.025,.92,x,4.872,z,0x26526a);
-   for(let n=-2;n<=2;n++)this.box(g,.014,.028,.84,x+n*.26,4.895,z,0x75a2b1);
-   this.box(g,1.60,.021,.026,x,4.902,z+.40,0xb7d6d6);
+   this.box(roofUpgrade,1.72,.09,1.01,x,4.81,z,0x344d5d,true);
+   this.box(roofUpgrade,1.60,.025,.92,x,4.872,z,0x26526a);
+   for(let n=-2;n<=2;n++)this.box(roofUpgrade,.014,.028,.84,x+n*.26,4.895,z,0x75a2b1);
+   this.box(roofUpgrade,1.60,.021,.026,x,4.902,z+.40,0xb7d6d6);
   }
   // A modest maintenance extraction unit and rear weather gutter.
-  this.box(g,.98,.31,.88,2.57,4.82,-2.02,0x687b84,true);
-  for(let j=0;j<6;j++)this.box(g,.8,.019,.014,2.57,4.99,-2.34+j*.12,0x253745);
+  this.box(roofUpgrade,.98,.31,.88,2.57,4.82,-2.02,0x687b84,true);
+  for(let j=0;j<6;j++)this.box(roofUpgrade,.8,.019,.014,2.57,4.99,-2.34+j*.12,0x253745);
   this.box(g,7.75,.10,.12,0,4.44,-2.96,0x701e30);
   for(const x of[-1.9,1.9]){
    this.box(g,.68,.085,.085,x,3.84,2.91,C.steel);
@@ -175,6 +179,7 @@ for(let x=-3.2;x<3.5;x+=.5){this.box(g,.025,3.6,.02,x,2.2,-2.8,0xb7b7a7);}this.s
   if(!workshopState)return;
   if(!this._workshopBuilt){this.makeWorkshop();this._workshopBuilt=true;}
   const level=workshopState?.level||1;
+  if(this._workshopRoofUpgrade)this._workshopRoofUpgrade.visible=level>=2;
   const upgrading=!!workshopState?.upgrade;
   const key=`ws-${level}-${upgrading}`;
   if(key===this._workshopKey)return;
@@ -207,6 +212,19 @@ for(let x=-3.2;x<3.5;x+=.5){this.box(g,.025,3.6,.02,x,2.2,-2.8,0xb7b7a7);}this.s
 
    // Roof extension (with slight overhang)
    this.box(g,3.9,.22,5.9,5.4,4.55,0,C.navy,true);
+   // True level-2 architecture: PUMA red front fascia, drainage and service lighting.
+   // No new collision volumes or route edits are introduced by these finish meshes.
+   this.box(g,3.88,.18,.26,5.4,4.47,2.95,0x701e30,true);
+   this.box(g,3.8,.034,.055,5.4,4.39,3.10,C.yellow);
+   for(const xx of[4.14,6.66]){
+    this.box(g,.12,.11,.55,xx,4.30,2.88,C.steel);
+    const luminaire=this.box(g,.40,.035,.12,xx,4.24,3.05,0xffe7b9);
+    luminaire.material=new T.MeshBasicMaterial({color:0xffe2a0});
+   }
+   for(const zz of[-1.98,-.97,.04,1.05]){
+    this.box(g,.052,2.85,.05,7.19,2.0,zz,0x6a8391);
+    this.box(g,.08,.06,.06,7.24,3.23,zz,C.steel);
+   }
    // Roof beams
    for(let x=3.8;x<7.2;x+=.32)this.box(g,.027,.03,5.5,x,4.68,0,0x476272);
    // Gutter/fascia

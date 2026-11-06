@@ -1,5 +1,14 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-06 — Full visual overhaul V2 (ChatGPT)
+
+- New `dist/chapter/visual-overhaul-v2.css` linked after older styles: complete consistent HUD, profile/level/resource/status design, physical-looking joystick, settings gear, interaction button, mission UI/overlays, phone/apps, placement, HSEC and Catalog.
+- Six real functional bottom nav destinations shown throughout gameplay and correctly routed to current game/phone/HSEC actions, including completed missions. No purchases or saved state modified.
+- Objective halos now include actual animated Three.js ground rings and upgraded HUD distance badges; all original goal positions preserved.
+- Workshop L1 retains simple functionality; level-2 solar/extraction roof and new PUMA-red advanced-bay architectural details activate at real upgrade level. Catalog thumbnails render the correct real L1/L2 variant using isolated factory geometries.
+- Regression tests `tests/full-visual-overhaul-v2.test.mjs`; JS syntax checks and stylesheet balance pass. Full browser/gamepad tests are a separate post-deploy gate.
+- Full report: `CHANGES/2026-11-06_full-visual-overhaul-v2.md`.
+
 ## 2026-11-06 — Restore PUMA burgundy and remove invisible workshop parking wall (ChatGPT)
 
 - User spotted an impassable, apparently empty approach between buildings; workshop level 2 had an unconditional 3.8×2.6m collider over an open parking bay. Remove this stale/phantom `_workshopNv2` blocker while preserving all real workshop/HSEC wall colliders.

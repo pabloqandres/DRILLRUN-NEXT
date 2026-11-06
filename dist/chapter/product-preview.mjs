@@ -56,7 +56,11 @@ export function workshopThumbnail(world,level=1){
  document.body.append(host);
  let preview=null;
  try{
-  const base=world.workshopModel||world.makeWorkshop(true);
+  // Generate the exact L1 or L2 variant from the shared game factory. The live
+  // level may differ from the one being previewed; never mutate the real world.
+  const base=world.makeWorkshop(true);
+  const advancedRoof=base.getObjectByName('taller-nv2-premium-roof');
+  if(advancedRoof)advancedRoof.visible=level>=2;
   const models=[base];
   if(level>=2&&world._workshopExt)models.push(world._workshopExt);
   preview=new ProductPreview(host,world,{transparent:true});
