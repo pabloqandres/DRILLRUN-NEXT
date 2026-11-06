@@ -8,10 +8,13 @@ Three.js r170 WebGL2 browser game. ES modules (.mjs), no bundler, deployed on Ve
 
 ## Before Starting Any Work
 
-1. Read `AI_COLLABORATION/CURRENT_STATE.md` — understand what's deployed
-2. Read `AI_COLLABORATION/ACTIVE_WORK.md` — check for locked files or active tasks
-3. Read `AI_COLLABORATION/CHANGELOG.md` — see recent changes
-4. Read `AI_COLLABORATION/DESIGN_SYSTEM.md` — follow the established visual language
+1. Synchronize the remote branch and identify the current commit; do not assume chat context is current.
+2. Read `AI_COLLABORATION/RULES.md` — authoritative collaboration rules.
+3. Read `AI_COLLABORATION/CURRENT_STATE.md` — confirmed project/deployment state.
+4. Read `AI_COLLABORATION/ACTIVE_WORK.md` — active branches and soft-locked files.
+5. Read `AI_COLLABORATION/COMPONENT_OWNERSHIP.md` — ownership and shared interfaces.
+6. Read `AI_COLLABORATION/CHANGELOG.md` and relevant `AI_COLLABORATION/CHANGES/` records.
+7. Read `AI_COLLABORATION/DESIGN_SYSTEM.md` and `DECISIONS.md` for approved visuals and shared-file coordination.
 
 ## Your Role
 
@@ -58,11 +61,12 @@ Follow `AI_COLLABORATION/DESIGN_SYSTEM.md` for:
 
 1. **Do not modify logic files** (state.mjs, game.mjs, narrative.mjs, etc.) — those belong to Claude Code
 2. **Shared CSS files:** Only modify visual aspects, never touch functional styles (phone logic, narrative layout)
-3. **After every session:** Update `AI_COLLABORATION/CHANGELOG.md` and `AI_COLLABORATION/CURRENT_STATE.md`
+3. **After each change:** Document it in `AI_COLLABORATION/CHANGELOG.md` and `CHANGES/`; update `CURRENT_STATE.md` only when confirmed project state changes. Record changed files, actual tests, commit and PR.
 4. **For cross-agent work:** Document in `AI_COLLABORATION/DECISIONS.md` first
-5. **Branch naming:** Use `chatgpt/<feature-name>` for feature branches
+5. **Branch naming:** Use `chatgpt/<feature-name>`; propose changes through a pull request, never directly on `main`.
 6. **Three.js version:** r170 — do not upgrade without coordination
 7. **No external dependencies** without documenting in `AI_COLLABORATION/DECISIONS.md`
+8. **No production release:** Never merge into `main`, deploy to production, or modify Vercel deployment settings without explicit user authorization. Keep previews separate from production.
 
 ## Collaboration with Claude Code
 
