@@ -1,12 +1,14 @@
 # Current State — DRILL RUN NEXT GENERATION
 
 **Last updated:** 2026-11-06
-**Updated by:** Claude Code
+**Updated by:** Claude Code (game state); ChatGPT (Git/Vercel verification)
 
 ## Game Version
 
 - **Platform:** Three.js r170, WebGL2, ES modules (.mjs), no bundler
-- **Deployment:** Vercel (auto-deploy from GitHub)
+- **Deployment:** Vercel project `drillrun-builder-lab-v22`; automatic deployment from new GitHub commits is **not independently confirmed**. Latest checked production deployment was created via CLI (`source: cli`) and referenced repository commit `3e36fe3a7d22fc09beb3d522d52aef2118a4f86d`.
+- **Deployment verification:** GitHub `main` at audit time: `8f3c434864845bc664995358296455c62c412c0e` (collaboration documentation only); Vercel production status READY does **not** mean that GitHub `main` HEAD is deployed.
+- **Production release rule:** Do not push deployments to production or assume autodeploy until Vercel Git configuration, branch mapping and release approval are verified.
 - **Repository:** https://github.com/pabloqandres/DRILLRUN-NEXT
 - **Branch:** `main`
 
@@ -48,9 +50,12 @@
 - `dist/config/` — Game configuration
 - `dist/assets/`, `dist/assets3d/` — 2D/3D assets
 
-## Known Issues
+## Known Issues / Verification Gaps
 
-- None critical at this time
+- No critical runtime issue was independently verified in this documentation audit; the listed mission completions reflect Claude Code's report, not independent end-to-end testing by ChatGPT.
+- Confirm GitHub-to-Vercel automatic deployment settings before relying on them.
+- Documentation currently under review in branch `chatgpt/collaboration-protocol-hardening`; do not describe it as merged until the PR has been approved and merged.
+- README retains historical development-version language; see the new current-state notice on its front page.
 
 ## Save Format
 
