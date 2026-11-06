@@ -95,3 +95,13 @@
 **Preview integrity:** construct workshop preview from the very same factory with `previewOnly=true` and no world/collider side effects; clone mesh buffers before disposing snapshot contexts; use existing HSEC `assetModel` thumbnails; include actual built level-2 extensions when available rather than substituting AI concept renders.
 
 **Release procedure:** create branch + PR and publish approved visuals to stable `main`/Vercel production, since user is testing the real saved game on that origin. Browser visual acceptance and performance checks remain necessary; do not represent the 2D mockup as guaranteed pixel-perfect 3D output.
+
+## 2026-11-06 — Full visual-overhaul V2 is directly authorized (User + ChatGPT)
+
+The user explicitly directed ChatGPT to rebuild **everything visible in the game**, not only color palettes, including persistent player HUD, name/profile/level, resources, joystick, settings gear, phone, mission objectives/complete overlays, navigation, catalog, world waypoints and 3D lighting halos, plus improved current buildings and future tier distinction. No handoff to another coding agent; push via branch -> PR -> `main` -> stable Vercel production for continued saved-game testing. No further intermediate approvals required for this UI implementation.
+
+**Design:** preserve a consistent high-quality navy/gold/cyan industrial UI with restrained PUMA-red architecture; retain office-original form and existing DRILLCO brand image only in office. Taller L1 must stay a simple credible structure; premium solar/extraction/architecture appears at true level 2.
+
+**Safety:** application logic, saved data/schema, Firebase, purchase/mission/economic calculations, interaction IDs, real colliders and roads unchanged. `dist/chapter/game.mjs` UI-only modification authorized. Any untested visual details remain subject to browser validation and later correction, not false claims of pixel-perfect concept parity.
+
+**Delivery report:** `AI_COLLABORATION/CHANGES/2026-11-06_full-visual-overhaul-v2.md`.
