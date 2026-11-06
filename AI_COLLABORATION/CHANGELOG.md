@@ -1,5 +1,16 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-06 — Camera zoom + Catalog inline actions + iconography V3 (ChatGPT)
+
+- Branch: `chatgpt/camera-distance-wheel-zoom`. Production release after user authorization and verification.
+- Camera: closer 3.8m default preset B, preserved original zoom preferences, adds wheel/trackpad zoom and retains mobile pinch.
+- Catalog: no floating duplicate selected-product inspector. The real action buttons/price/status now live inside the Catalog dock.
+- M4: no repetitive "Ingreso automatizado recibido" toast; funds and history still credit as before.
+- Iconography: new SVG path family for 39 core icon keys (including unchanged Google logo) and 13 HSEC categories; no external image/font dependencies, IDs/handlers unchanged.
+- Tests added for zoom, settings migration and icon coverage; direct function-level checks passed. Full `npm test` and browser UX testing not run.
+- **HUD layout:** a less crowded visual mockup was generated **for review only**; not integrated into game code.
+- Full record: `CHANGES/2026-11-06_chatgpt_camera-icons-hud-concept.md`.
+
 ## 2026-11-06 — Hotfix Catálogo + DrillTruck + Economía M4 (ChatGPT)
 
 - **Branch:** `chatgpt/catalog-camera-and-category-scroll-fix`.
