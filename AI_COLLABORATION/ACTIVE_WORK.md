@@ -4,11 +4,11 @@
 
 ## Currently Active
 
-_No active tasks. ChatGPT Catalog + M4 hotfix merged and deployed. Browser-based visual/gameplay validation is still a separate follow-up._
+- **ChatGPT — Cámara zoom / Catálogo V2.1 / aviso ingreso M4:** rama `chatgpt/camera-distance-wheel-zoom`. Cambios en código aplicados; pendiente de PR y verificación de despliegue en main. Funcionalidades: cámara más cercana, rueda/trackpad + gesto táctil, CTA dentro del dock, sin tarjeta flotante y sin toast repetitivo de ingresos automáticos.
 
 ## Files in Progress
 
-_No files currently locked. Future edits should sync `main` before starting._
+- `dist/camera/config.mjs`, `dist/camera/gestures.mjs`, `dist/chapter/catalog.css`, `dist/chapter/game.mjs`, `tests/camera-zoom.test.mjs` — cambios acotados ChatGPT; evita edición simultánea sin sincronizar.
 
 ## Recently Completed
 
