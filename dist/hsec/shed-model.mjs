@@ -75,7 +75,7 @@ export function buildShed({box,cyl,add,C,colliders,walls}){
   for(let n=-1;n<=1;n++){const line=box(.012,.019,1.04,side*1.39+n*.29,3.544,z,C.silver);line.rotation.z=-side*pitch;}
  }
  // Integrated entry lighting and hazard-striped canopy, keeping doors unobstructed.
- box(4.70,.14,.52,0,3.02,2.66,C.steel);
+ box(4.70,.14,.52,0,3.02,2.66,C.red);
  box(4.73,.035,.09,0,2.935,2.94,C.yellow);
  for(const x of[-1.65,1.65]){box(.60,.06,.14,x,2.96,2.98,C.yellow);box(.49,.024,.10,x,2.916,2.98,C.white);}
  for(const x of[-1.7,1.7]){
