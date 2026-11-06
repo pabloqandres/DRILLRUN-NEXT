@@ -534,7 +534,10 @@ function renderHUD(){if(!s)return;setText($('#cashValue'),money(s.cash));setText
  const m4Active=s.mission4&&s.mission4.phase!=='inactive';
  if(m4Active){const phase4=s.mission4.phase;const eyebrow=$('#objective .eyebrow');if(eyebrow)eyebrow.textContent=phase4==='complete'?'MISIÓN COMPLETADA':'MISIÓN 3';const title=$('#objectiveTitle');if(title)title.textContent=phase4==='complete'?'Operación automatizada':'Automatiza tu operación';const detail=$('#objectiveDetail');if(detail){if(phase4==='complete'){detail.classList.add('hidden');}else{detail.classList.remove('hidden');const m4objs=mission4Objectives(s);const currentObj=m4objs.find(o=>o.id===s.mission4.currentObjective)||m4objs[0];const objNames={upgradeWorkshop:'Ampliar taller',equipDth:'Equipamiento DTH',deployProduction:'Desplegar producción',automateDrillTruck:'Automatizar DrillTruck',automatedProduction:'Producción activa'};const checkNames={upgradeToNv2:'Taller Nv.2',purchaseDthDrill:'Comprar perforadora DTH',orderPumaTools:'Pedir herramientas PUMA',installDthTools:'Instalar martillo + bit',convertBorehole:'Convertir sondaje a zona',assignDthToZone:'Asignar DTH a zona',hireTecnicoDrillco:'Contratar Técnico DRILLCO',purchaseDrillTruck:'Comprar DrillTruck',linkTruckToZone:'Vincular DrillTruck a zona',completeProductionCycle:'Completar ciclo',convertAllZones:'Automatizar todas las zonas'};if(currentObj){detail.innerHTML=`<b style="font-size:10px;color:#e7c886;display:block;margin-bottom:4px">${objNames[currentObj.nameKey]||currentObj.nameKey}</b>`+currentObj.checks.map(c=>`<span class="hsecStep ${c.done?'done':'active'}">${c.done?'✓ ':'○ '}${checkNames[c.labelKey]||c.labelKey}</span>`).join('');}else{detail.textContent='Preparando misión';}}}const totalChecks=mission4Objectives(s).reduce((n,o)=>n+o.checks.length,0);const doneChecks=mission4Objectives(s).reduce((n,o)=>n+o.checks.filter(c=>c.done).length,0);const prog4=totalChecks>0?doneChecks/totalChecks:0;$('#objectiveProgress').style.width=(prog4*100)+'%';setText($('#objectiveCount'),phase4==='complete'?'✓':`${doneChecks}/${totalChecks}`);}
  const m4Playing=m4Active&&s.mission4.phase!=='complete';const m3Playing=m3Active&&s.mission3.phase!=='complete';
- hsecUI?.update();hidden($('#bottomNav'),!m3Playing&&!m4Playing);
+ hsecUI?.update();
+  // Permanent, useful navigation in gameplay — not dependent on an unfinished mission.
+  // Keep original game/phone/HSEC actions; the six destinations simply expose them.
+  hidden($('#bottomNav'),phase!=='play');
  const job=pendingConstruction(s),building=!!job;hidden($('#buildHud'),!building);if(building){const seconds=Math.max(0,Math.ceil((job.ends-Date.now())/1000));setText($('#buildTime'),String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0'));$('#buildProgress').value=progress(s);$('#boostButton').disabled=s.boosters<1;}
  const a=phase==='play'?nearInteraction():null;$('#handButton').disabled=!a||!!busy||!!a?.blocked;$('#handButton').classList.toggle('available',!!a&&!a.blocked);$('#handButton').classList.toggle('blocked',!!a?.blocked);scene?.setInteraction(a,s);$('#handButton').setAttribute('aria-label',a?t(a.blocked?'noEnergy':a.kind==='boost'?'boostAction':a.label):t('hand'));$('#handButton').style.setProperty('--action-progress',busy?Math.min(1,busy.elapsed/CONFIG.clearSeconds):0);$('#handButton').style.opacity=a||busy?'1':'.45';document.body.classList.toggle('interior',s.inside);if(obj!==lastObjective){lastObjective=obj;$('#hud').dataset.objective=obj;}$('#hud').dataset.cleared=s.cleared.length;$('#hud').dataset.chapterComplete=String(!!s.chapterCompletedAt);
 }
@@ -570,7 +573,17 @@ onM4Action:(type,data)=>{try{
 }catch(e){const msg=e.message==='noMoney'?'Fondos insuficientes':e.message;notices.push({title:msg,symbol:'lock'});}},
 onNarrativeAction:handleNarrativeAction,
 });
-$('#builderButton').onclick=openBuilder;$$('#bottomNav [data-nav]').forEach(b=>b.onclick=()=>{const nav=b.dataset.nav;if(nav==='builder')openBuilder();else openPhone(nav);});$('#phoneButton').onclick=()=>phoneOpen?closePhone():openPhone();$('#closePhone').onclick=$('#phoneShade').onclick=closePhone;$('#phoneBack').onclick=()=>phoneUI.backApp();$('#money').onclick=()=>notices.push({title:t('cash'),detail:money(s.cash),symbol:'wallet'});
+$('#builderButton').onclick=openBuilder;
+ $('#bottomNav [data-nav]').forEach(b=>b.onclick=()=>{
+  const nav=b.dataset.nav;
+  if(nav==='builder'){openBuilder();return;}
+  if(nav==='hsec'){if(hsecUI&&s?.hsec)hsecUI.open();else openPhone('objectives');return;}
+  if(nav==='m4-zones'){openPhone(s?.mission4?.phase&&s.mission4.phase!=='inactive'?'m4-zones':'objectives');return;}
+  if(nav==='m3-contract'){openPhone(s?.mission3?.phase&&s.mission3.phase!=='inactive'?'m3-contract':'objectives');return;}
+  if(nav==='m3-inventory'){openPhone(s?.mission3?.phase&&s.mission3.phase!=='inactive'?'m3-inventory':'inventory');return;}
+  if(nav==='m3-personnel'){openPhone(s?.mission3?.phase&&s.mission3.phase!=='inactive'?'m3-personnel':'home');return;}
+  openPhone(nav);
+ });$('#phoneButton').onclick=()=>phoneOpen?closePhone():openPhone();$('#closePhone').onclick=$('#phoneShade').onclick=closePhone;$('#phoneBack').onclick=()=>phoneUI.backApp();$('#money').onclick=()=>notices.push({title:t('cash'),detail:money(s.cash),symbol:'wallet'});
 $('#objective').onclick=e=>{if(e.target.closest('#objToggle'))return;showMission();};$('#objective').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showMission();}};
 $('#objToggle').onclick=e=>{e.stopPropagation();$('#objective').classList.toggle('collapsed');const gc=$('#geoCard');if(gc&&gc._shown===false)gc.classList.add('hidden');};
 $('#geoDismiss').onclick=e=>{e.stopPropagation();if(s?.geoAnalysis){s.geoAnalysis.cardDismissed=true;save();renderHUD();}};
