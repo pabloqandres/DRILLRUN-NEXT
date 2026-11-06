@@ -2,12 +2,18 @@
 // Automated income generation from converted borehole zones.
 
 export const CYCLE_DURATION=900; // 15 minutes in seconds
-export const BASE_INCOME_PER_CYCLE=2500;
+// Moderate passive income relative to one-off contract rewards (M3: 60,000 base).
+export const BASE_INCOME_PER_CYCLE=500;
+// One hour of unattended cycles per zone at most when reopening the game.
+export const MAX_OFFLINE_PRODUCTION_CYCLES=4;
 
 // Income for a single zone per cycle
 export function zoneIncomePerCycle(zone){
  if(!zone)return 0;
- return Math.round(BASE_INCOME_PER_CYCLE*zone.geologyQuality*(zone.depthReached/30));
+ // Clamp saved values defensively: a malformed zone must never mint arbitrary money.
+ const quality=Number.isFinite(zone.geologyQuality)?Math.max(0,Math.min(1,zone.geologyQuality)):0;
+ const depth=Number.isFinite(zone.depthReached)?Math.max(0,Math.min(30,zone.depthReached)):0;
+ return Math.round(BASE_INCOME_PER_CYCLE*quality*(depth/30));
 }
 
 // Tick production for all active zones (called once per second)
