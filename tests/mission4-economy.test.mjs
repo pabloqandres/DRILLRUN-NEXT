@@ -37,7 +37,10 @@ test('long offline absence does not produce unlimited credits',()=>{
  assert.equal(s.cash,5000+cap);
  assert.equal(s.ledger.length,1);
  assert.equal(s.mission4.zones[0].lastCycleAt,now);
- assert.equal(calculateOfflineProduction(s,now),null);
+ const second=calculateOfflineProduction(s,now);
+ assert.equal(second.incomeCycles,0);
+ assert.equal(second.totalIncome,0);
+ assert.equal(s.cash,5000+cap);
 });
 
 test('income cannot explode from corrupted saved quality or depth',()=>{
