@@ -1,5 +1,14 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-06 — Collaboration protocol documentation hardening (ChatGPT)
+
+### Documentation-only, pending review
+- Branch: `chatgpt/collaboration-protocol-hardening`
+- Changed: `CLAUDE.md`, `AGENTS.md`, `AI_COLLABORATION/RULES.md`, `AI_COLLABORATION/CURRENT_STATE.md`, `AI_COLLABORATION/CHANGELOG.md`, `AI_COLLABORATION/ACTIVE_WORK.md`, `README.md`; added `AI_COLLABORATION/CHANGES/2026-11-06_chatgpt_collaboration-audit.md`.
+- Clarified mandatory pre-edit reading, protected branches and approval gate, safer local instructions, actual deployment provenance and versioned audit trail.
+- Verification: inspected GitHub repository/docs/commits and Vercel project/deployment metadata; **no gameplay tests run** because no runtime source files were changed.
+- No Vercel deployment or production edit performed. Commit and PR references are available through the branch history and PR once opened.
+
 ## 2026-11-06 — Narrative Mission Flow System (Claude Code)
 
 ### Added
