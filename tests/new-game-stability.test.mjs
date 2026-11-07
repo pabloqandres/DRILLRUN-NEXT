@@ -121,6 +121,7 @@ test('Casa Matriz reserves workshop capacity before order delivery',()=>{
 
 test('Casa Matriz defers delivery if workshop storage is full',()=>{
  const s=newGame('es','operator01',at);s.cash=50000;s.drill={id:'rig_rc_compact'};
+ s.workshop={level:1,status:'built'};
  placeOrder(s,[{type:'bit',model:'dome-4',qty:1,unitPrice:450}],at);
  s.toolInventory=Array.from({length:8},(_,i)=>({id:'legacy-'+i,status:'new'}));
  tickDeliveries(s,at+121000);
