@@ -169,7 +169,7 @@ export function validateMissionState(s){
  const fixes=[];
 
  // Fix 1: M1 completed but reward never given
- if(s.chapterCompletedAt&&!s.ledger?.some(l=>l.key==='missionReward')){
+ if(s.chapterCompletedAt&&s.narrative?.rewardsCollected?.includes('m1')&&!s.ledger?.some(l=>l.key==='missionReward')){
   s.cash+=5000;
   s.ledger.push({id:s.nextId++,key:'missionReward',label:'Recompensa · Misión 1 (recuperada)',amount:5000,at:Date.now()});
   fixes.push('m1RewardRecovered');
