@@ -33,6 +33,11 @@ export function restore(data,now=Date.now()){
  /* Preserve saved contract terms. Older contracts keep their original 15-minute/6-site rules; new contracts use 180s/3 sites. */
  /* Reset drilling timer for saves where deadline already passed */
  if(s.contract&&s.contract.duration!==180&&s.contract.drillingStartedAt&&!s.contract._timerReset4){const deadline=s.contract.drillingStartedAt+s.contract.duration*1000;if(deadline<now){s.contract.drillingStartedAt=now;}s.contract._timerReset4=true;}
+ // Repair the early-game legacy default workshop without affecting legitimately built properties.
+ if(!s.chapterCompletedAt&&!s.mission3&&s.workshop?.level===1&&!s.workshop?.upgrade&&
+    !s.ledger?.some(l=>l.key==='workshopBuild')&&!(s.toolInventory||[]).length){
+  s.workshop=null;
+ }
  // Workshop is never auto-created: a new player must build its prefabricated Level 1 module.
  /* M4 defaults */ s.mission4=s.mission4||null;
  /* M1 mission rewards are confirmed by narrative; restore never pays before confirmation. */
