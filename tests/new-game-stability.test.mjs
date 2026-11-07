@@ -104,9 +104,15 @@ test('Office L1 automatically installs the complete workstation without Office S
  assert.equal(s.cash,2000);
 });
 
-test('All selectable avatars retain the single approved Avatar 1 intro film',()=>{
+test('Each supplied avatar intro uses the approved cinematic player and pending Avatar 3 uses Avatar 1',()=>{
  assert.deepEqual(Object.keys(INTRO_VARIANTS).sort(),['operator01','operator02','operator03','operator04']);
- assert(Object.values(INTRO_VARIANTS).every(v=>v.video===SHARED_INTRO_VIDEO));
+ assert.equal(INTRO_VARIANTS.operator01.video,SHARED_INTRO_VIDEO);
+ assert.equal(INTRO_VARIANTS.operator02.video,'./cinematics/avatar02-intro.mp4');
+ assert.equal(INTRO_VARIANTS.operator03.video,SHARED_INTRO_VIDEO);
+ assert.equal(INTRO_VARIANTS.operator04.video,'./cinematics/avatar04-intro.mp4');
+ assert.equal(INTRO_VARIANTS.operator03.sharedIntro,true);
+ assert.equal(INTRO_VARIANTS.operator02.sharedIntro,false);
+ assert.equal(INTRO_VARIANTS.operator04.sharedIntro,false);
 });
 
 test('Casa Matriz reserves workshop capacity before order delivery',()=>{
