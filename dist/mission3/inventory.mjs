@@ -10,10 +10,33 @@ export const WORKSHOP_LEVELS=[
  {level:3,capacity:22,upgradeCost:6000,label:'Industrial',constructionSeconds:480}
 ];
 
-export function workshopLevel(s){return s.workshop?.level||1;}
+export const WORKSHOP_L1_COST=2500;
+export const WORKSHOP_L1_SECONDS=30;
+export function workshopBuilt(s){return !!s.workshop&&s.workshop.status!=='building';}
+export function workshopLevel(s){return workshopBuilt(s)?s.workshop.level:0;}
+export function canBuildWorkshop(s){
+ if(s.workshop)return 'alreadyBuilt';
+ if(!s.mission3||s.mission3.phase==='inactive')return 'missionNotActive';
+ if(!s.hsec?.completedAt||s.office?.level<2)return 'needsHsec';
+ if(s.cash<WORKSHOP_L1_COST)return 'noMoney';
+ return null;
+}
+export function buildWorkshop(s,now=Date.now()){
+ const err=canBuildWorkshop(s);if(err)throw new Error(err);
+ s.cash-=WORKSHOP_L1_COST;
+ s.workshop={level:1,status:'building',started:now,ends:now+WORKSHOP_L1_SECONDS*1000};
+ s.ledger.push({id:s.nextId++,key:'workshopBuild',amount:-WORKSHOP_L1_COST,at:now});
+ return s.workshop;
+}
+export function finishWorkshopConstruction(s,now=Date.now()){
+ const w=s.workshop;
+ if(!w||w.status!=='building'||now<w.ends)return false;
+ w.status='built';delete w.started;delete w.ends;
+ return true;
+}
 export function workshopCapacity(s){
  const lvl=workshopLevel(s);
- return (WORKSHOP_LEVELS.find(w=>w.level===lvl)||WORKSHOP_LEVELS[0]).capacity;
+ return lvl?(WORKSHOP_LEVELS.find(w=>w.level===lvl)||WORKSHOP_LEVELS[0]).capacity:0;
 }
 export function workshopUsed(s){
  return (s.toolInventory||[]).filter(t=>t.status!=='spent').length;
@@ -21,6 +44,7 @@ export function workshopUsed(s){
 export function workshopFree(s){return Math.max(0,workshopCapacity(s)-workshopUsed(s));}
 
 export function canUpgradeWorkshop(s){
+ if(!workshopBuilt(s))return 'workshopNotBuilt';
  const lvl=workshopLevel(s);
  const next=WORKSHOP_LEVELS.find(w=>w.level===lvl+1);
  if(!next)return 'maxLevel';
@@ -35,7 +59,6 @@ export function upgradeWorkshop(s,now=Date.now()){
  const lvl=workshopLevel(s);
  const next=WORKSHOP_LEVELS.find(w=>w.level===lvl+1);
  s.cash-=next.upgradeCost;
- if(!s.workshop)s.workshop={level:1};
  s.workshop.upgrade={
   targetLevel:next.level,
   started:now,
