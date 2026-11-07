@@ -4,11 +4,11 @@
 
 ## Currently Active
 
-- **ChatGPT — full visual overhaul V2:** branch `chatgpt/full-visual-overhaul-v2`; real CSS/HTML/JS/3D implementation finished, code checked, awaiting PR and production validation. Includes HUD, settings gear, profile/level, six functional bottom nav tabs, mission modals, 3D beacons, tiered workshop roof, real L1/L2 Catalog geometry.
+- **ChatGPT — Visual V3:** branch `chatgpt/world-art-v3-terrain-roads-workshop`; true integrated player portrait/level and mission card, simplified joystick, terrain scatter, worn road painting, real RC rig snapshots, original hired-crew portraits. Ready for PR and production integration; runtime visual acceptance still needed.
 
 ## Files in Progress
 
-- Scoped files: `dist/chapter/visual-overhaul-v2.css`, `dist/index.html`, `dist/chapter/game.mjs` (UI routing only), `dist/chapter/action-halo.mjs`, `dist/scene.mjs` (workshop art only), `dist/chapter/product-preview.mjs` and tests. Avoid overlapping edits; state/mission/economy and Firebase off limits.
+- V3 scope: `dist/index.html`, `dist/chapter/visual-overhaul-v3.css`, `dist/chapter/game.mjs` (mission badge only), `dist/chapter/crew-portraits.mjs`, `dist/chapter/phone-ui.mjs`, `dist/chapter/product-preview.mjs`, `dist/mission3/phone-apps.mjs` (images only), `dist/graphics/desert.mjs`, `dist/hsec/world.mjs` (road painting only), tests. Main also includes separate PR #12 invisible delivery-truck collider fix; **retain it when merging V3**.
 
 ## Recently Completed
 
