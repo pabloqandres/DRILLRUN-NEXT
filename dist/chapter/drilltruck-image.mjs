@@ -57,6 +57,15 @@ async function renderRealTruck(world){
   preview.draw();
   const canvas=preview.renderer.domElement;
   if(!canvas.width||!canvas.height)throw new Error('DrillTruck preview canvas is empty');
+  // A data URL from a blank transparent frame is still valid PNG text. Inspect
+  // alpha coverage so a silent WebGL failure is never presented as a real photo.
+  const probe=document.createElement('canvas');probe.width=canvas.width;probe.height=canvas.height;
+  const context=probe.getContext('2d',{willReadFrequently:true});
+  context.drawImage(canvas,0,0);
+  const pixels=context.getImageData(0,0,probe.width,probe.height).data;
+  let visiblePixels=0;
+  for(let i=3;i<pixels.length;i+=32)if(pixels[i]>20)visiblePixels++;
+  if(visiblePixels<12)throw new Error('DrillTruck model rendered a transparent/blank frame');
   const image=cutoutPNG(canvas);
   if(!image.startsWith('data:image/png;base64,')||image.length<150)throw new Error('DrillTruck preview PNG is empty');
   return image;
