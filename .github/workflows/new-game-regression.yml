@@ -1,7 +1,7 @@
 name: New game regression checks
 on:
   push:
-    branches: ['chatgpt/new-game-stability-fixes', 'chatgpt/stability-validation-followup', main]
+    branches: ['chatgpt/new-game-stability-fixes', 'chatgpt/stability-validation-followup', 'chatgpt/select-avatar-by-touch-3d', main]
   pull_request:
     branches: [main]
 jobs:
@@ -15,7 +15,7 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - name: Required stability regression checks
-        run: node --test tests/new-game-stability.test.mjs tests/mission4-economy.test.mjs tests/delivery-visibility-collider.test.mjs tests/short-contract-narrative.test.mjs
+        run: node --test tests/new-game-stability.test.mjs tests/mission4-economy.test.mjs tests/delivery-visibility-collider.test.mjs tests/short-contract-narrative.test.mjs tests/avatar-touch-selection.test.mjs
       - name: Legacy full suite (known historical failures; informational until updated)
         continue-on-error: true
         run: npm test
