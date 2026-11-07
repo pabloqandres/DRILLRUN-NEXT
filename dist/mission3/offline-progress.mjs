@@ -5,8 +5,8 @@ import {tickDeliveries} from './headquarters.mjs';
 import {applyWear} from './wear.mjs';
 import {tickAnalysis} from './geology.mjs';
 
-// Productivity: meters per hour (game time). Normalized so 360m can complete in ~3h.
-const BASE_PRODUCTIVITY=1200; // m/h — 180m in ~9min
+// Match active drilling speed: 90 m in about 108 seconds plus repositioning.
+const BASE_PRODUCTIVITY=3000; // m/h; remaining off-line progress still respects tool wear
 
 export function calculateOfflineProgress(s,now=Date.now()){
  const elapsed=Math.max(0,now-(s.savedAt||now));
