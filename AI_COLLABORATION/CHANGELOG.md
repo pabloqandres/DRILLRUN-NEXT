@@ -1,5 +1,14 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-06 — Category audit 01: DrillTruck genuine 3D asset image
+
+- **Root cause fixed:** Catalog thumbnail callback previously ignored vehicle products, so DrillTruck card and technical sheet always showed icon fallback despite its 1.7 MB GLB already being in assets.
+- New cached service loads `DRILLTRUCK_optimized.glb` with GLTF/DRACO exactly as the live vehicle does; 5 m standardized model, 3/4 transparent snapshot using existing ProductPreview. Reject blank images and retry transient errors.
+- **Same image** in Vehicles card, expanded Ficha Técnica and M4 Phone management/purchase hero. Vehicle panel gains appropriately larger product/card hero and compact responsive layouts.
+- Consistent icon-holder sizing in category tabs plus precise phone/settings SVG centering; no generic substitute images, no invented logos.
+- No gameplay, inventory, economics, mission progression, real GLB, colliders or saved state changes.
+- Regression suite `tests/drilltruck-real-asset-catalog.test.mjs`; details in `CHANGES/2026-11-06_drilltruck-real-asset-catalog.md`. Runtime screenshot to be confirmed post-deploy.
+
 ## 2026-11-06 — Cinematic World Art V4 (ChatGPT)
 
 - Real 3D visual upgrades: shared concrete mineral wear maps, construction-pad joints, soft contact AO beneath office/workshop, warmer entry luminaires and workshop drainage/threshold details.

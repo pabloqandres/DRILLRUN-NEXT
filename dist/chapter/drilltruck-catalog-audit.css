@@ -1,0 +1,181 @@
+/* DRILL RUN · Vehicles audit 01 · DrillTruck
+   Real GLB imagery in Catalog / technical sheet / phone.
+   Shared icon geometry and centering. Presentation-only; never touch purchases.
+*/
+#builderPanel.catalogTray .catalogCategories button{
+ display:inline-flex!important;align-items:center!important;
+ justify-content:center!important;gap:7px!important;
+ min-height:45px!important;line-height:1.15!important;
+ text-align:center;vertical-align:middle;
+}
+#builderPanel.catalogTray .catalogCategoryIcon{
+ display:grid!important;place-items:center!important;
+ flex:0 0 23px;width:23px;height:23px;
+ line-height:0;margin:0;padding:0;
+}
+#builderPanel.catalogTray .catalogCategoryIcon>.uiIcon{
+ display:block!important;position:static!important;
+ width:21px!important;height:21px!important;
+ margin:0!important;padding:0!important;transform:none!important;
+ flex:none!important;vertical-align:middle!important;
+ stroke-linecap:round;stroke-linejoin:round;
+}
+#builderPanel.catalogTray .catalogCategories button>span:last-child{
+ display:block;align-self:center;line-height:1.15;
+ white-space:nowrap;letter-spacing:.01em;
+}
+#builderPanel.catalogTray .catalogCategories button.selected .catalogCategoryIcon{
+ color:#ffe0a4;filter:drop-shadow(0 0 5px #ffdc8059);
+}
+/* Phone and settings: equal optical center rather than mismatched padding
+   between a squircle device and radial settings dial. */
+#hud header .topActions{
+ display:flex!important;align-items:center!important;justify-content:center;
+ gap:8px!important;
+}
+#hud header .topActions .iconButton{
+ box-sizing:border-box!important;flex:0 0 45px!important;
+ display:grid!important;place-items:center!important;
+ width:45px!important;min-width:45px!important;max-width:45px!important;
+ height:45px!important;min-height:45px!important;max-height:45px!important;
+ padding:0!important;margin:0!important;line-height:0!important;
+ border-radius:14px!important;
+}
+#hud header .topActions .iconButton>span:first-child{
+ display:grid!important;place-items:center!important;
+ width:100%!important;height:100%!important;line-height:0!important;
+ padding:0!important;margin:0!important;
+}
+#hud header .topActions .iconButton .uiIcon{
+ display:block!important;width:23px!important;height:23px!important;
+ flex:none!important;stroke-width:2.05!important;
+ margin:0!important;padding:0!important;
+ position:static!important;transform:none!important;
+ filter:drop-shadow(0 0 4px #bcf3ff33)!important;
+}
+#hud header #settingsButton{border-radius:14px!important}
+#hud header #settingsButton .uiIcon{color:#ffde9c!important}
+/* Only the requested vehicle category. Bigger product image with breathing room. */
+#builderPanel.catalogTray[data-category="vehicles"]:not(.catalogCollapsed) .constructionRail{
+ padding:10px 14px!important;
+}
+#builderPanel.catalogTray[data-category="vehicles"] .catalogProduct{
+ flex:0 0 clamp(204px,18vw,270px)!important;
+ width:clamp(204px,18vw,270px)!important;
+ padding:8px 12px 11px!important;
+ background:linear-gradient(155deg,#294759,#10273c 74%)!important;
+ border:1px solid #739daf81!important;
+ border-radius:14px!important;gap:4px!important;
+}
+#builderPanel.catalogTray[data-category="vehicles"] .catalogProduct.selected{
+ border:1px solid #f2c77b!important;
+ box-shadow:0 0 0 1px #dcb27665,0 8px 24px #0005,
+ inset 0 1px #fff6!important;
+}
+#builderPanel.catalogTray[data-category="vehicles"] .catalogArt{
+ flex:1;min-height:94px;
+ background:radial-gradient(ellipse at 50% 90%,#72b2c92b,transparent 75%);
+ border:1px solid #89b7c32a;border-radius:10px!important;
+ overflow:hidden;position:relative;
+}
+#builderPanel.catalogTray[data-category="vehicles"] .catalogArt::before{
+ content:'';position:absolute;bottom:12px;left:20%;right:20%;
+ height:10px;border-radius:50%;background:#0007;filter:blur(8px);
+}
+#builderPanel.catalogTray[data-category="vehicles"] .catalogArt>img{
+ padding:3px 3px 0!important;width:100%!important;height:100%!important;
+ object-fit:contain!important;object-position:center!important;
+ filter:drop-shadow(0 8px 8px #0008)!important;
+}
+#builderPanel.catalogTray[data-category="vehicles"] .catalogName{
+ font-weight:860!important;font-size:clamp(12px,1.15vw,16px)!important;color:#f3fafc;
+}
+#builderPanel.catalogTray[data-category="vehicles"] .catalogLevel{
+ font-size:11px!important;color:#acd4e4!important;
+}
+#builderPanel.catalogTray[data-category="vehicles"] .catalogInlineDetails{
+ padding:10px 15px!important;gap:17px!important;align-items:stretch!important;
+ background:linear-gradient(145deg,#142d40bd,#091c2dcc)!important;
+}
+#builderPanel.catalogTray[data-category="vehicles"] .catalogDetailVisual{
+ flex:0 0 clamp(235px,43%,450px)!important;
+ border:1px solid #9bbfca48;
+ background:radial-gradient(ellipse at 49% 74%,#527b8c41,#0c253500 79%)!important;
+ min-height:0;overflow:hidden;
+}
+#builderPanel.catalogTray[data-category="vehicles"] .catalogDetailVisual>img{
+ width:100%;height:100%;object-fit:contain!important;
+ padding:0 8px!important;filter:drop-shadow(0 8px 9px #0009)!important;
+}
+#builderPanel.catalogTray[data-category="vehicles"] .catalogFacts{
+ grid-template-columns:repeat(2,minmax(0,1fr));align-content:center;
+ gap:7px 15px!important;
+}
+#builderPanel .realAssetLoading{
+ display:flex;align-items:center;justify-content:center;
+ width:100%;height:100%;max-width:100%;padding:12px;
+ font-size:10px;line-height:1.4;letter-spacing:1.2px;
+ font-weight:800;text-align:center;color:#9bbccc;
+ animation:drAssetPulse 2.3s ease-in-out infinite;
+}
+@keyframes drAssetPulse{0%,100%{opacity:.55}50%{opacity:1}}
+/* Management/technical screen receives the SAME cached GLB PNG. */
+#phone .drillTruckHero{
+ margin:8px 7px 13px;padding:0!important;overflow:hidden;
+ border:1px solid #a4b9c687;border-radius:16px;
+ background:linear-gradient(150deg,#244558,#071b30);
+ box-shadow:0 9px 24px #0006,inset 0 1px #f5fcff33;
+}
+#phone .drillTruckHeroStage{
+ position:relative;display:flex;align-items:center;justify-content:center;
+ width:100%;height:clamp(110px,19vh,210px);
+ background:radial-gradient(ellipse at 50% 70%,#9bcbd12a,transparent 72%);
+ color:#9fc7d5;font-size:9px;letter-spacing:1px;text-align:center;
+}
+#phone .drillTruckHeroStage:has(img)::before{
+ content:'';position:absolute;left:20%;right:20%;bottom:18px;
+ height:10px;background:#0005;border-radius:50%;filter:blur(9px);
+}
+#phone .drillTruckHeroStage img{
+ position:relative;width:100%;height:100%;
+ object-fit:contain;object-position:center;
+ padding:6px 9px 2px;filter:drop-shadow(0 6px 10px #0009);
+}
+#phone .drillTruckHero figcaption{
+ display:flex;align-items:center;justify-content:space-between;gap:10px;
+ padding:8px 12px;
+ background:#061a2bbd;border-top:1px solid #8cb0bc3f;
+}
+#phone .drillTruckHero figcaption b{
+ color:#ffe0a7;font-size:11px;letter-spacing:.5px;
+}
+#phone .drillTruckHero figcaption span{
+ color:#a4bbca;font-size:9px;text-align:right;
+}
+@media(max-width:900px),(max-height:510px){
+ #hud header .topActions{gap:5px!important}
+ #hud header .topActions .iconButton{
+  flex-basis:37px!important;width:37px!important;min-width:37px!important;
+  max-width:37px!important;height:37px!important;min-height:37px!important;max-height:37px!important;
+  border-radius:11px!important;
+ }
+ #hud header .topActions .iconButton .uiIcon{width:21px!important;height:21px!important}
+ #builderPanel.catalogTray .catalogCategoryIcon{flex-basis:19px;width:19px;height:19px}
+ #builderPanel.catalogTray .catalogCategoryIcon>.uiIcon{width:18px!important;height:18px!important}
+ #builderPanel.catalogTray[data-category="vehicles"] .catalogProduct{
+  flex-basis:clamp(150px,24vw,215px)!important;
+  width:clamp(150px,24vw,215px)!important;padding:5px 8px 8px!important;
+ }
+ #builderPanel.catalogTray[data-category="vehicles"] .catalogArt{min-height:60px}
+ #builderPanel.catalogTray[data-category="vehicles"] .catalogDetailVisual{flex-basis:40%!important}
+ #phone .drillTruckHero figcaption span{font-size:8px}
+}
+@media(max-width:590px){
+ #hud header .topActions .iconButton{
+  flex-basis:31px!important;width:31px!important;min-width:31px!important;
+  max-width:31px!important;height:34px!important;min-height:34px!important;max-height:34px!important;
+ }
+ #hud header .topActions .iconButton .uiIcon{width:18px!important;height:18px!important}
+ #builderPanel.catalogTray[data-category="vehicles"] .catalogDetailVisual{flex-basis:39%!important}
+}
+@media(prefers-reduced-motion:reduce){#builderPanel .realAssetLoading{animation:none!important}}
