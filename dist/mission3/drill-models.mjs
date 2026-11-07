@@ -98,15 +98,8 @@ export function createDrillModel(drillId){
   g.add(tube);
  }
 
- // === Sign plate ===
- const label=advanced?'EXPLORA® RC-ADV':'EXPLORA® RC';
- const ca=document.createElement('canvas');ca.width=512;ca.height=128;
- const ctx=ca.getContext('2d');ctx.fillStyle='#233c53';ctx.fillRect(0,0,512,128);
- ctx.fillStyle='#f5f0df';ctx.textAlign='center';ctx.textBaseline='middle';
- ctx.font='bold 52px Arial';ctx.fillText(label,256,64);
- const tex=new T.CanvasTexture(ca);tex.colorSpace=T.SRGBColorSpace;
- const signMesh=new T.Mesh(new T.PlaneGeometry(.9,.22),new T.MeshBasicMaterial({map:tex,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}));
- signMesh.position.set(0,1.55,1.32*scale);g.add(signMesh);
+ // This is a generic third-party machine, NOT an EXPLORA® product.
+ // DRILLCO® labels belong only to approved drilling tools, never to the rig.
 
  // === Safety cones at corners ===
  for(const [cx,cz] of [[-1.2,1.6],[1.2,1.6],[-1.2,-1.6],[1.2,-1.6]]){
