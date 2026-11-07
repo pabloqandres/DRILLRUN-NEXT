@@ -574,7 +574,7 @@ onM4Action:(type,data)=>{try{
 onNarrativeAction:handleNarrativeAction,
 });
 $('#builderButton').onclick=openBuilder;
- $('#bottomNav [data-nav]').forEach(b=>b.onclick=()=>{
+ $$('#bottomNav [data-nav]').forEach(b=>b.onclick=()=>{
   const nav=b.dataset.nav;
   if(nav==='builder'){openBuilder();return;}
   if(nav==='hsec'){if(hsecUI&&s?.hsec)hsecUI.open();else openPhone('objectives');return;}
