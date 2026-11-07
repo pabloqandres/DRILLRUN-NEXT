@@ -1,7 +1,7 @@
 import {CONFIG,PRODUCTS,CATEGORIES} from './config.mjs';
 import {availableMessages,unreadMessages,readMessage} from './ui-state.mjs';
 import {landReady,objective} from './state.mjs';
-import {ProductPreview} from './product-preview.mjs';
+import {ProductPreview,rcDrillThumbnail} from './product-preview.mjs';
 import {icon,workerAvatar} from './icons.mjs';
 import {isM3App,m3HomeApps,renderM3App} from '../mission3/phone-apps.mjs';
 import {isM4App,m4HomeApps,renderM4App} from '../mission4/phone-apps.mjs';
@@ -10,7 +10,7 @@ import {markCharacterRead,narrativeUnread} from './narrative.mjs';
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const categoryIcon={desks:'desk',chairs:'chair',computers:'computer',lighting:'light',storage:'storage',decoration:'decoration',finishes:'finishes'};
 export class PhoneUI{
- constructor(options){Object.assign(this,options);this.category='desks';this.selected='desk';this.variants={};this.conversation=false;this.narrativeCharacter=null;this._typing=null;}
+ constructor(options){Object.assign(this,options);this.category='desks';this.selected='desk';this.variants={};this.conversation=false;this.narrativeCharacter=null;this._typing=null;this.rigArtCache=new Map();}
  release(){if(this.preview)this.previewAngle=this.preview.angle;this.preview?.dispose();this.preview=null;this._disposeTyping();}
  render(app){
   this.release();const s=this.state(),t=this.translate(),c=this.content,fmt=this.format;this.app=app;
@@ -37,6 +37,19 @@ export class PhoneUI{
   }else if(isM4App(app)){
    this.title.textContent=app.replace('m4-','').replace(/^\w/,c=>c.toUpperCase());this.back.style.visibility='visible';
    c.className='appContent';c.innerHTML=renderM4App(app,s,t,fmt,icon,{onSave:this.onSave,onNavigate:this.onNavigate});
+  }
+  // Only actual non-DRILLCO rig models are previewed here. Consumables await
+  // user-supplied official DRILLCO® GLBs, never a fabricated product rendering.
+  if(app==='m3-catalog'){
+   for(const slot of c.querySelectorAll('[data-rc-rig]')){
+    const id=slot.dataset.rcRig;
+    if(!this.rigArtCache.has(id)){
+     try{this.rigArtCache.set(id,rcDrillThumbnail(this.getWorld(),id));}
+     catch(err){console.warn('[Catalog] Real RC rig thumbnail unavailable:',err);this.rigArtCache.set(id,null);}
+    }
+    const src=this.rigArtCache.get(id);
+    if(src){const img=document.createElement('img');img.src=src;img.alt='Vista 3D de perforadora';img.loading='lazy';slot.replaceChildren(img);}
+   }
   }
   c.querySelectorAll('[data-app]').forEach(b=>b.onclick=()=>{if(b.dataset.app==='messages')this.conversation=false;this.onNavigate(b.dataset.app);});
   c.querySelectorAll('[data-place]').forEach(b=>b.onclick=()=>this.onPlace(b.dataset.place));
