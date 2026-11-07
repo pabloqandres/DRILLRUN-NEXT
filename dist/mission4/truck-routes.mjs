@@ -15,14 +15,17 @@ const ROAD_SPINE=[
  new T.Vector3(16,0,-6),       // approaching zone area
 ];
 
-// Per-zone final approach waypoints
+// A service truck stops in the western service lane, not on the borehole.
+// RC/DTH rigs occupy the boreholes at x >= 20: a truck must never use a drill
+// centre as its destination. Keep >= 4.5 m lateral clearance at every stop.
+const SERVICE_LANE_X=15.0;
 const ZONE_APPROACH={
- 'BH-01':[new T.Vector3(18,0,-2),new T.Vector3(19,0,1),new T.Vector3(20,0,4)],
- 'BH-02':[new T.Vector3(18,0,-2),new T.Vector3(20,0,0),new T.Vector3(23,0,1)],
- 'BH-03':[new T.Vector3(18,0,-4),new T.Vector3(22,0,-3),new T.Vector3(26,0,-2)],
- 'BH-04':[new T.Vector3(18,0,-5),new T.Vector3(21,0,-5),new T.Vector3(23,0,-5)],
- 'BH-05':[new T.Vector3(18,0,-7),new T.Vector3(19,0,-8),new T.Vector3(20,0,-8)],
- 'BH-06':[new T.Vector3(18,0,-7),new T.Vector3(22,0,-8),new T.Vector3(26,0,-8)]
+ 'BH-01':[new T.Vector3(SERVICE_LANE_X,0,4)],
+ 'BH-02':[new T.Vector3(SERVICE_LANE_X,0,1)],
+ 'BH-03':[new T.Vector3(SERVICE_LANE_X,0,-2)],
+ 'BH-04':[new T.Vector3(SERVICE_LANE_X,0,-5)],
+ 'BH-05':[new T.Vector3(SERVICE_LANE_X,0,-8)],
+ 'BH-06':[new T.Vector3(SERVICE_LANE_X,0,-8)]
 };
 
 function buildRoute(zoneId,direction){
