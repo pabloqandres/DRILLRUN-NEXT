@@ -281,7 +281,7 @@ export class HsecWorld{
   const imageData=ctx.getImageData(0,0,W,H),px=imageData.data;
   for(let i=0;i<px.length;i+=4){if(px[i+3]<10)continue;// Stable pseudo-grain prevents roads flickering whenever HSEC redraws.
    const grain=((Math.sin(i*.000041+73.1)*43758.5453)%1);
-   const g=(grain-Math.trunc(grain)-.5)*10;
+   const g=(grain-Math.floor(grain)-.5)*10;
    px[i]+=g;px[i+1]+=g;px[i+2]+=g;}
   ctx.putImageData(imageData,0,0);
   this.roadTex.needsUpdate=true;this.w.renderer.staticFrame=null;}
