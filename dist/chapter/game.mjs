@@ -360,14 +360,14 @@ function handleNarrativeAction(actionType,missionId){
    if(missionId==='m4'&&canStartMission4(s)&&(!s.mission4||s.mission4.phase==='inactive')){
     startMission4(s);notices.push({title:'Misión 4 desbloqueada — Automatiza tu operación',symbol:'bell'});
    }
-   save();if(phoneOpen)renderPhone();renderHUD();
+   save();if(phoneOpen)closePhone();renderHUD();
   }
  }else if(actionType==='collect'){
   const result=confirmCompletion(s,missionId);
   if(result){
    sound('finish');
    showMissionComplete(t(result.name)||'Misión completada',result.cash,result.boosters);
-   save();if(phoneOpen)renderPhone();renderHUD();
+   save();if(phoneOpen)closePhone();renderHUD();
   }
  }
 }
