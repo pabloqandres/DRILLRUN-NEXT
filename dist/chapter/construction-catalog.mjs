@@ -4,7 +4,6 @@ import {HSEC_ASSETS,HSEC_CATEGORIES} from '../hsec/catalog.mjs';
 import {workshopLevel,workshopUpgradeJob,WORKSHOP_LEVELS,canUpgradeWorkshop} from '../mission3/inventory.mjs';
 import {DRILLS,canPurchaseDrill} from '../mission3/drills.mjs';
 import {ROLES,personnelByRole,canHire} from '../mission3/personnel.mjs';
-import {PRODUCTS as FURNITURE} from './config.mjs';
 import {DTH_DRILLS,canPurchaseDthDrill} from '../mission4/drills-dth.mjs';
 import {DRILLTRUCK_COST,canPurchaseDrillTruck,drillTruckState} from '../mission4/drilltruck.mjs';
 import {pendingOrders} from '../mission3/headquarters.mjs';
@@ -80,14 +79,6 @@ export function catalogProducts(s,t){
  const truckOnOrder=hasPendingMachinery('drillTruck');
  const truckStatus=!m4On?'locked':truckOwned?'installed':truckOnOrder?'building':truckBlocked?'locked':'available';
  products.push({id:'drilltruck',kind:'vehicle',category:'vehicles',title:'DrillTruck',level:1,description:'Vehículo autónomo de mantenimiento en terreno',benefit:'Mantenimiento automatizado de sondajes',price:truckOwned||truckOnOrder?null:DRILLTRUCK_COST,seconds:null,w:5.5,d:2.2,h:2.8,capacity:'1 zona',status:truckStatus,reason:!m4On?c.later:truckOnOrder?c.ordered:blockReason(truckBlocked,c),model:{id:'drilltruck'},canStart:truckStatus==='available',action:truckOwned?'manage':truckOnOrder?'manage':'buy',insufficient:truckStatus==='available'&&s.cash<DRILLTRUCK_COST});
-
- // ── Furniture ──
- const officeReady=s.office?.status==='built'&&s.hasEntered;
- for(const f of FURNITURE){
-  const owned=(s.inventory||[]).find(i=>i.product===f.id);
-  const status=!officeReady?'locked':owned?'installed':'available';
-  products.push({id:'furniture-'+f.id,kind:'furniture',category:'furniture',title:t(f.nameKey),level:1,description:t(f.descriptionKey||f.nameKey),benefit:t(f.descriptionKey||f.nameKey),price:owned?null:f.price,seconds:null,w:f.w,d:f.d,h:f.h,capacity:null,status,reason:!officeReady?c.requiresOffice:'',model:f,canStart:status==='available',action:owned?'manage':'buy',insufficient:status==='available'&&s.cash<f.price});
- }
 
  // ── Management / Personnel ──
  const ROLE_NAMES={hsec:'Profesional HSEC',admin:'Administrador',driller:'Perforista',helper:'Ayudante',techVisit:'Visita Técnica',tecnicoDrillco:'Técnico DRILLCO'};
