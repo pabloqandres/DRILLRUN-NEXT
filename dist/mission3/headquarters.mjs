@@ -111,9 +111,9 @@ export function tickDeliveries(s,now=Date.now()){
   if(elapsed>=order.dispatchDuration){
    // Complete persistent transactions before recording them as consumed.
    // A missing mission state remains recoverable on the next restore.
-   for(const item of order.items||[]){
-    if(item.category==='machinery'&&!materializeMachinery(s,item,now))continue;
-   }
+   const machinery=(order.items||[]).filter(item=>item.category==='machinery');
+   // Never consume a paid order until its persisted equipment is actually created.
+   if(machinery.some(item=>!materializeMachinery(s,item,now)))continue;
    order.status='delivered';
    order.deliveredAt=now;
    if(!order.consumed){
