@@ -73,7 +73,7 @@ export class World{
  window(g,x,y,z,w,h){for(const side of[-1,1]){this.box(g,.08,h+.16,.1,x+side*(w/2+.04),y,z,C.navy);this.box(g,w+.16,.08,.1,x,y+side*(h/2+.04),z,C.navy);}const glass=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({color:0x8fbdc4,transparent:true,opacity:.34,side:T.DoubleSide}));glass.position.set(x,y,z+.055);g.add(glass);this.box(g,.05,h,.1,x,y,z+.06,C.navy);}
  pot(g,x,y,z){this.cyl(g,.23,.4,x,y+.2,z,0x727d77,.31);for(let i=0;i<7;i++){const leaf=new T.Mesh(new T.ConeGeometry(.12,.65,4),this.mat(i%2?0x6c8052:0x89915b));leaf.position.set(x+Math.sin(i)*.14,y+.5,z+Math.cos(i)*.14);leaf.rotation.z=Math.sin(i)*.55;leaf.rotation.x=Math.cos(i)*.5;g.add(leaf);}}
  makeWorkshop(previewOnly=false){const g=new T.Group();g.name='DR-BLD-002 · Taller de mantenimiento';g.position.set(-7.6,0,-9.3);
-  if(!previewOnly){this.scene.add(g);this.pad(-7.6,-9.3,8.3,6.3);this.workshopModel=g;}softContactShadow(this,g,8.3,6.05,.143);this.box(g,7.2,.3,5.4,0,.3,0,C.steel);this.box(g,7.2,4.1,.16,0,2.3,-2.7,C.cream,true);for(const x of[-3.6,3.6])this.box(g,.15,4.1,5.4,x,2.3,0,C.cream,true);this.box(g,7.3,.8,.2,0,4.05,2.7,C.cream);this.box(g,1.2,3.4,.2,-3,2,2.7,C.cream);this.box(g,1.2,3.4,.2,3,2,2.7,C.cream);this.box(g,7.6,.22,5.9,0,4.55,0,C.navy,true);for(let z=-2.5;z<2.6;z+=.24){this.box(g,.035,3.7,.03,3.7,2.35,z,0xb6b8ad);this.box(g,.035,3.7,.03,-3.7,2.35,z,0xb6b8ad);}for(let x=-3.4;x<3.5;x+=.32)this.box(g,.027,.03,5.5,x,4.68,0,0x476272);this.box(g,6.9,.04,5.1,0,.47,0,0xb5b8a8);for(const x of[-3.7,3.7])this.box(g,.16,4.2,.18,x,2.3,2.76,C.navy);this.box(g,4.7,.65,.18,0,3.75,2.82,0x8c9999);for(let y=3.47;y<4.05;y+=.14)this.box(g,4.7,.025,.03,0,y,2.93,C.steel);this.sign(g,'TALLER',2.3,.47,0,4.15,2.83,C.navy);
+  if(!previewOnly){this.scene.add(g);this.workshopPad=this.pad(-7.6,-9.3,8.3,6.3);this.workshopModel=g;}softContactShadow(this,g,8.3,6.05,.143);this.box(g,7.2,.3,5.4,0,.3,0,C.steel);this.box(g,7.2,4.1,.16,0,2.3,-2.7,C.cream,true);for(const x of[-3.6,3.6])this.box(g,.15,4.1,5.4,x,2.3,0,C.cream,true);this.box(g,7.3,.8,.2,0,4.05,2.7,C.cream);this.box(g,1.2,3.4,.2,-3,2,2.7,C.cream);this.box(g,1.2,3.4,.2,3,2,2.7,C.cream);this.box(g,7.6,.22,5.9,0,4.55,0,C.navy,true);for(let z=-2.5;z<2.6;z+=.24){this.box(g,.035,3.7,.03,3.7,2.35,z,0xb6b8ad);this.box(g,.035,3.7,.03,-3.7,2.35,z,0xb6b8ad);}for(let x=-3.4;x<3.5;x+=.32)this.box(g,.027,.03,5.5,x,4.68,0,0x476272);this.box(g,6.9,.04,5.1,0,.47,0,0xb5b8a8);for(const x of[-3.7,3.7])this.box(g,.16,4.2,.18,x,2.3,2.76,C.navy);this.box(g,4.7,.65,.18,0,3.75,2.82,0x8c9999);for(let y=3.47;y<4.05;y+=.14)this.box(g,4.7,.025,.03,0,y,2.93,C.steel);this.sign(g,'TALLER',2.3,.47,0,4.15,2.83,C.navy);
   // Workshop V2: industrial facade, steel canopy, solar arrays and illuminated entry.
   // Original usable floor, roof, player door clearances and collision geometry stay unchanged.
   this.box(g,6.15,.13,.76,0,3.97,3.09,0x701e30,true);
@@ -188,7 +188,19 @@ for(let x=-3.2;x<3.5;x+=.5){this.box(g,.025,3.6,.02,x,2.2,-2.8,0xb7b7a7);}this.s
  }
  // Workshop upgrade visuals: scaffold during construction + expanded structure at Nv.2+
  updateWorkshop(workshopState){
-  if(!workshopState)return;
+  if(!workshopState||workshopState.status==='building'){
+   if(this._workshopBuilt){
+    this.workshopModel?.removeFromParent();this.workshopPad?.removeFromParent();
+    this._workshopExt?.removeFromParent();this._workshopScaffold?.removeFromParent();
+    if(this._wsExtPadGroup)this._wsExtPadGroup.removeFromParent();
+    this.colliders=this.colliders.filter(c=>!c._workshop&&!c._workshopNv2);
+    this.walkSurfaces=(this.walkSurfaces||[]).filter(v=>!(v.z===-9.3&&v.x>=-12&&v.x<3));
+    this.labels=this.labels.filter(l=>l.id!=='workshop');
+    this.workshopModel=null;this.workshopPad=null;this._workshopExt=null;this._workshopScaffold=null;
+    this._workshopBuilt=false;this._workshopKey=null;this._workshopRoofUpgrade=null;this._wsExtWalk=false;
+   }
+   return;
+  }
   if(!this._workshopBuilt){this.makeWorkshop();this._workshopBuilt=true;}
   const level=workshopState?.level||1;
   if(this._workshopRoofUpgrade)this._workshopRoofUpgrade.visible=level>=2;
