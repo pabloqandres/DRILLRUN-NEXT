@@ -4,6 +4,7 @@ import {SoftwareRenderer} from '../software-renderer.mjs';
 import {moduleFixtures} from './module-catalog.mjs';
 import {furnitureModel} from './furniture.mjs';
 import {fitPreviewCamera} from './preview-framing.mjs';
+import {createDrillModel} from '../mission3/drill-models.mjs';
 // One demand-rendered view. Same mesh factory and variants as the installed object.
 export class ProductPreview{
  constructor(host,world,{transparent=false}={}){
@@ -45,6 +46,27 @@ export class ProductPreview{
  draw(){if(!this.model)return;if(this.interior){this.model.traverse(o=>{if(o.isGroup&&o.name.startsWith('03 ·'))o.visible=false;if(o.isGroup&&o.name.startsWith('04 ·'))o.visible=Math.cos(this.angle)<0;if(o.isGroup&&o.name.startsWith('05 ·'))o.visible=Math.cos(this.angle)>=0;if(o.isGroup&&o.name.startsWith('06 ·'))o.visible=Math.sin(this.angle)>=0;if(o.isGroup&&o.name.startsWith('07 ·'))o.visible=Math.sin(this.angle)<0;});}const width=this.host.clientWidth,height=this.host.clientHeight;if(width<2||height<2)return;this.renderer.setSize(width,height);fitPreviewCamera(this.camera,new T.Box3().setFromObject(this.model),width/height,this.angle);this.renderer.staticFrame=null;this.renderer.last=0;this.renderer.render(this.scene,this.camera);}
  releaseModel(){if(!this.model)return;this.model.traverse(o=>{o.geometry?.dispose();if(o.isLineSegments)o.material.dispose();});this.model.removeFromParent();this.model=null;}
  dispose(){this.observer.disconnect();this.releaseModel();this.scene.traverse(o=>o.geometry?.dispose());this.renderer.dispose?.();this.renderer.domElement.remove();this.host.onpointerdown=this.host.onpointermove=this.host.onpointerup=this.host.onpointercancel=null;}
+}
+
+// The M3 equipment panel uses the very same physical rig model as the world.
+// These one-shot PNG snapshots are transparent, brand-neutral and do not
+// create a second playable machine or touch any purchase/inventory state.
+export function rcDrillThumbnail(world,drillId){
+ const host=document.createElement('div');
+ host.style.cssText='position:fixed;left:-1500px;top:-1500px;width:480px;height:320px;pointer-events:none;visibility:hidden';
+ document.body.append(host);
+ let preview=null;
+ try{
+  preview=new ProductPreview(host,world,{transparent:true});
+  preview.model=createDrillModel(drillId);
+  preview.model.visible=true;
+  preview.scene.add(preview.model);
+  preview.draw();
+  return cutoutPNG(preview.renderer.domElement);
+ }finally{
+  preview?.dispose();
+  host.remove();
+ }
 }
 
 // The workshop thumbnail is rendered from precisely the same makeWorkshop()
