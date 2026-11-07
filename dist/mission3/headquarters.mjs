@@ -1,6 +1,8 @@
 // Mission 3 — Casa Matriz / Dispatch system
 // Handles material orders, delivery scheduling, and supply logistics.
-import {hammerDefinition,bitDefinition} from './drills.mjs';
+import {hammerDefinition,bitDefinition,purchaseDrill} from './drills.mjs';
+import {dthHammerDefinition,dthBitDefinition,purchaseDthDrill} from '../mission4/drills-dth.mjs';
+import {purchaseDrillTruck} from '../mission4/drilltruck.mjs';
 import {workshopFree} from './inventory.mjs';
 
 const fail=msg=>{throw new Error(msg);};
@@ -13,6 +15,11 @@ export function orderCost(items){
 }
 
 export function canPlaceOrder(s,items){
+ for(const item of items||[]){
+  if(item.category!=='machinery')continue;
+  if((item.type==='drill'&&s.drill)||(item.type==='dthDrill'&&s.mission4?.productionDrill)||(item.type==='drillTruck'&&s.mission4?.drillTruck))return 'alreadyOwned';
+  if((s.orders||[]).some(o=>['pending','dispatched'].includes(o.status)&&o.items?.some(i=>i.category==='machinery'&&i.type===item.type)))return 'orderAlreadyPending';
+ }
  if(!items?.length)return 'emptyOrder';
  // Machinery orders don't require existing drill
  const hasMachinery=items.some(i=>i.category==='machinery');
@@ -26,8 +33,8 @@ export function canPlaceOrder(s,items){
  // Validate each item exists in catalog
  for(const item of items){
   if(item.category==='machinery')continue; // machinery validated by caller
-  const def=item.type==='hammer'?hammerDefinition(item.model):
-            item.type==='bit'?bitDefinition(item.model):null;
+  const def=item.type==='hammer'?(hammerDefinition(item.model)||dthHammerDefinition(item.model)):
+            item.type==='bit'?(bitDefinition(item.model)||dthBitDefinition(item.model)):null;
   if(!def)return 'invalidItem';
   if(!Number.isInteger(item.qty)||item.qty<1||item.qty>10)return 'invalidQty';
  }
@@ -73,6 +80,26 @@ export function deliveredOrders(s){
  return (s.orders||[]).filter(o=>o.status==='delivered');
 }
 
+// Apply a paid machinery delivery to the persistent state before marking its order consumed.
+// This also recovers legacy saves that recorded a delivery but lost the scene callback.
+export function materializeMachinery(s,item,now=Date.now()){
+ if(item.type==='drill'){
+  if(!s.drill)purchaseDrill(s,item.model,true,now);
+  return !!s.drill;
+ }
+ if(item.type==='dthDrill'){
+  if(!s.mission4)return false;
+  if(!s.mission4.productionDrill)purchaseDthDrill(s,item.model,true,now);
+  return !!s.mission4.productionDrill;
+ }
+ if(item.type==='drillTruck'){
+  if(!s.mission4)return false;
+  if(!s.mission4.drillTruck)purchaseDrillTruck(s,true,now);
+  return !!s.mission4.drillTruck;
+ }
+ return false;
+}
+
 // Check and complete deliveries whose timer has expired
 // Returns {delivered, machineryDelivered[]} for the game to handle spawning
 export function tickDeliveries(s,now=Date.now()){
@@ -82,6 +109,11 @@ export function tickDeliveries(s,now=Date.now()){
   if(order.status!=='dispatched'||order.consumed)continue;
   const elapsed=(now-order.dispatchedAt)/1000;
   if(elapsed>=order.dispatchDuration){
+   // Complete persistent transactions before recording them as consumed.
+   // A missing mission state remains recoverable on the next restore.
+   const machinery=(order.items||[]).filter(item=>item.category==='machinery');
+   // Never consume a paid order until its persisted equipment is actually created.
+   if(machinery.some(item=>!materializeMachinery(s,item,now)))continue;
    order.status='delivered';
    order.deliveredAt=now;
    if(!order.consumed){
@@ -93,7 +125,7 @@ export function tickDeliveries(s,now=Date.now()){
       continue;
      }
      // Tools: add to inventory
-     const def=item.type==='hammer'?hammerDefinition(item.model):bitDefinition(item.model);
+     const def=item.type==='hammer'?(hammerDefinition(item.model)||dthHammerDefinition(item.model)):(bitDefinition(item.model)||dthBitDefinition(item.model));
      for(let i=0;i<item.qty;i++){
       s.toolInventory.push({
        id:'tool-'+(s.nextId++),
@@ -116,6 +148,20 @@ export function tickDeliveries(s,now=Date.now()){
   }
  }
  return {delivered,machineryDelivered};
+}
+
+// Repair an old delivered order that was marked consumed without creating its rig.
+export function reconcileDeliveredMachinery(s,now=Date.now()){
+ const repaired=[];
+ for(const order of s.orders||[]){
+  if(order.status!=='delivered')continue;
+  for(const item of order.items||[]){
+   if(item.category!=='machinery')continue;
+   const existed=item.type==='drill'?!!s.drill:item.type==='dthDrill'?!!s.mission4?.productionDrill:item.type==='drillTruck'?!!s.mission4?.drillTruck:true;
+   if(!existed&&materializeMachinery(s,item,now))repaired.push(item.type);
+  }
+ }
+ return repaired;
 }
 
 // All orders (for tracking UI)

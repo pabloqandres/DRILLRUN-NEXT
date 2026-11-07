@@ -23,7 +23,7 @@ export const CLEARABLES=[
  {id:'clear-14',kind:'metal',variant:2,x:-8.1,z:-4.15,r:.59,size:1.0,angle:-.5},
  {id:'clear-15',kind:'bush',variant:2,x:-3.1,z:-2.85,r:.43,size:.92,angle:3}
 ];
-export const CATEGORIES=['desks','chairs','computers','lighting','storage','decoration','finishes'];
+export const CATEGORIES=[]; // Legacy internal prefab product definitions remain below; no furniture shop categories.
 // Replace this director with the definitive cinematic without changing the chapter's spawn contract.
 export const INTRO_SHOTS=[
  {id:'desert',seconds:1.1,text:'intro1',target:[-6,1,0],offset:[12,7,17]},

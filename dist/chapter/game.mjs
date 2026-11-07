@@ -18,7 +18,7 @@ import {toolCondition} from '../mission3/wear.mjs';
 import {drillDefinition,bitDefinition,hammerDefinition,HAMMERS,BITS} from '../mission3/drills.mjs';
 import {requestAnalysis,accelerateAnalysis,technicianArrives,startAnalysisTimer} from '../mission3/geology.mjs';
 import {purchaseDrill,installTool} from '../mission3/drills.mjs';
-import {placeOrder,placeMachineryOrder} from '../mission3/headquarters.mjs';
+import {placeOrder,placeMachineryOrder,reconcileDeliveredMachinery} from '../mission3/headquarters.mjs';
 import {upgradeWorkshop,workshopLevel,workshopCapacity,workshopUsed,workshopFree,WORKSHOP_LEVELS,workshopUpgradeJob,workshopUpgradeProgress,finishWorkshopUpgrade,accelerateWorkshop,canDemolishWorkshop,demolishWorkshop} from '../mission3/inventory.mjs';
 import {canStartMission3,startMission3,updateMission3Phase} from '../mission3/mission3-state.mjs';
 import {createDrillModel,animateDrill} from '../mission3/drill-models.mjs';
@@ -68,7 +68,7 @@ import {pendingMessage,deliverMessage,acceptMission,confirmCompletion,isMissionA
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],hidden=(el,v)=>el.classList.toggle('hidden',v);
 let prefs={lang:deviceLanguage(navigator.language),sound:true};try{prefs={...prefs,...JSON.parse(localStorage.getItem('drillrun-preferences')||'{}')};}catch{}
 if(!LANGUAGES.some(([l])=>l===prefs.lang))prefs.lang='es';let t=translator(prefs.lang),s=null,hasSave=false;
-function readSave(){try{const raw=localStorage.getItem(CONFIG.saveKey),data=JSON.parse(raw||'null');if(data&&data.schema!=='modular-1'&&!localStorage.getItem(CONFIG.saveKey+'-before-modular'))localStorage.setItem(CONFIG.saveKey+'-before-modular',raw);const value=restore(data);if(value){restoreHsec(value);restoreMission3(value);restoreMission4(value);}return value;}catch{return null;}}
+function readSave(){try{const raw=localStorage.getItem(CONFIG.saveKey),data=JSON.parse(raw||'null');if(data&&data.schema!=='modular-1'&&!localStorage.getItem(CONFIG.saveKey+'-before-modular'))localStorage.setItem(CONFIG.saveKey+'-before-modular',raw);const value=restore(data);if(value){restoreHsec(value);restoreMission3(value);reconcileDeliveredMachinery(value);restoreMission4(value);}return value;}catch{return null;}}
 s=readSave();hasSave=!!s;if(s)prefs.lang=s.lang;t=translator(prefs.lang);
 let hsecWorld=null,hsecUI=null,hsecElapsed=0,hsecLastSignature='',hsecFollow=false,hsecRecorder=null;
 let constructionCallout=null,guidance=null,cinematic=null,cameraDebug=null,cinemaRecorder=null,reviewBackup=null,cinemaReview=false,locomotionReview=null,qaComputerPath=null,qaWalkRoute=null,characterStage=null,avatars=null,builderOpen=false,managingOffice=false,officePanelPreview=null,selectedBuildModule=null,lastPortraitId=null,selectedAvatar='operator01';
@@ -203,8 +203,8 @@ function updateM3Visuals(dt){
  for(let i=0;i<m3BoreholeMarkers.length;i++){
   const bh=s.boreholes?.[i],marker=m3BoreholeMarkers[i];
   if(!bh){updateMarkerProgress(marker,0,'idle');continue;}
-  const progress=bh.depthCompleted/(bh.depthTarget||60);
-  const status=bh.status==='complete'?'complete':s.contract?.activeBoreholeIndex===i&&drilling?'active':'idle';
+  const progress=(bh.depthDrilled||0)/(bh.depthTarget||30);
+  const status=bh.status==='completed'?'complete':s.contract?.activeBoreholeIndex===i&&drilling?'active':'idle';
   updateMarkerProgress(marker,progress,status);
  }
  // Drilling effects at active borehole
@@ -354,10 +354,10 @@ function handleNarrativeAction(actionType,missionId){
    // Start the actual mission system
    if(missionId==='m2'&&s.hsec){/* HSEC already active from beginPlay or restore */}
    if(missionId==='m3'&&canStartMission3(s)&&(!s.mission3||s.mission3.phase==='inactive')){
-    startMission3(s);notices.push({title:'Misión 2 desbloqueada — Tu Primer Contrato',symbol:'bell'});
+    startMission3(s);notices.push({title:'Misión 3 desbloqueada — Tu primer contrato',symbol:'bell'});
    }
    if(missionId==='m4'&&canStartMission4(s)&&(!s.mission4||s.mission4.phase==='inactive')){
-    startMission4(s);notices.push({title:'Misión 3 desbloqueada — Automatiza tu operación',symbol:'bell'});
+    startMission4(s);notices.push({title:'Misión 4 desbloqueada — Automatiza tu operación',symbol:'bell'});
    }
    save();if(phoneOpen)renderPhone();renderHUD();
   }
@@ -541,7 +541,7 @@ function renderHUD(){if(!s)return;
  // Once confirmed, retire the objective card; keep production, saves and HSEC data intact.
  const m4NarrativeClosed=s.mission4?.phase==='complete'&&isMissionCollected(s,'m4');
  hidden($('#objective'),m4NarrativeClosed);
- setText($('#cashValue'),money(s.cash));setText($('#energyValue'),Math.floor(s.energy)+' / '+CONFIG.maxEnergy);setText($('#boostValue'),s.boosters);const unread=unreadMessages(s).length;hidden($('#phoneBadge'),!unread);setText($('#phoneBadge'),unread);if(avatars&&lastPortraitId!==s.character){lastPortraitId=s.character;$('#playerAvatar').innerHTML=avatars.portrait(s.character);}$('#hud').dataset.avatar=s.character;setText($('#playerName'),s.playerName||t('operatorName'));const lvl=playerLevel(s);setText($('#levelValue'),lvl);const m3On=s.mission3&&s.mission3.phase!=='inactive';const m4HudOn=s.mission4&&s.mission4.phase!=='inactive';const missionSub=m4HudOn?(s.mission4.phase==='complete'?'Misión 3 · Completada':'Misión 3 · Automatiza tu operación'):m3On?(s.mission3.phase==='complete'?'Misión 2 · Completada':'Misión 2 · Tu Primer Contrato'):s.hsec?.completedAt?'Misión 1 · Completada':s.chapterCompletedAt?'Cap. 1 · Completado':'Cap. 1 · '+t('firstSteps');setText($('#playerMission'),missionSub);$('#playerProgress').style.width=(s.chapterCompletedAt?100:s.office.status==='built'?66:s.cleared.length===16?33:Math.round(s.cleared.length/16*33))+'%';
+ setText($('#cashValue'),money(s.cash));setText($('#energyValue'),Math.floor(s.energy)+' / '+CONFIG.maxEnergy);setText($('#boostValue'),s.boosters);const unread=unreadMessages(s).length;hidden($('#phoneBadge'),!unread);setText($('#phoneBadge'),unread);if(avatars&&lastPortraitId!==s.character){lastPortraitId=s.character;$('#playerAvatar').innerHTML=avatars.portrait(s.character);}$('#hud').dataset.avatar=s.character;setText($('#playerName'),s.playerName||t('operatorName'));const lvl=playerLevel(s);setText($('#levelValue'),lvl);const m3On=s.mission3&&s.mission3.phase!=='inactive';const m4HudOn=s.mission4&&s.mission4.phase!=='inactive';const missionSub=m4HudOn?(s.mission4.phase==='complete'?'Misión 4 · Completada':'Misión 4 · Automatiza tu operación'):m3On?(s.mission3.phase==='complete'?'Misión 3 · Completada':'Misión 3 · Tu primer contrato'):s.hsec?.completedAt?'Misión 2 · Completada':s.chapterCompletedAt?'Misión 1 · Completada':'Misión 1 · '+t('firstSteps');setText($('#playerMission'),missionSub);$('#playerProgress').style.width=(s.chapterCompletedAt?100:s.office.status==='built'?66:s.cleared.length===16?33:Math.round(s.cleared.length/16*33))+'%';
  /* Geo analysis floating card */
  const geo=s.geoAnalysis;const geoCard=$('#geoCard');if(geoCard){const geoActive=!!(geo&&geo.requested&&!geo.completed);const geoDone=!!(geo&&geo.completed);const m3DrillingOrLater=s.mission3&&['drilling','delivery','complete'].includes(s.mission3.phase);const geoDismissed=!!(geo&&geo.cardDismissed)||!!(s.mission3?.reportRead)||m3DrillingOrLater;const showCard=(geoActive||(geoDone&&!s.mission3?.reportRead))&&!geoDismissed;if(geoCard._shown!==showCard){geoCard._shown=showCard;hidden(geoCard,!showCard);}if(showCard){hidden($('#geoDismiss'),!geoDone);if(geoActive){const elapsed=(Date.now()-(geo.analysisStartedAt||Date.now()))/1000;const dur=geo.analysisDuration||75;const pct=Math.min(1,elapsed/dur);setText($('#geoTitle'),'Análisis geológico');setText($('#geoDetail'),Math.round(pct*100)+'% completado');$('#geoProgressBar').style.width=(pct*100)+'%';geoCard.classList.remove('complete');}else if(geoDone){setText($('#geoTitle'),'Informe disponible');setText($('#geoDetail'),'Toca para revisar');$('#geoProgressBar').style.width='100%';geoCard.classList.add('complete');}}}const obj=objective(s);setText($('#objectiveTitle'),t(obj));setText($('#objectiveDetail'),t(obj+'Detail'));let value=0,count='';if(obj==='clear'){value=s.cleared.length/CLEARABLES.length;count=s.cleared.length+' / '+CLEARABLES.length;}else if(obj==='admin'){value=s.chapterCompletedAt?1:s.hasEntered?.75:0;count='';}else value=obj==='next'?1:progress(s);$('#objectiveProgress').style.width=(value*100)+'%';setText($('#objectiveCount'),count);
  const m3Active=s.mission3&&s.mission3.phase!=='inactive';
@@ -584,7 +584,7 @@ onM3Action:(type,data)=>{try{
 }catch(e){const msg=e.message==='noCapacity'?'Sin espacio en el taller — amplía capacidad':e.message==='noMoney'?'Fondos insuficientes':e.message==='constructionPending'?'Ampliación en curso':e.message;notices.push({title:msg,symbol:'lock'});}},
 onM4Action:(type,data)=>{try{
  if(type==='buyDthDrill'){placeMachineryOrder(s,'dthDrill',data||'rig_dth_production',DTH_DRILLS[0]?.price||28000);notices.push({title:'Perforadora DTH solicitada · en camino',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}
- else if(type==='orderDthTool'){const h=dthHammerDefinition(data);const b=dthBitDefinition(data);const def=h||b;if(!def)throw new Error('invalid');if(s.cash<def.price)throw new Error('noMoney');s.cash-=def.price;addToInventory(s,{type:h?'hammer':'bit',model:def.id,name:def.label||def.id,lifeTotal:def.lifeTotal});s.ledger.push({id:s.nextId++,key:'dthToolPurchase',amount:-def.price,at:Date.now()});notices.push({title:(def.label||def.id)+' adquirido',symbol:'bell'});}
+ else if(type==='orderDthTool'){const h=dthHammerDefinition(data);const b=dthBitDefinition(data);const def=h||b;if(!def)throw new Error('invalid');placeOrder(s,[{type:h?'hammer':'bit',model:def.id,qty:1,unitPrice:def.price}]);notices.push({title:(def.label||def.id)+' solicitado a Casa Matriz',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}
  else if(type==='installDthTool'){installDthTool(s,data);notices.push({title:'Herramienta DTH instalada',symbol:'bell'});}
  else if(type==='convertZone'){convertBoreholeToZone(s,data);notices.push({title:data+' convertido a zona',symbol:'bell'});}
  else if(type==='assignDthDrill'){assignDthDrillToZone(s,data);notices.push({title:'DTH instalada en zona',symbol:'bell'});}
@@ -642,7 +642,7 @@ function applyMovement(intent,dt){
 function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Math.max(0,(now-last)/1000));last=now;clock+=dt;if(document.body.dataset.phase!==phase)document.body.dataset.phase=phase;if(!s)return;const wall=Date.now(),result=phase==='play'?tick(s,wall):{};if(result.built||result.upgraded){if(result.built)onBuilt();if(result.upgraded){scene.burst(-6,0);toast('upgradeComplete');}syncUIEvents();if(phoneOpen)renderPhone();if(builderOpen)builderUI.render();}
  if(phase==='intro')cinematic.update(dt);
  if(phase==='play'&&hsecActive(s)&&!document.hidden){ensureHsec(s);hsecElapsed+=dt;if(hsecElapsed>=1){tickHsec(s,hsecElapsed);if(!s.hsec.grantNotified){s.hsec.grantNotified=true;notices.push({title:'Misión 2 · Prepara tu operación',detail:`Capital de desarrollo: ${money(B.startingGrant)} · abre el panel HSEC para comenzar.`,symbol:'hsec:management'});}hsecElapsed=0;hsecUI.cachedEval=evaluation(s);const signature=[s.hsec.revision,s.hsec.orders.map(o=>o.status).join(','),s.hsec.inspection?.id,s.hsec.employee?.blocked,s.hsec.completedAt].join('|');if(signature!==hsecLastSignature){hsecLastSignature=signature;if(s.hsec.employee?.blocked)notices.push({title:'Prevencionista detenido',detail:s.hsec.employee.blocked,symbol:'lock'});if(hsecUI.panelOpen)hsecUI.refresh();if(s.hsec.completedAt&&!s.hsec.completionNotified){s.hsec.completionNotified=true;/* reward modal deferred to narrative confirmCompletion */}
- if(s.hsec.completedAt&&isMissionAccepted(s,'m3')&&canStartMission3(s)&&(!s.mission3||s.mission3.phase==='inactive')){startMission3(s);notices.push({title:'Misión 2 desbloqueada — Tu Primer Contrato',symbol:'bell'});save();}save();}}moveNpc(s,dt);}
+ if(s.hsec.completedAt&&isMissionAccepted(s,'m3')&&canStartMission3(s)&&(!s.mission3||s.mission3.phase==='inactive')){startMission3(s);notices.push({title:'Misión 3 desbloqueada — Tu primer contrato',symbol:'bell'});save();}save();}}moveNpc(s,dt);}
  if(phase==='play'){narrativeTick(dt);/* Workshop upgrade construction tick */const wsJob=workshopUpgradeJob(s);if(wsJob&&Date.now()>=wsJob.ends){finishWorkshopUpgrade(s);save();renderHUD();if(workshopCardOpen)showWorkshopCard();notices.push({title:`Taller ampliado a Nv.${workshopLevel(s)}`,symbol:'bell'});sound('finish');updateMission4Phase(s);}if(workshopCardOpen&&wsJob)showWorkshopCard();world.updateWorkshop(s.workshop);
  initM3Visuals();const m3events=tickMission3(s,dt,wall);if(m3events){for(const e of m3events){if(typeof e==='object'&&e.type==='machineryDelivered'){
   const m=e.machinery;
@@ -658,7 +658,7 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
   initM4Visuals();const m4events=tickMission4(s,dt,wall);if(m4events){for(const e of m4events){if(e==='incomeGenerated'){/* Auto-credit silently. The wallet and production report display actual funds. */}else if(e==='maintenanceComplete'){notices.push({title:'Mantenimiento completado',symbol:'bell'});if(phoneOpen)renderPhone();}else if(e==='truckDispatch'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'out');}else if(e==='truckReturn'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'return');}else if(e==='missionComplete'){sound('finish');showMissionComplete('Automatiza tu operación',null,0,'Producción automatizada habilitada');}}save();}
   updateM4Visuals(dt);
   // Auto-start M4 when M3 completes
-  if(s.mission3?.phase==='complete'&&s.contract?.status==='delivered'&&isMissionAccepted(s,'m4')&&canStartMission4(s)&&(!s.mission4||s.mission4.phase==='inactive')){startMission4(s);notices.push({title:'Misión 3 desbloqueada — Automatiza tu operación',symbol:'bell'});save();}
+  if(s.mission3?.phase==='complete'&&s.contract?.status==='delivered'&&isMissionAccepted(s,'m4')&&canStartMission4(s)&&(!s.mission4||s.mission4.phase==='inactive')){startMission4(s);notices.push({title:'Misión 4 desbloqueada — Automatiza tu operación',symbol:'bell'});save();}
   }
  avatars?.updateSelector(phase==='character',selectedAvatar,s,dt,clock);characterStage?.update(phase==='character',clock,selectedAvatar);
  if(phase==='character'){world.chapterCamera={target:new T.Vector3(-4.55+Math.max(0,Math.min(.5,(730-innerWidth)/324)),1.0,5.35),offset:new T.Vector3(0,.55,6.1)};}

@@ -61,7 +61,7 @@ export function mission3Objectives(s){
    {id:'receiveOrder',done:(s.orders||[]).some(o=>o.status==='delivered'),labelKey:'receiveDelivery'}
   ]},
   {id:4,nameKey:'executeExploration',checks:[
-   {id:'startDrill',done:cp?.status==='active'||cp?.status==='completed',labelKey:'startDrilling'},
+   {id:'startDrill',done:['active','completed','delivered'].includes(cp?.status),labelKey:'startDrilling'},
    {id:'complete6',done:cp?.boreholesDone>=6,labelKey:'complete6Boreholes',
     progress:cp?cp.progress:0}
   ]},

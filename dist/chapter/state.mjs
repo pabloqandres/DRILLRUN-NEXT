@@ -1,7 +1,7 @@
 import {CONFIG,CLEARABLES,PRODUCTS} from './config.mjs';
 import {avatarDefinition} from './avatars.mjs';
 import {moduleDefinition,MODULES,BUILD_ZONES,moduleFixtures,pendingConstruction,moduleAvailability} from './module-catalog.mjs';
-import {migrateNarrative} from './narrative.mjs';
+import {migrateNarrative,ensureNarrative} from './narrative.mjs';
 export class GameError extends Error{constructor(key){super(key);this.key=key;}}
 const fail=key=>{throw new GameError(key);},finite=n=>Number.isFinite(n),product=id=>PRODUCTS.find(p=>p.id===id);
 export function newGame(lang='es',character='operator01',now=Date.now()){
@@ -36,11 +36,17 @@ export function restore(data,now=Date.now()){
  if(s.contract&&s.contract.drillingStartedAt&&!s.contract._timerReset4){const deadline=s.contract.drillingStartedAt+s.contract.duration*1000;if(deadline<now){s.contract.drillingStartedAt=now;}s.contract._timerReset4=true;}
  if(!s.workshop)s.workshop={level:1};
  /* M4 defaults */ s.mission4=s.mission4||null;
- /* M1 reward recovery — fix for saves where useOfficeComputer didn't give reward */
- if(s.chapterCompletedAt&&!s.ledger?.some(l=>l.key==='missionReward')){s.cash+=5000;s.ledger.push({id:s.nextId++,key:'missionReward',label:'Recompensa · Misión 1 (recuperada)',amount:5000,at:now});}
+ /* M1 mission rewards are confirmed by narrative; restore never pays before confirmation. */
  /* M4 stuck zones fix */
  if(s.mission4?.drillTruck&&!s.mission4.drillTruck.maintenancePhase){for(const z of s.mission4?.zones||[]){if(z.status==='maintenance')z.status='idle';}}
- /* Narrative migration */ migrateNarrative(s,now);
+ /* Only historical saves without a narrative record need backfill.
+    Never auto-confirm a mission from a modern, unconfirmed save. */
+ if(!data.narrative)migrateNarrative(s,now);
+ else ensureNarrative(s);
+ if(s.chapterCompletedAt&&s.narrative?.rewardsCollected?.includes('m1')&&!s.ledger?.some(l=>l.key==='missionReward')){
+  s.cash+=5000;
+  s.ledger.push({id:s.nextId++,key:'missionReward',label:'Recompensa · Misión 1 (recuperada)',amount:5000,at:now});
+ }
  s.specialty=avatarDefinition(s.character).roleKey;s.bonuses={...avatarDefinition(s.character).bonuses};
  if(!['es','en','pt','it','zh-Hant'].includes(s.lang))s.lang='es';if(!CONFIG.protagonists.some(p=>p.id===s.character&&p.available))s.character='operator01';s.playerName=cleanPlayerName(data.playerName||'');
  s.energy=Math.max(0,Math.min(CONFIG.maxEnergy,s.energy));s.boosters=Math.floor(s.boosters);
