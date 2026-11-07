@@ -172,7 +172,7 @@ export function confirmCompletion(s,missionId,now=Date.now()){
  // Deliver reward if defined
  const narr=MISSION_NARRATIVES[missionId];
  const rewardDef=narr?.end?.reward;
- if(rewardDef&&rewardDef.cash>0){
+ if(rewardDef&&rewardDef.cash>0&&!(s.ledger||[]).some(l=>l.key===rewardDef.ledgerKey)){
   s.cash+=rewardDef.cash;
   s.ledger.push({id:s.nextId++,key:rewardDef.ledgerKey,label:rewardDef.label,amount:rewardDef.cash,at:now});
   if(rewardDef.boosters)s.boosters=(s.boosters||0)+rewardDef.boosters;
