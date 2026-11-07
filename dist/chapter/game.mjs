@@ -22,7 +22,6 @@ import {placeOrder,placeMachineryOrder} from '../mission3/headquarters.mjs';
 import {upgradeWorkshop,workshopLevel,workshopCapacity,workshopUsed,workshopFree,WORKSHOP_LEVELS,workshopUpgradeJob,workshopUpgradeProgress,finishWorkshopUpgrade,accelerateWorkshop,canDemolishWorkshop,demolishWorkshop} from '../mission3/inventory.mjs';
 import {canStartMission3,startMission3,updateMission3Phase} from '../mission3/mission3-state.mjs';
 import {createDrillModel,animateDrill} from '../mission3/drill-models.mjs';
-import {upgradeRcRigVisual,loadRigVisual} from './rig-visuals.mjs';
 import {createBoreholeMarker,updateMarkerProgress} from '../mission3/borehole-marker.mjs';
 import {createDeliveryVehicle,startDelivery,updateDelivery,departDelivery} from '../mission3/delivery-vehicle.mjs';
 import {createDrillingEffects,updateDrillingEffects} from '../mission3/drilling-effects.mjs';
@@ -75,7 +74,6 @@ let hsecWorld=null,hsecUI=null,hsecElapsed=0,hsecLastSignature='',hsecFollow=fal
 let constructionCallout=null,guidance=null,cinematic=null,cameraDebug=null,cinemaRecorder=null,reviewBackup=null,cinemaReview=false,locomotionReview=null,qaComputerPath=null,qaWalkRoute=null,characterStage=null,avatars=null,builderOpen=false,managingOffice=false,officePanelPreview=null,selectedBuildModule=null,lastPortraitId=null,selectedAvatar='operator01';
 let m3DrillModel=null,m3BoreholeMarkers=[],m3DeliveryVehicle=null,m3DrillingFx=null,m3VisualsReady=false;
 let m4DrillTruckModel=null,m4ParkingSpot=null,m4VisualsReady=false,m4TruckLoading=false,m4TruckCollider=null;
-let m4DthVisual=null,m4DthLoading=false,m4DthFailed=false,m4DthCollider=null;
 let world,scene,phase='start',phoneApp=null,phoneOpen=false,category='desks',modalOpen=false,blueprint=false,placement=null,busy=null,keys={},joy={x:0,y:0},pointer=null,target=null,auth={configured:false},account=null,audioContext=null,last=performance.now(),clock=0,lastSave=0,lastHud=0,introAt=0,lastObjective='',qaRoute=false;
 const motion=createMotion(),qa=new URLSearchParams(location.search).has('chapterqa'),cameraDev=new URLSearchParams(location.search).get('dev')==='camera';
 function loadCameraSettings(){try{return cameraSettings(JSON.parse(localStorage.getItem(CAMERA_KEY)));}catch{return cameraSettings();}}
@@ -167,8 +165,6 @@ function spawnM3Drill(drillId){
  const dx=activeBH?.x||22,dz=activeBH?.z||0;
  m3DrillModel.position.set(dx,0,dz);
  world.scene.add(m3DrillModel);
- // Keep procedural fallback until the verified user GLB is available.
- upgradeRcRigVisual(m3DrillModel,drillId).catch(error=>console.warn('[RC] Optimized visual unavailable; keeping procedural rig:',error));
  // Dynamic collider for drill rig
  if(!m3DrillCollider){m3DrillCollider={x:dx,z:dz,w:3.6,d:4.5};world.colliders.push(m3DrillCollider);}
  m3DrillCollider.x=dx;m3DrillCollider.z=dz;
@@ -285,43 +281,6 @@ function createProceduralTruck(){
 }
 function updateM4Visuals(dt){
  if(!m4VisualsReady||!s?.mission4)return;
- // Immediately show the owned DTH at a designated workshop-side display spot
- // until it is assigned to a production zone. This visual fallback does not
- // alter save data or silently invent an assigned drilling destination.
- // The parked visual has no collider to avoid blocking the pedestrian corridor.
- const dthOwned=!!s.mission4.productionDrill;
- const dthAssigned=s.mission4.productionDrill?.position||null;
- const dthParking={x:-17.5,z:-9.3};
- const dthPlace=dthAssigned||dthParking;
- if(dthOwned&&!m4DthVisual&&!m4DthLoading&&!m4DthFailed){
-  m4DthLoading=true;
-  loadRigVisual('rig_dth_production').then(model=>{
-   if(!s?.mission4?.productionDrill||!world)return;
-   const position=s.mission4.productionDrill.position||dthParking;
-   const wrapper=new T.Group();wrapper.name='production-dth-rig';wrapper.add(model);
-   wrapper.position.set(position.x,0.12,position.z);
-   world.scene.add(wrapper);m4DthVisual=wrapper;
-  }).catch(error=>{
-   m4DthFailed=true; // Avoid repeated network requests for a missing asset.
-   console.warn('[DTH] Optimized visual unavailable:',error);
-  }).finally(()=>{m4DthLoading=false;});
- }
- if(m4DthVisual){
-  if(!dthOwned){
-   m4DthVisual.removeFromParent();m4DthVisual=null;
-   if(m4DthCollider){const idx=world.colliders.indexOf(m4DthCollider);if(idx!==-1)world.colliders.splice(idx,1);m4DthCollider=null;}
-  }else{
-   m4DthVisual.position.set(dthPlace.x,0.12,dthPlace.z);
-   // Physical obstacle only after the rig has a real assigned drilling site.
-   // A parked machine is shown visually without blocking access to buildings.
-   if(dthAssigned){
-    if(!m4DthCollider){m4DthCollider={x:dthAssigned.x,z:dthAssigned.z,w:2.6,d:5.5,_dth:true};world.colliders.push(m4DthCollider);}
-    else{m4DthCollider.x=dthAssigned.x;m4DthCollider.z=dthAssigned.z;}
-   }else if(m4DthCollider){
-    const idx=world.colliders.indexOf(m4DthCollider);if(idx!==-1)world.colliders.splice(idx,1);m4DthCollider=null;
-   }
-  }
- }
  // Ensure parking and truck are initialized on state change
  if(s.mission4.parkingBuilt&&!m4ParkingSpot)initM4Visuals();
  if(s.mission4.drillTruck&&!m4DrillTruckModel){m4VisualsReady=false;initM4Visuals();}

@@ -1,14 +1,5 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
-## 2026-11-07 — User-supplied optimized RC/DTH rigs (visual integration, pending binary import)
-
-- User supplied two unbranded GLBs, each with 1,000,000 source triangles, embedded 4K textures and no moving part hierarchy or animations.
-- RC optimized locally to 101,625 faces / 2,748,264 bytes, DTH to 74,119 faces / 1,985,828 bytes. New 2D WebP catalog cutouts, muted neutral paint, no external branding.
-- Added read-only `rig-visuals.mjs` with GLTFLoader caching, M3 procedural fallback and original animated carriage/shaft retained. DTH is spawned only after assigned-zone position is known; an active DTH receives a collider and no phantom obstacle appears at origin.
-- Equipment cards asynchronously load only real optimized thumbnails; fallback icon if absent.
-- **Imported:** the four optimized binaries are present as independent GitHub assets, hash-verified by GitHub Actions, with temporary transfer ZIP removed. 6 focused tests passed. DTH is displayed next to the workshop after delivery, then moved to the real zone once assigned; no parked phantom collider. Production deployment pending.
-- Details and precise verification: `CHANGES/2026-11-07_uploaded-rc-dth-optimized.md`.
-
 ## 2026-11-06 — Vehículos identity rail + two-machine Equipment presentation
 
 - Vehicles-specific CSS override formerly replaced the Catalog identity-rail 144px left inset with 14px, visually covering the side brand; preserve 144px and 101px in compact media queries, leaving the larger DrillTruck card intact.

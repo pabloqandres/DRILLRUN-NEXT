@@ -3,10 +3,9 @@ import {landReady} from './state.mjs';
 import {CatalogView} from './catalog-view.mjs';
 import {officeThumbnail,workshopThumbnail} from './product-preview.mjs';
 import {drillTruckImage} from './drilltruck-image.mjs';
-import {rigCatalogImageUrl} from './rig-visuals.mjs';
 import {catalogProducts,catalogCategories} from './construction-catalog.mjs';
 export class BuilderUI{
- constructor(options){Object.assign(this,options);this.category='infrastructure';this.selected='office';this.zone='office01';this.store=new CatalogView(this.host);this.buildingThumbnails=new Map();this.vehicleThumbnails=new Map();this.vehicleImageLoading=false;this.equipmentThumbnails=new Map();}
+ constructor(options){Object.assign(this,options);this.category='infrastructure';this.selected='office';this.zone='office01';this.store=new CatalogView(this.host);this.buildingThumbnails=new Map();this.vehicleThumbnails=new Map();this.vehicleImageLoading=false;}
  open(){this.store.close();this.selected='office';this.category='infrastructure';this.render();}
  close(){this.store.close();this.onSelection(null);}
  render(){
@@ -34,22 +33,6 @@ export class BuilderUI{
   }
   return this.buildingThumbnails.get(key);
  }
- // Async image check prevents broken img tags when an asset has not been
- // imported into the GitHub branch yet; Cards fall back to their original icon.
- getEquipmentThumbnail(id){
-  if(this.equipmentThumbnails.has(id))return this.equipmentThumbnails.get(id);
-  const source=rigCatalogImageUrl(id);
-  if(!source)return null;
-  this.equipmentThumbnails.set(id,null);
-  const image=new Image();
-  image.onload=()=>{
-   this.equipmentThumbnails.set(id,source);
-   if(this.category==='equipment'&&this.store.options&&!this.host.classList.contains('hidden'))this.store.render(this.store.options);
-  };
-  image.onerror=()=>{this.equipmentThumbnails.set(id,null);};
-  image.src=source;
-  return null;
- }
  getDrillTruckThumbnail(){
   const existing=this.vehicleThumbnails.get('drilltruck');
   if(existing)return existing;
@@ -76,7 +59,7 @@ export class BuilderUI{
   const s=this.state(),t=this.translate();this.onSelection(null);
   let products;try{products=catalogProducts(s,t);}catch(e){console.error('catalogProducts error:',e);products=[];}
   this.store.render({lang:s.lang,products,categories:catalogCategories(s.lang),category,selected,format:this.format,
-   thumbnail:p=>(p.kind==='drill'||p.kind==='dthDrill')?this.getEquipmentThumbnail(p.id):p.kind==='module'?this.getOfficeThumbnail(p.level):p.kind==='workshop'?this.getWorkshopThumbnail(p.level):p.kind==='vehicle'&&p.id==='drilltruck'?this.getDrillTruckThumbnail():p.kind==='hsec'&&p.status!=='future'&&this.hsec?.world?this.hsec.world.thumbnail(p.id):null,
+   thumbnail:p=>p.kind==='module'?this.getOfficeThumbnail(p.level):p.kind==='workshop'?this.getWorkshopThumbnail(p.level):p.kind==='vehicle'&&p.id==='drilltruck'?this.getDrillTruckThumbnail():p.kind==='hsec'&&p.status!=='future'&&this.hsec?.world?this.hsec.world.thumbnail(p.id):null,
    onCategory,onSelect,onClose:this.onClose,onStaff:()=>this.hsec?.open('staff'),
    onManage:p=>{
     if(p.kind==='module')return s.office.status==='building'?this.onClose():this.onManage();

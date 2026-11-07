@@ -121,13 +121,3 @@ The user explicitly directed ChatGPT to rebuild **everything visible in the game
 **Overrides the earlier equipment naming and research proposal:** Never introduce outside manufacturer names, product names, logos, photos, distinctive machine livery or outside product references in DRILL RUN gameplay, user-facing UI, visual mockups, technical sheets, design briefs or assets. Only explicitly user-approved DRILLCO®-associated brand assets may appear. The previously proposed fictional rig nicknames were not approved and are withdrawn. Use neutral descriptive labels for generic unbranded machinery until the user approves names and original appearance. DRILLCO® does not sell the drilling machines, only its authorized drill tools.
 
 **Scope:** Retain a two-type Equipment catalog and the Vehicles identity-rail CSS fix; replace invented nicknames with «Perforadora RC · Sondaje», legacy «Perforadora RC · Alta capacidad» and «Perforadora DTH · Producción». Remove outside-branded modeling references, preserving IDs, orders, economy, missions and state. Production release still requires approval.
-
-## 2026-11-07 — User GLB integration; narrow game renderer exception (User + ChatGPT)
-
-**User request:** directly optimize and integrate the uploaded RC/DTH Tripo GLB models into DRILL RUN NEXT GENERATION, preserving all existing economic, mission, stock and save behavior. Strictly no competing manufacturer branding.
-
-**Shared ownership exception:** ChatGPT may edit ONLY the existing M3 visual-spawn hook and M4 visual-refresh hook in `dist/chapter/game.mjs`, plus `dist/chapter/builder-ui.mjs` thumbnail read-only presentation. This is **visual integration**, not game mechanics. No touch to M3/M4 module logic, purchase/dispatch functions, invoices, economy or persistent state.
-
-**Rigging limit:** Original uploaded GLBs are each a single mesh with zero animations. Do not claim independently articulated mast. M3 preserves existing procedural drilling head/shaft effect and collider. DTH appears when its actual world position is assigned; its standalone GLB is static until user approves segmentation/rigging.
-
-**Asset control:** two optimized GLBs and two WebP images generated from user files with neutralized appearance; no external logos. Their binary upload into the GitHub branch is required before promotion. Keep missing-asset fallback and avoid automatic repeated network attempts. No merge/deploy without explicit approval.
