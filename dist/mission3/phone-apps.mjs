@@ -1,6 +1,7 @@
 // Mission 3 — Phone/Computer app screens
 // Renders M3 UI panels inside the existing PhoneUI system.
 import {ROLES,personnelRoster,canHire,hasRole} from './personnel.mjs';
+import {crewPortrait} from '../chapter/crew-portraits.mjs';
 import {CONTRACT_TEMPLATES,contractTemplate,canAcceptContract,contractProgress,contractDeadline,isContractComplete,startDrilling} from './contracts.mjs';
 import {analysisProgress,analysisReport,requestAnalysis,accelerateAnalysis} from './geology.mjs';
 import {DRILLS,HAMMERS,BITS,drillDefinition,compatibleHammers,compatibleBits,canPurchaseDrill} from './drills.mjs';
@@ -54,7 +55,7 @@ function renderPersonnel(s,t,fmt,icon,cb){
  if(roster.length){
   html+=`<div class="sectionHeading">Equipo activo<span>${roster.length}</span></div>`;
   for(const p of roster){
-   html+=`<article class="inventoryCard"><span class="inventoryIcon">${icon('player')}</span><div><b>${esc(roleNames[p.role]||p.role)}</b><small>Nivel ${p.level} · ${esc(stateNames[p.state]||p.state)}</small><span class="itemStatus">${icon('check')} Contratado</span></div></article>`;
+   html+=`<article class="inventoryCard staffCard"><span class="inventoryIcon crewPortrait">${crewPortrait(p.role,p.id)}</span><div><b>${esc(roleNames[p.role]||p.role)}</b><small>Nivel ${p.level} · ${esc(stateNames[p.state]||p.state)}</small><span class="itemStatus">${icon('check')} Contratado</span></div></article>`;
   }
  }else{
   html+=`<div class="emptyState">${icon('player')}<p>No tienes personal contratado aún.</p></div>`;
@@ -65,7 +66,7 @@ function renderPersonnel(s,t,fmt,icon,cb){
   const blocked=canHire(s,role.id);
   const current=roster.filter(p=>p.role===role.id).length;
   if(current>=role.limit)continue;
-  html+=`<article class="inventoryCard"><span class="inventoryIcon">${icon('player')}</span><div><b>${esc(roleNames[role.id]||role.id)}</b><small>${role.hireCost>0?fmt(role.hireCost):'Gratuito'} · Límite: ${role.limit}</small>${blocked?`<span class="itemStatus">${icon('lock')} ${esc(blocked)}</span>`:''}</div><button data-hire="${role.id}" ${blocked?'disabled':''}>${icon('store')}<span>Contratar</span></button></article>`;
+  html+=`<article class="inventoryCard staffCard"><span class="inventoryIcon crewPortrait">${crewPortrait(role.id)}</span><div><b>${esc(roleNames[role.id]||role.id)}</b><small>${role.hireCost>0?fmt(role.hireCost):'Gratuito'} · Límite: ${role.limit}</small>${blocked?`<span class="itemStatus">${icon('lock')} ${esc(blocked)}</span>`:''}</div><button data-hire="${role.id}" ${blocked?'disabled':''}>${icon('store')}<span>Contratar</span></button></article>`;
  }
  return html;
 }
