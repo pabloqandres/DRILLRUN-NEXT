@@ -84,7 +84,7 @@ export function mission4Objectives(s){
   ]},
   {id:5,nameKey:'automatedProduction',checks:[
    {id:'firstCycle',done:hasIncome,labelKey:'completeProductionCycle'},
-   {id:'allZones',done:m.zones.length>=6,labelKey:'convertAllZones'}
+   {id:'productionZone',done:m.zones.some(z=>z.status==='producing'),labelKey:'convertBorehole'}
   ]}
  ];
 }
