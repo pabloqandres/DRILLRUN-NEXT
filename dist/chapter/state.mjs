@@ -32,7 +32,7 @@ export function restore(data,now=Date.now()){
  if(s.mission3&&s.mission3.phase!=='inactive'&&!s.mission3.fundingV2){const total=(s.cash||0)+(s.bank||0);const min=25000;if(total<min){const bonus=min-total;s.cash+=bonus;s.ledger.push({id:s.nextId++,key:'Subsidio operacional · Misión 3',amount:bonus,at:now});}s.mission3.fundingV2=true;}
  /* Preserve saved contract terms. Older contracts keep their original 15-minute/6-site rules; new contracts use 180s/3 sites. */
  /* Reset drilling timer for saves where deadline already passed */
- if(s.contract&&s.contract.drillingStartedAt&&!s.contract._timerReset4){const deadline=s.contract.drillingStartedAt+s.contract.duration*1000;if(deadline<now){s.contract.drillingStartedAt=now;}s.contract._timerReset4=true;}
+ if(s.contract&&s.contract.duration!==180&&s.contract.drillingStartedAt&&!s.contract._timerReset4){const deadline=s.contract.drillingStartedAt+s.contract.duration*1000;if(deadline<now){s.contract.drillingStartedAt=now;}s.contract._timerReset4=true;}
  if(!s.workshop)s.workshop={level:1};
  /* M4 defaults */ s.mission4=s.mission4||null;
  /* M1 mission rewards are confirmed by narrative; restore never pays before confirmation. */
