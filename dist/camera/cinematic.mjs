@@ -1,9 +1,18 @@
 import {transitionLook} from './transition-look.mjs';
-import {INTRO_VARIANTS} from '../chapter/config.mjs';
+import {INTRO_VARIANTS,SHARED_INTRO_VIDEO} from '../chapter/config.mjs';
 export class CinematicDirector{
  constructor({world,host,translate,sound,onComplete,onSound}){Object.assign(this,{world,host,translate,sound,onComplete,onSound});this.video=host.querySelector('video');this.retry=host.querySelector('#playCinematic');this.caption=host.querySelector('#introText');this.sweep=host.querySelector('#digitalSweep');this.backdrop=host.querySelector('.introBackdrop');this.particles=host.querySelector('#digitalParticles');this.glitch=host.querySelector('#digitalGlitch');this.stage='off';this.progress=0;
   this.particles.innerHTML=Array.from({length:24},(_,i)=>`<i style="left:${8+(i*37%86)}%;top:${10+(i*23%75)}%;--drift:${(i%5-2)*12}px"></i>`).join('');
-  this.video.onended=()=>{if(this.stage==='video')this.transform();};this.video.onerror=()=>{if(this.stage==='video')this.transform();};this.retry.onclick=()=>this.play();
+  this.video.onended=()=>{if(this.stage==='video')this.transform();};
+  // Keep the approved Avatar 1 film as a safe fallback until every dedicated file is deployed.
+  this.video.onerror=()=>{
+   if(this.stage!=='video')return;
+   const shared=new URL(SHARED_INTRO_VIDEO,new URL('../',import.meta.url)).href;
+   if(this.video.src!==shared){
+    this.video.src=shared;this.video.load();this.play();
+   }else this.transform();
+  };
+  this.retry.onclick=()=>this.play();
  }
  start(avatar,{orbitOnly=false}={}){this.stop();this.avatar=avatar;const variant=INTRO_VARIANTS[avatar];this.stage=orbitOnly?'orbit':variant?.video?'video':'provisional';this.age=0;this.progress=0;this.host.classList.remove('hidden');this.host.dataset.stage=this.stage;this.caption.textContent=this.stage==='provisional'?this.translate()('provisionalIntro'):'';this.world.cameraRig.startEntrance();this.world.cameraRig.entranceAt(0);this.renderReveal(0);
   if(this.stage==='video'){this.video.hidden=false;this.video.src=new URL(variant.video,new URL('../',import.meta.url)).href;this.video.muted=!this.sound();this.video.volume=this.sound()?1:0;this.play();}else{this.video.style.opacity='0';this.backdrop.style.opacity='0';this.sweep.style.opacity='0';this.particles.style.opacity='0';}
