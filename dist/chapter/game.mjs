@@ -625,6 +625,9 @@ onCatalogAction:(type,data)=>{try{
 }catch(e){const msg=e.message==='noMoney'?'Fondos insuficientes':e.message==='noCapacity'?'Sin espacio en el taller':e.message;notices.push({title:msg,symbol:'lock'});}}
 });
 function renderPhone(){if(s){phoneUI.render(phoneApp);if(phoneApp==='m3-geology'&&s.mission3?.reportRead){updateMission3Phase(s);save();renderHUD();}}}
+// Legacy furniture placement is retired. Keep Escape/scene cleanup safe for older sessions.
+function cancelPlacement(){placement=null;scene?.cancelPlacement();document.body.classList.remove('placing');hidden($('#placementBar'),true);}
+function renderPlacement(){} // No manual placement in prefab construction mode.
 function joyMove(e){const r=$('#joystick').getBoundingClientRect(),max=r.width*.30;let x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2,l=Math.hypot(x,y);if(l>max){x*=max/l;y*=max/l;}joy={x:x/max,y:y/max};$('#joyKnob').style.transform=`translate(${x}px,${y}px)`;}
 $('#joystick').onpointerdown=e=>{pointer=e.pointerId;e.currentTarget.setPointerCapture(pointer);target=null;joyMove(e);};$('#joystick').onpointermove=e=>{if(pointer===e.pointerId)joyMove(e);};$('#joystick').onpointerup=$('#joystick').onpointercancel=$('#joystick').onlostpointercapture=resetJoy;
 $('#cameraHome').onclick=()=>{world.zoom=1;resetOrbit(world.orbit);world.cameraRig.reset();persistCamera();};
