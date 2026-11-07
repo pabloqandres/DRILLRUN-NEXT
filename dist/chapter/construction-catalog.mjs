@@ -23,6 +23,14 @@ function blockReason(code,c){
  return map[code]||'';
 }
 
+// Temporary generic labels only; any commercial names and brand-specific artwork
+// require explicit approval. DRILLCO® does not sell these unbranded machines.
+const EQUIPMENT_DISPLAY_NAMES={
+ rig_rc_compact:'Perforadora RC · Sondaje',
+ rig_rc_advanced:'Perforadora RC · Alta capacidad',
+ rig_dth_production:'Perforadora DTH · Producción'
+};
+
 // Read-only projections of the existing economy. Browsing must never create HSEC state or a ledger entry.
 export function catalogProducts(s,t){
  const c=catalogCopy(s.lang),base=MODULES[0],installed=s.office.status==='built',module=installed?moduleDefinition('office-l'+s.office.level)||base:base,job=pendingConstruction(s);
@@ -46,18 +54,24 @@ export function catalogProducts(s,t){
  const m3On=s.mission3&&s.mission3.phase!=='inactive';
  const pending=pendingOrders(s);
  const hasPendingMachinery=(type)=>pending.some(o=>o.items.some(i=>i.category==='machinery'&&i.type===type));
+ // Two primary machines in the Catalog: one exploration RC and one production DTH.
+ // Preserve the legacy RC PRO definition and show it in the same single RC slot
+ // whenever an existing save owns it or the higher-capacity model is on order.
+ const rcOrderedAdvanced=pending.some(o=>o.items?.some(i=>i.category==='machinery'&&i.type==='drill'&&i.model==='rig_rc_advanced'));
+ const visibleRcId=s.drill?.id==='rig_rc_advanced'||rcOrderedAdvanced?'rig_rc_advanced':'rig_rc_compact';
  for(const d of DRILLS){
+  if(d.id!==visibleRcId)continue;
   const owned=s.drill?.id===d.id;const blocked=canPurchaseDrill(s,d.id);
   const onOrder=hasPendingMachinery('drill');
   const status=!m3On?'locked':owned?'installed':onOrder?'building':blocked==='drillOwned'?'installed':blocked?'locked':'available';
-  products.push({id:d.id,kind:'drill',category:'equipment',title:d.labelKey||d.nameKey,level:1,description:`${c.depth}: ${d.maxDepth}${c.meters} · Ø ${d.bitDiameter}"`,benefit:`RC · ${d.maxDepth}${c.meters}`,price:owned||onOrder?null:d.price,seconds:null,w:3,d:2,h:6,capacity:d.maxDepth+c.meters,status,reason:!m3On?c.chapter:onOrder?c.ordered:blockReason(blocked,c),model:d,canStart:status==='available',action:owned?'manage':onOrder?'manage':'buy',insufficient:status==='available'&&s.cash<d.price});
+  products.push({id:d.id,kind:'drill',category:'equipment',title:EQUIPMENT_DISPLAY_NAMES[d.id]||d.labelKey||d.nameKey,level:1,description:`${c.depth}: ${d.maxDepth}${c.meters} · Ø ${d.bitDiameter}"`,benefit:`RC · ${d.maxDepth}${c.meters}`,price:owned||onOrder?null:d.price,seconds:null,w:3,d:2,h:6,capacity:d.maxDepth+c.meters,status,reason:!m3On?c.chapter:onOrder?c.ordered:blockReason(blocked,c),model:d,canStart:status==='available',action:owned?'manage':onOrder?'manage':'buy',insufficient:status==='available'&&s.cash<d.price});
  }
  const m4On=s.mission4&&s.mission4.phase!=='inactive';
  for(const d of DTH_DRILLS){
   const owned=s.mission4?.productionDrill?.id===d.id;const blocked=canPurchaseDthDrill(s,d.id);
   const onOrder=hasPendingMachinery('dthDrill');
   const status=!m4On?'locked':owned?'installed':onOrder?'building':blocked?'locked':'available';
-  products.push({id:d.id,kind:'dthDrill',category:'equipment',title:d.labelKey||d.nameKey,level:2,description:`${c.depth}: ${d.maxDepth}${c.meters} · Ø ${d.bitDiameter}"`,benefit:`DTH · ${d.maxDepth}${c.meters}`,price:owned||onOrder?null:d.price,seconds:null,w:4,d:2.5,h:8,capacity:d.maxDepth+c.meters,status,reason:!m4On?c.later:onOrder?c.ordered:blockReason(blocked,c),model:d,canStart:status==='available',action:owned?'manage':onOrder?'manage':'buy',insufficient:status==='available'&&s.cash<d.price});
+  products.push({id:d.id,kind:'dthDrill',category:'equipment',title:EQUIPMENT_DISPLAY_NAMES[d.id]||d.labelKey||d.nameKey,level:2,description:`${c.depth}: ${d.maxDepth}${c.meters} · Ø ${d.bitDiameter}"`,benefit:`DTH · ${d.maxDepth}${c.meters}`,price:owned||onOrder?null:d.price,seconds:null,w:4,d:2.5,h:8,capacity:d.maxDepth+c.meters,status,reason:!m4On?c.later:onOrder?c.ordered:blockReason(blocked,c),model:d,canStart:status==='available',action:owned?'manage':onOrder?'manage':'buy',insufficient:status==='available'&&s.cash<d.price});
  }
 
  // ── Vehicles ──
