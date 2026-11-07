@@ -34,7 +34,6 @@ export const HSEC_CATEGORIES=[
  {id:'infrastructure',name:'Infraestructura operativa',color:'#FFC83D',max:15},
  {id:'equipment',name:'Equipos de perforación',color:'#E8A040',max:0},
  {id:'vehicles',name:'Vehículos y maquinaria',color:'#5B9FE8',max:0},
- {id:'furniture',name:'Mobiliario de oficina',color:'#C896E8',max:0},
  {id:'mobility',name:'Movilidad y tránsito seguro',color:'#2CDCF1',max:25},
  {id:'boundaries',name:'Delimitación y control de riesgos',color:'#FF756C',max:20},
  {id:'lighting',name:'Iluminación y visibilidad',color:'#B891FF',max:15},
