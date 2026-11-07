@@ -11,9 +11,9 @@ test('vehicle category keeps the Catalog identity rail in desktop and compact vi
 
 test('equipment card names are player-readable, and only two active rig types show',async()=>{
  const js=file('chapter/construction-catalog.mjs');
- assert(js.includes("rig_rc_compact:'PIONERO RC'"));
- assert(js.includes("rig_dth_production:'TITÁN DTH'"));
- assert(js.includes("rig_rc_advanced:'PIONERO RC PRO'"));
+ assert(js.includes("rig_rc_compact:'Perforadora RC · Sondaje'"));
+ assert(js.includes("rig_dth_production:'Perforadora DTH · Producción'"));
+ assert(js.includes("rig_rc_advanced:'Perforadora RC · Alta capacidad'"));
  assert(js.includes("if(d.id!==visibleRcId)continue"));
  assert(js.includes("s.drill?.id==='rig_rc_advanced'||rcOrderedAdvanced"));
  assert(js.includes("title:EQUIPMENT_DISPLAY_NAMES[d.id]||d.labelKey||d.nameKey"));
@@ -29,10 +29,10 @@ test('runtime catalog always exposes two rig cards and preserves advanced RC own
  const {catalogProducts}=await import('../dist/chapter/construction-catalog.mjs');
  const s=newGame('es');
  const labels=()=>catalogProducts(s,v=>v).filter(p=>p.category==='equipment').map(p=>p.title);
- assert.deepEqual(labels(),['PIONERO RC','TITÁN DTH']);
+ assert.deepEqual(labels(),['Perforadora RC · Sondaje','Perforadora DTH · Producción']);
  s.drill={id:'rig_rc_advanced'};
- assert.deepEqual(labels(),['PIONERO RC PRO','TITÁN DTH']);
+ assert.deepEqual(labels(),['Perforadora RC · Alta capacidad','Perforadora DTH · Producción']);
  s.drill=null;
  s.orders=[{status:'dispatched',items:[{category:'machinery',type:'drill',model:'rig_rc_advanced'}]}];
- assert.deepEqual(labels(),['PIONERO RC PRO','TITÁN DTH']);
+ assert.deepEqual(labels(),['Perforadora RC · Alta capacidad','Perforadora DTH · Producción']);
 });

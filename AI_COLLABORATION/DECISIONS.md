@@ -112,6 +112,12 @@ The user explicitly directed ChatGPT to rebuild **everything visible in the game
 
 **Scoped shared-file exception:** ChatGPT may adjust the display-only mapping and visibility of rig cards in `dist/chapter/construction-catalog.mjs` without changing drill definitions, product pricing, purchase permission, missions, delivery, contract, save data or state. Existing high-capacity RC owners/pending orders retain visibility via the RC card slot. Other agents should not replace these display names with internal translation keys.
 
-**Brand protection:** In-game machines remain generic unbranded third-party rigs. Manufacturer photos are external modeling references only; DRILLCO® is not represented as selling drill rigs. Equipment nicknames PIONERO RC and TITÁN DTH are fictional interface names.
+**Brand protection:** In-game machines remain generic unbranded third-party rigs. Manufacturer photos are external modeling references only; DRILLCO® is not represented as selling drill rigs. Equipment nicknames Perforadora RC · Sondaje and Perforadora DTH · Producción are fictional interface names.
 
 **Release:** Feature branch and PR only, production merge requires explicit approval. New GLBs and drilling-data realism review are separate tasks; never infer that DTH production blast holes have an 800 m real-world specification.
+
+## 2026-11-06 — Mandatory brand-approval correction (User)
+
+**Overrides the earlier equipment naming and research proposal:** Never introduce outside manufacturer names, product names, logos, photos, distinctive machine livery or outside product references in DRILL RUN gameplay, user-facing UI, visual mockups, technical sheets, design briefs or assets. Only explicitly user-approved DRILLCO®-associated brand assets may appear. The previously proposed fictional rig nicknames were not approved and are withdrawn. Use neutral descriptive labels for generic unbranded machinery until the user approves names and original appearance. DRILLCO® does not sell the drilling machines, only its authorized drill tools.
+
+**Scope:** Retain a two-type Equipment catalog and the Vehicles identity-rail CSS fix; replace invented nicknames with «Perforadora RC · Sondaje», legacy «Perforadora RC · Alta capacidad» and «Perforadora DTH · Producción». Remove outside-branded modeling references, preserving IDs, orders, economy, missions and state. Production release still requires approval.

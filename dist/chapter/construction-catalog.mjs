@@ -23,12 +23,12 @@ function blockReason(code,c){
  return map[code]||'';
 }
 
-// Fictional in-game rig nicknames. The machines are generic third-party equipment;
-// these are NOT DRILLCO products or manufacturers' commercial model names.
+// Temporary generic labels only; any commercial names and brand-specific artwork
+// require explicit approval. DRILLCO® does not sell these unbranded machines.
 const EQUIPMENT_DISPLAY_NAMES={
- rig_rc_compact:'PIONERO RC',
- rig_rc_advanced:'PIONERO RC PRO',
- rig_dth_production:'TITÁN DTH'
+ rig_rc_compact:'Perforadora RC · Sondaje',
+ rig_rc_advanced:'Perforadora RC · Alta capacidad',
+ rig_dth_production:'Perforadora DTH · Producción'
 };
 
 // Read-only projections of the existing economy. Browsing must never create HSEC state or a ledger entry.
