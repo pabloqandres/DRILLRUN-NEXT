@@ -1,0 +1,45 @@
+name: Import approved RC/DTH user GLBs
+on:
+  push:
+    branches: [chatgpt/rc-dth-glb-visual-integration]
+    paths: [.github/workflows/import-approved-rigs.yml]
+permissions:
+  contents: write
+jobs:
+  import-rigs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 1
+      - name: Extract the four user-optimized original assets
+        run: |
+          set -euo pipefail
+          zip=transfer/DRILLRUN_user_models.zip
+          for f in drill_rc_sondaje_optimized.glb drill_dth_produccion_optimized.glb; do
+            unzip -p "$zip" "DRILLRUN_rigs_optimized/integration/dist/assets3d/$f" > "dist/assets3d/$f"
+          done
+          mkdir -p dist/assets/catalog
+          for f in drill_rc_sondaje_catalog.webp drill_dth_produccion_catalog.webp; do
+            unzip -p "$zip" "DRILLRUN_rigs_optimized/integration/dist/assets/catalog/$f" > "dist/assets/catalog/$f"
+          done
+          echo '9020ec6f5116367767125398df7d75390d66bec6bbba40411441583d35180a2c  dist/assets3d/drill_rc_sondaje_optimized.glb' | sha256sum -c -
+          echo 'd00278ad379b3f9e06ed9b421e694cb9f4310cd7a8a175e5da7aa6a21e62759e  dist/assets3d/drill_dth_produccion_optimized.glb' | sha256sum -c -
+          echo '4ab0bce0d3d1267351ac4d44e1429fbe4ae4b45bafcf4a3640e93fd24c3749bc  dist/assets/catalog/drill_rc_sondaje_catalog.webp' | sha256sum -c -
+          echo '6e56e514b01bbb0aad116a2802a464fc7e0d2aed3fc18f6dda3f326a3d533c1f  dist/assets/catalog/drill_dth_produccion_catalog.webp' | sha256sum -c -
+      - name: Test optimized 3D assets and catalog
+        run: |
+          node --check dist/chapter/game.mjs
+          node --check dist/chapter/builder-ui.mjs
+          node --test tests/rig-optimized-assets.test.mjs tests/catalog-equipment-two-rigs-layout.test.mjs
+      - name: Commit extracted files and remove one-time import workflow
+        run: |
+          set -euo pipefail
+          git config user.name "DRILL RUN asset importer"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add dist/assets3d/drill_rc_sondaje_optimized.glb dist/assets3d/drill_dth_produccion_optimized.glb dist/assets/catalog/drill_rc_sondaje_catalog.webp dist/assets/catalog/drill_dth_produccion_catalog.webp
+          git rm transfer/DRILLRUN_user_models.zip .github/workflows/import-approved-rigs.yml
+          git commit -m "assets: import verified optimized RC/DTH GLBs and previews"
+          git push origin "HEAD:refs/heads/chatgpt/rc-dth-glb-visual-integration"
