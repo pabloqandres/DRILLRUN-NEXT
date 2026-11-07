@@ -15,7 +15,7 @@ export function soilPixels(size=512){const data=new Uint8Array(size*size*4),norm
   const windBand=Math.sin(Math.PI*2*(u*28+v*5+periodicNoise(u*5,v*5,5)*.6));
   const pale=Math.max(0,broad-.53)*29,gravel=grain>.985?-43:grain>.96?18:0;
   const shade=(stone-.5)*23+(grain-.5)*12+(broad-.5)*30+gravel+windBand*6;
-  const i=(y*size+x)*4;data[i]=Math.max(0,Math.min(255,207+shade+pale));data[i+1]=Math.max(0,Math.min(255,148+shade*.94+pale));data[i+2]=Math.max(0,Math.min(255,91+shade*.83+pale));data[i+3]=255;
+  const i=(y*size+x)*4;data[i]=Math.max(0,Math.min(255,196+shade+pale*.8));data[i+1]=Math.max(0,Math.min(255,151+shade*.94+pale*.7));data[i+2]=Math.max(0,Math.min(255,112+shade*.83+pale*.55));data[i+3]=255;
  }
  // Small embedded pebbles, warm highlights and cool contact edges; no photo texture.
  for(let stone=0;stone<Math.round(period*period/470);stone++){
@@ -38,7 +38,7 @@ export function createDesert(w){
  const group=new T.Group();group.name='Atacama · premium';const pixels=soilPixels(),map=tex(pixels.color,pixels.size,true),normalMap=tex(pixels.normal,pixels.size);
  const geo=new T.PlaneGeometry(240,240,96,96);geo.rotateX(-Math.PI/2);const p=geo.attributes.position,col=[];
  for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i);p.setY(i,reliefHeight(x,z));const n=noise(x*.17,z*.17),c=new T.Color().setRGB(1-.09*n,1-.075*n,1-.06*n);col.push(c.r,c.g,c.b);}geo.setAttribute('color',new T.Float32BufferAttribute(col,3));geo.computeVertexNormals();
- const material=new T.MeshStandardMaterial({color:0xffffff,map,normalMap,normalScale:new T.Vector2(.45,.45),roughness:.97,metalness:0,vertexColors:true});material.userData.premiumSoil=true;const ground=new T.Mesh(geo,material);ground.name='terrain-ground';ground.receiveShadow=true;group.add(ground);w.soilMaterial=material;
+ const material=new T.MeshStandardMaterial({color:0xffffff,map,normalMap,normalScale:new T.Vector2(.57,.57),roughness:.99,metalness:0,vertexColors:true});material.userData.premiumSoil=true;const ground=new T.Mesh(geo,material);ground.name='terrain-ground';ground.receiveShadow=true;group.add(ground);w.soilMaterial=material;
  // Four staggered ridgelines. Far colours absorb the sky haze; near ridges retain warm strata.
  for(let layer=3;layer>=0;layer--){const depth=24+layer*5,g=new T.PlaneGeometry(210,depth,110,20);g.rotateX(-Math.PI/2);const a=g.attributes.position;
   for(let i=0;i<a.count;i++){const x=a.getX(i),z=a.getZ(i),v=(z+depth/2)/depth,ridge=Math.pow(Math.max(0,Math.sin(v*Math.PI)),1.2),peaks=2.5+Math.pow(noise(x*.045,layer*4+3),2)*9+Math.pow(noise(x*.16,layer*9+2),2)*4,clefts=Math.abs(Math.sin(x*.29+z*.35))*1.1;a.setY(i,.2+ridge*(peaks+layer*1.7-clefts));}
