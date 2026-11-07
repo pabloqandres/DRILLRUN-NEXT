@@ -1,5 +1,14 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-06 — Visual V3: true HUD components, roads, Atacama, rig imagery and crew portraits
+
+- Replaced legacy profile/mission DOM grouping with actual joint avatar/level card and structured mission header/status/progress/footer. Added simplified joystick CSS and final cascade correction for previously absolutely positioned resources. Original input/movement logic intact.
+- Added instanced sediment stones/windrows beyond operating boundary; true constructed HSEC roads now paint directional wheel wear and deterministic non-flickering grain.
+- Casa Matriz's two RC rigs now display actual render snapshots of the in-world procedural 3D models; no fabricated DRILLCO hammer/bit previews.
+- Personnel hiring and roster show original, differentiated illustrated PPE portraits for each worker role; complete 3D hired NPCs remain future scope.
+- Parallel PR #12 eliminated invisible delivery-truck collision at (0,0) and is live. V3 must retain it.
+- Regression suite: `tests/world-art-v3-regression.test.mjs`. Detailed change record: `CHANGES/2026-11-06_visual-world-hud-v3.md`. Browser acceptance pending.
+
 ## 2026-11-06 — Full visual overhaul V2 (ChatGPT)
 
 - New `dist/chapter/visual-overhaul-v2.css` linked after older styles: complete consistent HUD, profile/level/resource/status design, physical-looking joystick, settings gear, interaction button, mission UI/overlays, phone/apps, placement, HSEC and Catalog.
