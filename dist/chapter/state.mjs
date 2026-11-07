@@ -37,7 +37,7 @@ export function restore(data,now=Date.now()){
  if(!s.workshop)s.workshop={level:1};
  /* M4 defaults */ s.mission4=s.mission4||null;
  /* M1 reward recovery — fix for saves where useOfficeComputer didn't give reward */
- if(s.chapterCompletedAt&&!s.ledger?.some(l=>l.key==='missionReward')){s.cash+=5000;s.ledger.push({id:s.nextId++,key:'missionReward',label:'Recompensa · Misión 1 (recuperada)',amount:5000,at:now});}
+ if(s.chapterCompletedAt&&s.narrative?.rewardsCollected?.includes('m1')&&!s.ledger?.some(l=>l.key==='missionReward')){s.cash+=5000;s.ledger.push({id:s.nextId++,key:'missionReward',label:'Recompensa · Misión 1 (recuperada)',amount:5000,at:now});}
  /* M4 stuck zones fix */
  if(s.mission4?.drillTruck&&!s.mission4.drillTruck.maintenancePhase){for(const z of s.mission4?.zones||[]){if(z.status==='maintenance')z.status='idle';}}
  /* Narrative migration */ migrateNarrative(s,now);
