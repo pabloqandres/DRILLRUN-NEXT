@@ -129,7 +129,7 @@ function renderDthCatalog(s,t,fmt,icon,cb){
 
 function renderDrillTruck(s,t,fmt,icon,cb){
  const truck=drillTruckInfo(s);
- let html=`<div class="m3Header">${icon('store')}<div><span class="eyebrow">DRILLTRUCK</span><h3>Camión de servicio</h3></div></div>`;
+ let html=`<div class="m3Header">${icon('store')}<div><span class="eyebrow">DRILLTRUCK</span><h3>Camión de servicio</h3></div></div><figure class="drillTruckHero" data-drilltruck-asset><div class="drillTruckHeroStage" data-real-asset-loading>GENERANDO IMAGEN DEL MODELO 3D REAL…</div><figcaption><b>DRILLTRUCK</b><span>Vista del asset oficial · modelo del juego</span></figcaption></figure>`;
  if(!truck){
   const blocked=canPurchaseDrillTruck(s);
   const wsLvl=workshopLevel(s);
