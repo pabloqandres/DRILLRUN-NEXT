@@ -1,5 +1,11 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-06 — DrillTruck quick-loading WebP for Catalog / Ficha Técnica / Phone
+
+- Replaced on-demand GLB snapshot generation with a pre-rendered 15,746-byte WebP captured directly from the original playable truck model; no WebGL/decoder/model fetch when viewing the UI image.
+- Same static image powers all three surfaces through the unchanged `drillTruckImage()` Promise API. World truck remains true 3D and unchanged; economy, saves, game state and purchase flow unaffected.
+- Focused Node test suite passed (3/3), device/UI acceptance pending. See `CHANGES/2026-11-06_drilltruck-static-catalog-image.md`.
+
 ## 2026-11-06 — Category audit 01: DrillTruck genuine 3D asset image
 
 - **Root cause fixed:** Catalog thumbnail callback previously ignored vehicle products, so DrillTruck card and technical sheet always showed icon fallback despite its 1.7 MB GLB already being in assets.
