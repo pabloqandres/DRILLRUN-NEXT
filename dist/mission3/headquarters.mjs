@@ -1,8 +1,8 @@
 // Mission 3 — Casa Matriz / Dispatch system
 // Handles material orders, delivery scheduling, and supply logistics.
-import {hammerDefinition,bitDefinition,purchaseDrill} from './drills.mjs';
-import {dthHammerDefinition,dthBitDefinition,purchaseDthDrill} from '../mission4/drills-dth.mjs';
-import {purchaseDrillTruck} from '../mission4/drilltruck.mjs';
+import {hammerDefinition,bitDefinition,drillDefinition,purchaseDrill} from './drills.mjs';
+import {dthHammerDefinition,dthBitDefinition,dthDrillDefinition,purchaseDthDrill} from '../mission4/drills-dth.mjs';
+import {purchaseDrillTruck,DRILLTRUCK_COST} from '../mission4/drilltruck.mjs';
 import {workshopFree} from './inventory.mjs';
 
 const fail=msg=>{throw new Error(msg);};
@@ -15,12 +15,18 @@ export function orderCost(items){
 }
 
 export function canPlaceOrder(s,items){
- for(const item of items||[]){
+ if(!items?.length)return 'emptyOrder';
+ for(const item of items){
   if(item.category!=='machinery')continue;
+  if(item.qty!==1)return 'invalidQty';
+  const def=item.type==='drill'?drillDefinition(item.model):
+            item.type==='dthDrill'?dthDrillDefinition(item.model):
+            item.type==='drillTruck'&&item.model==='drilltruck'?{price:DRILLTRUCK_COST}:null;
+  if(!def||item.unitPrice!==def.price)return 'invalidItem';
+  if(['dthDrill','drillTruck'].includes(item.type)&&(!s.mission4||s.mission4.phase==='inactive'))return 'missionNotActive';
   if((item.type==='drill'&&s.drill)||(item.type==='dthDrill'&&s.mission4?.productionDrill)||(item.type==='drillTruck'&&s.mission4?.drillTruck))return 'alreadyOwned';
   if((s.orders||[]).some(o=>['pending','dispatched'].includes(o.status)&&o.items?.some(i=>i.category==='machinery'&&i.type===item.type)))return 'orderAlreadyPending';
  }
- if(!items?.length)return 'emptyOrder';
  // Machinery orders don't require existing drill
  const hasMachinery=items.some(i=>i.category==='machinery');
  if(!hasMachinery&&!s.drill)return 'needsDrill';
@@ -29,13 +35,16 @@ export function canPlaceOrder(s,items){
  // Check workshop capacity (only for tools, not machinery)
  const toolItems=items.filter(i=>!i.category||i.category!=='machinery');
  const totalQty=toolItems.reduce((n,i)=>n+i.qty,0);
- if(totalQty>0&&totalQty>workshopFree(s))return 'noCapacity';
+ const reservedQty=(s.orders||[]).filter(o=>['pending','dispatched'].includes(o.status)&&!o.consumed)
+  .flatMap(o=>(o.items||[]).filter(i=>i.category!=='machinery'))
+  .reduce((n,i)=>n+(Number(i.qty)||0),0);
+ if(totalQty+reservedQty>workshopFree(s))return 'noCapacity';
  // Validate each item exists in catalog
  for(const item of items){
   if(item.category==='machinery')continue; // machinery validated by caller
   const def=item.type==='hammer'?(hammerDefinition(item.model)||dthHammerDefinition(item.model)):
             item.type==='bit'?(bitDefinition(item.model)||dthBitDefinition(item.model)):null;
-  if(!def)return 'invalidItem';
+  if(!def||item.unitPrice!==def.price)return 'invalidItem';
   if(!Number.isInteger(item.qty)||item.qty<1||item.qty>10)return 'invalidQty';
  }
  return null;
@@ -84,11 +93,12 @@ export function deliveredOrders(s){
 // This also recovers legacy saves that recorded a delivery but lost the scene callback.
 export function materializeMachinery(s,item,now=Date.now()){
  if(item.type==='drill'){
+  if(!drillDefinition(item.model))return false;
   if(!s.drill)purchaseDrill(s,item.model,true,now);
   return !!s.drill;
  }
  if(item.type==='dthDrill'){
-  if(!s.mission4)return false;
+  if(!s.mission4||!dthDrillDefinition(item.model))return false;
   if(!s.mission4.productionDrill)purchaseDthDrill(s,item.model,true,now);
   return !!s.mission4.productionDrill;
  }
@@ -109,6 +119,9 @@ export function tickDeliveries(s,now=Date.now()){
   if(order.status!=='dispatched'||order.consumed)continue;
   const elapsed=(now-order.dispatchedAt)/1000;
   if(elapsed>=order.dispatchDuration){
+   // Pending deliveries do not bypass the warehouse's actual free capacity.
+   const incoming=(order.items||[]).filter(i=>i.category!=='machinery').reduce((n,i)=>n+(i.qty||0),0);
+   if(incoming>workshopFree(s))continue;
    // Complete persistent transactions before recording them as consumed.
    // A missing mission state remains recoverable on the next restore.
    const machinery=(order.items||[]).filter(item=>item.category==='machinery');
