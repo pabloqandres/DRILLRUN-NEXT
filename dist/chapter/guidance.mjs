@@ -1,4 +1,4 @@
-import {active as hsecActive,missionGoal} from '../hsec/state.mjs';
+import {active as hsecActive} from '../hsec/state.mjs';
 import {hsecIcon} from '../hsec/icons.mjs';
 import {ActionHalo,OBJECTIVE_COLORS} from './action-halo.mjs';
 import {icon} from './icons.mjs';
@@ -9,7 +9,9 @@ const names={bush:'clearBush',rock:'clearRock',crate:'clearCrate',metal:'clearMe
 const symbols={bush:'leaf',rock:'rock',crate:'inventory',metal:'metal'};
 // Every playable mission resolves to a real destination. Clearing has no mandatory order.
 export function missionDestination(s,previous=null,random=Math.random){
- if(hsecActive(s))return missionGoal(s);
+ // HSEC tasks are completed through the construction/HUD interface, not by standing on a floor marker.
+ // Never show an inert HSEC beacon (including when a later mission is already active).
+ if(hsecActive(s))return null;
  const mission=objective(s),entrance={id:'office-entry',x:CONFIG.officeSlot.access.x,z:CONFIG.officeSlot.access.z,y:.1,icon:'camp',label:'enter',mission};
  if(mission==='clear'){
   const remaining=CLEARABLES.filter(o=>!s.cleared.includes(o.id));if(!remaining.length)return null;
