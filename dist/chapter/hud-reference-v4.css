@@ -102,3 +102,92 @@
  #hud #joystick #joyKnob{width:36px!important;height:36px!important}
  #hud #objective:not(.collapsed){width:200px!important;max-height:120px!important}
 }
+
+/* HUD V5 — slender dock, four independent cardinal arrows.
+   Supersedes V4 typography and its incorrect pseudo-element arrow text. */
+#hud #bottomNav{
+ width:min(690px,calc(100vw - 270px))!important;
+ min-height:54px!important;height:54px!important;
+ border-radius:17px!important;border:1px solid #86b4caad!important;
+ background:linear-gradient(150deg,#142e43f0,#071e31f7)!important;
+ box-shadow:0 7px 16px #0008,inset 0 1px #ffffff23!important;
+}
+#hud #bottomNav button{
+ min-height:52px!important;height:52px!important;
+ min-width:0!important;padding:4px 8px!important;gap:3px!important;
+ font-size:clamp(8px,.76vw,11px)!important;letter-spacing:.15px!important;
+ font-weight:730!important;line-height:1!important;white-space:nowrap!important;
+}
+#hud #bottomNav button .uiIcon{
+ width:21px!important;height:21px!important;stroke-width:1.8!important;
+ filter:none!important;
+}
+#hud #bottomNav button:not(:first-child)::before{
+ top:19%!important;height:62%!important;background:#9fc0d34a!important;
+}
+#hud #bottomNav button.navActive{
+ border:1px solid #ffca4b!important;border-radius:15px!important;
+ background:linear-gradient(160deg,#765520e6,#3b3624eb)!important;
+ box-shadow:0 0 8px #ffc53b82,inset 0 0 7px #efbc3426!important;
+ transform:none!important;
+}
+#hud #bottomNav button.navActive .uiIcon{color:#ffd54e!important}
+#hud #bottomNav button span:last-child{display:block!important;max-width:100%!important;overflow:hidden!important;text-overflow:clip!important}
+#hud #joystick{
+ width:112px!important;height:112px!important;
+ left:max(17px,var(--safe-l))!important;bottom:max(18px,var(--safe-b))!important;
+ border:1.5px solid #d0e3ebac!important;
+ background:radial-gradient(circle at 50% 47%,#839ea51c,#19384c65 64%,#0b243896)!important;
+ box-shadow:inset 0 0 12px #bed8df28,0 4px 12px #0006!important;
+}
+#hud #joystick .joyCross{display:none!important}
+#hud #joystick::before,#hud #joystick::after,
+#hud #joystick .joyCross::before,#hud #joystick .joyCross::after{
+ content:none!important;display:none!important;
+}
+#hud #joystick .joyDirections{
+ display:block!important;position:absolute!important;inset:0!important;
+ pointer-events:none!important;z-index:1!important;
+}
+#hud #joystick .joyArrow{
+ position:absolute!important;width:10px!important;height:10px!important;
+ border-top:2px solid #e0e8edb8!important;border-right:2px solid #e0e8edb8!important;
+ display:block!important;box-sizing:border-box!important;
+ font-size:0!important;line-height:0!important;
+}
+#hud #joystick .joyUp{top:11px!important;left:50%!important;transform:translateX(-50%) rotate(-45deg)!important}
+#hud #joystick .joyRight{right:11px!important;top:50%!important;transform:translateY(-50%) rotate(45deg)!important}
+#hud #joystick .joyDown{bottom:11px!important;left:50%!important;transform:translateX(-50%) rotate(135deg)!important}
+#hud #joystick .joyLeft{left:11px!important;top:50%!important;transform:translateY(-50%) rotate(225deg)!important}
+#hud #joystick #joyKnob{
+ position:relative!important;z-index:2!important;
+ width:51px!important;height:51px!important;
+ border:1.5px solid #e9f1f5dc!important;
+ background:radial-gradient(circle at 40% 30%,#f5f5f5,#bbc5ca 70%,#84949c)!important;
+ box-shadow:0 3px 9px #0008,inset 0 2px 4px #ffffffb8!important;
+}
+@media(max-width:1050px),(max-height:600px){
+ #hud #bottomNav{width:min(580px,calc(100vw - 185px))!important;min-height:48px!important;height:48px!important;border-radius:15px!important}
+ #hud #bottomNav button{min-height:46px!important;height:46px!important;padding:3px 4px!important;gap:2px!important;font-size:8px!important}
+ #hud #bottomNav button .uiIcon{width:19px!important;height:19px!important}
+ #hud #bottomNav button.navActive{border-radius:13px!important}
+ #hud #joystick{width:94px!important;height:94px!important}
+ #hud #joystick #joyKnob{width:43px!important;height:43px!important}
+ #hud #joystick .joyArrow{width:8px!important;height:8px!important}
+ #hud #joystick .joyUp{top:9px!important}
+ #hud #joystick .joyDown{bottom:9px!important}
+ #hud #joystick .joyLeft{left:9px!important}
+ #hud #joystick .joyRight{right:9px!important}
+}
+@media(max-width:650px){
+ #hud #bottomNav{width:calc(100vw - 130px)!important;height:43px!important;min-height:43px!important;border-radius:12px!important}
+ #hud #bottomNav button{height:41px!important;min-height:41px!important;padding:3px 1px!important;font-size:6.5px!important}
+ #hud #bottomNav button .uiIcon{width:16px!important;height:16px!important}
+ #hud #joystick{width:74px!important;height:74px!important}
+ #hud #joystick #joyKnob{width:34px!important;height:34px!important}
+ #hud #joystick .joyArrow{width:6px!important;height:6px!important;border-width:1.5px!important}
+ #hud #joystick .joyUp{top:6px!important}
+ #hud #joystick .joyDown{bottom:6px!important}
+ #hud #joystick .joyLeft{left:6px!important}
+ #hud #joystick .joyRight{right:6px!important}
+}
