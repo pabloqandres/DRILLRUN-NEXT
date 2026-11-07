@@ -274,7 +274,7 @@ function renderM3Objectives(s,t,fmt,icon,cb){
  const phaseNames={briefing:'Briefing Inicial',setup:'Preparación',survey:'Estudio Geológico',equip:'Equipamiento',drilling:'Perforación Activa',delivery:'Entrega Final',complete:'¡Misión Completa!'};
  const phaseIcons={briefing:'messages',setup:'build',survey:'location',equip:'inventory',drilling:'drill',delivery:'check',complete:'check'};
  const objNames={prepareCompany:'Preparar la empresa',knowTerrain:'Conocer el terreno',equipOperation:'Equipar la operación',executeExploration:'Ejecutar exploración',deliverContract:'Entregar contrato'};
- const checkNames={workshopReady:'Taller operativo',hireAdmin:'Administrador contratado',requestAnalysis:'Solicitar análisis geológico',waitForReport:'Esperar informe',reviewReport:'Revisar informe',purchaseDrill:'Adquirir perforadora',hireDriller:'Contratar operador',orderTools:'Ordenar herramientas',receiveDelivery:'Recibir pedido',startDrilling:'Iniciar perforación',complete6Boreholes:'Completar 6 sondajes',completeBoreholes:'Completar 3 sondajes',validateMeters:'Validar metraje',submitContract:'Entregar al cliente'};
+ const checkNames={workshopReady:'Taller operativo',hireAdmin:'Administrador contratado',requestAnalysis:'Solicitar análisis geológico',waitForReport:'Esperar informe',reviewReport:'Revisar informe',purchaseDrill:'Adquirir perforadora',hireDriller:'Contratar operador',orderTools:'Ordenar herramientas',receiveDelivery:'Recibir pedido',startDrilling:'Iniciar perforación',completeBoreholes:'Completar 3 sondajes',validateMeters:'Validar metraje',submitContract:'Entregar al cliente'};
 
  // Total progress
  const totalChecks=objs.reduce((n,o)=>n+o.checks.length,0);
@@ -284,7 +284,7 @@ function renderM3Objectives(s,t,fmt,icon,cb){
  // Contract stats
  const cp=contractProgress(s);
  const meters=s.contract?Math.round(s.contract.metersCompleted):0;
- const totalMeters=s.contract?s.contract.totalMeters:180;
+ const totalMeters=s.contract?s.contract.totalMeters:CONTRACT_TEMPLATES[0].totalMeters;
 
  let html=`<div class="missionHeading"><span class="eyebrow">MISIÓN 3 · TU PRIMER CONTRATO</span><h3 style="font-size:22px;margin:6px 0 0">Exploración RC</h3><p style="font-size:10px;color:#a8b8b8;margin-top:6px">Completa 90 metros de perforación en 3 sondajes de exploración geológica.</p></div>`;
 
