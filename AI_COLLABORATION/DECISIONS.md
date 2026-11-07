@@ -105,3 +105,13 @@ The user explicitly directed ChatGPT to rebuild **everything visible in the game
 **Safety:** application logic, saved data/schema, Firebase, purchase/mission/economic calculations, interaction IDs, real colliders and roads unchanged. `dist/chapter/game.mjs` UI-only modification authorized. Any untested visual details remain subject to browser validation and later correction, not false claims of pixel-perfect concept parity.
 
 **Delivery report:** `AI_COLLABORATION/CHANGES/2026-11-06_full-visual-overhaul-v2.md`.
+
+## 2026-11-06 — Vehicle rail correction and visual-only Equipment card consolidation (User + ChatGPT)
+
+**User request:** Restore the left CATÁLOGO rail in Vehículos; use two distinct types of perforadoras in Equipment (exploration/sondaje RC vs production DTH), with short, attractive names. Research real-world 3D reference imagery.
+
+**Scoped shared-file exception:** ChatGPT may adjust the display-only mapping and visibility of rig cards in `dist/chapter/construction-catalog.mjs` without changing drill definitions, product pricing, purchase permission, missions, delivery, contract, save data or state. Existing high-capacity RC owners/pending orders retain visibility via the RC card slot. Other agents should not replace these display names with internal translation keys.
+
+**Brand protection:** In-game machines remain generic unbranded third-party rigs. Manufacturer photos are external modeling references only; DRILLCO® is not represented as selling drill rigs. Equipment nicknames PIONERO RC and TITÁN DTH are fictional interface names.
+
+**Release:** Feature branch and PR only, production merge requires explicit approval. New GLBs and drilling-data realism review are separate tasks; never infer that DTH production blast holes have an 800 m real-world specification.

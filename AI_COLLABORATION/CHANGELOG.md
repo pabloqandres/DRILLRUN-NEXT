@@ -1,5 +1,12 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-06 — Vehículos identity rail + two-machine Equipment presentation
+
+- Vehicles-specific CSS override formerly replaced the Catalog identity-rail 144px left inset with 14px, visually covering the side brand; preserve 144px and 101px in compact media queries, leaving the larger DrillTruck card intact.
+- Equipment Catalog now presents two primary machines: **PIONERO RC** (exploration) and **TITÁN DTH** (production), without exposing internal camelCase keys. Existing RC high-capacity saves/orders show **PIONERO RC PRO** in the same RC slot.
+- RC and DTH catalog data definitions, economics, prices, purchase/management callbacks, inventory, missions and saves are unchanged. External machine references are for 3D concept modeling only, never third-party branding inside the game.
+- Focused regression and responsive QA to be reported in the PR. See `CHANGES/2026-11-06_catalog-equipment-rigs-layout.md`.
+
 ## 2026-11-06 — Category audit 01: DrillTruck genuine 3D asset image
 
 - **Root cause fixed:** Catalog thumbnail callback previously ignored vehicle products, so DrillTruck card and technical sheet always showed icon fallback despite its 1.7 MB GLB already being in assets.

@@ -57,7 +57,8 @@
 #hud header #settingsButton .uiIcon{color:#ffde9c!important}
 /* Only the requested vehicle category. Bigger product image with breathing room. */
 #builderPanel.catalogTray[data-category="vehicles"]:not(.catalogCollapsed) .constructionRail{
- padding:10px 14px!important;
+ /* Retain the 129px identity rail; the former 14px left padding overlapped CATÁLOGO. */
+ padding:10px 14px 10px 144px!important;
 }
 #builderPanel.catalogTray[data-category="vehicles"] .catalogProduct{
  flex:0 0 clamp(204px,18vw,270px)!important;
@@ -153,6 +154,8 @@
  color:#a4bbca;font-size:9px;text-align:right;
 }
 @media(max-width:900px),(max-height:510px){
+ /* Compact brand is 92px: align vehicle cards with the other categories. */
+ #builderPanel.catalogTray[data-category="vehicles"]:not(.catalogCollapsed) .constructionRail{padding-left:101px!important}
  #hud header .topActions{gap:5px!important}
  #hud header .topActions .iconButton{
   flex-basis:37px!important;width:37px!important;min-width:37px!important;
