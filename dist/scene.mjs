@@ -197,7 +197,7 @@ for(let x=-3.2;x<3.5;x+=.5){this.box(g,.025,3.6,.02,x,2.2,-2.8,0xb7b7a7);}this.s
     this.walkSurfaces=(this.walkSurfaces||[]).filter(v=>!(v.z===-9.3&&v.x>=-12&&v.x<3));
     this.labels=this.labels.filter(l=>l.id!=='workshop');
     this.workshopModel=null;this.workshopPad=null;this._workshopExt=null;this._workshopScaffold=null;
-    this._workshopBuilt=false;this._workshopKey=null;this._workshopRoofUpgrade=null;this._wsExtWalk=false;
+    this._workshopBuilt=false;this._workshopKey=null;this._workshopRoofUpgrade=null;this._wsExtWalk=false;this._wsExtPad=false;this._wsExtPadGroup=null;
    }
    return;
   }
@@ -217,7 +217,7 @@ for(let x=-3.2;x<3.5;x+=.5){this.box(g,.025,3.6,.02,x,2.2,-2.8,0xb7b7a7);}this.s
 
    // === EXTENSION BAY (3.5m wider) ===
    // Ground pad (only create once to avoid duplication)
-   if(!this._wsExtPad){this.pad(-7.6+5.35,-9.3,4.2,6.5);this._wsExtPad=true;}
+   if(!this._wsExtPad){this._wsExtPadGroup=this.pad(-7.6+5.35,-9.3,4.2,6.5);this._wsExtPad=true;}
    // Concrete floor with thickness
    this.box(g,3.5,.3,5.4,5.35,.3,0,C.steel);
    this.box(g,3.5,.06,5.4,5.35,.46,0,0xb5b8a8); // floor finish
