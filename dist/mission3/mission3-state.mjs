@@ -45,7 +45,7 @@ export function mission3Objectives(s){
  const cp=contractProgress(s);
  return [
   {id:1,nameKey:'prepareCompany',checks:[
-   {id:'workshop',done:!!shed,labelKey:'workshopReady'},
+   {id:'workshop',done:!!shed&&!!s.workshop&&s.workshop.status!=='building',labelKey:'workshopReady'},
    {id:'admin',done:hasRole(s,'admin'),labelKey:'hireAdmin'}
   ]},
   {id:2,nameKey:'knowTerrain',checks:[

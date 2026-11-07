@@ -72,6 +72,7 @@ export class BuilderUI{
    },
    onPurchase:p=>{
     if(p.kind==='module'){const current=this.state(),m=moduleDefinition('office-l1');if(!moduleAvailability(current,m)&&landReady(current)&&current.cash>=m.price)this.onConfirm(m,this.zone);return;}
+    if(p.kind==='workshop')return this.onCatalogAction?.('buildWorkshop');
     if(p.kind==='drill')return this.onCatalogAction?.('buyDrill',p.model.id);
     if(p.kind==='dthDrill')return this.onCatalogAction?.('buyDthDrill',p.model.id);
     if(p.kind==='vehicle')return this.onCatalogAction?.('buyTruck',p.model.id);

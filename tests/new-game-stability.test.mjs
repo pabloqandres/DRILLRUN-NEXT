@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {newGame,restore,startOffice,tick} from '../dist/chapter/state.mjs';
+import {WORKSHOP_L1_COST,canBuildWorkshop,buildWorkshop,finishWorkshopConstruction,workshopLevel,workshopCapacity,workshopFree} from '../dist/mission3/inventory.mjs';
+import {catalogProducts} from '../dist/chapter/construction-catalog.mjs';
 import {CLEARABLES,INTRO_VARIANTS,SHARED_INTRO_VIDEO} from '../dist/chapter/config.mjs';
 import {startModule,accelerate,useOfficeComputer} from '../dist/chapter/state.mjs';
 import {ensureHsec,tickHsec,buildAsset,evaluation} from '../dist/hsec/state.mjs';
@@ -73,6 +75,7 @@ test('old consumed machine orders can restore a missing paid rig without chargin
 test('PUMA DTH consumables use the same dispatched Casa Matriz pipeline',()=>{
  const s=newGame('es','operator01',at);s.cash=20000;
  s.drill={id:'rig_rc_compact'};
+ s.workshop={level:1,status:'built'};
  placeOrder(s,[{type:'hammer',model:'puma-dth-6',qty:1,unitPrice:6500}],at);
  assert.equal(s.toolInventory.length,0);
  tickDeliveries(s,at+121000);
@@ -83,7 +86,7 @@ test('PUMA DTH consumables use the same dispatched Casa Matriz pipeline',()=>{
 
 test('first automated production no longer requires converting six zones',()=>{
  const s=newGame('es','operator01',at);
- s.workshop.level=2;
+ s.workshop={level:2,status:'built'};
  s.mission4={phase:'production',zones:[{id:'BH-01',status:'producing'}],productionCycles:1,productionDrill:{id:'rig_dth_production',installedHammer:'x',installedBit:'y',assignedZone:'BH-01'},drillTruck:{id:'drilltruck-01',assignedZone:'BH-01'}};
  const last=mission4Objectives(s).at(-1);
  assert.equal(last.checks.length,2);
@@ -108,6 +111,7 @@ test('All selectable avatars retain the single approved Avatar 1 intro film',()=
 
 test('Casa Matriz reserves workshop capacity before order delivery',()=>{
  const s=newGame('es','operator01',at);s.cash=50000;s.drill={id:'rig_rc_compact'};
+ s.workshop={level:1,status:'built'};
  placeOrder(s,[{type:'bit',model:'dome-4',qty:8,unitPrice:450}],at);
  assert.throws(()=>placeOrder(s,[{type:'bit',model:'dome-4',qty:1,unitPrice:450}],at+1),/noCapacity/);
  tickDeliveries(s,at+121000);
@@ -117,6 +121,7 @@ test('Casa Matriz reserves workshop capacity before order delivery',()=>{
 
 test('Casa Matriz defers delivery if workshop storage is full',()=>{
  const s=newGame('es','operator01',at);s.cash=50000;s.drill={id:'rig_rc_compact'};
+ s.workshop={level:1,status:'built'};
  placeOrder(s,[{type:'bit',model:'dome-4',qty:1,unitPrice:450}],at);
  s.toolInventory=Array.from({length:8},(_,i)=>({id:'legacy-'+i,status:'new'}));
  tickDeliveries(s,at+121000);
@@ -147,4 +152,49 @@ test('HSEC score alone cannot complete an unsafe faena',()=>{
  assert(e.light>=.8,'La red debe estar suficientemente iluminada');
  tickHsec(s,1);
  assert(s.hsec.completedAt);
+});
+
+test('Brand-new game has no workshop building or storage capacity',()=>{
+ const s=newGame('es','operator01',at);
+ assert.equal(s.workshop,null);
+ assert.equal(workshopLevel(s),0);
+ assert.equal(workshopCapacity(s),0);
+ assert.equal(workshopFree(s),0);
+ assert.equal(canBuildWorkshop(s),'missionNotActive');
+ const loaded=restore(JSON.parse(JSON.stringify(s)),at+1000);
+ assert.equal(loaded.workshop,null);
+});
+test('L1 workshop can be bought once in M3 and only appears after 30-second construction',()=>{
+ const s=newGame('es','operator01',at);
+ s.chapterCompletedAt=at;s.office={status:'built',level:2};
+ s.hsec={completedAt:at,assets:[],time:0};
+ s.mission3={phase:'setup',currentObjective:1};s.cash=30000;
+ assert.equal(canBuildWorkshop(s),null);
+ const before=s.cash;
+ buildWorkshop(s,at);
+ assert.equal(s.cash,before-WORKSHOP_L1_COST);
+ assert.equal(workshopCapacity(s),0);
+ assert.equal(finishWorkshopConstruction(s,at+29000),false);
+ assert.equal(finishWorkshopConstruction(s,at+30001),true);
+ assert.equal(workshopCapacity(s),8);
+ assert.equal(workshopLevel(s),1);
+ assert.equal(canBuildWorkshop(s),'alreadyBuilt');
+ assert.equal(s.ledger.filter(l=>l.key==='workshopBuild').length,1);
+ const loaded=restore(JSON.parse(JSON.stringify(s)),at+32000);
+ assert.equal(loaded.workshop.status,'built');
+ assert.equal(workshopLevel(loaded),1);
+});
+test('An existing M1 save loses the inherited phantom workshop but preserves game progress',()=>{
+ const early=newGame('es','operator01',at);
+ early.workshop={level:1};early.cleared=['rock1'];early.cash=3456;
+ const loaded=restore(JSON.parse(JSON.stringify(early)),at+5000);
+ assert.equal(loaded.workshop,null);
+ assert.equal(loaded.cash,3456);
+ assert.deepEqual(loaded.cleared,['rock1'].filter(id=>CLEARABLES.some(x=>x.id===id)));
+});
+test('Existing saves with workshop level 1 keep their property',()=>{
+ const old=newGame('es','operator01',at);old.workshop={level:1};old.chapterCompletedAt=at;
+ const loaded=restore(JSON.parse(JSON.stringify(old)),at+1000);
+ assert.equal(workshopLevel(loaded),1);
+ assert.equal(workshopCapacity(loaded),8);
 });

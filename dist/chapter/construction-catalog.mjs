@@ -1,7 +1,7 @@
 import {MODULES,moduleDefinition,BUILD_ZONES,pendingConstruction} from './module-catalog.mjs';
 import {constructionSeconds,landReady} from './state.mjs';
 import {HSEC_ASSETS,HSEC_CATEGORIES} from '../hsec/catalog.mjs';
-import {workshopLevel,workshopUpgradeJob,WORKSHOP_LEVELS,canUpgradeWorkshop} from '../mission3/inventory.mjs';
+import {workshopLevel,workshopUpgradeJob,WORKSHOP_LEVELS,canUpgradeWorkshop,canBuildWorkshop,WORKSHOP_L1_COST,WORKSHOP_L1_SECONDS} from '../mission3/inventory.mjs';
 import {DRILLS,canPurchaseDrill} from '../mission3/drills.mjs';
 import {ROLES,personnelByRole,canHire} from '../mission3/personnel.mjs';
 import {DTH_DRILLS,canPurchaseDthDrill} from '../mission4/drills-dth.mjs';
@@ -36,10 +36,10 @@ export function catalogProducts(s,t){
  const officeStatus=job?'building':installed?'installed':!landReady(s)?'locked':'available';
  const products=[{id:'office',kind:'module',category:'infrastructure',title:t(module.nameKey).replace(/\s*[·—-]\s*(Nivel|Level|Nível|Livello)\s*\d+$/i,''),level:module.level,description:t(module.descriptionKey),benefit:t(module.benefitKey),price:installed?null:module.price,seconds:installed?null:constructionSeconds(s,module),w:module.width,d:module.depth,h:module.height,capacity:module.capacity+' '+t(module.capacityKey),status:officeStatus,reason:job?c.constructionPending:!installed&&!landReady(s)?c.clearPlot:'',model:module,zone:BUILD_ZONES[0].id,canStart:officeStatus==='available',action:installed||job?'manage':'buy'}];
  // Workshop entry in catalog
- const wsLvl=workshopLevel(s),wsJob=workshopUpgradeJob(s),wsDef=WORKSHOP_LEVELS.find(w=>w.level===wsLvl),wsNext=WORKSHOP_LEVELS.find(w=>w.level===wsLvl+1);
- const wsStatus=wsJob?'building':'installed';
+ const wsLvl=workshopLevel(s),wsBuilding=s.workshop?.status==='building',wsJob=workshopUpgradeJob(s),wsDef=WORKSHOP_LEVELS.find(w=>w.level===wsLvl),wsNext=WORKSHOP_LEVELS.find(w=>w.level===wsLvl+1);
+ const wsStatus=wsBuilding||wsJob?'building':wsLvl?'installed':canBuildWorkshop(s)===null?'available':'locked';
  const wsDescs={1:'Almacenamiento de herramientas y mantenimiento básico',2:'Mayor capacidad + estacionamiento DrillTruck',3:'Capacidad industrial para operaciones a gran escala'};
- products.push({id:'workshop',kind:'workshop',category:'infrastructure',title:'Taller',level:wsLvl,description:wsDescs[wsLvl]||'',benefit:`Capacidad: ${wsDef?.capacity||8} herramientas`,price:wsNext?wsNext.upgradeCost:null,seconds:wsNext?wsNext.constructionSeconds:null,w:7.2,d:5.4,h:4.5,capacity:(wsDef?.capacity||8)+' herramientas',status:wsStatus,reason:wsJob?c.constructionPending:'',model:{id:'workshop-l'+wsLvl,level:wsLvl,nameKey:'workshop'},canStart:false,action:'manage',insufficient:wsNext?s.cash<wsNext.upgradeCost:false});
+ products.push({id:'workshop',kind:'workshop',category:'infrastructure',title:'Taller',level:wsLvl,description:wsDescs[wsLvl]||'',benefit:`Capacidad: ${wsDef?.capacity||8} herramientas`,price:wsLvl?(wsNext?wsNext.upgradeCost:null):WORKSHOP_L1_COST,seconds:wsLvl?(wsNext?wsNext.constructionSeconds:null):WORKSHOP_L1_SECONDS,w:7.2,d:5.4,h:4.5,capacity:(wsDef?.capacity||8)+' herramientas',status:wsStatus,reason:wsBuilding||wsJob?c.constructionPending:!wsLvl&&canBuildWorkshop(s)?c.later:'',model:{id:'workshop-l'+(wsLvl||1),level:wsLvl||1,nameKey:'workshop'},canStart:wsStatus==='available',action:wsLvl||wsBuilding?'manage':'buy',insufficient:!wsLvl?s.cash<WORKSHOP_L1_COST:wsNext?s.cash<wsNext.upgradeCost:false});
  // HSEC assets
  for(const d of HSEC_ASSETS){
   const existing=d.id==='shed'?s.hsec?.assets?.find(a=>a.type===d.id):null;
