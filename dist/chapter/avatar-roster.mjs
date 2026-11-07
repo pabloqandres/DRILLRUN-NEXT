@@ -69,7 +69,31 @@ export class AvatarRoster{
     if(lookup.has(parent))return lookup.get(parent);
    }
   }
-  return null;
+  // Skinned GLB meshes can occasionally miss raycast hits, especially during
+  // animated poses. Use a tight camera-projected body hit area as touch fallback.
+  // Body-space coordinates are projected with the actual selector camera.
+  let closest=null,score=Infinity;
+  for(const a of AVATARS){
+   const e=this.entries.get(a.id);
+   if(!e?.root?.visible)continue;
+   const height=e.definition?.height||1.8;
+   const ground=new T.Vector3(0,0,0),head=new T.Vector3(0,height,0);
+   e.root.localToWorld(ground);e.root.localToWorld(head);
+   ground.project(this.world.camera);head.project(this.world.camera);
+   if(ground.z>=1||head.z>=1)continue;
+   const cx=rect.left+(ground.x+head.x+2)*rect.width/4;
+   const top=rect.top+(1-head.y)*rect.height/2;
+   const bottom=rect.top+(1-ground.y)*rect.height/2;
+   const bodyHeight=Math.abs(bottom-top);
+   if(bodyHeight<20)continue;
+   const hw=Math.max(20,Math.min(65,bodyHeight*.20));
+   const cy=(top+bottom)/2;
+   const dx=Math.abs(clientX-cx),dy=Math.abs(clientY-cy);
+   if(dx>hw||dy>bodyHeight*.55)continue;
+   const distance=(dx/hw)**2+(dy/(bodyHeight*.55))**2;
+   if(distance<score){score=distance;closest=a.id;}
+  }
+  return closest;
  }
  portrait(id){const e=this.entries.get(id);if(!e)return '';if(!e.portrait){const host=document.createElement('span');renderPlayerPortrait({...this.world,player:e.root,worker:e.rig},host,e.definition.height);e.portrait=host.innerHTML;}return e.portrait;}
  updateSelector(show,selected,state,dt,time){
