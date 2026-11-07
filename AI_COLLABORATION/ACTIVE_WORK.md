@@ -4,11 +4,11 @@
 
 ## Currently Active
 
-- **ChatGPT — Cinematic World Art V4:** new Three.js mineral concrete textures, ambient grounding shadows and dusk lighting in real office/workshop, level-aware office roof, richer atmosphere and restrained desert scatter. Branch `chatgpt/cinematic-world-art-v4`, pending PR and production verification. Scope is visual-only, user saved state untouched.
+- **ChatGPT — Category Audit 01 · Vehículos/DrillTruck:** canonical GLB snapshot shared by Catalog vehicle card, technical sheet, M4 Phone; visually balanced icons and category layout. Branch `chatgpt/drilltruck-real-glb-catalog-audit`, code complete pending PR/production and browser screenshot QA. No state/economy/model behavior changes.
 
 ## Files in Progress
 
-- `dist/graphics/world-finish.mjs`, `dist/scene.mjs`, `dist/assets3d/office-shell.mjs`, `dist/chapter/product-preview.mjs`, `dist/graphics/desert.mjs`, `dist/graphics/atmosphere.mjs`, `dist/graphics/quality.mjs`, `dist/hsec/world.mjs`, regression tests. Do not alter purchases/colliders/save format.
+- Audit scope: `dist/chapter/drilltruck-image.mjs`, `dist/chapter/builder-ui.mjs`, `dist/chapter/catalog-view.mjs`, `dist/chapter/phone-ui.mjs`, `dist/mission4/phone-apps.mjs`, `dist/chapter/drilltruck-catalog-audit.css`, `dist/index.html`, tests/documentation. Do not touch truck purchase, asset geometry or save data.
 
 ## Recently Completed
 
