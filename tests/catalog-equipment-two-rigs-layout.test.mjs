@@ -23,3 +23,16 @@ test('equipment card names are player-readable, and only two active rig types sh
  assert(rigs.includes("id:'rig_rc_compact'"));
  assert(dth.includes("id:'rig_dth_production'"));
 });
+
+test('runtime catalog always exposes two rig cards and preserves advanced RC owners/orders',async()=>{
+ const {newGame}=await import('../dist/chapter/state.mjs');
+ const {catalogProducts}=await import('../dist/chapter/construction-catalog.mjs');
+ const s=newGame('es');
+ const labels=()=>catalogProducts(s,v=>v).filter(p=>p.category==='equipment').map(p=>p.title);
+ assert.deepEqual(labels(),['PIONERO RC','TITÁN DTH']);
+ s.drill={id:'rig_rc_advanced'};
+ assert.deepEqual(labels(),['PIONERO RC PRO','TITÁN DTH']);
+ s.drill=null;
+ s.orders=[{status:'dispatched',items:[{category:'machinery',type:'drill',model:'rig_rc_advanced'}]}];
+ assert.deepEqual(labels(),['PIONERO RC PRO','TITÁN DTH']);
+});

@@ -15,4 +15,4 @@ Use Explorac 235 as a geometry reference for exploration RC, and SmartROC D65 fo
 See `design/equipment-rig-reference-brief.md`.
 
 ## Safety/QA
-Tests and browser layout checks are to be recorded after execution; do not merge or deploy without approval.
+JavaScript syntax check and 2 initial focused tests PASSED. Runtime catalog probe: new game => PIONERO RC / TITÁN DTH; advanced owned and pending advanced order => PIONERO RC PRO / TITÁN DTH. Browser CSS computed geometry (real stylesheet cascade, mock Catalog DOM): at 1440 × 900, both categories start products at x=145px, identity rail ends x=130px and vehicle left padding is 144px. At 800 × 480 and 375 × 700, both start at x=102px, brand ends x=93px, vehicle left padding is 101px. Full interactive gameplay/visual QA on user device and full suite not asserted. No merge/deploy without approval.

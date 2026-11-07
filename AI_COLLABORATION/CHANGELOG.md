@@ -5,7 +5,7 @@
 - Vehicles-specific CSS override formerly replaced the Catalog identity-rail 144px left inset with 14px, visually covering the side brand; preserve 144px and 101px in compact media queries, leaving the larger DrillTruck card intact.
 - Equipment Catalog now presents two primary machines: **PIONERO RC** (exploration) and **TITÁN DTH** (production), without exposing internal camelCase keys. Existing RC high-capacity saves/orders show **PIONERO RC PRO** in the same RC slot.
 - RC and DTH catalog data definitions, economics, prices, purchase/management callbacks, inventory, missions and saves are unchanged. External machine references are for 3D concept modeling only, never third-party branding inside the game.
-- Focused regression and responsive QA to be reported in the PR. See `CHANGES/2026-11-06_catalog-equipment-rigs-layout.md`.
+- Focused regression tests passed; runtime data projection confirmed 2 equipment cards in new and advanced-owner/order states. Browser computed rail positioning matched Equipos at 1440×900, 800×480 and 375×700 (no overlap). Visual testing on real game still pending. See `CHANGES/2026-11-06_catalog-equipment-rigs-layout.md`.
 
 ## 2026-11-06 — Category audit 01: DrillTruck genuine 3D asset image
 
