@@ -1,6 +1,7 @@
 import * as T from '../vendor/three.module.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {OFFICE,officeBlocked,insideOffice,officeGround,doorShape,circleHitsRect} from './office-layout.mjs';
+import {softContactShadow} from '../graphics/world-finish.mjs';
 // Preserve the originally approved PUMA burgundy office, with upgraded technical detailing.
 // Architectural redesigns beyond this reversible palette restoration require visual approval.
 const P={red:0x701e30,edge:0x461b28,panel:0xe6d5bc,trim:0xc4b6a1,inside:0xeee4d2,steel:0x68747b,dark:0x313e45,yellow:0xf4ba28,bolt:0xb9bfc0,floor:0x9b9c91};
@@ -14,6 +15,9 @@ function batch(group){
 }
 export function createOffice(w){
  const root=new T.Group();root.name='DR-BLD-001 · Oficina nivel 1';root.userData={kind:'office',...OFFICE,stage:'architecture',furniture:[]};
+ // Soft ambient contact is a real, translucent ground mesh, not a decal
+ // outside of the model. The same detail appears in the game and Catálogo.
+ softContactShadow(w,root,7.3,3.7,.018);
  const part=name=>{const g=new T.Group();g.name=name;root.add(g);return g;};
  const chassis=part('01 · Chasis y piso'),frame=part('02 · Estructura burdeos'),roof=part('03 · Techo desmontable');
  const elevations={front:part('04 · Acceso'),back:part('05 · Panel posterior'),west:part('06 · Servicios'),east:part('07 · Lateral oficina')};
@@ -82,7 +86,8 @@ export function createOffice(w){
  // Architecture V2: realistic roof protection, solar arrays and rooftop services.
  // These are only render meshes; the original office footprint, entry collider,
  // liftable roof group, interior slots and animations are never modified.
- const design=new T.Group();design.name='11 · Industrial finishes and roof equipment';roof.add(design);
+ const design=new T.Group();design.name='11 · Industrial finishes and roof equipment';design.visible=false;roof.add(design);
+ root.userData.premiumRoof=design; // Shown by World.update only after office Lv.2.
  for(const side of[-1,1])for(let j=0;j<3;j++){
   const x=side*1.88,z=-.73+j*.72;
   bevel(design,1.14,.045,.52,x,3.03,z,P.dark);
@@ -107,6 +112,10 @@ export function createOffice(w){
  for(const x of[-1.35,1.0]){bevel(roof,.86,.035,.28,x,2.767,0,P.trim);const diffuser=box(roof,.76,.012,.22,x,2.743,0,0xffe5b3);diffuser.material=new T.MeshBasicMaterial({color:0xffe5b3});}
  bevel(access,.48,.15,.11,-1.99,2.69,1.32,P.dark);const led=box(access,.39,.083,.014,-1.99,2.69,1.383,0xffdf99);led.material=new T.MeshBasicMaterial({color:0xffdf99});
  const light=new T.PointLight(0xffd29b,1.3,3.2,2);light.position.set(-1.2,2.35,.3);root.add(light);
+ // Physical exterior wash under the office fascia, especially readable at dusk.
+ const entryGlow=new T.PointLight(0xffdfb2,.55,5.2,2);
+ entryGlow.position.set(-1.95,2.40,1.65);entryGlow.castShadow=false;
+ entryGlow.name='Oficina · warm porch lighting';root.add(entryGlow);
 
  // Grated treads, stringers, yellow nosings, rail posts and a curved continuous handrail.
  for(const [top,z,depth]of[[.42,1.53,.49],[.32,1.925,.31],[.22,2.235,.31],[.12,2.51,.24]]){
