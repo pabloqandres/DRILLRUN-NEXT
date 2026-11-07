@@ -183,8 +183,16 @@ test('L1 workshop can be bought once in M3 and only appears after 30-second cons
  assert.equal(loaded.workshop.status,'built');
  assert.equal(workshopLevel(loaded),1);
 });
+test('An existing M1 save loses the inherited phantom workshop but preserves game progress',()=>{
+ const early=newGame('es','operator01',at);
+ early.workshop={level:1};early.cleared=['rock1'];early.cash=3456;
+ const loaded=restore(JSON.parse(JSON.stringify(early)),at+5000);
+ assert.equal(loaded.workshop,null);
+ assert.equal(loaded.cash,3456);
+ assert.deepEqual(loaded.cleared,['rock1'].filter(id=>CLEARABLES.some(x=>x.id===id)));
+});
 test('Existing saves with workshop level 1 keep their property',()=>{
- const old=newGame('es','operator01',at);old.workshop={level:1};
+ const old=newGame('es','operator01',at);old.workshop={level:1};old.chapterCompletedAt=at;
  const loaded=restore(JSON.parse(JSON.stringify(old)),at+1000);
  assert.equal(workshopLevel(loaded),1);
  assert.equal(workshopCapacity(loaded),8);
