@@ -49,6 +49,49 @@ export function createDesert(w){
  // Non-interactive geological scatter stays outside the usable parcel.
  const rocks=new T.InstancedMesh(new T.IcosahedronGeometry(.12,1),new T.MeshStandardMaterial({color:0x9c8064,roughness:1}),400),dummy=new T.Object3D();let ri=0;
  for(let i=0;ri<400&&i<2000;i++){const x=(hash(i,12)-.5)*75,z=(hash(i,46)-.5)*60;if(x>-14&&x<17&&z>-14&&z<10)continue;dummy.position.set(x,reliefHeight(x,z)+.015,z);dummy.rotation.set(hash(i,4),hash(i,9)*6,hash(i,5));dummy.scale.set(.35+hash(i,6)*2,.25,.35+hash(i,7));dummy.updateMatrix();rocks.setMatrixAt(ri,dummy.matrix);ri++;}rocks.count=ri;rocks.receiveShadow=true;group.add(rocks);
+ // V3 sediment dressing: deterministic, low-poly stones and windrows on the
+ // outer Atacama rim. Instanced meshes make this cheap; no gameplay colliders.
+ const perimeter=new T.InstancedMesh(
+  new T.DodecahedronGeometry(.18,0),
+  new T.MeshStandardMaterial({color:0xffffff,roughness:1,flatShading:true}),
+  260
+ );
+ perimeter.name='Atacama · alluvial stone scatter';
+ const palette=[0xae8c70,0xc2a084,0x957e6e,0xb89a79,0x82786f];
+ let placed=0;
+ for(let i=0;i<1800&&placed<260;i++){
+  const x=(hash(i,107)-.5)*67,z=(hash(i,139)-.5)*52;
+  if(x>-17.5&&x<20&&z>-16&&z<12)continue;
+  const size=.5+hash(i,113)*2,flat=.19+hash(i,117)*.42;
+  dummy.position.set(x,reliefHeight(x,z)+.04,z);
+  dummy.rotation.set(hash(i,181)*.3,hash(i,191)*6.28,hash(i,199)*.22);
+  dummy.scale.set(size,size*flat,size*(.7+hash(i,211)*.6));
+  dummy.updateMatrix();perimeter.setMatrixAt(placed,dummy.matrix);
+  perimeter.setColorAt(placed,new T.Color(palette[Math.floor(hash(i,163)*palette.length)]));
+  placed++;
+ }
+ perimeter.count=placed;perimeter.receiveShadow=true;perimeter.castShadow=false;
+ perimeter.instanceMatrix.needsUpdate=true;
+ if(perimeter.instanceColor)perimeter.instanceColor.needsUpdate=true;
+ group.add(perimeter);
+ const windrows=new T.InstancedMesh(
+  new T.SphereGeometry(.5,8,4),
+  new T.MeshStandardMaterial({color:0xc0a181,roughness:1,flatShading:true}),
+  48
+ );
+ windrows.name='Atacama · wind-deposited silt';
+ let dunes=0;
+ for(let i=0;i<170&&dunes<48;i++){
+  const a=hash(i,333)*Math.PI*2,radius=27+hash(i,337)*10;
+  const x=Math.cos(a)*radius+2,z=Math.sin(a)*radius*.78-1.5;
+  if(x>-17.5&&x<20&&z>-16&&z<12)continue;
+  dummy.position.set(x,reliefHeight(x,z)-.09,z);
+  dummy.rotation.set(0,a+.55,0);
+  dummy.scale.set(1.6+hash(i,331)*3,.17+hash(i,349)*.16,.7+hash(i,353)*1.25);
+  dummy.updateMatrix();windrows.setMatrixAt(dunes,dummy.matrix);dunes++;
+ }
+ windrows.count=dunes;windrows.receiveShadow=true;windrows.castShadow=false;
+ windrows.instanceMatrix.needsUpdate=true;group.add(windrows);
  w.scene.add(group);w.premiumTerrain=group;
  // Soft contact colour at the base of each existing clearable is supplied by its own mesh.
  return group;

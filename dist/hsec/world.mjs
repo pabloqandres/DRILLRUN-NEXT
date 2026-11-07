@@ -242,7 +242,23 @@ export class HsecWorld{
    ctx.lineWidth=tw(d.w*.35);ctx.globalAlpha=.15;
    ctx.strokeStyle=d.id==='vehicle'?'#6f7a7b':'#cad0c5';
    tracePath(ctx,pts);ctx.stroke();ctx.globalAlpha=1;
-   // 5) Center dashed line
+   // V3 pavement: wheel-wear strips are generated from the actual road
+   // centerline, so their width and direction follow every corner exactly.
+   // This is decal-only; the actual collision/routing network is unchanged.
+   if(d.id==='vehicle'){
+    ctx.setLineDash([]);ctx.strokeStyle='rgba(33,43,49,.22)';
+    ctx.lineWidth=tw(.105);ctx.lineCap='round';
+    for(const offset of[-d.w*.24,d.w*.24])for(let k=1;k<pts.length;k++){
+     const p=pts[k-1],q=pts[k],dx=q.x-p.x,dz=q.z-p.z,len=Math.hypot(dx,dz);
+     if(len<.001)continue;
+     const nx=-dz/len,nz=dx/len;
+     ctx.beginPath();
+     ctx.moveTo(tx(p.x+nx*offset),tz(p.z+nz*offset));
+     ctx.lineTo(tx(q.x+nx*offset),tz(q.z+nz*offset));
+     ctx.stroke();
+    }
+   }
+   // 5) Contrasting dashed operational centerline.
    ctx.setLineDash([tw(.45),tw(.45)]);ctx.lineWidth=tw(.06);
    ctx.strokeStyle=d.id==='vehicle'?'#f0c46b':'#e8efdf';
    tracePath(ctx,pts);ctx.stroke();
@@ -263,7 +279,10 @@ export class HsecWorld{
    ctx.restore();}
   // Grain noise for texture over painted areas
   const imageData=ctx.getImageData(0,0,W,H),px=imageData.data;
-  for(let i=0;i<px.length;i+=4){if(px[i+3]<10)continue;const g=(Math.random()-.5)*10;px[i]+=g;px[i+1]+=g;px[i+2]+=g;}
+  for(let i=0;i<px.length;i+=4){if(px[i+3]<10)continue;// Stable pseudo-grain prevents roads flickering whenever HSEC redraws.
+   const grain=((Math.sin(i*.000041+73.1)*43758.5453)%1);
+   const g=(grain-Math.floor(grain)-.5)*10;
+   px[i]+=g;px[i+1]+=g;px[i+2]+=g;}
   ctx.putImageData(imageData,0,0);
   this.roadTex.needsUpdate=true;this.w.renderer.staticFrame=null;}
  setDraft(draft){if(JSON.stringify(draft)===this.draftKey)return;this.draftKey=JSON.stringify(draft);releaseModel(this.ghost);this.ghost=null;for(const child of [...this.coverage.children]){child.material?.dispose();child.geometry?.dispose();child.removeFromParent();}this.draftAnims=[];this.draft=draft;if(!draft)return;
