@@ -2,6 +2,13 @@ import {hsecSymbol} from '../hsec/icons.mjs';
 // DRILL RUN visual iconography V3: one consistent 24px, rounded-line pictogram set.
 // Keep all keys, signatures and semantics. No third-party font/assets or scripts.
 const paths={
+ "dock-catalog":"<path d=\"m12 2 8.5 5-8.5 5L3.5 7 12 2Z\"/><path d=\"M3.5 7v9.5L12 22l8.5-5.5V7M12 12v10\"/><path d=\"m8 12 3 3 5-5\"/>",
+ "dock-contract":"<rect x=\"5.5\" y=\"4\" width=\"13\" height=\"18\" rx=\"1.5\"/><path d=\"M9 4V2h6v2M9 10h6M9 14h6M9 18h4\"/>",
+ "dock-equipment":"<path d=\"M3 18h18M5 18v-5l3-5h8l3 5v5M8 8V5.5h8V8M8 13h8M9 18v3m6-3v3\"/><path d=\"M12 2v3\"/>",
+ "dock-personnel":"<circle cx=\"9\" cy=\"7\" r=\"3\"/><path d=\"M2.5 20v-2.5c0-3.5 2.7-5.5 6.5-5.5s6.5 2 6.5 5.5V20H2.5Z\"/><circle cx=\"18\" cy=\"8\" r=\"2.5\"/><path d=\"M18 13c2.4.3 3.5 1.8 3.5 4V20h-4\"/>",
+ "dock-hsec":"<path d=\"M4 13.5h16M6 13.5v-2.2a6 6 0 0 1 12 0v2.2M3 14.5h18v2H3zM9 5.3V3.5M15 5.3V3.5M7 20h10\"/><path d=\"M12 6v7\"/>",
+ "dock-zones":"<path d=\"M12 22s7.5-7.8 7.5-13a7.5 7.5 0 1 0-15 0C4.5 14.2 12 22 12 22Z\"/><circle cx=\"12\" cy=\"9\" r=\"2.7\"/>",
+
  time:"<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 6.5V12l3.5 2\"/>",
  wrench:"<path d=\"M20.2 7.5a6.5 6.5 0 0 1-8.7 7.8l-6.2 6.1a2.1 2.1 0 0 1-3-3l6.1-6.2A6.5 6.5 0 0 1 16.2 3l-4.3 4.3 3.1 3.1 5.2-2.9Z\"/>",
  geology:"<path d=\"m2 18 4-11 6-4 8 5 2 11-7 3H8l-6-4Z\"/><path d=\"m6 7 7 5 7-4m-7 4 2 10M2 18l11-6\"/>",
