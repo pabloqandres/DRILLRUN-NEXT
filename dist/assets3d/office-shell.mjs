@@ -159,7 +159,12 @@ export function createOffice(w){
  for(const [text,width,x,z]of[['OFICINA · PLANTA LIBRE',3.2,0,0]]){const sign=w.sign(plan,text,width,.24,x,.446,z,0xaaa99b,'#31464b');sign.rotation.x=-Math.PI/2;}plan.visible=false;
  // Empty furnishing anchors are separate from the shell, for the initial game's buy/place flow.
  for(const zone of OFFICE.zones){const anchor=new T.Group();anchor.name='Zona editable · '+zone.id;anchor.position.set(zone.x,.42,zone.z);anchor.userData={zone:zone.id,furnishable:true};root.add(anchor);}
+ // Keep the upgrade-only roof meshes in their own batch. If batch(roof)
+ // traverses them, they merge into L1 and cannot be hidden by saved level.
+ roof.remove(design);
  for(const g of[chassis,frame,roof,...Object.values(elevations),partitions,services,access,...doors.values()])batch(g);
+ batch(design);
+ roof.add(design);
  let visibility='';
  root.userData.api={angles,opened,blocked:(x,z,r)=>officeBlocked(x,z,r,angles),ground:officeGround,
   nearDoor(x,z){let best=null,distance=1.4;for(const spec of OFFICE.doors){const cx=spec.hinge.x+spec.width/2,cz=spec.hinge.z,d=Math.hypot(x-cx,z-cz);if(d<distance){best=spec;distance=d;}}return best;},
