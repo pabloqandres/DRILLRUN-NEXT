@@ -55,7 +55,7 @@ function renderM4Objectives(s,t,fmt,icon,cb){
   completeProductionCycle:'Primer ciclo de producción',
   convertAllZones:'Automatizar todas las zonas'
  };
- let html=`<div class="m3Header">${icon('location')}<div><span class="eyebrow">MISIÓN 3</span><h3>Automatiza tu operación</h3></div></div>`;
+ let html=`<div class="m3Header">${icon('location')}<div><span class="eyebrow">MISIÓN 4</span><h3>Automatiza tu operación</h3></div></div>`;
  html+=`<div class="steps">`;
  for(const obj of objs){
   const allDone=obj.checks.every(c=>c.done);
@@ -83,9 +83,10 @@ function renderDthCatalog(s,t,fmt,icon,cb){
  html+=`<div class="sectionHeading">Perforadora DTH</div>`;
  if(!drill){
   const d=DTH_DRILLS[0];
-  const blocked=canPurchaseDthDrill(s,d.id);
+  const pendingRig=(s.orders||[]).some(o=>['pending','dispatched'].includes(o.status)&&o.items?.some(i=>i.category==='machinery'&&i.type==='dthDrill'));
+  const blocked=canPurchaseDthDrill(s,d.id)||pendingRig||s.cash<d.price+200;
   html+=`<div class="bankCard"><div class="bankBrand">${icon('build')}<span>DTH PRODUCCIÓN</span></div><small>Perforadora Down The Hole para producción</small><b>Profundidad máx. ${d.maxDepth}m · ${d.bitDiameter}" Ø</b><div class="bankWallet"><span>Precio</span><strong>${fmt(d.price)}</strong></div></div>`;
-  html+=`<div style="padding:0 16px 16px"><button class="startDrillBtn" data-m4-action="buyDthDrill" data-drill="${d.id}" ${blocked?'disabled':''}>${icon('store')} Comprar perforadora DTH · ${fmt(d.price)}</button></div>`;
+  html+=`<div style="padding:0 16px 16px"><button class="startDrillBtn" data-m4-action="buyDthDrill" data-drill="${d.id}" ${blocked?'disabled':''}>${icon('store')} ${pendingRig?'Perforadora DTH en camino':'Solicitar perforadora DTH'} · ${fmt(d.price)} + despacho</button></div>`;
  }else{
   const def=dthDrillDefinition(drill.id);
   const stateLabels={idle:'En taller',producing:'En producción',maintenance:'En mantenimiento'};
@@ -106,7 +107,8 @@ function renderDthCatalog(s,t,fmt,icon,cb){
   if(installable){
    html+=`<button data-m4-action="installDthTool" data-tool="${installable.id}">${icon('arrow')} Instalar</button>`;
   }
-  html+=`<button data-m4-action="orderDthTool" data-model="${h.id}" data-type="hammer" ${s.cash<h.price?'disabled':''}>${icon('store')} ${fmt(h.price)}</button></article>`;
+  const inTransit=(s.orders||[]).filter(o=>['pending','dispatched'].includes(o.status)).flatMap(o=>o.items||[]).filter(i=>i.model===h.id).reduce((n,i)=>n+i.qty,0);
+  html+=`<button data-m4-action="orderDthTool" data-model="${h.id}" data-type="hammer" ${s.cash<h.price+200?'disabled':''}>${icon('store')} Solicitar · ${fmt(h.price)}</button>${inTransit?'<small>En camino: '+inTransit+'</small>':''}</article>`;
  }
  // DTH Bits
  html+=`<div class="sectionHeading">Bits DTH</div>`;
@@ -119,7 +121,8 @@ function renderDthCatalog(s,t,fmt,icon,cb){
   if(installable){
    html+=`<button data-m4-action="installDthTool" data-tool="${installable.id}">${icon('arrow')} Instalar</button>`;
   }
-  html+=`<button data-m4-action="orderDthTool" data-model="${b.id}" data-type="bit" ${s.cash<b.price?'disabled':''}>${icon('store')} ${fmt(b.price)}</button></article>`;
+  const inTransit=(s.orders||[]).filter(o=>['pending','dispatched'].includes(o.status)).flatMap(o=>o.items||[]).filter(i=>i.model===b.id).reduce((n,i)=>n+i.qty,0);
+  html+=`<button data-m4-action="orderDthTool" data-model="${b.id}" data-type="bit" ${s.cash<b.price+200?'disabled':''}>${icon('store')} Solicitar · ${fmt(b.price)}</button>${inTransit?'<small>En camino: '+inTransit+'</small>':''}</article>`;
  }
  return html;
 }
@@ -128,7 +131,8 @@ function renderDrillTruck(s,t,fmt,icon,cb){
  const truck=drillTruckInfo(s);
  let html=`<div class="m3Header">${icon('store')}<div><span class="eyebrow">DRILLTRUCK</span><h3>Camión de servicio</h3></div></div><figure class="drillTruckHero" data-drilltruck-asset><div class="drillTruckHeroStage" data-real-asset-loading>GENERANDO IMAGEN DEL MODELO 3D REAL…</div><figcaption><b>DRILLTRUCK</b><span>Vista del asset oficial · modelo del juego</span></figcaption></figure>`;
  if(!truck){
-  const blocked=canPurchaseDrillTruck(s);
+  const pendingTruck=(s.orders||[]).some(o=>['pending','dispatched'].includes(o.status)&&o.items?.some(i=>i.category==='machinery'&&i.type==='drillTruck'));
+  const blocked=canPurchaseDrillTruck(s)||pendingTruck||s.cash<DRILLTRUCK_COST+200;
   const wsLvl=workshopLevel(s);
   const hasTecnico=hasRole(s,'tecnicoDrillco');
   const hasPkg=s.mission4?.parkingBuilt;
@@ -140,7 +144,7 @@ function renderDrillTruck(s,t,fmt,icon,cb){
   html+=`<div class="${hasPkg?'done':''}"><span class="stepNumber">${hasPkg?icon('check'):'02'}</span><span><b>Estacionamiento</b></span></div>`;
   html+=`<div class="${hasTecnico?'done':''}"><span class="stepNumber">${hasTecnico?icon('check'):'03'}</span><span><b>Técnico DRILLCO®</b></span></div>`;
   html+=`</div>`;
-  html+=`<div style="padding:0 16px 16px"><button class="startDrillBtn" data-m4-action="buyTruck" ${blocked?'disabled':''}>${icon('store')} Comprar DrillTruck · ${fmt(DRILLTRUCK_COST)}</button></div>`;
+  html+=`<div style="padding:0 16px 16px"><button class="startDrillBtn" data-m4-action="buyTruck" ${blocked?'disabled':''}>${icon('store')} ${pendingTruck?'DrillTruck en camino':'Solicitar DrillTruck'} · ${fmt(DRILLTRUCK_COST)} + despacho</button></div>`;
  }else{
   const stateLabels={parked:'Estacionado',dispatched:'En ruta',onsite:'En zona',maintenance:'Mantenimiento',returning:'Retornando'};
   const stateClass=truck.state==='parked'?'idle':truck.state==='maintenance'?'active':'moving';
