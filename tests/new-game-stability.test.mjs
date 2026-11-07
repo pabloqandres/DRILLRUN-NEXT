@@ -136,7 +136,8 @@ test('HSEC score alone cannot complete an unsafe faena',()=>{
  tickHsec(s,0);
  startModule(s,'office-l2','office01',at+3);accelerate(s,at+4);
  for(const type of ['shed','vehicle','pedestrian','crossing','railing','railing','railing','tower','tower','tower','tower','cone','cone','cone','cone','cone','cone','sign','extinguisher']){
-  buildAsset(s,type,suggestedPose(s,type));
+  const pose=suggestedPose(s,type);
+  try{buildAsset(s,type,pose);}catch(e){throw new Error('HSEC asset '+type+' '+JSON.stringify(pose)+': '+e.message);}
   tickHsec(s,26);
  }
  const e=evaluation(s);
