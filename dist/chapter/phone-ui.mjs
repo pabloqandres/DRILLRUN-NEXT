@@ -2,6 +2,7 @@ import {CONFIG,PRODUCTS,CATEGORIES} from './config.mjs';
 import {availableMessages,unreadMessages,readMessage} from './ui-state.mjs';
 import {landReady,objective} from './state.mjs';
 import {ProductPreview,rcDrillThumbnail} from './product-preview.mjs';
+import {drillTruckImage} from './drilltruck-image.mjs';
 import {icon,workerAvatar} from './icons.mjs';
 import {isM3App,m3HomeApps,renderM3App} from '../mission3/phone-apps.mjs';
 import {isM4App,m4HomeApps,renderM4App} from '../mission4/phone-apps.mjs';
@@ -37,6 +38,22 @@ export class PhoneUI{
   }else if(isM4App(app)){
    this.title.textContent=app.replace('m4-','').replace(/^\w/,c=>c.toUpperCase());this.back.style.visibility='visible';
    c.className='appContent';c.innerHTML=renderM4App(app,s,t,fmt,icon,{onSave:this.onSave,onNavigate:this.onNavigate});
+  }
+  // The M4 DrillTruck technical/management view shares the exact same cached
+  // GLB image as the Vehicles catalog card and inline technical sheet.
+  // It has no effect on purchase, assigned zones, progression or saved data.
+  if(app==='m4-drilltruck'){
+   const stage=c.querySelector('[data-drilltruck-asset] .drillTruckHeroStage');
+   if(stage)drillTruckImage(this.getWorld()).then(src=>{
+    if(this.app!=='m4-drilltruck'||!stage.isConnected)return;
+    const img=document.createElement('img');
+    img.src=src;img.alt='DrillTruck: imagen real del modelo 3D instalado en el juego';
+    img.decoding='async';stage.replaceChildren(img);
+    stage.removeAttribute('data-real-asset-loading');
+   }).catch(error=>{
+    console.error('[DrillTruck] no se pudo generar la imagen del GLB:',error);
+    if(stage.isConnected)stage.textContent='NO SE PUDO CARGAR EL MODELO 3D';
+   });
   }
   // Only actual non-DRILLCO rig models are previewed here. Consumables await
   // user-supplied official DRILLCO® GLBs, never a fabricated product rendering.
