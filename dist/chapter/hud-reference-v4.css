@@ -191,3 +191,6 @@
  #hud #joystick .joyLeft{left:6px!important}
  #hud #joystick .joyRight{right:6px!important}
 }
+
+/* Keep game visibility state authoritative over the decorative HUD shell. */
+#hud #bottomNav.hidden{display:none!important}
