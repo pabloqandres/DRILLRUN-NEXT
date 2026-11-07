@@ -20,8 +20,8 @@ export class PhoneUI{
   c.className=app==='store'?'catalogContent':'appContent';
   if(app==='home'){
    const name=s.playerName||t('operatorName'),count=unreadMessages(s).length+narrativeUnread(s);
-   const m3On=s.mission3&&s.mission3.phase!=='inactive';const m4On=s.mission4&&s.mission4.phase!=='inactive';const missionLabel=m4On?'Automatiza tu operación':m3On?'Tu Primer Contrato':t(objective(s));const missionEyebrow=m4On?'MISIÓN 3':m3On?'MISIÓN 2':t('currentMission');
-   c.innerHTML=`<div class="phoneGreeting"><span class="eyebrow">${esc(t('fieldNetwork'))}</span><b>${esc(name)}</b><small>${esc(t('operator'))}</small></div><div class="phoneMission"><span>${icon('location')}</span><span><small>${esc(missionEyebrow)}</small><b>${esc(missionLabel)}</b></span></div><div class="apps">${['messages','builder'].map(a=>`<button data-app="${a}"><span class="appTile app-${a}">${icon(a==='builder'?'build':a)}${a==='messages'&&count?`<i class="appBadge">${count}</i>`:''}</span><span>${esc(t(a==='builder'?'buildNow':a))}</span></button>`).join('')}${m3HomeApps(s,t,icon)}${m4HomeApps(s,t,icon)}</div><div class="phoneFooter">DRILL RUN <span>·</span> ${esc(t('firstSteps'))}</div>`;
+   
+   c.innerHTML=`<div class="phoneGreeting"><span class="eyebrow">${esc(t('fieldNetwork'))}</span><b>${esc(name)}</b><small>${esc(t('operator'))}</small></div><div class="apps">${['messages'].map(a=>`<button data-app="${a}"><span class="appTile app-${a}">${icon(a)}${count?`<i class="appBadge">${count}</i>`:''}</span><span>${esc(t(a))}</span></button>`).join('')}${m3HomeApps(s,t,icon)}${m4HomeApps(s,t,icon)}</div><div class="phoneFooter">DRILL RUN <span>·</span> ${esc(t('firstSteps'))}</div>`;
   }else if(app==='messages')this.renderMessages(s,t);
   else if(app==='bank'){
    s.bankViewed=true;this.onSave();c.innerHTML=`<div class="bankCard"><div class="bankBrand">${icon('bank')}<span>DR / BANK</span></div><small>${esc(t('bankAccount'))}</small><b>${fmt(s.bank)}</b><div class="bankWallet"><span>${esc(t('wallet'))}</span><strong>${fmt(s.cash)}</strong></div></div><div class="sectionHeading">${esc(t('bankTransfer'))}</div><label class="bankInput">${esc(t('amount'))}<input id="bankAmount" type="number" min="1" step="1" value="2500" inputmode="numeric"></label><div class="bankActions"><button class="primary" data-transfer="withdraw">${esc(t('withdraw'))}</button><button data-transfer="deposit">${esc(t('deposit'))}</button></div><small>${esc(t('bankNote'))}</small><div class="sectionHeading">${esc(t('operations'))}</div><ul class="transactions">${[...s.ledger].reverse().map(o=>`<li><span class="transactionIcon">${icon(o.key==='capital'?'bank':o.key==='withdraw'?'arrow':o.key==='deposit'?'bank':'store')}</span><span>${esc(t(o.key))}<small>${new Date(o.at).toLocaleTimeString(s.lang,{hour:'2-digit',minute:'2-digit'})}</small></span><b>${fmt(o.amount)}</b></li>`).join('')}</ul>`;
@@ -67,6 +67,11 @@ export class PhoneUI{
     const src=this.rigArtCache.get(id);
     if(src){const img=document.createElement('img');img.src=src;img.alt='Vista 3D de perforadora';img.loading='lazy';slot.replaceChildren(img);}
    }
+  }
+  // DTH supply is retained under Casa Matriz instead of occupying a duplicate phone home icon.
+  if(app==='m3-catalog'&&s.mission4&&s.mission4.phase!=='inactive'){
+   const link=document.createElement('button');link.className='primary';link.dataset.app='m4-dth-catalog';link.textContent=s.lang==='en'?'DTH equipment and consumables':'Equipos y consumibles DTH';
+   link.style.margin='12px 16px';c.appendChild(link);
   }
   c.querySelectorAll('[data-app]').forEach(b=>b.onclick=()=>{if(b.dataset.app==='messages')this.conversation=false;this.onNavigate(b.dataset.app);});
   c.querySelectorAll('[data-place]').forEach(b=>b.onclick=()=>this.onPlace(b.dataset.place));

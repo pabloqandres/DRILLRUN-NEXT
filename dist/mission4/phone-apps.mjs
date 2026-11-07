@@ -19,10 +19,7 @@ export function isM4App(app){return M4_APPS.includes(app);}
 export function m4HomeApps(s,t,icon){
  if(!s.mission4||mission4Phase(s)==='inactive')return '';
  const apps=[];
- apps.push({id:'m4-objectives',icon:'location',label:'Misión',css:'m4-mission'});
  apps.push({id:'m4-zones',icon:'geology',label:'Zonas',css:'m4-zones'});
- apps.push({id:'m4-drilltruck',icon:'store',label:'DrillTruck',css:'m4-truck'});
- apps.push({id:'m4-dth-catalog',icon:'build',label:'DTH Supply',css:'m4-dth'});
  return apps.map(a=>`<button data-app="${a.id}"><span class="appTile app-${a.css}">${icon(a.icon)}</span><span>${esc(a.label)}</span></button>`).join('');
 }
 
