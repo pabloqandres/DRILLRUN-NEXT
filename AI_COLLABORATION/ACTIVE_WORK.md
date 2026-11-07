@@ -4,6 +4,7 @@
 
 ## Currently Active
 
+- **ChatGPT — DrillTruck static catalog image:** 15.7 KB WebP screenshot captured from the exact GLB; same image URL in Catalog, Ficha Técnica and Phone with no on-demand 3D renderer. Feature branch `chatgpt/drilltruck-static-catalog-image` pending PR and device QA. No gameplay/economy changes.
 - **ChatGPT — Category Audit 01 · Vehículos/DrillTruck:** canonical GLB snapshot shared by Catalog vehicle card, technical sheet, M4 Phone; visually balanced icons and category layout. Branch `chatgpt/drilltruck-real-glb-catalog-audit`, code complete pending PR/production and browser screenshot QA. No state/economy/model behavior changes.
 
 ## Files in Progress
