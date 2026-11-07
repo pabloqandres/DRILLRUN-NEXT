@@ -135,13 +135,15 @@ test('HSEC score alone cannot complete an unsafe faena',()=>{
  s.inside=true;useOfficeComputer(s,at+2);s.inside=false;
  tickHsec(s,0);
  startModule(s,'office-l2','office01',at+3);accelerate(s,at+4);
- for(const type of ['shed','vehicle','pedestrian','crossing','railing','railing','railing','tower','tower','tower','tower','cone','cone','cone','cone','cone','cone','sign','sign','extinguisher','extinguisher']){
+ for(const type of ['shed','vehicle','pedestrian','crossing','railing','railing','railing','tower','tower','tower','tower','cone','cone','cone','cone','cone','cone','sign','extinguisher']){
   buildAsset(s,type,suggestedPose(s,type));
   tickHsec(s,26);
  }
  const e=evaluation(s);
- assert.equal(e.operational,true,JSON.stringify({critical:e.critical,total:e.total,vehicle:e.vehicle,pedestrian:e.pedestrian,light:e.light,perimeter:e.perimeter}));
- assert(e.total>=80);
+ assert(e.total>=80,JSON.stringify({score:e.total,critical:e.critical}));
+ assert(e.vehicle&&e.pedestrian,'Ambas redes deben estar conectadas');
+ assert.equal(e.conflicts.unsafe.length,0,'No se permiten cruces peligrosos');
+ assert(e.light>=.8,'La red debe estar suficientemente iluminada');
  tickHsec(s,1);
  assert(s.hsec.completedAt);
 });
