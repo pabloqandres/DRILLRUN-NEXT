@@ -21,23 +21,39 @@ export function drillTruckImage(world){
 }
 
 async function renderRealTruck(world){
- const draco=new DRACOLoader();
- draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
- const loader=new GLTFLoader();loader.setDRACOLoader(draco);
- let gltf;
- try{gltf=await loader.loadAsync(drillTruckAssetUrl());}
- finally{draco.dispose?.();}
- if(!gltf?.scene)throw new Error('DRILLTRUCK_optimized.glb returned no scene');
-
- // A measured model, with the same 5 m maximum dimension used by World.initM4Visuals.
- const model=gltf.scene;
- const bounds=new T.Box3().setFromObject(model),size=new T.Vector3();
- bounds.getSize(size);
- const dimension=Math.max(size.x,size.y,size.z);
- if(!Number.isFinite(dimension)||dimension<=0)throw new Error('DrillTruck GLB has no measurable geometry');
- model.scale.setScalar(5/dimension);
- const grounded=new T.Box3().setFromObject(model);
- model.position.y-=grounded.min.y;
+ // Purchased vehicle: use the EXACT GLB already visible in the world first.
+ // A cloned mesh gets private geometry, so disposing the preview cannot break
+ // the installed truck, its animation or its collision/route state.
+ const live=world.scene?.getObjectByName?.('drilltruck-wrapper');
+ let model=null;
+ if(live?.children?.length){
+  model=live.clone(true);
+  model.position.set(0,0,0);model.rotation.set(0,0,0);model.visible=true;
+  let meshes=0;
+  model.traverse(node=>{
+   node.visible=true;
+   if(node.isMesh){meshes++;if(node.geometry)node.geometry=node.geometry.clone();}
+  });
+  if(!meshes)model=null;
+ }
+ if(!model){
+  const draco=new DRACOLoader();
+  draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
+  const loader=new GLTFLoader();loader.setDRACOLoader(draco);
+  let gltf;
+  try{gltf=await loader.loadAsync(drillTruckAssetUrl());}
+  finally{draco.dispose?.();}
+  if(!gltf?.scene)throw new Error('DRILLTRUCK_optimized.glb returned no scene');
+  // Same real 5m-scale geometry the game uses, including its rear mechanical arm.
+  model=gltf.scene;
+  const bounds=new T.Box3().setFromObject(model),size=new T.Vector3();
+  bounds.getSize(size);
+  const dimension=Math.max(size.x,size.y,size.z);
+  if(!Number.isFinite(dimension)||dimension<=0)throw new Error('DrillTruck GLB has no measurable geometry');
+  model.scale.setScalar(5/dimension);
+  const grounded=new T.Box3().setFromObject(model);
+  model.position.y-=grounded.min.y;
+ }
  model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;}});
 
  // Keep the canvas in the document with a real measurable viewport.
