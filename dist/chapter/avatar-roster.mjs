@@ -51,6 +51,26 @@ export class AvatarRoster{
  }
  async loadAll(onProgress=()=>{}){let done=1;onProgress(done,4);for(const a of AVATARS.slice(1)){await this.load(a.id);onProgress(++done,4);}}
  activate(id){const e=this.entries.get(id);if(!e)return false;this.selected=id;Object.assign(this.world,{player:e.root,playerBody:e.body,worker:e.rig,vest:e.vest,candidateActive:true});this.world.setCharacter(id);e.root.userData.validationCanvas=this.world.renderer.domElement;this.world.renderer.domElement.dataset.avatarId=id;this.world.renderer.domElement.dataset.avatarTextures=e.rig.meshes.map(m=>[!!m.material.map,!!m.material.normalMap,!!m.material.metalnessMap].join('/')).join(',');e.rig.reset();this.world.renderer.staticFrame=null;return true;}
+ // Hit-test the four visible 3D candidates using the actual game camera.
+ // Only selectable meshes are tested; backdrop props, UI panels and terrain are ignored.
+ pickSelector(clientX,clientY){
+  const canvas=this.world.renderer.domElement,rect=canvas.getBoundingClientRect();
+  if(!rect.width||!rect.height||clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom)return null;
+  const pointer=new T.Vector2((clientX-rect.left)/rect.width*2-1,-(clientY-rect.top)/rect.height*2+1);
+  this.world.camera.updateMatrixWorld();
+  this.world.ray.setFromCamera(pointer,this.world.camera);
+  const roots=[],lookup=new Map();
+  for(const a of AVATARS){
+   const e=this.entries.get(a.id);if(!e?.root?.visible)continue;
+   e.root.updateMatrixWorld(true);roots.push(e.root);lookup.set(e.root,a.id);
+  }
+  for(const hit of this.world.ray.intersectObjects(roots,true)){
+   for(let parent=hit.object;parent;parent=parent.parent){
+    if(lookup.has(parent))return lookup.get(parent);
+   }
+  }
+  return null;
+ }
  portrait(id){const e=this.entries.get(id);if(!e)return '';if(!e.portrait){const host=document.createElement('span');renderPlayerPortrait({...this.world,player:e.root,worker:e.rig},host,e.definition.height);e.portrait=host.innerHTML;}return e.portrait;}
  updateSelector(show,selected,state,dt,time){
   for(const a of AVATARS){const e=this.entries.get(a.id);if(!e)continue;e.root.visible=show||a.id===this.selected;if(!show)continue;const i=AVATARS.indexOf(a),chosen=a.id===selected;const x=-5.5+this.displayOffsets[i],z=5.2+(chosen?.45:0);e.root.position.set(x,0,z);e.root.rotation.y=0;if(chosen){state.position={x,z};}else e.rig.update(dt,()=>0,time);}
