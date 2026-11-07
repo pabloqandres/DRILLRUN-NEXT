@@ -4,11 +4,11 @@
 
 ## Currently Active
 
-- **ChatGPT — Visual V3:** branch `chatgpt/world-art-v3-terrain-roads-workshop`; true integrated player portrait/level and mission card, simplified joystick, terrain scatter, worn road painting, real RC rig snapshots, original hired-crew portraits. Ready for PR and production integration; runtime visual acceptance still needed.
+- **ChatGPT — Cinematic World Art V4:** new Three.js mineral concrete textures, ambient grounding shadows and dusk lighting in real office/workshop, level-aware office roof, richer atmosphere and restrained desert scatter. Branch `chatgpt/cinematic-world-art-v4`, pending PR and production verification. Scope is visual-only, user saved state untouched.
 
 ## Files in Progress
 
-- V3 scope: `dist/index.html`, `dist/chapter/visual-overhaul-v3.css`, `dist/chapter/game.mjs` (mission badge only), `dist/chapter/crew-portraits.mjs`, `dist/chapter/phone-ui.mjs`, `dist/chapter/product-preview.mjs`, `dist/mission3/phone-apps.mjs` (images only), `dist/graphics/desert.mjs`, `dist/hsec/world.mjs` (road painting only), tests. Main also includes separate PR #12 invisible delivery-truck collider fix; **retain it when merging V3**.
+- `dist/graphics/world-finish.mjs`, `dist/scene.mjs`, `dist/assets3d/office-shell.mjs`, `dist/chapter/product-preview.mjs`, `dist/graphics/desert.mjs`, `dist/graphics/atmosphere.mjs`, `dist/graphics/quality.mjs`, `dist/hsec/world.mjs`, regression tests. Do not alter purchases/colliders/save format.
 
 ## Recently Completed
 

@@ -1,5 +1,15 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-06 — Cinematic World Art V4 (ChatGPT)
+
+- Real 3D visual upgrades: shared concrete mineral wear maps, construction-pad joints, soft contact AO beneath office/workshop, warmer entry luminaires and workshop drainage/threshold details.
+- Original PUMA-red office remains; advanced rooftop machinery now truly hidden at office L1 and shown at L2, including real-model Catalog thumbnails; roof batching keeps the two level appearances separate.
+- Atacama terrain desaturated to natural mineral hues, richer micro-normal relief, low-poly instanced exterior yard stones, richer atmospheric dust. Low graphics disables decorative scatter.
+- Day/night fog and environmental lighting harmonized with the existing HSEC clock, without changing safety score or timelines.
+- No new collider, building, inventory, cash, save schema, mission or equipment brand assets.
+- Static regression suite `tests/world-art-v4-regression.test.mjs` plus Vercel source validation required after merge. Full live WebGL/device visual testing still outstanding.
+- Detail: `CHANGES/2026-11-06_cinematic-world-art-v4.md`.
+
 ## 2026-11-06 — Visual V3: true HUD components, roads, Atacama, rig imagery and crew portraits
 
 - Replaced legacy profile/mission DOM grouping with actual joint avatar/level card and structured mission header/status/progress/footer. Added simplified joystick CSS and final cascade correction for previously absolutely positioned resources. Original input/movement logic intact.
