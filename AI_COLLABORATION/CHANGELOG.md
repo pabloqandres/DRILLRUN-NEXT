@@ -1,5 +1,20 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-07 — Avatar 02/03/04 intro videos (Claude Code)
+
+### Added
+- `dist/cinematics/avatar02-intro.mp4` (4.8 MB), `avatar03-intro.mp4` (15 MB), `avatar04-intro.mp4` (14 MB)
+- All 4 avatars now have dedicated intro cinematics (no more shared fallback for Avatar 3)
+
+### Changed
+- `dist/chapter/config.mjs`: `AVATAR_INTRO_VIDEOS` maps operator03 to dedicated video
+- `tests/new-game-stability.test.mjs`: Updated avatar intro test expectations
+
+### Closed
+- PR #33 (ChatGPT) superseded by PR #35 (Claude Code) which includes config changes + binary uploads
+- PR #35 merged to main, deployed to Vercel production `dpl_7utw3MPTofuibqqBKbamztafD4RM`
+- All 4 MP4s verified HTTP 200 on production
+
 ## 2026-11-06 — Vehículos identity rail + two-machine Equipment presentation
 
 - Vehicles-specific CSS override formerly replaced the Catalog identity-rail 144px left inset with 14px, visually covering the side brand; preserve 144px and 101px in compact media queries, leaving the larger DrillTruck card intact.
