@@ -2,9 +2,10 @@ import {moduleDefinition,moduleAvailability} from './module-catalog.mjs';
 import {landReady} from './state.mjs';
 import {CatalogView} from './catalog-view.mjs';
 import {officeThumbnail,workshopThumbnail} from './product-preview.mjs';
+import {drillTruckImage} from './drilltruck-image.mjs';
 import {catalogProducts,catalogCategories} from './construction-catalog.mjs';
 export class BuilderUI{
- constructor(options){Object.assign(this,options);this.category='infrastructure';this.selected='office';this.zone='office01';this.store=new CatalogView(this.host);this.buildingThumbnails=new Map();}
+ constructor(options){Object.assign(this,options);this.category='infrastructure';this.selected='office';this.zone='office01';this.store=new CatalogView(this.host);this.buildingThumbnails=new Map();this.vehicleThumbnails=new Map();this.vehicleImageLoading=false;}
  open(){this.store.close();this.selected='office';this.category='infrastructure';this.render();}
  close(){this.store.close();this.onSelection(null);}
  render(){
@@ -32,11 +33,33 @@ export class BuilderUI{
   }
   return this.buildingThumbnails.get(key);
  }
+ getDrillTruckThumbnail(){
+  const existing=this.vehicleThumbnails.get('drilltruck');
+  if(existing)return existing;
+  if(!this.world||this.vehicleImageLoading)return null;
+  this.vehicleImageLoading=true;
+  drillTruckImage(this.world).then(image=>{
+   this.vehicleThumbnails.set('drilltruck',image);
+   this.vehicleImageLoading=false;
+   // CatalogView keeps selection and horizontal scroll when the asynchronous
+   // real GLB snapshot arrives. No purchases or game state are modified.
+   if(this.category==='vehicles'&&!this.host.classList.contains('hidden')&&this.store.options){
+    this.store.render(this.store.options);
+   }
+  }).catch(err=>{
+   this.vehicleImageLoading=false;
+   console.error('[DrillTruck] Official GLB snapshot failed:',err);
+   // Missing image is explicit; never substitute an invented vehicle.
+   if(this.category==='vehicles')this.host.querySelectorAll('[data-real-asset-loading]')
+    .forEach(node=>{node.textContent='VISTA 3D NO DISPONIBLE';});
+  });
+  return null;
+ }
  renderStore(category,selected,onCategory,onSelect){
   const s=this.state(),t=this.translate();this.onSelection(null);
   let products;try{products=catalogProducts(s,t);}catch(e){console.error('catalogProducts error:',e);products=[];}
   this.store.render({lang:s.lang,products,categories:catalogCategories(s.lang),category,selected,format:this.format,
-   thumbnail:p=>p.kind==='module'?this.getOfficeThumbnail(p.level):p.kind==='workshop'?this.getWorkshopThumbnail(p.level):p.kind==='hsec'&&p.status!=='future'&&this.hsec?.world?this.hsec.world.thumbnail(p.id):null,
+   thumbnail:p=>p.kind==='module'?this.getOfficeThumbnail(p.level):p.kind==='workshop'?this.getWorkshopThumbnail(p.level):p.kind==='vehicle'&&p.id==='drilltruck'?this.getDrillTruckThumbnail():p.kind==='hsec'&&p.status!=='future'&&this.hsec?.world?this.hsec.world.thumbnail(p.id):null,
    onCategory,onSelect,onClose:this.onClose,onStaff:()=>this.hsec?.open('staff'),
    onManage:p=>{
     if(p.kind==='module')return s.office.status==='building'?this.onClose():this.onManage();
