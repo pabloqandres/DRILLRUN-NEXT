@@ -62,7 +62,7 @@ export function mission3Objectives(s){
   ]},
   {id:4,nameKey:'executeExploration',checks:[
    {id:'startDrill',done:['active','completed','delivered'].includes(cp?.status),labelKey:'startDrilling'},
-   {id:'complete6',done:cp?.boreholesDone>=6,labelKey:'complete6Boreholes',
+   {id:'completeBoreholes',done:cp?.boreholesDone>0&&cp?.boreholesDone>=cp.totalBoreholes,labelKey:'completeBoreholes',
     progress:cp?cp.progress:0}
   ]},
   {id:5,nameKey:'deliverContract',checks:[

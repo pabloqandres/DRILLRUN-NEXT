@@ -15,8 +15,8 @@ export const BOREHOLE_SITES=[
 
 export const CONTRACT_TEMPLATES=[
  {id:'first-contract',nameKey:'firstContract',descriptionKey:'firstContractDesc',
-  type:'exploration',totalMeters:180,boreholeCount:6,
-  duration:900, // 15 min real time
+  type:'exploration',totalMeters:90,boreholeCount:3,
+  duration:180, // 3 minutes for the introductory exploration contract
   reward:60000,bonusUnderBudget:8000,bonusSpeed:5000,
   requirements:['admin','geoAnalysis','drill']}
 ];
@@ -38,7 +38,7 @@ export function acceptContract(s,contractId,now=Date.now()){
  if(blocked)fail(blocked);
  const tpl=contractTemplate(contractId);
  // Create boreholes
- s.boreholes=BOREHOLE_SITES.map(site=>({
+ s.boreholes=BOREHOLE_SITES.slice(0,tpl.boreholeCount).map(site=>({
   id:site.id,
   position:{x:site.x,z:site.z},
   depthTarget:site.depthTarget,

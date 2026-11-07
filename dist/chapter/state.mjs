@@ -30,10 +30,9 @@ export function restore(data,now=Date.now()){
  /* ensure M3 defaults exist */ s.personnel=Array.isArray(s.personnel)?s.personnel:[];s.contract=s.contract||null;s.boreholes=Array.isArray(s.boreholes)?s.boreholes:[];s.geoAnalysis=s.geoAnalysis||null;s.toolInventory=Array.isArray(s.toolInventory)?s.toolInventory:[];s.spentMaterials=Array.isArray(s.spentMaterials)?s.spentMaterials:[];s.orders=Array.isArray(s.orders)?s.orders:[];s.drill=s.drill||null;s.drillRunSessions=Array.isArray(s.drillRunSessions)?s.drillRunSessions:[];s.mission3=s.mission3||null;s.knowledgeAccelerators=Math.max(0,Math.floor(Number(s.knowledgeAccelerators)||0));
  /* M3 funds safety net — one-time top-up for existing saves with low cash */
  if(s.mission3&&s.mission3.phase!=='inactive'&&!s.mission3.fundingV2){const total=(s.cash||0)+(s.bank||0);const min=25000;if(total<min){const bonus=min-total;s.cash+=bonus;s.ledger.push({id:s.nextId++,key:'Subsidio operacional · Misión 3',amount:bonus,at:now});}s.mission3.fundingV2=true;}
- /* M3 contract duration migration — now 900s (15min) */
- if(s.contract&&s.contract.duration!==900){s.contract.duration=900;if(s.boreholes)s.boreholes.forEach(b=>{if(b.depthTarget>30)b.depthTarget=30;});if(s.contract.totalMeters>180)s.contract.totalMeters=180;}
+ /* Preserve saved contract terms. Older contracts keep their original 15-minute/6-site rules; new contracts use 180s/3 sites. */
  /* Reset drilling timer for saves where deadline already passed */
- if(s.contract&&s.contract.drillingStartedAt&&!s.contract._timerReset4){const deadline=s.contract.drillingStartedAt+s.contract.duration*1000;if(deadline<now){s.contract.drillingStartedAt=now;}s.contract._timerReset4=true;}
+ if(s.contract&&s.contract.duration!==180&&s.contract.drillingStartedAt&&!s.contract._timerReset4){const deadline=s.contract.drillingStartedAt+s.contract.duration*1000;if(deadline<now){s.contract.drillingStartedAt=now;}s.contract._timerReset4=true;}
  if(!s.workshop)s.workshop={level:1};
  /* M4 defaults */ s.mission4=s.mission4||null;
  /* M1 mission rewards are confirmed by narrative; restore never pays before confirmation. */

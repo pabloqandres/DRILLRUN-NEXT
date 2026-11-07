@@ -33,7 +33,7 @@ export function tickMission3(s,dt,now=Date.now()){
  }
  // 3b. Auto-advance drilling (1 second of real-time progress)
  if(s.contract?.status==='active'&&s.drill?.state==='drilling'&&s.drill.installedBit&&s.drill.installedHammer){
-  const PRODUCTIVITY_PER_SECOND=1200/3600; // 1200 m/h → m/s (~9 min for 180m)
+  const PRODUCTIVITY_PER_SECOND=3000/3600; // 90 m in ~108s plus repositioning, within 3 min
   const metersThisTick=PRODUCTIVITY_PER_SECOND;
   const bhi=s.contract.activeBoreholeIndex;
   const bh=s.boreholes?.[bhi];

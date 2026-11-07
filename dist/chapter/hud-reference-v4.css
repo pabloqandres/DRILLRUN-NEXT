@@ -194,3 +194,19 @@
 
 /* Keep game visibility state authoritative over the decorative HUD shell. */
 #hud #bottomNav.hidden{display:none!important}
+
+/* Narrative-controlled objective panel: on the right, only when a mission is accepted.
+   .hidden always wins over legacy fixed-display rules. */
+#hud #objective.hidden,body.interior #hud #objective.hidden{display:none!important}
+#hud #objective,body.interior #hud #objective{
+ left:auto!important;right:max(16px,var(--dr-hud-side))!important;
+ top:calc(var(--dr-hud-top) + 74px)!important;bottom:auto!important;
+ transition:transform .25s ease,opacity .25s ease!important;
+}
+#hud #objective.collapsed,body.interior #hud #objective.collapsed{
+ transform:translateX(calc(100% - 22px))!important;opacity:.7!important;
+}
+#hud #objective #objToggle{left:-13px!important;right:auto!important;border-radius:10px 0 0 10px!important}
+@media(max-width:1050px){
+ #hud #objective,body.interior #hud #objective{right:max(12px,var(--dr-hud-side))!important;top:calc(var(--dr-hud-top) + 53px)!important}
+}

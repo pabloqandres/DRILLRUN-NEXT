@@ -182,6 +182,16 @@ export function confirmCompletion(s,missionId,now=Date.now()){
  return{missionId,cash:rewardDef?.cash||0,boosters:rewardDef?.boosters||0,name:narr.missionNameKey,number:narr.missionNumber};
 }
 
+// The right-side mission card represents accepted, uncollected narrative missions only.
+// It remains visible while the objectives are done but the closing text is unconfirmed.
+export function activeNarrativeMission(s){
+ ensureNarrative(s);
+ for(const missionId of ['m1','m2','m3','m4']){
+  if(isAccepted(s,missionId)&&!isCollected(s,missionId))return missionId;
+ }
+ return null;
+}
+
 // ─── Query helpers ──────────────────────────────────────
 
 export function narrativeUnread(s){

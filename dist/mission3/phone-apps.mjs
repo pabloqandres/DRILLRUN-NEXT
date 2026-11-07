@@ -76,7 +76,7 @@ function renderContract(s,t,fmt,icon,cb){
  if(!s.contract){
   const tpl=CONTRACT_TEMPLATES[0];
   const blocked=canAcceptContract(s,tpl.id);
-  html+=`<div class="bankCard"><div class="bankBrand">${icon('build')}<span>EXPLORACIÓN</span></div><small>Contrato de exploración geológica</small><b>180 metros · 6 sondajes</b><div class="bankWallet"><span>Recompensa</span><strong>${fmt(tpl.reward)}</strong></div></div>`;
+  html+=`<div class="bankCard"><div class="bankBrand">${icon('build')}<span>EXPLORACIÓN</span></div><small>Contrato de exploración geológica</small><b>${tpl.totalMeters} metros · ${tpl.boreholeCount} sondajes · 3 minutos</b><div class="bankWallet"><span>Recompensa</span><strong>${fmt(tpl.reward)}</strong></div></div>`;
   html+=`<div class="sectionHeading">Requisitos</div>`;
   html+=`<div class="steps"><div class="${hasRole(s,'admin')?'done':''}"><span class="stepNumber">${hasRole(s,'admin')?icon('check'):'01'}</span><span><b>Administrador contratado</b></span></div>`;
   html+=`<div class="${s.geoAnalysis?.completed?'done':''}"><span class="stepNumber">${s.geoAnalysis?.completed?icon('check'):'02'}</span><span><b>Análisis geológico completado</b></span></div>`;
@@ -274,7 +274,7 @@ function renderM3Objectives(s,t,fmt,icon,cb){
  const phaseNames={briefing:'Briefing Inicial',setup:'Preparación',survey:'Estudio Geológico',equip:'Equipamiento',drilling:'Perforación Activa',delivery:'Entrega Final',complete:'¡Misión Completa!'};
  const phaseIcons={briefing:'messages',setup:'build',survey:'location',equip:'inventory',drilling:'drill',delivery:'check',complete:'check'};
  const objNames={prepareCompany:'Preparar la empresa',knowTerrain:'Conocer el terreno',equipOperation:'Equipar la operación',executeExploration:'Ejecutar exploración',deliverContract:'Entregar contrato'};
- const checkNames={workshopReady:'Taller operativo',hireAdmin:'Administrador contratado',requestAnalysis:'Solicitar análisis geológico',waitForReport:'Esperar informe',reviewReport:'Revisar informe',purchaseDrill:'Adquirir perforadora',hireDriller:'Contratar operador',orderTools:'Ordenar herramientas',receiveDelivery:'Recibir pedido',startDrilling:'Iniciar perforación',complete6Boreholes:'Completar 6 sondajes',validateMeters:'Validar metraje',submitContract:'Entregar al cliente'};
+ const checkNames={workshopReady:'Taller operativo',hireAdmin:'Administrador contratado',requestAnalysis:'Solicitar análisis geológico',waitForReport:'Esperar informe',reviewReport:'Revisar informe',purchaseDrill:'Adquirir perforadora',hireDriller:'Contratar operador',orderTools:'Ordenar herramientas',receiveDelivery:'Recibir pedido',startDrilling:'Iniciar perforación',completeBoreholes:'Completar 3 sondajes',validateMeters:'Validar metraje',submitContract:'Entregar al cliente'};
 
  // Total progress
  const totalChecks=objs.reduce((n,o)=>n+o.checks.length,0);
@@ -284,9 +284,9 @@ function renderM3Objectives(s,t,fmt,icon,cb){
  // Contract stats
  const cp=contractProgress(s);
  const meters=s.contract?Math.round(s.contract.metersCompleted):0;
- const totalMeters=s.contract?s.contract.totalMeters:180;
+ const totalMeters=s.contract?s.contract.totalMeters:CONTRACT_TEMPLATES[0].totalMeters;
 
- let html=`<div class="missionHeading"><span class="eyebrow">MISIÓN 3 · TU PRIMER CONTRATO</span><h3 style="font-size:22px;margin:6px 0 0">Exploración RC</h3><p style="font-size:10px;color:#a8b8b8;margin-top:6px">Completa 180 metros de perforación en 6 sondajes de exploración geológica.</p></div>`;
+ let html=`<div class="missionHeading"><span class="eyebrow">MISIÓN 3 · TU PRIMER CONTRATO</span><h3 style="font-size:22px;margin:6px 0 0">Exploración RC</h3><p style="font-size:10px;color:#a8b8b8;margin-top:6px">Completa 90 metros de perforación en 3 sondajes de exploración geológica.</p></div>`;
 
  // Phase badge + progress ring
  html+=`<div style="display:flex;gap:14px;align-items:center;padding:14px;background:linear-gradient(135deg,#2a5040,#1e3a30);border-radius:14px;border:1px solid #4a826a55;margin-bottom:14px">`;
