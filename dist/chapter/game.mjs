@@ -181,7 +181,21 @@ function updateM3Visuals(dt){
  // Sync drill collider position
  if(m3DrillCollider&&m3DrillModel){m3DrillCollider.x=m3DrillModel.position.x;m3DrillCollider.z=m3DrillModel.position.z;}
  // Sync truck collider position
- if(m3DeliveryVehicle){if(!m3TruckCollider){m3TruckCollider={x:m3DeliveryVehicle.position.x,z:m3DeliveryVehicle.position.z,w:2.4,d:5};world.colliders.push(m3TruckCollider);}m3TruckCollider.x=m3DeliveryVehicle.position.x;m3TruckCollider.z=m3DeliveryVehicle.position.z;}
+ if(m3DeliveryVehicle){
+  // The delivery model is created hidden at (0,0,0) before its first dispatch.
+  // Registering a collider unconditionally there created a large invisible wall
+  // between the office and maintenance facilities. An inactive truck is not solid.
+  const truckPresent=m3DeliveryVehicle.visible&&m3DeliveryVehicle.parent===world.scene;
+  if(truckPresent){
+   if(!m3TruckCollider)m3TruckCollider={x:0,z:0,w:2.4,d:5,_m3Delivery:true};
+   m3TruckCollider.x=m3DeliveryVehicle.position.x;
+   m3TruckCollider.z=m3DeliveryVehicle.position.z;
+   if(!world.colliders.includes(m3TruckCollider))world.colliders.push(m3TruckCollider);
+  }else if(m3TruckCollider){
+   const idx=world.colliders.indexOf(m3TruckCollider);
+   if(idx!==-1)world.colliders.splice(idx,1);
+  }
+ }
  // Animate drill
  const drilling=s.drill?.state==='drilling';
  animateDrill(m3DrillModel,dt,drilling);
