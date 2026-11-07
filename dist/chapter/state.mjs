@@ -6,7 +6,7 @@ export class GameError extends Error{constructor(key){super(key);this.key=key;}}
 const fail=key=>{throw new GameError(key);},finite=n=>Number.isFinite(n),product=id=>PRODUCTS.find(p=>p.id===id);
 export function newGame(lang='es',character='operator01',now=Date.now()){
  return {version:6,schema:'modular-1',lang,character:CONFIG.protagonists.some(p=>p.id===character&&p.available)?character:'operator01',playerName:'',specialty:avatarDefinition(character).roleKey,bonuses:{...avatarDefinition(character).bonuses},position:{...CONFIG.spawn},inside:false,introSeen:false,bank:CONFIG.bank,cash:CONFIG.cash,energy:CONFIG.maxEnergy,energyAt:now,boosters:CONFIG.boosters,cleared:[],office:{status:'unbuilt'},inventory:[],furniture:[],nextId:1,ledger:[{id:0,key:'capital',amount:CONFIG.cash,at:now}],bankViewed:false,messageRead:false,hasEntered:false,chapterCompletedAt:null,sound:true,facing:Math.PI,savedAt:now,messageReads:[],uiEvents:[],
-  /* M3 fields */ personnel:[],contract:null,boreholes:[],geoAnalysis:null,toolInventory:[],spentMaterials:[],orders:[],drill:null,drillRunSessions:[],mission3:null,knowledgeAccelerators:0,workshop:{level:1},
+  /* M3 fields */ personnel:[],contract:null,boreholes:[],geoAnalysis:null,toolInventory:[],spentMaterials:[],orders:[],drill:null,drillRunSessions:[],mission3:null,knowledgeAccelerators:0,workshop:null,
   /* M4 fields */ mission4:null,
   /* Narrative */ narrative:{messages:[],accepted:[],rewardsCollected:[]}};
 }
@@ -33,7 +33,7 @@ export function restore(data,now=Date.now()){
  /* Preserve saved contract terms. Older contracts keep their original 15-minute/6-site rules; new contracts use 180s/3 sites. */
  /* Reset drilling timer for saves where deadline already passed */
  if(s.contract&&s.contract.duration!==180&&s.contract.drillingStartedAt&&!s.contract._timerReset4){const deadline=s.contract.drillingStartedAt+s.contract.duration*1000;if(deadline<now){s.contract.drillingStartedAt=now;}s.contract._timerReset4=true;}
- if(!s.workshop)s.workshop={level:1};
+ // Workshop is never auto-created: a new player must build its prefabricated Level 1 module.
  /* M4 defaults */ s.mission4=s.mission4||null;
  /* M1 mission rewards are confirmed by narrative; restore never pays before confirmation. */
  /* M4 stuck zones fix */
