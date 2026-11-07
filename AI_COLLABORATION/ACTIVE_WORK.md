@@ -4,6 +4,8 @@
 
 ## Currently Active
 
+- **ChatGPT — RC/DTH GLB visual integration (2026-11-07):** locally optimized the uploaded RC and DTH single-mesh GLBs to 2.75 MB / 1.99 MB, produced static previews, and staged read-only visual loaders. Dependent on PR #17 (generic equipment labels). Full asset binary set is in conversation ZIP; this GitHub PR contains integration **code only until the binaries are imported**, with procedural RC fallback. Branch `chatgpt/rc-dth-glb-visual-integration`. No economy, save or mission mutations. Production release blocked pending full GLB/WebP asset import and acceptance.
+
 - **ChatGPT — Catalog visual correction / Equipment 02:** fix Vehicles identity-rail overlap (144px desktop, 101px compact); show one exploration RC and one production DTH with descriptive temporary labels pending user's express brand/name approval; legacy advanced RC save/order remains visible. Branch `chatgpt/catalog-vehicles-rail-two-rigs`; focused JS and responsive browser CSS geometry verified, awaiting PR/real-game visual acceptance. No product economics or saved identity changes.
 - **ChatGPT — Category Audit 01 · Vehículos/DrillTruck:** canonical GLB snapshot shared by Catalog vehicle card, technical sheet, M4 Phone; visually balanced icons and category layout. Branch `chatgpt/drilltruck-real-glb-catalog-audit`, code complete pending PR/production and browser screenshot QA. No state/economy/model behavior changes.
 
