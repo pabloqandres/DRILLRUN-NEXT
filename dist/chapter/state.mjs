@@ -58,7 +58,7 @@ export function restore(data,now=Date.now()){
  if(s.office.upgrade&&(!finite(s.office.upgrade.started)||!finite(s.office.upgrade.ends)||s.office.upgrade.targetLevel!==2||s.office.upgrade.ends<s.office.upgrade.started))delete s.office.upgrade;
  const candidates=s.furniture;s.furniture=[];candidates.sort((a,b)=>Number(product(s.inventory.find(v=>v.id===a.id)?.product)?.layer==='surface')-Number(product(s.inventory.find(v=>v.id===b.id)?.product)?.layer==='surface'));
  for(const f of candidates){const valid=validatePlacement(s,f.id,f);if(valid.valid)s.furniture.push({id:f.id,x:f.x,z:f.z,rotation:f.rotation,y:valid.y,...(valid.host?{host:valid.host}:{})});}
- if(!CONFIG.requiredProducts.every(sku=>s.furniture.some(f=>s.inventory.find(v=>v.id===f.id)?.product===sku)))s.chapterCompletedAt=null;
+ // Mission completion depends on using the included workstation, never furniture purchases.
  tick(s,now);return s;
 }
 export function clearObject(s,id,now=Date.now()){

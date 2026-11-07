@@ -8,7 +8,7 @@ export function readMessage(s,id){if(!availableMessages(s).some(m=>m.id===id))re
 export function collectUIEvents(s){
  s.uiEvents??=[];const events=[];
  const once=(id,title,detail,icon,reward=false)=>{if(s.uiEvents.includes(id))return;s.uiEvents.push(id);events.push({id,title,detail,icon,reward});};
- for(const m of availableMessages(s))once('message:'+m.id,'newMessage',m.id==='welcome'?'welcomePreview':'storePreview','messages');
+ for(const m of availableMessages(s))once('message:'+m.id,'newMessage','welcomePreview','messages');
  if(landReady(s))once('mission:clear','missionCompleted','landCleared','leaf',true);
  if(s.office.status==='built')once('mission:office','built','officeUnlocked','camp',true);
  if(s.chapterCompletedAt)once('mission:chapter','missionCompleted','workstationReady','computer',true);

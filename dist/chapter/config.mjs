@@ -1,6 +1,6 @@
 import {AVATARS} from './avatars.mjs';
 export const CONFIG={version:6,requiredProducts:['desk','chair','computer'],saveKey:'drillrun-chapter-01-v5',bank:0,cash:5000,maxEnergy:20,regenSeconds:30,clearCost:1,clearSeconds:1.2,officeCost:3000,buildSeconds:600,boosters:0,grid:.1,
- cover:'./assets/cover-season-01.png',mentor:{nameKey:'mentor',messages:[{id:'welcome',bodyKey:'mentorWelcome'},{id:'office-store',bodyKey:'mentorStore',requires:'office'}]},
+ cover:'./assets/cover-season-01.png',mentor:{nameKey:'mentor',messages:[{id:'welcome',bodyKey:'mentorWelcome'}]},
  protagonists:AVATARS,
  officeSlot:{id:'office01',x:-6,z:0,w:6,d:2.5,access:{x:-7.99,z:2.9}},spawn:{x:-5.5,z:5.2}
 };
