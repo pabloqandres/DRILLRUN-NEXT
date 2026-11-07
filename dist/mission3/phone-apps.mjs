@@ -23,7 +23,6 @@ export function m3HomeApps(s,t,icon){
  const phase=mission3Phase(s);
  const L={es:{mission:'Misión',personnel:'Personal',contract:'Contrato',geology:'Geología',workshop:'Taller',catalog:'Casa Matriz'},en:{mission:'Mission',personnel:'Personnel',contract:'Contract',geology:'Geology',workshop:'Workshop',catalog:'HQ Supply'}};
  const l=L[s.lang]||L.es,apps=[];
- apps.push({id:'m3-objectives',icon:'location',label:l.mission,css:'m3-mission'});
  apps.push({id:'m3-personnel',icon:'player',label:l.personnel,css:'m3-personnel'});
  apps.push({id:'m3-contract',icon:'build',label:l.contract,css:'m3-contract'});
  apps.push({id:'m3-geology',icon:'geology',label:l.geology,css:'m3-geology'});
