@@ -285,33 +285,41 @@ function createProceduralTruck(){
 }
 function updateM4Visuals(dt){
  if(!m4VisualsReady||!s?.mission4)return;
- // Production DTH becomes visible only after the existing game assigns a real
- // zone position. Do not create an invisible machine/collider at world origin.
- const dthPosition=s.mission4.productionDrill?.position;
- if(dthPosition&&!m4DthVisual&&!m4DthLoading&&!m4DthFailed){
+ // Immediately show the owned DTH at a designated workshop-side display spot
+ // until it is assigned to a production zone. This visual fallback does not
+ // alter save data or silently invent an assigned drilling destination.
+ // The parked visual has no collider to avoid blocking the pedestrian corridor.
+ const dthOwned=!!s.mission4.productionDrill;
+ const dthAssigned=s.mission4.productionDrill?.position||null;
+ const dthParking={x:-17.5,z:-9.3};
+ const dthPlace=dthAssigned||dthParking;
+ if(dthOwned&&!m4DthVisual&&!m4DthLoading&&!m4DthFailed){
   m4DthLoading=true;
   loadRigVisual('rig_dth_production').then(model=>{
-   const position=s?.mission4?.productionDrill?.position;
-   if(!position||!world)return;
+   if(!s?.mission4?.productionDrill||!world)return;
+   const position=s.mission4.productionDrill.position||dthParking;
    const wrapper=new T.Group();wrapper.name='production-dth-rig';wrapper.add(model);
    wrapper.position.set(position.x,0.12,position.z);
    world.scene.add(wrapper);m4DthVisual=wrapper;
-   m4DthCollider={x:position.x,z:position.z,w:2.6,d:5.5,_dth:true};
-   world.colliders.push(m4DthCollider);
   }).catch(error=>{
-   m4DthFailed=true; // No repeated 404 every game frame.
+   m4DthFailed=true; // Avoid repeated network requests for a missing asset.
    console.warn('[DTH] Optimized visual unavailable:',error);
   }).finally(()=>{m4DthLoading=false;});
  }
  if(m4DthVisual){
-  if(!dthPosition){
+  if(!dthOwned){
    m4DthVisual.removeFromParent();m4DthVisual=null;
-   const idx=world.colliders.indexOf(m4DthCollider);
-   if(idx!==-1)world.colliders.splice(idx,1);
-   m4DthCollider=null;
+   if(m4DthCollider){const idx=world.colliders.indexOf(m4DthCollider);if(idx!==-1)world.colliders.splice(idx,1);m4DthCollider=null;}
   }else{
-   m4DthVisual.position.set(dthPosition.x,0.12,dthPosition.z);
-   if(m4DthCollider){m4DthCollider.x=dthPosition.x;m4DthCollider.z=dthPosition.z;}
+   m4DthVisual.position.set(dthPlace.x,0.12,dthPlace.z);
+   // Physical obstacle only after the rig has a real assigned drilling site.
+   // A parked machine is shown visually without blocking access to buildings.
+   if(dthAssigned){
+    if(!m4DthCollider){m4DthCollider={x:dthAssigned.x,z:dthAssigned.z,w:2.6,d:5.5,_dth:true};world.colliders.push(m4DthCollider);}
+    else{m4DthCollider.x=dthAssigned.x;m4DthCollider.z=dthAssigned.z;}
+   }else if(m4DthCollider){
+    const idx=world.colliders.indexOf(m4DthCollider);if(idx!==-1)world.colliders.splice(idx,1);m4DthCollider=null;
+   }
   }
  }
  // Ensure parking and truck are initialized on state change

@@ -29,3 +29,13 @@ test('visual loader uses local unbranded assets and no gameplay writes',()=>{
  assert.match(module,/rig_rc_advanced/);
  assert.doesNotMatch(module,/s\.cash|save\(|purchaseDrill\(|ledger\.push/);
 });
+
+test('owned production rig is visible at a workshop-side display spot before assignment',()=>{
+ const game=fs.readFileSync(asPath('chapter/game.mjs'),'utf8');
+ assert(game.includes('const dthOwned=!!s.mission4.productionDrill;'));
+ assert(game.includes('const dthParking={x:-17.5,z:-9.3};'));
+ assert(game.includes('const dthPlace=dthAssigned||dthParking;'));
+ assert(game.includes('if(dthOwned&&!m4DthVisual&&!m4DthLoading&&!m4DthFailed)'));
+ assert(game.includes('if(dthAssigned){'));
+ assert(!game.includes('if(dthPosition&&!m4DthVisual'));
+});

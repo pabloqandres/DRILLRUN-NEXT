@@ -6,7 +6,7 @@
 - RC optimized locally to 101,625 faces / 2,748,264 bytes, DTH to 74,119 faces / 1,985,828 bytes. New 2D WebP catalog cutouts, muted neutral paint, no external branding.
 - Added read-only `rig-visuals.mjs` with GLTFLoader caching, M3 procedural fallback and original animated carriage/shaft retained. DTH is spawned only after assigned-zone position is known; an active DTH receives a collider and no phantom obstacle appears at origin.
 - Equipment cards asynchronously load only real optimized thumbnails; fallback icon if absent.
-- **Pending:** GitHub PR contains code, but the two GLB and two WebP binaries must be uploaded from the conversation ZIP before merging. Production has not changed; no economic or save-file alterations.
+- **Imported:** the four optimized binaries are present as independent GitHub assets, hash-verified by GitHub Actions, with temporary transfer ZIP removed. 6 focused tests passed. DTH is displayed next to the workshop after delivery, then moved to the real zone once assigned; no parked phantom collider. Production deployment pending.
 - Details and precise verification: `CHANGES/2026-11-07_uploaded-rc-dth-optimized.md`.
 
 ## 2026-11-06 — Vehículos identity rail + two-machine Equipment presentation
