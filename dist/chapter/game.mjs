@@ -584,7 +584,7 @@ onM3Action:(type,data)=>{try{
 }catch(e){const msg=e.message==='noCapacity'?'Sin espacio en el taller — amplía capacidad':e.message==='noMoney'?'Fondos insuficientes':e.message==='constructionPending'?'Ampliación en curso':e.message;notices.push({title:msg,symbol:'lock'});}},
 onM4Action:(type,data)=>{try{
  if(type==='buyDthDrill'){placeMachineryOrder(s,'dthDrill',data||'rig_dth_production',DTH_DRILLS[0]?.price||28000);notices.push({title:'Perforadora DTH solicitada · en camino',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}
- else if(type==='orderDthTool'){const h=dthHammerDefinition(data);const b=dthBitDefinition(data);const def=h||b;if(!def)throw new Error('invalid');if(s.cash<def.price)throw new Error('noMoney');s.cash-=def.price;addToInventory(s,{type:h?'hammer':'bit',model:def.id,name:def.label||def.id,lifeTotal:def.lifeTotal});s.ledger.push({id:s.nextId++,key:'dthToolPurchase',amount:-def.price,at:Date.now()});notices.push({title:(def.label||def.id)+' adquirido',symbol:'bell'});}
+ else if(type==='orderDthTool'){const h=dthHammerDefinition(data);const b=dthBitDefinition(data);const def=h||b;if(!def)throw new Error('invalid');placeOrder(s,[{type:h?'hammer':'bit',model:def.id,qty:1,unitPrice:def.price}]);notices.push({title:(def.label||def.id)+' solicitado a Casa Matriz',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}
  else if(type==='installDthTool'){installDthTool(s,data);notices.push({title:'Herramienta DTH instalada',symbol:'bell'});}
  else if(type==='convertZone'){convertBoreholeToZone(s,data);notices.push({title:data+' convertido a zona',symbol:'bell'});}
  else if(type==='assignDthDrill'){assignDthDrillToZone(s,data);notices.push({title:'DTH instalada en zona',symbol:'bell'});}
