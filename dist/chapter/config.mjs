@@ -37,8 +37,8 @@ export const INTRO_SHOTS=[
 ];
 export const SHARED_INTRO_VIDEO='./cinematics/avatar01-seedance.mp4';
 // Dedicated intros are displayed by the same CinematicDirector as Avatar 1.
-// Avatar 3 keeps the approved Avatar 1 film until its dedicated cinematic is supplied.
-export const AVATAR_INTRO_VIDEOS={operator01:SHARED_INTRO_VIDEO,operator02:'./cinematics/avatar02-intro.mp4',operator03:null,operator04:'./cinematics/avatar04-intro.mp4'};
+// Avatars 2, 3 and 4 have approved dedicated cinematic assets.
+export const AVATAR_INTRO_VIDEOS={operator01:SHARED_INTRO_VIDEO,operator02:'./cinematics/avatar02-intro.mp4',operator03:'./cinematics/avatar03-intro.mp4',operator04:'./cinematics/avatar04-intro.mp4'};
 export const INTRO_VARIANTS=Object.fromEntries(AVATARS.map(a=>[a.id,{id:'intro-'+a.id,avatar:a.id,video:AVATAR_INTRO_VIDEOS[a.id]||SHARED_INTRO_VIDEO,sharedIntro:!AVATAR_INTRO_VIDEOS[a.id],shots:INTRO_SHOTS}]));
 export const PRODUCTS=[
  {id:'desk',nameKey:'desk',category:'desks',price:350,w:1.2,d:.58,h:.75,layer:'floor',descriptionKey:'deskDescription',variants:[{id:'oak',nameKey:'lightWood',swatch:'#c49d70'},{id:'graphite',nameKey:'graphite',swatch:'#536068'},{id:'ivory',nameKey:'industrialWhite',swatch:'#e8e4d8'}]},
