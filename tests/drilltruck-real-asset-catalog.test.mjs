@@ -11,6 +11,9 @@ test('the one canonical vehicle asset is the actual playable GLB in the reposito
  assert(game.includes("../assets3d/DRILLTRUCK_optimized.glb"));
  assert(renderer.includes("import {DRILLTRUCK_GLB} from '../mission4/drilltruck.mjs'"));
  assert(renderer.includes("loader.loadAsync(drillTruckAssetUrl())"));
+ assert(renderer.includes("world.scene?.getObjectByName?.('drilltruck-wrapper')"));
+ assert(renderer.includes("model=live.clone(true)"));
+ assert(renderer.includes("node.geometry=node.geometry.clone()"));
  assert(renderer.includes("new T.Box3().setFromObject(model)"));
  assert(renderer.includes("model.scale.setScalar(5/dimension)"));
  assert(renderer.includes("new ProductPreview(host,world,{transparent:true})"));
