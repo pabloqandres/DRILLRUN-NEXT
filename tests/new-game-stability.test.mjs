@@ -1,6 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newGame,restore} from '../dist/chapter/state.mjs';
+import {newGame,restore,startOffice,tick} from '../dist/chapter/state.mjs';
+import {CLEARABLES,INTRO_VARIANTS,SHARED_INTRO_VIDEO} from '../dist/chapter/config.mjs';
+import {startModule,accelerate,useOfficeComputer} from '../dist/chapter/state.mjs';
+import {ensureHsec,tickHsec,buildAsset,evaluation} from '../dist/hsec/state.mjs';
+import {suggestedPose} from '../dist/hsec/layout.mjs';
 import {confirmCompletion} from '../dist/chapter/narrative.mjs';
 import {placeMachineryOrder,placeOrder,tickDeliveries,reconcileDeliveredMachinery} from '../dist/mission3/headquarters.mjs';
 import {restoreMission3} from '../dist/mission3/tick.mjs';
@@ -84,4 +88,60 @@ test('first automated production no longer requires converting six zones',()=>{
  const last=mission4Objectives(s).at(-1);
  assert.equal(last.checks.length,2);
  assert(last.checks.every(x=>x.done));
+});
+
+test('Office L1 automatically installs the complete workstation without Office Store',()=>{
+ const s=newGame('es','operator01',at);
+ s.cleared=CLEARABLES.map(o=>o.id);
+ startOffice(s,'office01',at);
+ tick(s,at+601000);
+ assert.equal(s.office.status,'built');
+ assert.deepEqual(s.inventory.map(i=>i.product).sort(),['archive','chair','computer','desk','lamp'].sort());
+ assert.equal(s.furniture.length,5);
+ assert.equal(s.cash,2000);
+});
+
+test('All selectable avatars retain the single approved Avatar 1 intro film',()=>{
+ assert.deepEqual(Object.keys(INTRO_VARIANTS).sort(),['operator01','operator02','operator03','operator04']);
+ assert(Object.values(INTRO_VARIANTS).every(v=>v.video===SHARED_INTRO_VIDEO));
+});
+
+test('Casa Matriz reserves workshop capacity before order delivery',()=>{
+ const s=newGame('es','operator01',at);s.cash=50000;s.drill={id:'rig_rc_compact'};
+ placeOrder(s,[{type:'bit',model:'dome-4',qty:8,unitPrice:450}],at);
+ assert.throws(()=>placeOrder(s,[{type:'bit',model:'dome-4',qty:1,unitPrice:450}],at+1),/noCapacity/);
+ tickDeliveries(s,at+121000);
+ assert.equal(s.toolInventory.length,8);
+ assert.equal(s.orders[0].status,'delivered');
+});
+
+test('Casa Matriz defers delivery if workshop storage is full',()=>{
+ const s=newGame('es','operator01',at);s.cash=50000;s.drill={id:'rig_rc_compact'};
+ placeOrder(s,[{type:'bit',model:'dome-4',qty:1,unitPrice:450}],at);
+ s.toolInventory=Array.from({length:8},(_,i)=>({id:'legacy-'+i,status:'new'}));
+ tickDeliveries(s,at+121000);
+ assert.equal(s.orders[0].status,'dispatched');
+ s.toolInventory=[];
+ tickDeliveries(s,at+122000);
+ assert.equal(s.orders[0].status,'delivered');
+ assert.equal(s.toolInventory.length,1);
+});
+
+test('HSEC score alone cannot complete an unsafe faena',()=>{
+ const s=newGame('es','operator01',at);
+ s.cleared=CLEARABLES.map(o=>o.id);
+ s.boosters=5;
+ startOffice(s,'office01',at);accelerate(s,at+1);
+ s.inside=true;useOfficeComputer(s,at+2);s.inside=false;
+ tickHsec(s,0);
+ startModule(s,'office-l2','office01',at+3);accelerate(s,at+4);
+ for(const type of ['shed','vehicle','pedestrian','crossing','railing','railing','railing','tower','tower','tower','tower','cone','cone','cone','cone','cone','cone','sign','extinguisher']){
+  buildAsset(s,type,suggestedPose(s,type));
+  tickHsec(s,26);
+ }
+ const e=evaluation(s);
+ assert.equal(e.operational,true);
+ assert(e.total>=80);
+ tickHsec(s,1);
+ assert(s.hsec.completedAt);
 });
