@@ -43,6 +43,7 @@ function shadowTexture(){
  const t=new T.CanvasTexture(canvas);t.colorSpace=T.SRGBColorSpace;return t;
 }
 export function finishConcretePad(world,group,x,z,width,depth){
+ if(typeof document==='undefined')return null; // also keeps geometry-only Node regressions pure
  world._v4ConcreteTex??=textureCanvas();
  const surface=new T.Mesh(
   new T.PlaneGeometry(width-.12,depth-.12),
@@ -63,6 +64,7 @@ export function finishConcretePad(world,group,x,z,width,depth){
  return surface;
 }
 export function softContactShadow(world,parent,width,depth,y=.024){
+ if(typeof document==='undefined')return null; // server-side geometry fixtures
  world._v4ShadowTex??=shadowTexture();
  const mesh=new T.Mesh(
   new T.PlaneGeometry(width,depth),
