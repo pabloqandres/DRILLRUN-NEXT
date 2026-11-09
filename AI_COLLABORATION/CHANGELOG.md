@@ -1,5 +1,10 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — Office L1 visible detail V6
+
+- Decorative, non-colliding fascia caps, rivets, rear air intake and service marker lenses added to real level-1 office. Preserves PUMA burgundy and original doors/geometry/upgrade gating.
+- V8 module syntax checked, browser WebGL acceptance pending. See `CHANGES/2026-11-09_office-l1-v6.md`.
+
 ## 2026-11-09 — World materials V5 (ChatGPT)
 
 - Enhanced procedural Atacama ground striation with muted wind abrasion and texture filtering; added flush concrete pad joints, mineral streaks and edge wear to actual 3D world surfaces.

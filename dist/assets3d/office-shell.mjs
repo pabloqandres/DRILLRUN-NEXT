@@ -148,6 +148,29 @@ export function createOffice(w){
   diffuser.material=new T.MeshBasicMaterial({color:0xffe9af});
  }
  for(const z of[-.86,-.60,-.34,-.08,.18,.44,.70,.96])box(elevations.west,.018,.055,.12,-3.045,2.35,z,0x57707c);
+ // V6 · L1 industrial finishing, deliberately limited to existing walls and fascia.
+ // No new footprint, obstruction, upgrade equipment, doors or gameplay triggers.
+ // Top edge weathering caps give the container a clearer fabricated silhouette.
+ for(const z of[-1.285,1.285]){
+  box(frame,5.74,.035,.045,0,2.755,z,0x3e4244);
+  for(let x=-2.55;x<=2.56;x+=.51){
+   box(frame,.036,.047,.017,x,2.753,z+(z>0?.029:-.029),P.bolt);
+  }
+ }
+ for(const x of[-3.038,3.038]){
+  box(frame,.045,.036,2.23,x,2.755,0,0x3e4244);
+  for(let z=-.90;z<=.91;z+=.45)box(frame,.015,.042,.035,x+(x>0?.029:-.029),2.754,z,P.bolt);
+ }
+ // High rear mechanical air intake — decorative recess on a solid upper panel.
+ bevel(elevations.back,.92,.20,.025,0,2.53,-1.274,P.steel);
+ for(let j=0;j<8;j++)box(elevations.back,.074,.105,.012,-.38+j*.108,2.53,-1.291,P.dark);
+ // Paired low-glare service markers: visible in the opening mission without
+ // adding point lights, hard shadows or a performance-heavy emitter.
+ for(const x of[-2.74,2.74]){
+  bevel(elevations.front,.13,.075,.042,x,2.48,1.329,P.steel);
+  const lens=box(elevations.front,.079,.039,.012,x,2.48,1.357,0xffdda3);
+  lens.material=new T.MeshBasicMaterial({color:0xffdda3});
+ }
  // Exact original PNG: white paper is masked and its original shapes rendered in grey ink.
  const logoMap=new T.TextureLoader().load(new URL('../assets/branding/drillco-original.png',import.meta.url).href,()=>{w.renderer.staticFrame=null;});logoMap.colorSpace=T.SRGBColorSpace;
  const logoMat=new T.MeshBasicMaterial({map:logoMap,color:0x4a4c4b,transparent:true,depthWrite:false,side:T.DoubleSide});logoMat.userData.brandInk=true;
