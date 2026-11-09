@@ -1,5 +1,9 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — V21 direct game-loop bug fix, M3 message + workshop obstruction UI
+
+**User issue:** Paid M3 contract never auto-opened Camila's closing phone SMS; workshop expansion falsely reported many invisible light poles. Narrow Claude-owned game.mjs changes explicitly under user direct-implementation instruction: deliver/open only m3 end message immediately and recover unread already-delivered saves without a second payout; replace erroneous render-mesh classification with read-only real built HSEC positions. No modifications to mission economic predicates, gameplay scoring or saved data. See CHANGES/2026-11-09_m3-closing-workshop-posts-v21.md.
+
 ## 2026-11-09 — Cross-owner V20 floating point bug in mission engine
 
 **User issue:** Screenshot shows 3/3 boreholes, 90/90 m, M3 11/13, stuck waiting for Validate Metrage, countdown at 00:00. Root cause reproduced: summing (3000/3600) across three boreholes can yield 89.99999999999997. ChatGPT narrowly updates Claude-owned dist/mission3/contracts.mjs to normalize physical completion, recognize legacy near-exact finished saves, and calculate speed bonus at physical drill completion. In dist/chapter/game.mjs the existing timer only changes display behavior to READY after true completion. No mission sequence, economy amounts, real drilling productivity or save migration altered. User previously authorized direct work in-game; coordinate merging this targeted fix before concurrent Claude mission changes. See CHANGES/2026-11-09_m3-meter-precision-v20.md.
