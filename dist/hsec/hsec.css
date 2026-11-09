@@ -25,3 +25,24 @@ body.builderOpen .hsecHud{display:none}
 .hsecAsset,.hsecOrder{border-color:#5ab8e833}
 .conditionBars progress::-webkit-progress-bar{background:#0a1e3066;border-radius:4px;border:1px solid #ffffff0a}
 .conditionBars progress::-webkit-progress-value{box-shadow:0 0 6px var(--accent,#2cdcf1)}
+
+
+/* V11 HSEC mission checklist with current measured values */
+.hsecChecklist{display:grid;gap:8px;margin:10px 0 14px}
+.hsecChecklistItem{display:grid;grid-template-columns:20px minmax(0,1fr) auto;column-gap:10px;row-gap:3px;align-items:start;padding:10px 12px;border:1px solid #54728188;border-radius:9px;background:#142f41a8}
+.hsecChecklistItem.done{border-color:#459e8890;background:#123c3880}
+.hsecChecklistSymbol{font-size:15px;line-height:20px;color:#ffca69}
+.hsecChecklistItem.done .hsecChecklistSymbol{color:#7be6b4}
+.hsecChecklistText{min-width:0}
+.hsecChecklistText b{display:block;font-size:12px;color:#f0f8fc}
+.hsecChecklistText small{display:block;margin-top:3px;font-size:10px;line-height:1.35;color:#b9d1df}
+.hsecChecklistStatus{text-align:right;font-size:10px;font-weight:800;color:#ffce77;white-space:nowrap}
+.hsecChecklistItem.done .hsecChecklistStatus{color:#7be6b4}
+.hsecChecklistValue{grid-column:2 / -1;font-size:11px;line-height:1.35;color:#cde2ed;font-variant-numeric:tabular-nums}
+.hsecChecklistHint{grid-column:2 / -1;font-size:10px;color:#b1c4d1;line-height:1.3}
+@media(max-width:540px){.hsecChecklistItem{grid-template-columns:17px minmax(0,1fr) auto;padding:8px;column-gap:7px}.hsecChecklistStatus{font-size:9px}}
+/* HSEC modal scroll region (also fixes earlier PR #44 conflict). */
+#modalCard.hsecModal{display:flex!important;flex-direction:column!important;max-height:calc(100dvh - 20px)!important;min-height:0!important;overflow:hidden!important}
+#modalCard.hsecModal .hsecPanel{display:flex!important;flex-direction:column!important;min-height:0!important;flex:1 1 auto}
+#modalCard.hsecModal .hsecPanel>.hsecBody{overflow-y:auto!important;overflow-x:hidden!important;flex:1 1 auto!important;min-height:0!important;touch-action:pan-y!important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:14px}
+#modalCard.hsecModal .hsecPanel>.hsecTabs{flex-shrink:0;touch-action:pan-x;overflow-x:auto;overflow-y:hidden}
