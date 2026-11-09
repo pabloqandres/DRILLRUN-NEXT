@@ -75,6 +75,12 @@ export function completeMaintenance(s,now=Date.now()){
  const zone=s.mission4.zones.find(z=>z.id===zoneId);
  if(s.mission4.productionMode==='single-dth-v2'){
   if(s.mission4.serviceRequested){
+   // Collected by DrillTruck only after it physically returns from service.
+   for(const material of (s.spentMaterials||[])){
+    if(material.originZone===zoneId&&material.recyclingStatus==='awaiting-pickup'){
+     material.recyclingStatus='awaiting-yard';material.recoveredAt=now;
+    }
+   }
    const ready=serviceDthFromStock(s,now);
    if(zone){zone.status=ready?'producing':'idle';zone.lastCycleAt=ready?now:null;}
   }else if(zone&&zone.id===s.mission4.productionDrill?.assignedZone){
