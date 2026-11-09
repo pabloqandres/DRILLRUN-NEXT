@@ -1,5 +1,9 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — Shared mission status presentation, no progress logic changes
+
+**User instruction:** Fix misleading M3 left mission panel and contradictory phone objectives; the left panel and details must reflect exactly the same live checklist and the next missing step (e.g. drilling rig not yet purchased). ChatGPT may modify only the M3 and M2 *rendering* sections in Claude-owned `dist/chapter/game.mjs`, and M3 objectives rendering in `dist/mission3/phone-apps.mjs`; source-of-truth engine `mission3-state.mjs`, M2 state, economy, asset purchases, and save files remain untouched. Shared pure readout modules avoid parallel duplicated progress logic. Full details `CHANGES/2026-11-09_live-mission-checklists-v16.md`.
+
 ## 2026-11-09 — Camera-only hookup in Claude-owned gameplay loop
 
 **User authorization:** Directly fix limited construction zoom, strange aerial movement and camera entering buildings. ChatGPT modifies the camera renderer (`dist/camera/follow-camera.mjs`) and just the existing world gesture handler and existing game-frame camera dispatch in `dist/chapter/game.mjs`. This does not touch movement/mission logic beyond dispatching the same joystick to camera-only pan while HSEC placing is active; the joystick continues moving the character in ordinary exploration. Review in `CHANGES/2026-11-09_builder-camera-navigation-v15.md`. Any concurrent Claude changes to `game.mjs` must be reconciled before merge; no broad refactoring authorized.
