@@ -1,5 +1,9 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — V12 unified painted road junctions
+
+- Repaired material-layer seams at HSEC road intersections, curves and T-junctions by painting every route in shared passes. Corrected metric road width under non-square terrain decal map. Zebra marks remain clipped to the actual vehicle pavement. No gameplay or saved-state changes. See `CHANGES/2026-11-09_road-junctions-v12.md`.
+
 ## 2026-11-09 — V10 continuous road junction rendering
 
 - Vehicle road painting now stays continuous beneath pedestrian crossings; zebra stripes clipped to constructed roads instead of creating floating rectangular overlays. No HSEC logic or saved state changes. See `CHANGES/2026-11-09_road-junctions-v10.md`.
