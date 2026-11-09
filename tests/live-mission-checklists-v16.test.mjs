@@ -14,7 +14,7 @@ test('M3: left card and phone share correct next step when geology is done but n
  const m=mission3Readout(s);
  assert.equal(m.groups.length,5);
  assert.equal(m.pending.id,'buyDrill');
- assert.equal(m.pending.name,'Perforadora adquirida');
+ assert.equal(m.pending.name,'Adquirir perforadora RC');
  assert.equal(m.done,5);
  assert.equal(m.total,13);
  assert.equal(m.progress,5/13);
