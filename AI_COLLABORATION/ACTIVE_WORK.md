@@ -4,6 +4,8 @@
 
 ## Currently Active
 
+- **ChatGPT — V12 road-junction render:** `chatgpt/hsec-unified-junction-paint-v12` corrects material pass order and metric widths on existing HSEC road canvas. Syntax and mock Canvas2D T-junction tests passed; live browser screenshot QA pending.
+
 - **ChatGPT — V10 road junctions:** `chatgpt/hsec-road-junctions-v10`; cosmetic `dist/hsec/world.mjs`, JS syntax checked. Runtime render QA pending.
 
 - **ChatGPT — HSEC V9 crossings and shed lights:** `chatgpt/hsec-crosswalk-shed-lights-v9`. Rendering-only `dist/hsec/world.mjs` and `dist/hsec/shed-model.mjs`. JS parses successfully; gameplay/WebGL screenshots and real-night lighting QA pending.
