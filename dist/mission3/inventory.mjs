@@ -96,10 +96,24 @@ export function finishWorkshopUpgrade(s){
 }
 
 // Accelerate workshop construction (boost)
-export function accelerateWorkshop(s,seconds=60){
+export function accelerateWorkshop(s,seconds=60,now=Date.now()){
  const job=workshopUpgradeJob(s);
- if(!job)return;
- job.ends=Math.max(job.started,job.ends-seconds*1000);
+ if(!job)throw new Error('constructionNotActive');
+ if(!Number.isFinite(seconds)||seconds<=0)throw new Error('invalidBoost');
+ // Every acceleration costs exactly one booster. Never mutate timer without
+ // successfully spending the booster first, and reject double-clicks after
+ // the job is already complete.
+ if(now>=job.ends)throw new Error('constructionFinished');
+ if(!Number.isFinite(s.boosters)||s.boosters<1)throw new Error('noBoosters');
+ const remaining=Math.max(0,job.ends-now);
+ const reduced=Math.min(remaining,seconds*1000);
+ if(reduced<=0)throw new Error('constructionFinished');
+ s.boosters-=1;
+ job.ends=Math.max(now,job.ends-reduced);
+ // Keep history of actual booster spending, not extra rewards.
+ s.ledger??=[];
+ s.ledger.push({id:s.nextId++,key:'workshopAcceleration',label:'Acelerador de ampliación de taller',amount:0,boosters:-1,seconds:Math.round(reduced/1000),at:now});
+ return {secondsReduced:reduced/1000,remainingSeconds:Math.max(0,(job.ends-now)/1000),boostersLeft:s.boosters};
 }
 
 // Demolish workshop (resets to level 1, no refund)
