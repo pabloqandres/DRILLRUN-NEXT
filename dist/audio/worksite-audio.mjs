@@ -72,7 +72,7 @@ export class WorksiteAudio{
   high.Q.value=surface==='concrete'?.72:.45;
   const volume=ctx.createGain();const start=ctx.currentTime+.005;
   volume.gain.setValueAtTime(.0001,start);
-  volume.gain.exponentialRampToValueAtTime((surface==='concrete'?.075:.11)*spatial,start+.016);
+  volume.gain.exponentialRampToValueAtTime((surface==='concrete'?.052:.068)*spatial,start+.027);
   volume.gain.exponentialRampToValueAtTime(.0001,start+(surface==='concrete'?.13:.18));
   src.connect(high);high.connect(volume);volume.connect(this.master);
   src.start(start);src.stop(start+.2);
