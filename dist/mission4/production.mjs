@@ -79,7 +79,7 @@ function retireSpentTool(s,tool,zoneId,now){
  if(!s.spentMaterials.some(x=>x.originalToolId===tool.id)){
   s.spentMaterials.push({id:'spent-'+(s.nextId++),originalToolId:tool.id,
    model:tool.model,type:tool.type,metersUsed:tool.metersUsed||0,
-   originZone:zoneId,recoveredAt:now,recyclingStatus:'awaiting-yard'});
+   originZone:zoneId,discardedAt:now,recoveredAt:null,recyclingStatus:'awaiting-pickup'});
  }
 }
 function activatePermanentProduction(s,now){
