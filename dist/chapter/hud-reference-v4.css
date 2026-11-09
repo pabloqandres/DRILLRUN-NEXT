@@ -1262,3 +1262,41 @@ body.interior #hud #objective:not(.hidden).collapsed{
 /* M4 dock: exactly five visible destinations. Visibility always overrides
    the HUD's legacy button display:flex!important declaration. */
 #hud #bottomNav button.hidden{display:none!important}
+
+/* Five-item dock — fit complete labels, including OPERACIONES, on desktop and mobile. */
+#hud #bottomNav{
+ box-sizing:border-box!important;
+ width:min(790px,calc(100vw - 225px))!important;
+ max-width:calc(100vw - 24px)!important;
+}
+#hud #bottomNav button{
+ box-sizing:border-box!important;
+ flex:1 1 20%!important;
+ width:20%!important;
+ min-width:0!important;
+ padding-left:3px!important;
+ padding-right:3px!important;
+ overflow:hidden!important;
+}
+#hud #bottomNav button span:last-child{
+ box-sizing:border-box!important;
+ width:100%!important;
+ max-width:100%!important;
+ text-align:center!important;
+ white-space:nowrap!important;
+ overflow:hidden!important;
+ text-overflow:clip!important;
+ font-size:clamp(9px,.95vw,12px)!important;
+ letter-spacing:0!important;
+ line-height:1.12!important;
+}
+#hud #bottomNav button.hidden{display:none!important}
+@media(max-width:1050px),(max-height:600px){
+ #hud #bottomNav{width:min(690px,calc(100vw - 175px))!important}
+ #hud #bottomNav button span:last-child{font-size:clamp(8px,1.05vw,11px)!important}
+}
+@media(max-width:650px){
+ #hud #bottomNav{width:calc(100vw - 115px)!important}
+ #hud #bottomNav button{padding-left:1px!important;padding-right:1px!important}
+ #hud #bottomNav button span:last-child{font-size:clamp(6px,1.4vw,9px)!important}
+}
