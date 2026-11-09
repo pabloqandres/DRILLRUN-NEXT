@@ -236,7 +236,32 @@ $('#playerNameInput').oninput=renderCharacters;
 $('#play').onclick=async()=>{if(cloudSyncing||cloudLocked)return;if(!hasSave)return chooseCharacter(true);try{requestImmersive();await ensureWorld();s=readSave();if(!s){hasSave=false;return chooseCharacter();}prefs.lang=s.lang;prefs.sound=s.sound;t=translator(s.lang);applyText();hasSave=true;beginPlay(true);}catch(e){console.error(e);toast('invalid');}};
 $('#newGame').onclick=()=>{if(cloudSyncing||cloudLocked)return;modal(`<h2>${esc(t('newGame'))}</h2><p>${esc(t('resetAsk'))}</p><div class="modalActions">${button('cancel','keepSave')}${button('confirm','replaceSave',true)}</div>`);$('#keepSave').onclick=closeModal;$('#replaceSave').onclick=()=>{closeModal();void chooseCharacter(true);};};
 $('#backStart').onclick=()=>{freshGameRequested=false;phase='start';hidden($('#characterScreen'),true);hidden($('#startScreen'),false);s=readSave();hasSave=!!s;applyText();};
-$('#startAdventure').onclick=()=>{try{setPlayerIdentity(s,selectedAvatar,$('#playerNameInput').value);}catch(e){toast(e.key);return;}hasSave=true;avatars.activate(s.character);world.setCharacter(s.character);world.inspect=false;hidden($('#characterScreen'),true);hidden($('#provisionalNote'),true);s.facing=Math.PI;s.position={...CONFIG.spawn};requestImmersive();startCinematic(false,false);save();};
+$('#startAdventure').onclick=async()=>{
+ if(cloudSyncing||cloudLocked)return;
+ try{setPlayerIdentity(s,selectedAvatar,$('#playerNameInput').value);}
+ catch(e){toast(e.key);return;}
+ const button=$('#startAdventure');button.disabled=true;
+ if(freshGameRequested){
+  s.cloudGeneration=previousCloudGeneration+1;
+  s.cloudResetPending=true;
+  s.cloudGameId=crypto.randomUUID();
+  cloudSyncing=true;cloudStatus='Activando nueva partida oficial…';
+  updateStartAccount();
+  if(cloudUserId()){
+   const synced=await cloudStartNewGame(s);
+   if(synced.status==='ready'){s=synced.state;cloudStatus='Nueva partida oficial sincronizada con Google';}
+   else cloudStatus='Partida nueva local; sincronización Google pendiente';
+  }else cloudStatus='Partida nueva local; conecta Google para sincronizar';
+  cloudSyncing=false;
+  s.savedAt=Date.now();
+  localStorage.setItem(CONFIG.saveKey,JSON.stringify(s));
+  freshGameRequested=false;
+ }
+ hasSave=true;avatars.activate(s.character);world.setCharacter(s.character);
+ world.inspect=false;hidden($('#characterScreen'),true);hidden($('#provisionalNote'),true);
+ s.facing=Math.PI;s.position={...CONFIG.spawn};requestImmersive();
+ startCinematic(false,false);save();updateStartAccount();
+};
 function requestImmersive(){const el=document.documentElement;if(!document.fullscreenElement&&el.requestFullscreen)el.requestFullscreen({navigationUI:'hide'}).catch(()=>{});}
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 function startCinematic(orbitOnly=false,review=false){stop();phase='intro';cinemaReview=review;blueprint=false;world.inspect=false;world.chapterCamera=null;world.avatarHeight=avatarDefinition(s.character).height;world.player.rotation.y=s.facing;motion.yaw=s.facing;world.worker.reset();resetOrbit(world.orbit);world.orbit.yaw=s.facing-Math.PI;hidden($('#hud'),true);hidden($('#characterScreen'),true);hidden($('#startScreen'),true);notices.clear();wind.set(false);worksiteAudio.set(false);cinematic.start(s.character,{orbitOnly});}
