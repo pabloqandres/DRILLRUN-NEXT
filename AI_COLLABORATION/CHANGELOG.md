@@ -1,5 +1,9 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — V19 phone scroll, input reliability, catalog polish, shed lighting
+
+- Fix same-app phone scroll resetting after bit/hammer purchases; native phone scroll restored. Release held PC controls when phone/modal takes focus or window blurs. Contain RC rig previews and use readable names in Casa Matriz. Reduce concrete/gravel steps by 31/38%; add two cold-white interior ceiling lights in completed shed. No mission/economy changes. See CHANGES/2026-11-09_phone-scroll-input-v19.md.
+
 ## 2026-11-09 — V18 immersive worksite sound and cinematic Atacama polish
 
 - Add original Web Audio spatial sounds for gravel/concrete footsteps, operating RC/DTH drill, active DrillTruck, workshop metalwork and office hum. Add state-driven industrial lights, rotating rooftop extractor, machine warning beacons, welding sparks, moving vehicle dust and contact shadows. New mineral skyline mesas and cinematic sky sunlight. No game/economy/mission changes; optional effects honor audio preference and low graphics preset. See `CHANGES/2026-11-09_immersive-atacama-v18.md`.

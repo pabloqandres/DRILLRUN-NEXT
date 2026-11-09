@@ -4,6 +4,8 @@
 
 ## Currently Active
 
+- **ChatGPT — V19 scroll/input/catalog and workshop lighting:** chatgpt/phone-scroll-input-catalog-light-v19. Phone scroll retained on purchases, input released on UI focus, contained Casa Matriz previews, softer footsteps and two interior PointLights. Syntax/CSS and fake DOM scroll checks passed; real device QA pending.
+
 - **ChatGPT — V18 immersive audiovisual worksite:** `chatgpt/atacama-immersive-av-v18`. New original procedural audio and graphical scene overlays with narrow game lifecycle integration, low-quality fallback. Parser and mock engine/scene checks passed; browser WebGL/audio device QA pending.
 
 - **ChatGPT — V17 HSEC top-bar alignment:** `chatgpt/hsec-header-status-v17`, visual DOM reparent and scoped HUD CSS only. Structural checks 10/10 passed; browser rendering pending. V16 M2/M3 checklist approved by user; untouched.

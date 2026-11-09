@@ -689,3 +689,172 @@ body.interior #hud #objective:not(.hidden).collapsed{
  #hud header .topActions #hsecInline .hsecIcon{width:13px!important;height:13px!important;flex-basis:13px!important}
  #hud header .topActions #hsecInline span b{font-size:11px!important}
 }
+
+
+/* V19 — phone is the scroll owner. Remove the old storeMode flex/overflow
+   constraint ONLY for regular phone apps. The world canvas keeps its own
+   pointer capture; the foreground phone takes native wheel/touch scroll. */
+#phone:not(.hidden){
+ min-height:0!important;
+ display:flex!important;
+ flex-direction:column!important;
+ overscroll-behavior:contain;
+}
+#phone:not(.storeMode) #phoneContent{
+ box-sizing:border-box!important;
+ display:block!important;
+ flex:1 1 0%!important;
+ min-height:0!important;
+ max-height:100%!important;
+ overflow-y:auto!important;
+ overflow-x:hidden!important;
+ overscroll-behavior:contain!important;
+ touch-action:pan-y!important;
+ -webkit-overflow-scrolling:touch!important;
+ scrollbar-width:thin!important;
+ scrollbar-color:#80b5c999 transparent!important;
+ pointer-events:auto!important;
+}
+#phone:not(.storeMode) #phoneContent.appContent{
+ animation:none!important; /* keep wheel/scroll layer stable during refresh */
+}
+#phone:not(.storeMode) .phoneTop,
+#phone:not(.storeMode) .phoneStatus,
+#phone:not(.storeMode) .phoneChin{
+ flex:0 0 auto!important;
+}
+/* Casa Matriz — product image, text and purchase action each have an owned
+   box. Prevent transparent cutout thumbnails from extending beyond cards. */
+#phoneContent .m3RigCatalogCard{
+ box-sizing:border-box!important;
+ display:grid!important;
+ grid-template-columns:clamp(68px,22%,102px) minmax(0,1fr) clamp(62px,21%,86px)!important;
+ align-items:center!important;
+ gap:clamp(6px,1.7vw,11px)!important;
+ width:100%!important;
+ max-width:100%!important;
+ padding:11px!important;
+ min-height:116px!important;
+ margin:0 0 10px!important;
+ overflow:hidden!important;
+ border-radius:15px!important;
+}
+#phoneContent .m3RigCatalogCard>.rigPreview{
+ position:relative!important;
+ display:flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+ box-sizing:border-box!important;
+ width:100%!important;
+ max-width:100%!important;
+ min-width:0!important;
+ height:102px!important;
+ flex:none!important;
+ overflow:hidden!important;
+ padding:6px!important;
+ isolation:isolate!important;
+ border:1px solid #76b8c37a!important;
+ border-radius:12px!important;
+ background:#163649dd!important;
+}
+#phoneContent .m3RigCatalogCard>.rigPreview>img{
+ display:block!important;
+ position:static!important;
+ width:100%!important;
+ height:100%!important;
+ max-width:100%!important;
+ max-height:100%!important;
+ min-width:0!important;
+ object-fit:contain!important;
+ object-position:center center!important;
+ transform:none!important;
+ filter:drop-shadow(0 3px 5px #01121f88);
+}
+#phoneContent .m3RigCatalogCard>div{
+ min-width:0!important;
+ max-width:100%!important;
+ overflow-wrap:anywhere!important;
+ word-break:normal!important;
+}
+#phoneContent .m3RigCatalogCard>div>b{
+ display:block!important;
+ font-size:clamp(10px,1vw,13px)!important;
+ line-height:1.25!important;
+ letter-spacing:0!important;
+ margin:0 0 5px!important;
+ overflow-wrap:anywhere!important;
+}
+#phoneContent .m3RigCatalogCard>div>small{
+ display:block!important;
+ font-size:10px!important;
+ line-height:1.35!important;
+ margin-top:5px!important;
+ overflow-wrap:anywhere!important;
+ color:#bbd3db!important;
+}
+#phoneContent .m3RigCatalogCard>button{
+ box-sizing:border-box!important;
+ display:flex!important;
+ flex-direction:column!important;
+ align-items:center!important;
+ justify-content:center!important;
+ width:100%!important;
+ min-width:0!important;
+ max-width:100%!important;
+ min-height:63px!important;
+ padding:7px 3px!important;
+ margin:0!important;
+ gap:4px!important;
+ font-size:10px!important;
+ border-radius:12px!important;
+ white-space:normal!important;
+ overflow-wrap:anywhere!important;
+}
+#phoneContent .m3RigCatalogCard>button>span{
+ display:block!important;
+ max-width:100%!important;
+ line-height:1.2!important;
+ text-align:center!important;
+}
+#phoneContent .m3RigCatalogCard>button .uiIcon{
+ width:20px!important;
+ height:20px!important;
+ flex:0 0 20px!important;
+}
+#phoneContent .m3Header{
+ min-width:0!important;
+ max-width:100%!important;
+ display:grid!important;
+ grid-template-columns:auto minmax(0,1fr) auto!important;
+ align-items:center!important;
+ gap:10px!important;
+}
+#phoneContent .m3Header>div{min-width:0!important}
+#phoneContent .m3Header h3{
+ overflow-wrap:break-word!important;
+ font-size:clamp(17px,1.5vw,22px)!important;
+}
+#phoneContent .m3Header .storeWallet{
+ max-width:128px!important;
+ min-width:0!important;
+ margin-left:0!important;
+ padding:7px!important;
+ font-size:clamp(11px,1vw,14px)!important;
+ overflow:hidden!important;
+}
+#phoneContent .m3Header .storeWallet .uiIcon{
+ flex:0 0 19px!important;
+ width:19px!important;
+ height:19px!important;
+}
+@media(max-width:750px){
+ #phoneContent .m3RigCatalogCard{
+  grid-template-columns:62px minmax(0,1fr) 58px!important;
+  gap:6px!important;
+  padding:8px!important;
+ }
+ #phoneContent .m3RigCatalogCard>.rigPreview{height:87px!important;padding:3px!important}
+ #phoneContent .m3RigCatalogCard>button{min-height:55px!important;font-size:9px!important}
+ #phoneContent .m3Header{gap:6px!important}
+ #phoneContent .m3Header .storeWallet{max-width:82px!important}
+}

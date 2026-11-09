@@ -43,6 +43,30 @@ export class SiteCinematics{
   const doorLight=new T.PointLight(0xb2f1fa,.6,8,2.4);
   doorLight.castShadow=false;doorLight.position.set(0,3.45,3.12);
   this.workshop.add(doorLight);this.workshopLight=doorLight;
+  // Two actual interior ceiling luminaires illuminate the workshop floor,
+  // shelves and toolbox (not just the facade). All are inside the real L1
+  // building and become visible only after construction completes.
+  this.workshopInteriorLights=[];
+  const ceilingMaterial=new T.MeshStandardMaterial({
+   color:0xe2f1ef,emissive:0xc8faff,emissiveIntensity:1.9,
+   roughness:.27,metalness:.08
+  });
+  const rimMaterial=new T.MeshStandardMaterial({
+   color:0x293f49,roughness:.54,metalness:.38
+  });
+  for(const x of[-1.85,1.85]){
+   const holder=new T.Mesh(new T.BoxGeometry(2.25,.115,.42),rimMaterial);
+   holder.position.set(x,4.05,-.38);this.workshop.add(holder);
+   const lens=new T.Mesh(new T.BoxGeometry(2.08,.047,.30),ceilingMaterial);
+   lens.position.set(x,3.98,-.38);this.workshop.add(lens);
+   const light=new T.PointLight(0xe7f7ff,3.3,9,1.6);
+   light.castShadow=false;
+   light.position.set(x,3.84,-.15);
+   this.workshop.add(light);
+   this.workshopInteriorLights.push(light);
+   const halo=billboard(cyanGlow,0xeaffff,1.65,.16);
+   halo.position.set(x,3.97,-.38);this.workshop.add(halo);
+  }
   // Powered rooftop extractor adds visible life to the maintenance facility,
   // strictly after the real workshop is built. Purely visual fan, no collision.
   const housingMat=new T.MeshStandardMaterial({color:0x273b43,roughness:.65,metalness:.43});
@@ -153,7 +177,9 @@ export class SiteCinematics{
    const glow=this.office.children[0];glow.material.opacity=.14+.045*Math.sin(time*.7);
   }
   if(this.workshop.visible){
-   this.workshopLight.intensity=.56+.09*Math.sin(time*.8);
+   this.workshopLight.intensity=.85+.10*Math.sin(time*.8);
+   // Stable industrial ceiling light, independent of night-cycle graphics.
+   for(const lamp of this.workshopInteriorLights)lamp.intensity=3.3;
    this.ventilator.rotation.y+=dt*3.3;
   }
   if(this.rig.visible){

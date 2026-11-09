@@ -13,6 +13,13 @@ export class PhoneUI{
  constructor(options){Object.assign(this,options);this.conversation=false;this.narrativeCharacter=null;this._typing=null;this.rigArtCache=new Map();}
  release(){if(this.preview)this.previewAngle=this.preview.angle;this.preview?.dispose();this.preview=null;this._disposeTyping();}
  render(app){
+  // Live mission/stock updates re-render this screen. Preserve the user's
+  // scroll position while they remain in the SAME phone view.
+  const viewKey=app==='messages'
+   ?app+':'+(this.conversation?'thread:'+String(this.narrativeCharacter||'mentor'):'contacts')
+   :app;
+  const keepScroll=this._lastViewKey===viewKey;
+  const previousScroll=keepScroll?this.content.scrollTop:0;
   this.release();const s=this.state(),t=this.translate(),c=this.content,fmt=this.format;this.app=app;
   this.shell.classList.remove('storeMode');this.shell.dataset.app=app;
   this.title.textContent=app==='home'?'FIELD / 01':t(app);this.back.style.visibility=app==='home'?'hidden':'visible';
@@ -86,7 +93,10 @@ export class PhoneUI{
   c.querySelectorAll('[data-locate-machinery]').forEach(b=>b.onclick=()=>{if(this.onM3Action)this.onM3Action('locateMachinery',b.dataset.locateMachinery);});
   // M4 action bindings
   c.querySelectorAll('[data-m4-action]').forEach(b=>b.onclick=()=>{if(this.onM4Action)this.onM4Action(b.dataset.m4Action,b.dataset.zone||b.dataset.bh||b.dataset.drill||b.dataset.tool||b.dataset.model||null);});
-  c.querySelector('#understoodMessage')?.addEventListener('click',this.onClose);c.scrollTop=0;this.onHUD();
+  c.querySelector('#understoodMessage')?.addEventListener('click',this.onClose);
+  this._lastViewKey=viewKey;
+  c.scrollTop=keepScroll?previousScroll:0;
+  this.onHUD();
  }
  renderMessages(s,t){
   const c=this.content;this._disposeTyping();
