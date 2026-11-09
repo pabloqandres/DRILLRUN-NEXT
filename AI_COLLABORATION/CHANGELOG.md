@@ -1,5 +1,10 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — M1 HUD panel shown before phone acceptance
+
+- Corrects missing entire M1 objective card when start message hasn't yet been accepted; still shows true obstacle progress and requires narrative acceptance for mission rewards. No saved-state changes.
+- V8 syntax and static assertions passed; browser visual verification pending. See `CHANGES/2026-11-09_m1-pending-hud-visibility.md`.
+
 ## 2026-11-09 — Mission 1 obstacle HUD summary restored
 
 - M1 objective card now reveals live obstacle removal count/total and description; left-side position and legibility fixed without changing mission state/economy/save schema.
