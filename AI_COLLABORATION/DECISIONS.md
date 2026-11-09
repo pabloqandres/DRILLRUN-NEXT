@@ -1,5 +1,9 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — Procedural worksite audio/visuals, narrow game-loop integration
+
+**User instruction:** After publishing V17 HSEC, implement a major original graphics and sound upgrade: footsteps on concrete/gravel, active rig and moving DrillTruck sound, contextual workshop/office acoustics. ChatGPT owns new `dist/audio/worksite-audio.mjs`, `dist/graphics/site-cinematics.mjs` and graphics sources; it adds narrowly scoped initialization, preference-toggle, and read-only per-frame calls into Claude-owned `dist/chapter/game.mjs`. No mission progression, saved data, economy, HSEC scoring, purchase asset or physics logic changes. No new third-party trademarks/audio assets. V16 checklists and V17 HSEC remain unchanged. See `CHANGES/2026-11-09_immersive-atacama-v18.md`.
+
 ## 2026-11-09 — Existing HSEC button relocation into header
 
 **User request:** Put the floating HSEC badge in the upper bar between resources and phone. ChatGPT moves the same `#hsecInline` element in shared `dist/index.html`, preserving ID and click bindings; CSS only in ChatGPT-owned `dist/chapter/hud-reference-v4.css`. No scripts changed. Read-only indicator appears after M2 completion as before. M2/M3 checklist V16 accepted by user; no checklist or gameplay edits. See `CHANGES/2026-11-09_hsec-top-header-v17.md`.

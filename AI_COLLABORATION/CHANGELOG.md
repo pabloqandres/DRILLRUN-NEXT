@@ -1,5 +1,9 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — V18 immersive worksite sound and cinematic Atacama polish
+
+- Add original Web Audio spatial sounds for gravel/concrete footsteps, operating RC/DTH drill, active DrillTruck, workshop metalwork and office hum. Add state-driven industrial lights, rotating rooftop extractor, machine warning beacons, welding sparks, moving vehicle dust and contact shadows. New mineral skyline mesas and cinematic sky sunlight. No game/economy/mission changes; optional effects honor audio preference and low graphics preset. See `CHANGES/2026-11-09_immersive-atacama-v18.md`.
+
 ## 2026-11-09 — V17 HSEC status integrated into top bar
 
 - Relocate HSEC score chip from the standalone right-hand floating rail to the main HUD header directly before Phone, following money/energy/boosters. Responsive icon+number in compact landscape. Same score and click handler, no game logic changes. M2/M3 checklist from V16 confirmed approved by user. See `CHANGES/2026-11-09_hsec-top-header-v17.md`.

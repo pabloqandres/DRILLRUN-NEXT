@@ -57,6 +57,34 @@ export function createDesert(w){
   for(let i=0;i<pos.count;i+=3){const h=(pos.getY(i)+pos.getY(i+1)+pos.getY(i+2))/3,n=noise(pos.getX(i)*.17,h*.4),base=new T.Color([0xb58c6c,0xb49887,0xaaa0a8,0xa8b4c4][layer]);const strata=Math.sin(h*1.65+pos.getX(i)*.07)*.065;base.multiplyScalar(.68+n*.36+strata+(h>12?.04:0));for(let j=0;j<3;j++)colors.push(base.r,base.g,base.b);}
   flat.setAttribute('color',new T.Float32BufferAttribute(colors,3));const m=new T.MeshLambertMaterial({color:0xffffff,vertexColors:true});const mountain=new T.Mesh(flat,m);mountain.name='ridge-'+layer;mountain.position.set(layer*7-6,-.2,-42-layer*20);group.add(mountain);
  }
+ // V18 cinematic relief: faceted high-altitude mesas in the far world.
+ // Entirely outside the playable parcel: no colliders, no traversable paths,
+ // no mining equipment or false buildings. 30 instances, 1 draw call.
+ const mesaGeometry=new T.CylinderGeometry(.74,1.1,1,7,4,false);
+ mesaGeometry.translate(0,.5,0);
+ const mesaMaterial=new T.MeshStandardMaterial({
+  color:0xffffff,roughness:1,metalness:0,flatShading:true
+ });
+ const mesas=new T.InstancedMesh(mesaGeometry,mesaMaterial,30);
+ const mesaColors=[0x987a65,0xae8f77,0x967f72,0xb69b83,0x897f7d];
+ mesas.name='Atacama · monumental background mesas';
+ let mesaIndex=0;
+ const mesaDummy=new T.Object3D();
+ for(let i=0;i<65&&mesaIndex<30;i++){
+  const x=-100+hash(i,371)*200,z=-44-hash(i,373)*44;
+  if(Math.abs(x)<20&&z>-51)continue;
+  const width=3.5+hash(i,379)*8,height=2.8+hash(i,383)*10;
+  mesaDummy.position.set(x,-.7,z);
+  mesaDummy.rotation.set(0,hash(i,389)*6.28,0);
+  mesaDummy.scale.set(width,height,width*(.42+hash(i,397)*.45));
+  mesaDummy.updateMatrix();mesas.setMatrixAt(mesaIndex,mesaDummy.matrix);
+  mesas.setColorAt(mesaIndex,new T.Color(mesaColors[Math.floor(hash(i,401)*mesaColors.length)]));
+  mesaIndex++;
+ }
+ mesas.count=mesaIndex;mesas.instanceMatrix.needsUpdate=true;
+ if(mesas.instanceColor)mesas.instanceColor.needsUpdate=true;
+ mesas.castShadow=false;mesas.receiveShadow=false;
+ group.add(mesas);
  // Non-interactive geological scatter stays outside the usable parcel.
  const rocks=new T.InstancedMesh(new T.IcosahedronGeometry(.12,1),new T.MeshStandardMaterial({color:0x9c8064,roughness:1}),400),dummy=new T.Object3D();let ri=0;
  for(let i=0;ri<400&&i<2000;i++){const x=(hash(i,12)-.5)*75,z=(hash(i,46)-.5)*60;if(x>-14&&x<17&&z>-14&&z<10)continue;dummy.position.set(x,reliefHeight(x,z)+.015,z);dummy.rotation.set(hash(i,4),hash(i,9)*6,hash(i,5));dummy.scale.set(.35+hash(i,6)*2,.25,.35+hash(i,7));dummy.updateMatrix();rocks.setMatrixAt(ri,dummy.matrix);ri++;}rocks.count=ri;rocks.receiveShadow=true;group.add(rocks);

@@ -12,6 +12,21 @@ export function createAtmosphere(w){
  gradient.addColorStop(.84,'#dfc3a6');
  gradient.addColorStop(1,'#eec6a0');
  ctx.fillStyle=gradient;ctx.fillRect(0,0,512,256);
+ // V18 cinematic low-altitude Atacama sunlight: a painted sky layer,
+ // not a scene light/flare that could add glare to the player HUD.
+ const sunGlow=ctx.createRadialGradient(400,79,3,400,79,115);
+ sunGlow.addColorStop(0,'rgba(255,252,230,.95)');
+ sunGlow.addColorStop(.09,'rgba(255,238,197,.57)');
+ sunGlow.addColorStop(.34,'rgba(250,207,151,.22)');
+ sunGlow.addColorStop(1,'rgba(248,196,149,0)');
+ ctx.fillStyle=sunGlow;ctx.fillRect(285,0,227,195);
+ // Thin ice crystals at altitude: wind-stretched clear desert sky rather
+ // than opaque clouds. Very low opacity avoids flat blue gradients.
+ for(let j=0;j<24;j++){
+  const x=(j*147.9)%520-10,y=40+(j*23.9)%97;
+  ctx.fillStyle='rgba(240,252,250,'+(.012+(j%4)*.006)+')';
+  ctx.beginPath();ctx.ellipse(x,y,37+(j%7)*7,1.8+(j%3),-.055,0,Math.PI*2);ctx.fill();
+ }
 
  // Thin, mineral-tinted inversion layers suggest the dry Atacama horizon.
  // Deterministic strokes avoid image downloads, texture flicker and dependencies.
