@@ -1,5 +1,9 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — V14 universal M1–M4 mission card polish
+
+- Rebuilt the shared mission HUD visually with a bounded flex layout, integrated collapse tab, contained “Ver detalles” footer/arrow, improved content spacing, progress and compact-screen sizing. CSS-only; no changes to mission data, input events or game state. See `CHANGES/2026-11-09_mission-card-v14.md`.
+
 ## 2026-11-09 — V13 compact HUD telemetry rail
 
 - Independent, compact HSEC score chip moved outside the mission card and placed at top-right below resources; the geological analysis timer sits below it on the right. Eliminates the overlapping stack on left mission instructions. No mission, save, interaction, scoring or economy changes. See `CHANGES/2026-11-09_hud-right-rail-v13.md`.
