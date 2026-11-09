@@ -4,6 +4,8 @@
 
 ## Currently Active
 
+- **ChatGPT — V16 synchronized M2/M3 checklists:** `chatgpt/live-mission-checklists-v16`. Shared read-only mission status adapters drive the left mission HUD and M3 phone details, plus seven M2 HSEC gates. JS syntax and isolated readout mock tests pass; browser and added Node suite still pending.
+
 - **ChatGPT — V15 builder camera controls:** `chatgpt/builder-camera-navigation-v15` owns `dist/camera/follow-camera.mjs` and narrowly coordinated camera-only hooks in `dist/chapter/game.mjs`. Source/mocked camera checks passed; Node and browser regression QA pending. No builder state, economy, missions or save changes.
 
 - **ChatGPT — Universal mission HUD V14:** `chatgpt/mission-card-polish-v14`; final-layer visual CSS in `dist/chapter/hud-reference-v4.css`. Targeted structural checks passed; browser/touch QA pending.
