@@ -161,7 +161,7 @@ function renderDthCatalog(s,t,fmt,icon,cb){
   html+=`<div style="padding:0 16px 16px"><button class="startDrillBtn" data-m4-action="buyDthDrill" data-drill="${d.id}" ${blocked?'disabled':''}>${icon('store')} ${pendingRig?'Perforadora DTH en camino':'Solicitar perforadora DTH'} · ${fmt(d.price)} + despacho</button></div>`;
  }else{
   const def=dthDrillDefinition(drill.id);
-  const stateLabels={idle:'En resguardo junto al taller',producing:'En producción',maintenance:'En mantenimiento'};
+  const stateLabels={idle:drill.assignedZone?'Desplegada · esperando mantenimiento':'En resguardo junto al taller',producing:'En producción',maintenance:'En mantenimiento'};
   html+=`<article class="inventoryCard"><span class="inventoryIcon">${icon('build')}</span><div><b>${def?.labelKey||'Perforadora DTH'}</b><small>${stateLabels[drill.state]||drill.state} · ${def?.bitDiameter||8}" Ø</small><span class="itemStatus isInstalled">${icon('check')} Recibida</span></div><button data-app="m4-workshop">Abrir taller</button></article>`;
   // Installed tools
   const installedHammer=drill.installedHammer?(s.toolInventory||[]).find(t2=>t2.id===drill.installedHammer):null;
