@@ -1,5 +1,9 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — V22 workshop acceleration consumes boosters
+
+- Fix infinite free workshop accelerations: each valid boost subtracts one inventory booster, saves audit record and removes up to one minute. Button indicates balance and disables at zero; guard prevents repeat clicks and timer overrun. Existing completed builds unaffected. See CHANGES/2026-11-09_workshop-boost-v22.md.
+
 ## 2026-11-09 — V21 M3 closing SMS and phantom workshop posts
 
 - M3 contract payout immediately delivers/opens Camila Reyes' closing message even when the phone shows Contract; previously paid saves with unread final message self-recover. No duplicate reward; explicit narrative confirmation still required for M4. Workshop upgrade no longer mislabels arbitrary 3D meshes as light poles: reads only real built HSEC assets and drops misleading auto-removal warning. See CHANGES/2026-11-09_m3-closing-workshop-posts-v21.md.

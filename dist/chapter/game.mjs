@@ -544,7 +544,7 @@ function showWorkshopCard(){
   +`<div class="dcGrid"><div class="dcStat"><span>Capacidad</span><b>${used}/${cap}</b></div><div class="dcStat"><span>Libres</span><b>${free}</b></div><div class="dcStat"><span>Bits</span><b>${bits}</b></div><div class="dcStat"><span>Martillos</span><b>${hammers}</b></div></div>`
   +`<div class="dcTool">${icon('store')}<span>Ocupación</span><div class="dcTrack"><div class="dcFill" style="width:${pct}%;background:${barColor}"></div></div><b>${pct}%</b></div>`
   +(spent?`<div style="font-size:9px;color:#9ec5dd;margin-top:4px;text-align:center">${spent} material${spent>1?'es':''} usado${spent>1?'s':''}</div>`:'')
-  +(job?`<div class="dcConstruction"><div class="dcConstructLabel">${icon('time')} Ampliación a Nv.${job.targetLevel} en curso</div><div class="dcTrack"><div class="dcFill" style="width:${buildPct}%;background:#64b5f6"></div></div><b>${buildPct}%</b><small>Restante: ${buildTime(Math.max(0,Math.ceil((job.ends-Date.now())/1000)))}</small><button class="dcBoost" id="workshopBoost">${icon('boost')} Acelerar</button></div>`:'')
+  +(job?`<div class="dcConstruction"><div class="dcConstructLabel">${icon('time')} Ampliación a Nv.${job.targetLevel} en curso</div><div class="dcTrack"><div class="dcFill" style="width:${buildPct}%;background:#64b5f6"></div></div><b>${buildPct}%</b><small>Restante: ${buildTime(Math.max(0,Math.ceil((job.ends-Date.now())/1000)))}</small><button class="dcBoost" id="workshopBoost" ${(s.boosters||0)<1||Date.now()>=job.ends?'disabled':''} title="Consume 1 acelerador y reduce hasta 60 segundos">${icon('boost')} Acelerar 1 min · ${s.boosters||0} disponible${s.boosters===1?'':'s'}</button></div>`:'')
   +`<div class="dcActions">`
   +(canUpgrade&&!job?`<button class="dcUpgrade" id="workshopUpgradeBtn">${icon('boost')} Ampliar a Nv.${nextDef.level}<small>${money(nextDef.upgradeCost)} · ${buildTime(nextDef.constructionSeconds)}</small></button>`:'')
   +(!nextDef&&!job?`<small class="dcMaxLevel">${icon('check')} Nivel máximo alcanzado</small>`:'')
@@ -552,7 +552,24 @@ function showWorkshopCard(){
   +`</div>`;
  wc.querySelector('#workshopCardClose').onclick=e=>{e.stopPropagation();hideWorkshopCard();};
  wc.querySelector('#workshopUpgradeBtn')?.addEventListener('click',()=>{workshopStartUpgrade();});
- wc.querySelector('#workshopBoost')?.addEventListener('click',()=>{accelerateWorkshop(s,60);save();showWorkshopCard();notices.push({title:'Construcción acelerada',symbol:'boost'});});
+ wc.querySelector('#workshopBoost')?.addEventListener('click',()=>{
+  try{
+   const boost=accelerateWorkshop(s,60);
+   save();renderHUD();showWorkshopCard();
+   notices.push({title:'Taller acelerado · -'+Math.ceil(boost.secondsReduced)+' s',detail:boost.boostersLeft+' acelerador(es) disponibles',symbol:'boost'});
+   if(boost.remainingSeconds<=0){
+    finishWorkshopUpgrade(s);
+    save();renderHUD();showWorkshopCard();
+    updateMission4Phase(s);
+    world.updateWorkshop(s.workshop);
+    notices.push({title:'Taller ampliado a Nv.'+workshopLevel(s),symbol:'bell'});
+    sound('finish');
+   }
+  }catch(e){
+   showWorkshopCard();
+   notices.push({title:e.message==='noBoosters'?'Sin aceleradores disponibles':e.message==='constructionFinished'?'La ampliación ya terminó':'No se pudo acelerar la construcción',symbol:'lock'});
+  }
+ });
  wc.querySelector('#workshopDemolishBtn')?.addEventListener('click',()=>{workshopConfirmDemolish();});
  wc.hidden=false;workshopCardOpen=true;
 }
