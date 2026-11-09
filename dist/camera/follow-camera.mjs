@@ -32,7 +32,7 @@ export class FollowCamera{
   }
   if(mode==='builder'){
    // Changing a draft point must NOT reset the player's chosen zoom.
-   if(this.mode!=='builder'){this.builderZoom=clamp(focus?.distance??24,10,70);this.builderPan={x:0,z:0};}
+   if(this.mode!=='builder'){this.builderZoom=clamp(Math.max(22,focus?.distance??22),10,70);this.builderPan={x:0,z:0};}
    this.builderBaseFocus={x:focus?.x??position.x,z:focus?.z??position.z};
    this.builderPan.x=clamp(this.builderPan.x,-17-this.builderBaseFocus.x,19-this.builderBaseFocus.x);
    this.builderPan.z=clamp(this.builderPan.z,-15-this.builderBaseFocus.z,13-this.builderBaseFocus.z);
