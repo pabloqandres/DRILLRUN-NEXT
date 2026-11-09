@@ -1,5 +1,9 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — V20 M3 90/90 m completion and countdown correctness
+
+- Fix M3 stuck at 11/13 after 3/3 physical boreholes due to 89.99999999999997 m floating-point precision. Normalize finished metres and recognize existing saves only when all real boreholes are complete. HUD timer shows PERFORACIÓN COMPLETA / LISTO instead of expiring after work finishes. Speed bonus uses drilling finish timestamp, not delayed phone delivery; no double payout. See CHANGES/2026-11-09_m3-meter-precision-v20.md.
+
 ## 2026-11-09 — V19 phone scroll, input reliability, catalog polish, shed lighting
 
 - Fix same-app phone scroll resetting after bit/hammer purchases; native phone scroll restored. Release held PC controls when phone/modal takes focus or window blurs. Contain RC rig previews and use readable names in Casa Matriz. Reduce concrete/gravel steps by 31/38%; add two cold-white interior ceiling lights in completed shed. No mission/economy changes. See CHANGES/2026-11-09_phone-scroll-input-v19.md.
