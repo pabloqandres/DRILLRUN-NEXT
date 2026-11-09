@@ -13,7 +13,7 @@ import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {DRACOLoader} from '../vendor/DRACOLoader.js';
 import {addToInventory} from '../mission3/inventory.mjs';
 import {hirePersonnel} from '../mission3/personnel.mjs';
-import {acceptContract,startDrilling,completeContract,contractDeadline} from '../mission3/contracts.mjs';
+import {acceptContract,startDrilling,completeContract,contractDeadline,isContractComplete,drillingCompletedAt} from '../mission3/contracts.mjs';
 import {toolCondition} from '../mission3/wear.mjs';
 import {drillDefinition,bitDefinition,hammerDefinition,HAMMERS,BITS} from '../mission3/drills.mjs';
 import {requestAnalysis,accelerateAnalysis,technicianArrives,startAnalysisTimer} from '../mission3/geology.mjs';
@@ -642,8 +642,39 @@ function renderHUD(){if(!s)return;
   $('#objectiveProgress').style.width=(checklist.progress*100)+'%';
   setText($('#objectiveCount'),s.mission3.phase==='complete'?'✓':checklist.done+'/'+checklist.total);
 }
- /* Mission timer card */
- const timerEl=$('#missionTimer');if(timerEl){const showTimer=m3Active&&s.contract?.drillingStartedAt&&(s.contract.status==='active'||s.contract.status==='completed');hidden(timerEl,!showTimer);if(showTimer){const deadline=contractDeadline(s);const now2=Date.now();const remaining=Math.max(0,deadline-now2);const totalDur=s.contract.duration*1000;const secs=Math.ceil(remaining/1000);const mins=Math.floor(secs/60);const ss=secs%60;$('#timerValue').textContent=String(mins).padStart(2,'0')+':'+String(ss).padStart(2,'0');const pct=totalDur>0?remaining/totalDur:0;$('#timerProgress').style.width=(pct*100)+'%';const bh=(s.boreholes||[]).filter(b=>b.status==='completed').length;$('#timerDetail').textContent=`Sondaje ${Math.min(bh+1,s.boreholes.length)}/${s.boreholes.length} · ${Math.round(s.contract.metersCompleted)}/${s.contract.totalMeters}m`;timerEl.classList.toggle('warning',pct<.3&&pct>=.1);timerEl.classList.toggle('danger',pct<.1);}}
+ /* Mission 3 contract timer: freeze upon physical drilling completion.
+    A previously completed 90/90 contract must not display a misleading
+    expired 00:00 while waiting for the user to submit from the phone. */
+ const timerEl=$('#missionTimer');
+ if(timerEl){
+  const contract=s.contract;
+  const showTimer=!!(m3Active&&contract?.drillingStartedAt&&['active','completed'].includes(contract.status));
+  hidden(timerEl,!showTimer);
+  if(showTimer){
+   const done=isContractComplete(s);
+   const finishedAt=done?drillingCompletedAt(s):null;
+   const deadline=contractDeadline(s);
+   const measuredAt=finishedAt||Date.now();
+   const remaining=Math.max(0,(deadline||measuredAt)-measuredAt);
+   const totalDur=contract.duration*1000;
+   const secs=Math.ceil(remaining/1000);
+   const mins=Math.floor(secs/60),ss=secs%60;
+   const bh=(s.boreholes||[]).filter(b=>b.status==='completed').length;
+   const totalHoles=(s.boreholes||[]).length;
+   $('#timerTitle').textContent=done?'PERFORACIÓN COMPLETA':'TIEMPO RESTANTE';
+   $('#timerValue').textContent=done?'LISTO':String(mins).padStart(2,'0')+':'+String(ss).padStart(2,'0');
+   const pct=done?1:totalDur>0?remaining/totalDur:0;
+   $('#timerProgress').style.width=(pct*100)+'%';
+   $('#timerDetail').textContent=done
+    ?'Sondajes '+bh+'/'+totalHoles+' · '+contract.totalMeters+'/'+contract.totalMeters+' m · Entregar contrato'
+    :'Sondaje '+Math.min(bh+1,totalHoles)+'/'+totalHoles+' · '+Math.round(contract.metersCompleted)+'/'+contract.totalMeters+' m';
+   timerEl.classList.toggle('complete',done);
+   timerEl.classList.toggle('warning',!done&&pct<.3&&pct>=.1);
+   timerEl.classList.toggle('danger',!done&&pct<.1);
+  }else{
+   timerEl.classList.remove('complete','warning','danger');
+  }
+ }
  // M4 objective panel
  const m4Active=s.mission4&&s.mission4.phase!=='inactive';
  if(narrativeMission==='m4'&&m4Active){const phase4=s.mission4.phase;const eyebrow=$('#objective .eyebrow');if(eyebrow)eyebrow.textContent=phase4==='complete'?'MISIÓN COMPLETADA':'MISIÓN 4';const title=$('#objectiveTitle');if(title)title.textContent=phase4==='complete'?'Operación automatizada':'Automatiza tu operación';const detail=$('#objectiveDetail');if(detail){if(phase4==='complete'){detail.classList.add('hidden');}else{detail.classList.remove('hidden');const m4objs=mission4Objectives(s);const currentObj=m4objs.find(o=>o.id===s.mission4.currentObjective)||m4objs[0];const objNames={upgradeWorkshop:'Ampliar taller',equipDth:'Equipamiento DTH',deployProduction:'Desplegar producción',automateDrillTruck:'Automatizar DrillTruck',automatedProduction:'Producción activa'};const checkNames={upgradeToNv2:'Taller Nv.2',purchaseDthDrill:'Comprar perforadora DTH',orderPumaTools:'Pedir herramientas PUMA',installDthTools:'Instalar martillo + bit',convertBorehole:'Convertir sondaje a zona',assignDthToZone:'Asignar DTH a zona',hireTecnicoDrillco:'Contratar Técnico DRILLCO',purchaseDrillTruck:'Comprar DrillTruck',linkTruckToZone:'Vincular DrillTruck a zona',completeProductionCycle:'Completar ciclo',convertAllZones:'Automatizar todas las zonas'};if(currentObj){detail.innerHTML=`<b style="font-size:10px;color:#e7c886;display:block;margin-bottom:4px">${objNames[currentObj.nameKey]||currentObj.nameKey}</b>`+currentObj.checks.map(c=>`<span class="hsecStep ${c.done?'done':'active'}">${c.done?'✓ ':'○ '}${checkNames[c.labelKey]||c.labelKey}</span>`).join('');}else{detail.textContent='Preparando misión';}}}const totalChecks=mission4Objectives(s).reduce((n,o)=>n+o.checks.length,0);const doneChecks=mission4Objectives(s).reduce((n,o)=>n+o.checks.filter(c=>c.done).length,0);const prog4=totalChecks>0?doneChecks/totalChecks:0;$('#objectiveProgress').style.width=(prog4*100)+'%';setText($('#objectiveCount'),phase4==='complete'?'✓':`${doneChecks}/${totalChecks}`);}
