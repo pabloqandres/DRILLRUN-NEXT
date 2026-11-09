@@ -41,7 +41,8 @@ export class PhoneUI{
    this.title.textContent=app.replace('m3-','').replace(/^\w/,c=>c.toUpperCase());this.back.style.visibility='visible';
    c.className='appContent';c.innerHTML=renderM3App(app,s,t,fmt,icon,{onSave:this.onSave,onNavigate:this.onNavigate});
   }else if(isM4App(app)){
-   this.title.textContent=app.replace('m4-','').replace(/^\w/,c=>c.toUpperCase());this.back.style.visibility='visible';
+   const m4Titles={'m4-operaciones':'Operaciones','m4-workshop':'Taller','m4-dth-catalog':'Casa Matriz · DTH','m4-drilltruck':'DrillTruck','m4-zones':'Zonas','m4-objectives':'Objetivos'};
+   this.title.textContent=m4Titles[app]||'Operaciones';this.back.style.visibility='visible';
    c.className='appContent';c.innerHTML=renderM4App(app,s,t,fmt,icon,{onSave:this.onSave,onNavigate:this.onNavigate});
   }
   // The M4 DrillTruck technical/management view shares the exact same cached
@@ -72,11 +73,6 @@ export class PhoneUI{
     const src=this.rigArtCache.get(id);
     if(src){const img=document.createElement('img');img.src=src;img.alt='Vista 3D de perforadora';img.loading='lazy';slot.replaceChildren(img);}
    }
-  }
-  // DTH supply is retained under Casa Matriz instead of occupying a duplicate phone home icon.
-  if(app==='m3-catalog'&&s.mission4&&s.mission4.phase!=='inactive'){
-   const link=document.createElement('button');link.className='primary';link.dataset.app='m4-dth-catalog';link.textContent=s.lang==='en'?'DTH equipment and consumables':'Equipos y consumibles DTH';
-   link.style.margin='12px 16px';c.appendChild(link);
   }
   c.querySelectorAll('[data-app]').forEach(b=>b.onclick=()=>{if(b.dataset.app==='messages')this.conversation=false;this.onNavigate(b.dataset.app);});
   // M3 action bindings
