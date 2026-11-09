@@ -598,3 +598,94 @@ body.interior #hud #objective:not(.hidden).collapsed{
 .hsecRequirementCopy>em{display:block;font-style:normal;color:#b7d4db;font-size:10px;line-height:1.35;margin-top:4px}
 .hsecRequirement>b{font-size:10px;white-space:nowrap;color:#f8ce83}
 .hsecRequirement.done>b{color:#95eabb}
+
+
+/* V17 — HSEC status is a native member of the HUD header action group,
+   immediately before Phone. No floating/right-rail position remains. */
+#hud header .topActions{
+ display:flex!important;
+ flex-wrap:nowrap!important;
+ align-items:center!important;
+ justify-content:flex-end!important;
+ min-width:0!important;
+ gap:clamp(4px,.55vw,9px)!important;
+}
+#hud header .topActions #hsecInline.hidden{display:none!important}
+#hud header .topActions #hsecInline:not(.hidden){
+ position:relative!important;
+ top:auto!important;right:auto!important;left:auto!important;bottom:auto!important;
+ transform:none!important;
+ display:inline-flex!important;
+ flex:0 0 auto!important;
+ align-items:center!important;justify-content:center!important;
+ box-sizing:border-box!important;
+ min-height:38px!important;height:40px!important;
+ min-width:92px!important;max-width:128px!important;width:auto!important;
+ margin:0!important;padding:5px 11px!important;
+ gap:6px!important;
+ border-radius:12px!important;border:1px solid #7ec2d1a8!important;
+ background:linear-gradient(150deg,#20475cfa,#0c283af4)!important;
+ box-shadow:inset 0 1px #e8fbff40,0 4px 10px #061b2966!important;
+ color:#e7f7fc!important;font-size:11px!important;
+ font-weight:750!important;letter-spacing:.15px!important;
+ white-space:nowrap!important;
+ pointer-events:auto!important;
+ z-index:auto!important;
+ cursor:pointer!important;
+}
+#hud header .topActions #hsecInline .hsecIcon{
+ flex:0 0 17px!important;width:17px!important;height:17px!important;
+ color:#82e6c0!important;
+}
+#hud header .topActions #hsecInline span{
+ display:inline!important;
+ color:#d4e8ee!important;
+ font-size:11px!important;
+ line-height:1!important;
+ white-space:nowrap!important;
+}
+#hud header .topActions #hsecInline b{
+ color:#8be6b5!important;
+ font-size:13px!important;
+ font-weight:900!important;
+ font-variant-numeric:tabular-nums!important;
+}
+#hud header .topActions #hsecInline.hsecWarning{
+ border-color:#e0a86dba!important;
+ background:linear-gradient(150deg,#58402ef0,#2a2936fa)!important;
+}
+#hud header .topActions #hsecInline.hsecWarning b{
+ color:#ffc787!important;
+}
+#hud header .topActions #hsecInline:focus-visible{
+ outline:2px solid #ffda85!important;
+ outline-offset:3px!important;
+}
+@media(max-width:1080px){
+ #hud header .topActions #hsecInline:not(.hidden){
+  min-width:75px!important;max-width:96px!important;
+  height:36px!important;min-height:36px!important;
+  padding:4px 7px!important;gap:4px!important;
+ }
+ #hud header .topActions #hsecInline span{font-size:10px!important}
+ #hud header .topActions #hsecInline b{font-size:12px!important}
+}
+@media(max-width:810px),(max-height:490px){
+ #hud header .topActions #hsecInline:not(.hidden){
+  min-width:45px!important;max-width:55px!important;
+  width:48px!important;
+  height:36px!important;min-height:36px!important;
+  padding:4px 5px!important;gap:3px!important;
+ }
+ #hud header .topActions #hsecInline .hsecIcon{width:15px!important;height:15px!important;flex-basis:15px!important}
+ #hud header .topActions #hsecInline span{font-size:0!important;letter-spacing:0!important}
+ #hud header .topActions #hsecInline span b{font-size:12px!important}
+}
+@media(max-width:590px){
+ #hud header .topActions #hsecInline:not(.hidden){
+  min-width:40px!important;max-width:43px!important;width:42px!important;
+  padding:3px 4px!important;
+ }
+ #hud header .topActions #hsecInline .hsecIcon{width:13px!important;height:13px!important;flex-basis:13px!important}
+ #hud header .topActions #hsecInline span b{font-size:11px!important}
+}

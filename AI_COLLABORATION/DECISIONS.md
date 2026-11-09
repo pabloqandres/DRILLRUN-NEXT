@@ -1,5 +1,9 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — Existing HSEC button relocation into header
+
+**User request:** Put the floating HSEC badge in the upper bar between resources and phone. ChatGPT moves the same `#hsecInline` element in shared `dist/index.html`, preserving ID and click bindings; CSS only in ChatGPT-owned `dist/chapter/hud-reference-v4.css`. No scripts changed. Read-only indicator appears after M2 completion as before. M2/M3 checklist V16 accepted by user; no checklist or gameplay edits. See `CHANGES/2026-11-09_hsec-top-header-v17.md`.
+
 ## 2026-11-09 — Shared mission status presentation, no progress logic changes
 
 **User instruction:** Fix misleading M3 left mission panel and contradictory phone objectives; the left panel and details must reflect exactly the same live checklist and the next missing step (e.g. drilling rig not yet purchased). ChatGPT may modify only the M3 and M2 *rendering* sections in Claude-owned `dist/chapter/game.mjs`, and M3 objectives rendering in `dist/mission3/phone-apps.mjs`; source-of-truth engine `mission3-state.mjs`, M2 state, economy, asset purchases, and save files remain untouched. Shared pure readout modules avoid parallel duplicated progress logic. Full details `CHANGES/2026-11-09_live-mission-checklists-v16.md`.

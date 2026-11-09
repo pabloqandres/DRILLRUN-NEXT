@@ -1,5 +1,9 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — V17 HSEC status integrated into top bar
+
+- Relocate HSEC score chip from the standalone right-hand floating rail to the main HUD header directly before Phone, following money/energy/boosters. Responsive icon+number in compact landscape. Same score and click handler, no game logic changes. M2/M3 checklist from V16 confirmed approved by user. See `CHANGES/2026-11-09_hsec-top-header-v17.md`.
+
 ## 2026-11-09 — V16 live mission requirements shared by HUD and details
 
 - M3 left mission card and phone details use identical next-pending check from mission3Objectives: if the rig is missing, request it rather than vague equipment wording. Both show 13 real checks and matching progress. M2 HSEC overview and left mission card use the same seven completion criteria. Read-only, no mission logic/save/economy modifications. See `CHANGES/2026-11-09_live-mission-checklists-v16.md`.
