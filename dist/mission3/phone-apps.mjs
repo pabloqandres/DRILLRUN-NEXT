@@ -86,6 +86,10 @@ function renderContractPortfolio(s,fmt,icon){
  html+=`<section class="m4OpsNext"><small>${delivered?'ENTREGADO':'EN CURSO'} · SONDAJE EXPLORATORIO</small><h3>Tu primer contrato</h3><p>${Math.round(Number(c.metersCompleted)||0)} / ${c.totalMeters||90} m · ${(s.boreholes||[]).filter(b=>b.status==='completed').length} / ${(s.boreholes||[]).length||3} sondajes</p><b>Recompensa acreditada: ${fmt(paid)}</b></section>`;
  html+=`<div class="sectionHeading">Operación productiva · Zona 1</div>`;
  html+=`<section class="m4OpsNext"><small>${esc(stage.toUpperCase())}</small><h3>Producción DTH</h3><p>${zoneCount} puntos convertidos · ${m.productionCycles||0} ciclos registrados · ${m.zone1Meterage||0} m DTH desde automatización</p><p>Estado de perforadora: ${esc(d.state||'Pendiente')}</p><b>Ingresos de producción: ${fmt(produced)}</b><div style="margin-top:12px"><button data-app="m4-operaciones" class="primary">${icon('arrow')} Abrir Operaciones</button></div></section>`;
+ const offline=m.lastOfflineReport;
+ if(offline&&Number(offline.cycles)>0){
+  html+=`<div class="sectionHeading">Producción durante tu ausencia</div><section class="m4OpsNext"><small>ÚLTIMA RECONCILIACIÓN · MÁXIMO 1 HORA</small><h3>${offline.cycles} ciclos completados</h3><p>${Math.round(offline.meters||0)} m perforados · ${offline.services||0} servicios de recambio</p><b>Ingresos acreditados: ${fmt(offline.income||0)}</b></section>`;
+ }
  html+='<p class="m4OpsHint">La sección conserva los contratos ya entregados. Los futuros contratos y nuevas zonas se incorporarán al desbloquear las siguientes misiones; no hay contratos ficticios disponibles.</p>';
  return html;
 }
