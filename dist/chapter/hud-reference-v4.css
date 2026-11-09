@@ -1258,3 +1258,7 @@ body.interior #hud #objective:not(.hidden).collapsed{
  #productionCycleValue{font-size:18px!important}
  #productionCycleDetail{font-size:8px!important}
 }
+
+/* M4 dock: exactly five visible destinations. Visibility always overrides
+   the HUD's legacy button display:flex!important declaration. */
+#hud #bottomNav button.hidden{display:none!important}
