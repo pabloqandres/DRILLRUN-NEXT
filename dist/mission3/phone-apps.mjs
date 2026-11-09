@@ -124,7 +124,7 @@ function renderContract(s,t,fmt,icon,cb){
 
 function renderCatalog(s,t,fmt,icon,cb){
  const free=workshopFree(s),cap=workshopCapacity(s),used=workshopUsed(s);
- let html=`<div class="m3Header">${icon('store')}<div><span class="eyebrow">CASA MATRIZ</span><h3>Solicitud de equipos</h3></div><span class="storeWallet">${icon('wallet')}${fmt(s.cash)}</span></div>`;
+ let html=`<div class="m3Header m3CatalogHeader">${icon('store')}<div><span class="eyebrow">CASA MATRIZ</span><h3>Solicitud de equipos</h3></div><span class="storeWallet">${icon('wallet')}${fmt(s.cash)}</span></div>`;
  html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 12px;background:${free<2?'#ef535022':'#0e2a4044'};border:1px solid ${free<2?'#ef535066':'#5ab8e822'};border-radius:8px;margin-bottom:10px;font-size:10px"><span style="color:${free<2?'#ef5350':'#9ec5dd'}">${icon('store')} Taller: ${used}/${cap} ocupado</span><b style="color:${free<2?'#ef5350':'#fff'}">${free} libres</b></div>`;
  // Drills section
  html+=`<div class="sectionHeading">Perforadoras RC</div>`;
