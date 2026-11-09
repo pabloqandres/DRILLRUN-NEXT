@@ -4,6 +4,8 @@
 
 ## Currently Active
 
+- **ChatGPT — World materials V5:** prepared on `chatgpt/world-materials-v5-release` after resolving parallel changelog edits with Atacama atmosphere V5. Only `dist/graphics/desert.mjs` and `dist/graphics/world-finish.mjs` changed in game; runtime visual QA pending.
+
 **2026-11-09 — ChatGPT: Atacama atmosphere V5** — Branch `chatgpt/atacama-atmosphere-v5`, file `dist/graphics/atmosphere.mjs` exclusively. Visual update committed; awaiting PR review and real-browser QA. No production or main changes.
 
 
