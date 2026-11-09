@@ -351,7 +351,9 @@ function showPendingMissionMessage(){
 }
 let narrativeTimer=0;
 function narrativeTick(dt){
- if(!s||phase!=='play')return;narrativeTimer+=dt;if(narrativeTimer<1.5)return;narrativeTimer=0;
+ // Let the player read the completion/reward overlay before the next briefing.
+ if(!s||phase!=='play'||document.querySelector('.missionCompleteOverlay'))return;
+ narrativeTimer+=dt;if(narrativeTimer<1.5)return;narrativeTimer=0;
  ensureNarrative(s);
  const msg=pendingMessage(s);
  if(msg&&deliverMessage(s,msg.id)){
