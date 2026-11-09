@@ -1,4 +1,4 @@
-// DRILL RUN NEXT GENERATION · WORLD ART V5
+// DRILL RUN NEXT GENERATION · WORLD ART V7
 // Visual-only detail layers shared by actual world buildings and their 3D previews.
 // All meshes are decorative: no collider, walk surface, purchase, save or route writes.
 import * as T from '../vendor/three.module.js';
@@ -113,7 +113,25 @@ export function softContactShadow(world,parent,width,depth,y=.024){
  mesh.rotation.x=-Math.PI/2;mesh.position.y=y;
  mesh.name='World Art V4 · soft ambient contact';
  mesh.renderOrder=1;mesh.castShadow=false;mesh.receiveShadow=false;
- parent.add(mesh);return mesh;
+ parent.add(mesh);
+ // A wider, fainter mineral penumbra ties prefabricated structures into
+ // the actual ground without adding a concrete platform or HSEC footprint.
+ // Remains purely decorative and follows the parent building/preview model.
+ const halo=new T.Mesh(
+  new T.PlaneGeometry(width*1.32,depth*1.40),
+  new T.MeshBasicMaterial({
+   map:world._v4ShadowTex,transparent:true,opacity:.27,
+   side:T.DoubleSide,depthWrite:false,
+   polygonOffset:true,polygonOffsetFactor:-2
+  })
+ );
+ halo.rotation.x=-Math.PI/2;
+ halo.position.y=Math.max(.008,y-.009);
+ halo.name='World Art V7 · foundation mineral penumbra';
+ halo.castShadow=false;halo.receiveShadow=false;
+ halo.renderOrder=0;
+ parent.add(halo);
+ return mesh;
 }
 export function installMineralYard(world){
  // Low, flat gravel grains improve scale near the player without adding obstacles.
