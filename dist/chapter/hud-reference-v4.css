@@ -251,3 +251,31 @@
  #hud #objective #objectiveDetail:not(.hidden){font-size:10px!important;max-height:48px!important}
  #hud #objective .missionCardProgress #objectiveCount{font-size:10px!important}
 }
+
+
+/* V11 phone scroll: the device body itself is fixed; only its content scrolls.
+   Excludes stock/catalog storeMode, which has its own internal scroll panes. */
+#phone:not(.storeMode){
+ display:flex!important;
+ flex-direction:column!important;
+ min-height:0!important;
+}
+#phone:not(.storeMode) #phoneContent{
+ display:block!important;
+ flex:1 1 0px!important;
+ height:0!important;
+ min-height:0!important;
+ max-height:none!important;
+ overflow-x:hidden!important;
+ overflow-y:auto!important;
+ overscroll-behavior-y:contain;
+ -webkit-overflow-scrolling:touch;
+ touch-action:pan-y!important;
+ scrollbar-width:thin!important;
+ scrollbar-color:#9dc2d0a8 transparent!important;
+}
+#phone:not(.storeMode) #phoneContent::-webkit-scrollbar{width:5px}
+#phone:not(.storeMode) #phoneContent::-webkit-scrollbar-thumb{background:#9dc2d0a8;border-radius:6px}
+#phone:not(.storeMode) .phoneStatus,
+#phone:not(.storeMode) .phoneTop,
+#phone:not(.storeMode) .phoneChin{flex:0 0 auto!important}
