@@ -1,5 +1,9 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — V19 UI input ownership and same-app scroll restoration
+
+**User request:** Direct repair of phone scroll blocking and resets after buying a bit, stuck keyboard controls, clipped Casa Matriz previews, loud footsteps and dark shed interior. ChatGPT modifies only rendering, UI input focus, art and audio code, including narrowly scoped input handling in Claude-owned dist/chapter/game.mjs. The same phone app preserves scrollTop on redraw; navigation resets it. V16 approved checklist and gameplay logic remain unchanged. See CHANGES/2026-11-09_phone-scroll-input-v19.md.
+
 ## 2026-11-09 — Procedural worksite audio/visuals, narrow game-loop integration
 
 **User instruction:** After publishing V17 HSEC, implement a major original graphics and sound upgrade: footsteps on concrete/gravel, active rig and moving DrillTruck sound, contextual workshop/office acoustics. ChatGPT owns new `dist/audio/worksite-audio.mjs`, `dist/graphics/site-cinematics.mjs` and graphics sources; it adds narrowly scoped initialization, preference-toggle, and read-only per-frame calls into Claude-owned `dist/chapter/game.mjs`. No mission progression, saved data, economy, HSEC scoring, purchase asset or physics logic changes. No new third-party trademarks/audio assets. V16 checklists and V17 HSEC remain unchanged. See `CHANGES/2026-11-09_immersive-atacama-v18.md`.
