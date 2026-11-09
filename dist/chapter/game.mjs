@@ -376,8 +376,11 @@ function narrativeTick(dt){
   notices.push({title:charName||'Nuevo mensaje',detail:t(msg.bodyKey)?.slice(0,60)+'…',symbol:'messages',action:()=>{phoneUI.narrativeCharacter=msg.characterId;phoneUI.conversation=true;openPhone('messages');}});
   sound('ring');save();
   renderHUD();
-  // Opening messages automatically open; closing messages only ring and glow.
-  if(msg.id.endsWith(':start')&&!phoneOpen&&!modalOpen&&!builderOpen&&!busy){
+  // M3 has already paid in completeContract(); its closing Camila message
+  // must open by itself even if the player is still viewing the Contract app.
+  // This only switches the phone view and never collects/pays a reward.
+  const isM3Closing=msg.id==='n:m3:end';
+  if((isM3Closing||msg.id.endsWith(':start'))&&!modalOpen&&!builderOpen&&!busy&&(!phoneOpen||isM3Closing)){
    phoneUI.narrativeCharacter=msg.characterId;
    phoneUI.conversation=true;
    openPhone('messages');
@@ -707,6 +710,9 @@ onM3Action:(type,data)=>{try{
  else if(type==='upgradeWorkshop'){upgradeWorkshop(s);notices.push({title:'Ampliación del taller iniciada',symbol:'bell'});}
  else if(type==='locateMachinery'){closePhone();const pos=data==='drill'&&m3DrillModel?{x:m3DrillModel.position.x,z:m3DrillModel.position.z}:data==='drillTruck'&&s.mission4?.drillTruck?s.mission4.drillTruck.position:null;if(pos)target={x:pos.x,z:pos.z};return;}
  updateMission3Phase(s);save();renderHUD();renderPhone();
+ // Deliver Camila's closing message immediately on contract submission;
+ // the 1.5s background poll remains a safe fallback on existing saves.
+ if(type==='completeContract'&&s.mission3?.phase==='complete')narrativeTick(1.5);
 }catch(e){const msg=e.message==='noCapacity'?'Sin espacio en el taller — amplía capacidad':e.message==='noMoney'?'Fondos insuficientes':e.message==='constructionPending'?'Ampliación en curso':e.message;notices.push({title:msg,symbol:'lock'});}},
 onM4Action:(type,data)=>{try{
  if(type==='buyDthDrill'){placeMachineryOrder(s,'dthDrill',data||'rig_dth_production',DTH_DRILLS[0]?.price||28000);notices.push({title:'Perforadora DTH solicitada · en camino',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}
