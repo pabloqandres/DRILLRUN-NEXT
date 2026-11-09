@@ -9,6 +9,7 @@ import {pendingOrders,deliveryProgress,allOrders,canPlaceOrder} from './headquar
 import {inventorySummary,availableTools,workshopLevel,workshopCapacity,workshopUsed,workshopFree,canUpgradeWorkshop,workshopUpgradeJob,workshopUpgradeProgress,WORKSHOP_LEVELS} from './inventory.mjs';
 import {toolCondition} from './wear.mjs';
 import {mission3Phase,mission3Objectives,mission3Objective} from './mission3-state.mjs';
+import {mission3Readout} from './mission3-readout.mjs';
 
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -270,6 +271,7 @@ function renderInventory(s,t,fmt,icon,cb){
 
 function renderM3Objectives(s,t,fmt,icon,cb){
  const phase=mission3Phase(s);
+ const readout=mission3Readout(s);
  const objs=mission3Objectives(s);
  const phaseNames={briefing:'Briefing Inicial',setup:'Preparación',survey:'Estudio Geológico',equip:'Equipamiento',drilling:'Perforación Activa',delivery:'Entrega Final',complete:'¡Misión Completa!'};
  const phaseIcons={briefing:'messages',setup:'build',survey:'location',equip:'inventory',drilling:'drill',delivery:'check',complete:'check'};
@@ -298,8 +300,16 @@ function renderM3Objectives(s,t,fmt,icon,cb){
  // Progress bar
  html+=`<div style="height:6px;border-radius:3px;background:#ffffff12;margin-bottom:16px;overflow:hidden"><div style="height:100%;border-radius:3px;background:linear-gradient(90deg,#67dfd0,#4ab89e);width:${totalPct}%;transition:width .4s"></div></div>`;
 
- // Objectives as steps
- html+=`<div class="steps">`;
+ // The first unresolved condition is the player's next actionable step.
+ // Its wording derives from the same game checks that drive phase transitions.
+ if(readout.pending){
+  html+=`<div class="m3NextAction"><small>SIGUIENTE ACCIÓN · PASO ${readout.pending.index}/5</small>
+   <b>${esc(readout.pending.name)}</b>
+   <p>${esc(readout.pending.hint)}</p>
+   ${readout.pending.value?`<span>${esc(readout.pending.value)}</span>`:''}</div>`;
+ }else html+=`<div class="m3NextAction"><b>Objetivos realizados</b><p>Revisa el mensaje final del celular para cerrar la misión.</p></div>`;
+ // Objectives in actual game phase order, with explicit pass/fail and hints.
+ html+=`<div class="steps m3DetailedSteps">`;
  for(let i=0;i<objs.length;i++){
   const obj=objs[i];
   const allDone=obj.checks.every(c=>c.done);
@@ -308,16 +318,15 @@ function renderM3Objectives(s,t,fmt,icon,cb){
   const firstUndone=!allDone&&!someStarted&&(i===0||objs[i-1].checks.every(c=>c.done));
   html+=`<div class="${allDone?'done':isActive||firstUndone?'active':''}">`;
   html+=`<span class="stepNumber">${allDone?icon('check'):String(i+1).padStart(2,'0')}</span>`;
-  html+=`<span style="flex:1"><b>${esc(objNames[obj.nameKey]||obj.nameKey)}</b>`;
-  for(const check of obj.checks){
-   const name=checkNames[check.labelKey]||check.labelKey;
-   const hasProg=check.progress!==undefined&&!check.done&&check.progress>0;
-   html+=`<small style="display:flex;align-items:center;gap:5px;margin:4px 0">`;
-   if(check.done)html+=`<span style="color:var(--mint)">${icon('check')}</span>`;
-   else html+=`<span style="width:14px;height:14px;border-radius:50%;border:1.5px solid ${isActive||firstUndone?'#e7c886':'#ffffff30'};display:inline-block;flex-shrink:0"></span>`;
-   html+=`<span style="${check.done?'text-decoration:line-through;opacity:.5':''}">${esc(name)}</span>`;
-   if(hasProg)html+=`<span style="margin-left:auto;font-size:8px;color:#67dfd0;font-weight:700">${Math.round(check.progress*100)}%</span>`;
-   html+=`</small>`;
+  const group=readout.groups[i];
+  html+=`<span style="flex:1;min-width:0"><b>${esc(group.title)} · ${group.checks.filter(c=>c.done).length}/${group.checks.length}</b>`;
+  for(const check of group.checks){
+   html+=`<small class="m3CheckRow ${check.done?'done':'pending'}">
+    <span class="m3CheckSymbol">${check.done?'✓':'○'}</span>
+    <span class="m3CheckText"><strong>${esc(check.name)}</strong>${!check.done?`<em>${esc(check.hint)}</em>`:''}
+     ${check.value?`<i>${esc(check.value)}</i>`:''}</span>
+    <span class="m3CheckStatus">${check.done?'Cumplido':'Pendiente'}</span>
+   </small>`;
   }
   html+=`</span></div>`;
  }
