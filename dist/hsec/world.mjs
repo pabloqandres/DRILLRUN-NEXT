@@ -224,8 +224,10 @@ export class HsecWorld{
   const tracePath=(ctx,pts)=>{ctx.beginPath();ctx.moveTo(tx(pts[0].x),tz(pts[0].z));for(let i=1;i<pts.length;i++)ctx.lineTo(tx(pts[i].x),tz(pts[i].z));};
   // Merge connected routes of same type into continuous chains for seamless painting
   const mergeChains=(type)=>{const assets=routes.filter(a=>a.type===type);if(!assets.length)return[];const chains=assets.map(a=>[...a.points]);let merged=true;while(merged){merged=false;for(let i=0;i<chains.length;i++){if(!chains[i])continue;for(let j=i+1;j<chains.length;j++){if(!chains[j])continue;const ai=chains[i],aj=chains[j],d1=Math.hypot(ai[ai.length-1].x-aj[0].x,ai[ai.length-1].z-aj[0].z),d2=Math.hypot(ai[ai.length-1].x-aj[aj.length-1].x,ai[ai.length-1].z-aj[aj.length-1].z),d3=Math.hypot(ai[0].x-aj[0].x,ai[0].z-aj[0].z),d4=Math.hypot(ai[0].x-aj[aj.length-1].x,ai[0].z-aj[aj.length-1].z);const tol=.6;if(d1<tol){chains[i]=ai.concat(aj.slice(1));chains[j]=null;merged=true;}else if(d2<tol){chains[i]=ai.concat(aj.reverse().slice(1));chains[j]=null;merged=true;}else if(d3<tol){chains[i]=aj.reverse().concat(ai.slice(1));chains[j]=null;merged=true;}else if(d4<tol){chains[i]=aj.concat(ai.slice(1));chains[j]=null;merged=true;}}}}return chains.filter(Boolean);};
-  // Sort: vehicle first (wider, underneath), then pedestrian
-  const paintOrder=[...mergeChains('vehicle').map(pts=>({type:'vehicle',points:pts})),...mergeChains('pedestrian').map(pts=>({type:'pedestrian',points:pts}))];
+  // V10: sidewalks are painted first. Continuous vehicle pavement and its
+  // kerb sit above them at intersections; the zebra paint then bridges both.
+  // The previous opposite order left pedestrian slabs visibly crossing roads.
+  const paintOrder=[...mergeChains('pedestrian').map(pts=>({type:'pedestrian',points:pts})),...mergeChains('vehicle').map(pts=>({type:'vehicle',points:pts}))];
   for(const a of paintOrder){const d=assetDefinition(a.type),pts=a.points;
    ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
    // Gravel shoulders add a premium road edge without changing navigation geometry.
@@ -269,25 +271,43 @@ export class HsecWorld{
    // 6) Pedestrian edge dashes
    if(d.id==='pedestrian'){ctx.lineWidth=tw(d.w+.08);ctx.strokeStyle='#c8ccc8';tracePath(ctx,pts);ctx.stroke();}
    ctx.setLineDash([]);ctx.restore();}
-  // V9: one shared surface for roads and crossings. Painting at the same
-  // roadPlane depth eliminates 3D slab overlap, Z-fighting and raised edges.
+  // V10: keep the road shoulder/markings continuous under crossings.
+  // Clip zebra paint to the actual built vehicle corridor so the crossing
+  // cannot create a second road slab or leave a rectangle over a sidewalk.
   const crossings=h.assets.filter(a=>a.type==='crossing'&&a.status==='built');
   const sx=W/wx,sz=H/wz;
+  const vehicleSegments=routes.filter(a=>a.type==='vehicle').flatMap(a=>
+   a.points.slice(1).map((p,i)=>({from:a.points[i],to:p}))
+  );
+  const vehicleFootprint=new Path2D();
+  for(const seg of vehicleSegments){
+   const dx=seg.to.x-seg.from.x,dz=seg.to.z-seg.from.z,length=Math.hypot(dx,dz);
+   if(length<.01)continue;
+   const nx=-dz/length*1.39,nz=dx/length*1.39;
+   vehicleFootprint.moveTo(tx(seg.from.x+nx),tz(seg.from.z+nz));
+   vehicleFootprint.lineTo(tx(seg.to.x+nx),tz(seg.to.z+nz));
+   vehicleFootprint.lineTo(tx(seg.to.x-nx),tz(seg.to.z-nz));
+   vehicleFootprint.lineTo(tx(seg.from.x-nx),tz(seg.from.z-nz));
+   vehicleFootprint.closePath();
+  }
+  // Rounded joints at bends prevent pinholes between adjacent road polygons.
+  for(const seg of vehicleSegments)for(const p of [seg.from,seg.to]){
+   vehicleFootprint.moveTo(tx(p.x)+sx*1.39,tz(p.z));
+   vehicleFootprint.ellipse(tx(p.x),tz(p.z),sx*1.39,sz*1.39,0,0,Math.PI*2);
+  }
   for(const a of crossings){
    const fp=assetDefinition('crossing'),r=a.rotation||0,c=Math.cos(r),sn=Math.sin(r);
    ctx.save();
-   // Convert local crossing metres to canvas pixels with independent X/Z
-   // scales. A normal ctx.rotate() skews rotated crossings on this 30x24 map.
-   ctx.setTransform(c*sx,-sn*sz,sn*sx,c*sz,tx(a.x),tz(a.z));
-   // Subtle transparent road tint; no dark rectangular slab or raised border.
-   ctx.fillStyle='rgba(22,37,43,.14)';
-   ctx.fillRect(-fp.w/2,-fp.d/2,fp.w,fp.d);
+   if(vehicleSegments.length)ctx.clip(vehicleFootprint);
+   // Canvas setTransform arguments: a=dx/dx, b=dy/dx, c=dx/dy,
+   // d=dy/dy. V9 had the sine signs swapped, mirroring the crossing
+   // relative to its collision/placement rotation.
+   ctx.setTransform(c*sx,sn*sz,-sn*sx,c*sz,tx(a.x),tz(a.z));
    ctx.fillStyle='#f4f3e9';
    for(let x=-fp.w/2+.22;x+0.26<fp.w/2;x+=.47){
     ctx.fillRect(x,-fp.d*.39,.26,fp.d*.78);
    }
-   // Fine stop demarcations align with the existing road instead of
-   // extending into thick independent pavement borders.
+   // Narrow transverse stop markers, never a full-area painted slab.
    ctx.fillStyle='#e8ba46';
    ctx.fillRect(-fp.w/2,-fp.d/2+.065,fp.w,.045);
    ctx.fillRect(-fp.w/2,fp.d/2-.11,fp.w,.045);
