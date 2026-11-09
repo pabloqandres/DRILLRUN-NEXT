@@ -24,6 +24,8 @@ import {canStartMission3,startMission3,updateMission3Phase} from '../mission3/mi
 import {mission3Readout} from '../mission3/mission-readout.mjs';
 import {mission2Readout} from '../hsec/mission-readout.mjs';
 import {createDrillModel,animateDrill} from '../mission3/drill-models.mjs';
+import {createDthProductionRig,animateDthRig,createMachineryStaging,RC_RESERVE,DTH_RESERVE} from '../graphics/production-dth-rig.mjs';
+import {mission4Readout} from '../mission4/operations-guide.mjs';
 import {createBoreholeMarker,updateMarkerProgress} from '../mission3/borehole-marker.mjs';
 import {createDeliveryVehicle,startDelivery,updateDelivery,departDelivery} from '../mission3/delivery-vehicle.mjs';
 import {createDrillingEffects,updateDrillingEffects} from '../mission3/drilling-effects.mjs';
@@ -78,6 +80,7 @@ let hsecWorld=null,hsecUI=null,hsecElapsed=0,hsecLastSignature='',hsecFollow=fal
 let constructionCallout=null,guidance=null,cinematic=null,cameraDebug=null,cinemaRecorder=null,reviewBackup=null,cinemaReview=false,locomotionReview=null,qaComputerPath=null,qaWalkRoute=null,characterStage=null,avatars=null,builderOpen=false,managingOffice=false,officePanelPreview=null,selectedBuildModule=null,lastPortraitId=null,selectedAvatar='operator01';
 let m3DrillModel=null,m3BoreholeMarkers=[],m3DeliveryVehicle=null,m3DrillingFx=null,m3VisualsReady=false;
 let m4DrillTruckModel=null,m4ParkingSpot=null,m4VisualsReady=false,m4TruckLoading=false,m4TruckCollider=null;
+let m4DthModel=null,m4DthCollider=null,m4Staging=null;
 let siteCinematics=null;
 let world,scene,phase='start',phoneApp=null,phoneOpen=false,category='desks',modalOpen=false,blueprint=false,placement=null,busy=null,keys={},joy={x:0,y:0},pointer=null,target=null,auth={configured:false},account=null,audioContext=null,last=performance.now(),clock=0,lastSave=0,lastHud=0,introAt=0,lastObjective='',qaRoute=false;
 const motion=createMotion(),qa=new URLSearchParams(location.search).has('chapterqa'),cameraDev=new URLSearchParams(location.search).get('dev')==='camera';
@@ -194,10 +197,15 @@ function updateM3Visuals(dt){
  if(!m3VisualsReady||!s?.mission3)return;
  // Ensure drill model exists if player owns a drill
  if(s.drill&&!m3DrillModel)spawnM3Drill(s.drill.id);
- // Move drill to active borehole
- if(m3DrillModel&&s.contract?.activeBoreholeIndex!=null){
-  const site=BOREHOLE_SITES[s.contract.activeBoreholeIndex];
-  if(site){m3DrillModel.position.x+=(site.x-m3DrillModel.position.x)*dt*2;m3DrillModel.position.z+=(site.z-m3DrillModel.position.z)*dt*2;}
+ // After the exploration contract is delivered, RC returns to an actual
+ // visible reserve bay; M4 production uses a separate physical DTH rig.
+ if(m3DrillModel){
+  const parked=s.contract?.status==='delivered'&&s.mission4?.phase&&s.mission4.phase!=='inactive';
+  const site=parked?RC_RESERVE:s.contract?.activeBoreholeIndex!=null?BOREHOLE_SITES[s.contract.activeBoreholeIndex]:null;
+  if(site){
+   m3DrillModel.position.x+=(site.x-m3DrillModel.position.x)*Math.min(1,dt*2);
+   m3DrillModel.position.z+=(site.z-m3DrillModel.position.z)*Math.min(1,dt*2);
+  }
  }
  // Sync drill collider position
  if(m3DrillCollider&&m3DrillModel){m3DrillCollider.x=m3DrillModel.position.x;m3DrillCollider.z=m3DrillModel.position.z;}
@@ -302,6 +310,26 @@ function createProceduralTruck(){
 }
 function updateM4Visuals(dt){
  if(!m4VisualsReady||!s?.mission4)return;
+ // Staging is visual only. The real protected machinery yard is a separate
+ // proposed M5 build; never grant its safety score before construction.
+ if(!m4Staging){m4Staging=createMachineryStaging();world.scene.add(m4Staging);}
+ if(s.mission4.productionDrill&&!m4DthModel){
+  m4DthModel=createDthProductionRig();
+  world.scene.add(m4DthModel);
+  m4DthCollider={x:DTH_RESERVE.x,z:DTH_RESERVE.z,w:3.2,d:4.5,_dth:true};
+  world.colliders.push(m4DthCollider);
+ }
+ if(m4DthModel){
+  const drill=s.mission4.productionDrill;
+  const assigned=drill?.assignedZone;
+  const zone=assigned?s.mission4.zones.find(z=>z.id===assigned):null;
+  const target=zone?.position||DTH_RESERVE;
+  // On reload and delivery, never leave the model at origin or invisible.
+  m4DthModel.position.x+=(target.x-m4DthModel.position.x)*Math.min(1,dt*3);
+  m4DthModel.position.z+=(target.z-m4DthModel.position.z)*Math.min(1,dt*3);
+  if(m4DthCollider){m4DthCollider.x=m4DthModel.position.x;m4DthCollider.z=m4DthModel.position.z;}
+  animateDthRig(m4DthModel,dt,drill?.state==='producing');
+ }
  // Ensure parking and truck are initialized on state change
  if(s.mission4.parkingBuilt&&!m4ParkingSpot)initM4Visuals();
  if(s.mission4.drillTruck&&!m4DrillTruckModel){m4VisualsReady=false;initM4Visuals();}
@@ -486,7 +514,7 @@ function manageOffice(){
 function previewOfficeUpgrade(next){
  officeQuickCard(next,{upgrade:true});scene.setUpgradePreview(next.level);
 }
-function showMission(){const m4On=s.mission4&&s.mission4.phase!=='inactive';const m3On=s.mission3&&s.mission3.phase!=='inactive';if(m4On){openPhone('m4-objectives');return;}if(hsecActive(s)&&!(s.hsec.completedAt&&m3On)){hsecUI.open();return;}if(m3On){openPhone('m3-objectives');return;}const obj=objective(s);modal(`<span class="eyebrow">${esc(t('chapter'))}</span><h2>${esc(t(obj))}</h2><p>${esc(t(obj+'Detail'))}</p><div class="modalActions">${button('close','closeMission',true)}</div>`);$('#closeMission').onclick=closeModal;}
+function showMission(){const m4On=s.mission4&&s.mission4.phase!=='inactive';const m3On=s.mission3&&s.mission3.phase!=='inactive';if(m4On){openPhone('m4-operaciones');return;}if(hsecActive(s)&&!(s.hsec.completedAt&&m3On)){hsecUI.open();return;}if(m3On){openPhone('m3-objectives');return;}const obj=objective(s);modal(`<span class="eyebrow">${esc(t('chapter'))}</span><h2>${esc(t(obj))}</h2><p>${esc(t(obj+'Detail'))}</p><div class="modalActions">${button('close','closeMission',true)}</div>`);$('#closeMission').onclick=closeModal;}
 $('#boostButton').onclick=()=>action(()=>accelerate(s));
 function enterOffice(){if(s.office.status!=='built'||pendingConstruction(s))return;transition('entryTransition');stop();world.office.userData.api.opened.entry=true;world.office.userData.api.angles.entry=Math.PI/2;s.position={x:-7.99,z:-.5};s.inside=true;s.hasEntered=true;world.worker.reset();$('#shade').classList.remove('entryFade');void $('#shade').offsetWidth;$('#shade').classList.add('entryFade');resetOrbit(world.orbit);syncUIEvents();save();renderHUD();}
 function playerLevel(s){let lvl=1;if(s.cleared.length>=16)lvl=2;if(s.office.status==='built')lvl=3;if(s.chapterCompletedAt)lvl=4;if(s.hsec?.completedAt)lvl=5;if(s.mission3&&s.mission3.phase!=='inactive')lvl=6;if(s.mission3?.phase==='drilling'||s.mission3?.phase==='delivery')lvl=7;if(s.mission3?.phase==='complete')lvl=8;if(s.mission4&&s.mission4.phase!=='inactive')lvl=9;if(s.mission4?.phase==='complete')lvl=10;return lvl;}
@@ -762,7 +790,7 @@ $('#builderButton').onclick=openBuilder;
   if(nav==='hsec'){if(!isMissionAccepted(s,'m2')&&!isMissionCollected(s,'m2')){if(!showPendingMissionMessage())openPhone('objectives');return;}if(hsecUI&&s?.hsec)hsecUI.open();else openPhone('objectives');return;}
   if(nav==='m4-zones'){openPhone(s?.mission4?.phase&&s.mission4.phase!=='inactive'?'m4-zones':'objectives');return;}
   if(nav==='m3-contract'){openPhone(s?.mission3?.phase&&s.mission3.phase!=='inactive'?'m3-contract':'objectives');return;}
-  if(nav==='m3-inventory'){openPhone(s?.mission3?.phase&&s.mission3.phase!=='inactive'?'m3-inventory':'inventory');return;}
+  if(nav==='m3-inventory'){openPhone(s?.mission4?.phase&&s.mission4.phase!=='inactive'?'m4-workshop':s?.mission3?.phase&&s.mission3.phase!=='inactive'?'m3-inventory':'inventory');return;}
   if(nav==='m3-personnel'){openPhone(s?.mission3?.phase&&s.mission3.phase!=='inactive'?'m3-personnel':'home');return;}
   openPhone(nav);
  });$('#phoneButton').onclick=()=>{if(phoneOpen)closePhone();else if(!showPendingMissionMessage())openPhone();};$('#closePhone').onclick=$('#phoneShade').onclick=closePhone;$('#phoneBack').onclick=()=>phoneUI.backApp();$('#money').onclick=()=>notices.push({title:t('cash'),detail:money(s.cash),symbol:'wallet'});
@@ -876,10 +904,10 @@ world.cameraFocus=inWorldConstruction?hsecUI.focus():managingOffice?{x:-6,z:0}:n
  const activeRC=!!s.drill&&s.drill.state==='drilling';
  const activeDTH=s.mission4?.productionDrill?.state==='producing';
  const movingTruck=!!m4DrillTruckModel&&truckRouteActive(m4DrillTruckModel);
- const siteInputs={drill:m3DrillModel,truck:m4DrillTruckModel,drilling:activeRC,truckMoving:movingTruck,playing:phase==='play'&&!document.hidden};
+ const siteInputs={drill:activeDTH?m4DthModel:m3DrillModel,truck:m4DrillTruckModel,drilling:activeRC||activeDTH,truckMoving:movingTruck,playing:phase==='play'&&!document.hidden};
  siteCinematics?.update(s,dt,clock,siteInputs);
  worksiteAudio.update(s,dt,{...siteInputs,
-  drill:activeRC?m3DrillModel:activeDTH?s.mission4.productionDrill:null,
+  drill:activeRC?m3DrillModel:activeDTH?m4DthModel:null,
   drilling:activeRC||activeDTH,
   position:s.position,moving:walking&&!builderOpen&&!phoneOpen&&!modalOpen,
   walkSurfaces:world.walkSurfaces||[]
