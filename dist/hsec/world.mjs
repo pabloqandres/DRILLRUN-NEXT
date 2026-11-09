@@ -212,115 +212,126 @@ export class HsecWorld{
   for(const btn of this.assetCard.querySelectorAll('.acInspect'))btn.addEventListener('click',()=>{this.onInspect?.(btn.dataset.asset);setTimeout(()=>{const updated=this.state.hsec?.assets.find(a=>a.id===asset.id);if(updated)this.showAssetCard(updated);},50);});
   for(const btn of this.assetCard.querySelectorAll('.acUpgrade'))btn.addEventListener('click',()=>{this.onUpgrade?.(btn.dataset.asset);this.showAssetCard(null);});
   for(const btn of this.assetCard.querySelectorAll('.acRemove'))btn.addEventListener('click',()=>{this.onRemove?.(btn.dataset.asset);this.showAssetCard(null);});}
- paintRoads(h){// Paint built routes onto the decal canvas
+ paintRoads(h){// V12: all route surfacing shares the SAME metric canvas space.
+  // Previous V10 painted each chain (including edges + dashes) separately.
+  // At T intersections a later chain laid its dark shoulder over the prior
+  // route, creating hard seams/visually severed roads. Non-square world-to-
+  // canvas mapping also made road widths depend on drawing direction.
   const cv=this.roadCanvas,ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
-  // World → canvas mapping: x ∈ [-13.5, 16.5] → [0, W], z ∈ [-13.5, 10.5] → [0, H]
-  const wx=30,wz=24,ox=-13.5,oz=-13.5;
-  const tx=x=>(x-ox)/wx*W,tz=z=>(z-oz)/wz*H,tw=w=>w/wx*W;
-  ctx.clearRect(0,0,W,H);
-  const routes=h.assets.filter(a=>['vehicle','pedestrian'].includes(a.type)&&a.status==='built'&&a.points?.length>=2);
-  // Crossings must remain visible even when a route is added later.
-  // An empty route list no longer skips the crossing decal pass.
-  const tracePath=(ctx,pts)=>{ctx.beginPath();ctx.moveTo(tx(pts[0].x),tz(pts[0].z));for(let i=1;i<pts.length;i++)ctx.lineTo(tx(pts[i].x),tz(pts[i].z));};
-  // Merge connected routes of same type into continuous chains for seamless painting
-  const mergeChains=(type)=>{const assets=routes.filter(a=>a.type===type);if(!assets.length)return[];const chains=assets.map(a=>[...a.points]);let merged=true;while(merged){merged=false;for(let i=0;i<chains.length;i++){if(!chains[i])continue;for(let j=i+1;j<chains.length;j++){if(!chains[j])continue;const ai=chains[i],aj=chains[j],d1=Math.hypot(ai[ai.length-1].x-aj[0].x,ai[ai.length-1].z-aj[0].z),d2=Math.hypot(ai[ai.length-1].x-aj[aj.length-1].x,ai[ai.length-1].z-aj[aj.length-1].z),d3=Math.hypot(ai[0].x-aj[0].x,ai[0].z-aj[0].z),d4=Math.hypot(ai[0].x-aj[aj.length-1].x,ai[0].z-aj[aj.length-1].z);const tol=.6;if(d1<tol){chains[i]=ai.concat(aj.slice(1));chains[j]=null;merged=true;}else if(d2<tol){chains[i]=ai.concat(aj.reverse().slice(1));chains[j]=null;merged=true;}else if(d3<tol){chains[i]=aj.reverse().concat(ai.slice(1));chains[j]=null;merged=true;}else if(d4<tol){chains[i]=aj.concat(ai.slice(1));chains[j]=null;merged=true;}}}}return chains.filter(Boolean);};
-  // V10: sidewalks are painted first. Continuous vehicle pavement and its
-  // kerb sit above them at intersections; the zebra paint then bridges both.
-  // The previous opposite order left pedestrian slabs visibly crossing roads.
-  const paintOrder=[...mergeChains('pedestrian').map(pts=>({type:'pedestrian',points:pts})),...mergeChains('vehicle').map(pts=>({type:'vehicle',points:pts}))];
-  for(const a of paintOrder){const d=assetDefinition(a.type),pts=a.points;
-   ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
-   // Gravel shoulders add a premium road edge without changing navigation geometry.
-   ctx.globalAlpha=.42;ctx.lineWidth=tw(d.w+.76);
-   ctx.strokeStyle=d.id==='vehicle'?'#927f69':'#9c9783';
-   tracePath(ctx,pts);ctx.stroke();ctx.globalAlpha=1;
-   // 1) Dark edge/shoulder stroke (widest)
-   ctx.lineWidth=tw(d.w+.4);
-   ctx.strokeStyle=d.id==='vehicle'?'#2a2d2a':'#3a4a42';
-   tracePath(ctx,pts);ctx.stroke();
-   // 2) Edge line stroke (white lines automatically appear between shoulder and surface)
-   if(d.id==='vehicle'){ctx.lineWidth=tw(d.w+.1);ctx.strokeStyle='#d0d4d0';tracePath(ctx,pts);ctx.stroke();}
-   // 3) Road surface stroke
-   ctx.lineWidth=tw(d.w);
-   ctx.strokeStyle=d.id==='vehicle'?'#535e63':'#9ba8a5';
-   tracePath(ctx,pts);ctx.stroke();
-   // 4) Subtle worn center
-   ctx.lineWidth=tw(d.w*.35);ctx.globalAlpha=.15;
-   ctx.strokeStyle=d.id==='vehicle'?'#6f7a7b':'#cad0c5';
-   tracePath(ctx,pts);ctx.stroke();ctx.globalAlpha=1;
-   // V3 pavement: wheel-wear strips are generated from the actual road
-   // centerline, so their width and direction follow every corner exactly.
-   // This is decal-only; the actual collision/routing network is unchanged.
-   if(d.id==='vehicle'){
-    ctx.setLineDash([]);ctx.strokeStyle='rgba(33,43,49,.22)';
-    ctx.lineWidth=tw(.105);ctx.lineCap='round';
-    for(const offset of[-d.w*.24,d.w*.24])for(let k=1;k<pts.length;k++){
-     const p=pts[k-1],q=pts[k],dx=q.x-p.x,dz=q.z-p.z,len=Math.hypot(dx,dz);
-     if(len<.001)continue;
-     const nx=-dz/len,nz=dx/len;
-     ctx.beginPath();
-     ctx.moveTo(tx(p.x+nx*offset),tz(p.z+nz*offset));
-     ctx.lineTo(tx(q.x+nx*offset),tz(q.z+nz*offset));
-     ctx.stroke();
+  const wx=30,wz=24,ox=-13.5,oz=-13.5,sx=W/wx,sz=H/wz;
+  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,W,H);
+  const routes=(h.assets||[]).filter(a=>
+   (a.type==='vehicle'||a.type==='pedestrian')&&a.status==='built'&&
+   a.points?.length>=2
+  );
+  const applyWorld=()=>ctx.setTransform(sx,0,0,sz,-ox*sx,-oz*sz);
+  const grouped=kind=>routes.filter(a=>a.type===kind);
+  const pathFor=assets=>{
+   const path=new Path2D();
+   for(const a of assets){
+    for(let i=1;i<a.points.length;i++){
+     const p=a.points[i-1],q=a.points[i];
+     if(Math.hypot(q.x-p.x,q.z-p.z)<.005)continue;
+     path.moveTo(p.x,p.z);path.lineTo(q.x,q.z);
     }
    }
-   // 5) Contrasting dashed operational centerline.
-   ctx.setLineDash([tw(.45),tw(.45)]);ctx.lineWidth=tw(.06);
-   ctx.strokeStyle=d.id==='vehicle'?'#f0c46b':'#e8efdf';
-   tracePath(ctx,pts);ctx.stroke();
-   // 6) Pedestrian edge dashes
-   if(d.id==='pedestrian'){ctx.lineWidth=tw(d.w+.08);ctx.strokeStyle='#c8ccc8';tracePath(ctx,pts);ctx.stroke();}
-   ctx.setLineDash([]);ctx.restore();}
-  // V10: keep the road shoulder/markings continuous under crossings.
-  // Clip zebra paint to the actual built vehicle corridor so the crossing
-  // cannot create a second road slab or leave a rectangle over a sidewalk.
-  const crossings=h.assets.filter(a=>a.type==='crossing'&&a.status==='built');
-  const sx=W/wx,sz=H/wz;
-  const vehicleSegments=routes.filter(a=>a.type==='vehicle').flatMap(a=>
-   a.points.slice(1).map((p,i)=>({from:a.points[i],to:p}))
-  );
-  const vehicleFootprint=new Path2D();
-  for(const seg of vehicleSegments){
-   const dx=seg.to.x-seg.from.x,dz=seg.to.z-seg.from.z,length=Math.hypot(dx,dz);
-   if(length<.01)continue;
-   const nx=-dz/length*1.39,nz=dx/length*1.39;
-   vehicleFootprint.moveTo(tx(seg.from.x+nx),tz(seg.from.z+nz));
-   vehicleFootprint.lineTo(tx(seg.to.x+nx),tz(seg.to.z+nz));
-   vehicleFootprint.lineTo(tx(seg.to.x-nx),tz(seg.to.z-nz));
-   vehicleFootprint.lineTo(tx(seg.from.x-nx),tz(seg.from.z-nz));
-   vehicleFootprint.closePath();
-  }
-  // Rounded joints at bends prevent pinholes between adjacent road polygons.
-  for(const seg of vehicleSegments)for(const p of [seg.from,seg.to]){
-   vehicleFootprint.moveTo(tx(p.x)+sx*1.39,tz(p.z));
-   vehicleFootprint.ellipse(tx(p.x),tz(p.z),sx*1.39,sz*1.39,0,0,Math.PI*2);
-  }
-  for(const a of crossings){
-   const fp=assetDefinition('crossing'),r=a.rotation||0,c=Math.cos(r),sn=Math.sin(r);
-   ctx.save();
-   if(vehicleSegments.length)ctx.clip(vehicleFootprint);
-   // Canvas setTransform arguments: a=dx/dx, b=dy/dx, c=dx/dy,
-   // d=dy/dy. V9 had the sine signs swapped, mirroring the crossing
-   // relative to its collision/placement rotation.
-   ctx.setTransform(c*sx,sn*sz,-sn*sx,c*sz,tx(a.x),tz(a.z));
-   ctx.fillStyle='#f4f3e9';
-   for(let x=-fp.w/2+.22;x+0.26<fp.w/2;x+=.47){
-    ctx.fillRect(x,-fp.d*.39,.26,fp.d*.78);
+   return path;
+  };
+  const paintNetwork=(kind)=>{
+   const assets=grouped(kind);if(!assets.length)return;
+   const d=assetDefinition(kind),veh=kind==='vehicle',path=pathFor(assets);
+   // Every stroke pass covers ALL segments before another pass begins.
+   // Round caps/joins now create contiguous pavement on L/T/X intersections,
+   // no matter how individual assets were split or saved.
+   ctx.save();ctx.lineCap='round';ctx.lineJoin='round';ctx.setLineDash([]);
+   const stroke=(width,color,opacity=1)=>{
+    ctx.globalAlpha=opacity;ctx.lineWidth=width;ctx.strokeStyle=color;ctx.stroke(path);
+   };
+   stroke(d.w+.76,veh?'#927f69':'#9c9783',.42);
+   stroke(d.w+.40,veh?'#2a2d2a':'#3a4a42');
+   if(veh)stroke(d.w+.10,'#d0d4d0');
+   stroke(d.w,veh?'#535e63':'#9ba8a5');
+   stroke(d.w*.35,veh?'#6f7a7b':'#cad0c5',.15);
+   ctx.globalAlpha=1;
+   if(veh){
+    // The worn wheel tracks may be split, but cannot reintroduce an asphalt
+    // seam because they are drawn on top of the consolidated road fill.
+    ctx.strokeStyle='rgba(33,43,49,.22)';
+    ctx.lineWidth=.105;
+    for(const offset of[-d.w*.24,d.w*.24])for(const a of assets){
+     for(let k=1;k<a.points.length;k++){
+      const p=a.points[k-1],q=a.points[k],dx=q.x-p.x,dz=q.z-p.z,len=Math.hypot(dx,dz);
+      if(len<.005)continue;
+      const nx=-dz/len,nz=dx/len;
+      ctx.beginPath();ctx.moveTo(p.x+nx*offset,p.z+nz*offset);
+      ctx.lineTo(q.x+nx*offset,q.z+nz*offset);ctx.stroke();
+     }
+    }
+   }else{
+    // Footpath side line belongs just inside the path, not outside it:
+    // previous d.w+.08 stroke at the end reintroduced a hard rim.
+    stroke(d.w-.13,'#c8ccc8',.30);
    }
-   // Narrow transverse stop markers, never a full-area painted slab.
-   ctx.fillStyle='#e8ba46';
-   ctx.fillRect(-fp.w/2,-fp.d/2+.065,fp.w,.045);
-   ctx.fillRect(-fp.w/2,fp.d/2-.11,fp.w,.045);
+   ctx.globalAlpha=1;
+   ctx.setLineDash([.45,.45]);
+   ctx.lineWidth=.06;
+   ctx.strokeStyle=veh?'#f0c46b':'#e8efdf';
+   ctx.stroke(path);ctx.setLineDash([]);
+   ctx.restore();
+  };
+  applyWorld();
+  paintNetwork('pedestrian');
+  paintNetwork('vehicle');
+  // Crosswalks are pedestrian connections painted ON the same uninterrupted
+  // pavement. Clip them to the assembled roadway, not a second rectangle.
+  const vehicle=grouped('vehicle'),crossings=(h.assets||[]).filter(a=>a.type==='crossing'&&a.status==='built');
+  if(vehicle.length&&crossings.length){
+   const vehicleFootprint=pathFor(vehicle);
+   ctx.save();
+   ctx.lineWidth=assetDefinition('vehicle').w;
+   ctx.lineCap='round';ctx.lineJoin='round';
+   // Canvas has no strokeClip. Fill a union of metric segment capsules with
+   // the same cap geometry as the actual vehicle surface.
+   const roadMask=new Path2D(),half=assetDefinition('vehicle').w/2;
+   for(const a of vehicle)for(let i=1;i<a.points.length;i++){
+    const p=a.points[i-1],q=a.points[i],dx=q.x-p.x,dz=q.z-p.z,len=Math.hypot(dx,dz);
+    if(len<.005)continue;
+    const nx=-dz/len*half,nz=dx/len*half;
+    roadMask.moveTo(p.x+nx,p.z+nz);
+    roadMask.lineTo(q.x+nx,q.z+nz);
+    roadMask.lineTo(q.x-nx,q.z-nz);
+    roadMask.lineTo(p.x-nx,p.z-nz);
+    roadMask.closePath();
+    for(const pt of[p,q]){roadMask.moveTo(pt.x+half,pt.z);roadMask.arc(pt.x,pt.z,half,0,Math.PI*2);}
+   }
+   ctx.clip(roadMask);
+   for(const a of crossings){
+    const fp=assetDefinition('crossing'),angle=a.rotation||0,c=Math.cos(angle),sn=Math.sin(angle);
+    ctx.save();
+    // Parent is still in metric world units. Apply rotation/translation in
+    // that space, then stripes preserve their intended real-world dimensions.
+    ctx.translate(a.x,a.z);ctx.rotate(angle);
+    ctx.fillStyle='#f4f3e9';
+    for(let x=-fp.w/2+.22;x+.26<fp.w/2;x+=.47)ctx.fillRect(x,-fp.d*.39,.26,fp.d*.78);
+    ctx.fillStyle='#e8ba46';
+    ctx.fillRect(-fp.w/2,-fp.d/2+.065,fp.w,.045);
+    ctx.fillRect(-fp.w/2,fp.d/2-.11,fp.w,.045);
+    ctx.restore();
+   }
    ctx.restore();
   }
-  // Grain noise for texture over painted areas
-  const imageData=ctx.getImageData(0,0,W,H),px=imageData.data;
-  for(let i=0;i<px.length;i+=4){if(px[i+3]<10)continue;// Stable pseudo-grain prevents roads flickering whenever HSEC redraws.
+  ctx.setTransform(1,0,0,1,0,0);
+  // Subtle deterministic texture on painted pixels (no rerender flicker).
+  const img=ctx.getImageData(0,0,W,H),px=img.data;
+  for(let i=0;i<px.length;i+=4){
+   if(px[i+3]<10)continue;
    const grain=((Math.sin(i*.000041+73.1)*43758.5453)%1);
    const g=(grain-Math.floor(grain)-.5)*10;
-   px[i]+=g;px[i+1]+=g;px[i+2]+=g;}
-  ctx.putImageData(imageData,0,0);
-  this.roadTex.needsUpdate=true;this.w.renderer.staticFrame=null;}
+   px[i]+=g;px[i+1]+=g;px[i+2]+=g;
+  }
+  ctx.putImageData(img,0,0);
+  this.roadTex.needsUpdate=true;this.w.renderer.staticFrame=null;
+ }
  setDraft(draft){if(JSON.stringify(draft)===this.draftKey)return;this.draftKey=JSON.stringify(draft);releaseModel(this.ghost);this.ghost=null;for(const child of [...this.coverage.children]){child.material?.dispose();child.geometry?.dispose();child.removeFromParent();}this.draftAnims=[];this.draft=draft;if(!draft)return;
  this.ghost=assetModel({...draft,level:1},{ghost:true});const ghostY=draft.points?.length?Math.max(...draft.points.map(p=>(this.baseGround?.(p.x,p.z)||0))):((this.baseGround?.(draft.x,draft.z)||0));this.ghost.position.set(draft.x,ghostY,draft.z);this.ghost.rotation.y=draft.rotation||0;this.group.add(this.ghost);
  this.ghost.traverse(o=>{if(o.isMesh)this.draftAnims.push({m:o.material,t:'ghost',ei:o.material.emissiveIntensity,op:o.material.opacity});});
