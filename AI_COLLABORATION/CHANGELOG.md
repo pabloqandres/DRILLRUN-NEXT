@@ -1,5 +1,9 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — V21 M3 closing SMS and phantom workshop posts
+
+- M3 contract payout immediately delivers/opens Camila Reyes' closing message even when the phone shows Contract; previously paid saves with unread final message self-recover. No duplicate reward; explicit narrative confirmation still required for M4. Workshop upgrade no longer mislabels arbitrary 3D meshes as light poles: reads only real built HSEC assets and drops misleading auto-removal warning. See CHANGES/2026-11-09_m3-closing-workshop-posts-v21.md.
+
 ## 2026-11-09 — V20 M3 90/90 m completion and countdown correctness
 
 - Fix M3 stuck at 11/13 after 3/3 physical boreholes due to 89.99999999999997 m floating-point precision. Normalize finished metres and recognize existing saves only when all real boreholes are complete. HUD timer shows PERFORACIÓN COMPLETA / LISTO instead of expiring after work finishes. Speed bonus uses drilling finish timestamp, not delayed phone delivery; no double payout. See CHANGES/2026-11-09_m3-meter-precision-v20.md.
