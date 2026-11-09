@@ -1,5 +1,9 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — V10 continuous road junction rendering
+
+- Vehicle road painting now stays continuous beneath pedestrian crossings; zebra stripes clipped to constructed roads instead of creating floating rectangular overlays. No HSEC logic or saved state changes. See `CHANGES/2026-11-09_road-junctions-v10.md`.
+
 ## 2026-11-09 — HSEC crossing / maintenance shed light V9
 
 - Crosswalk uses a single flush painted decal aligned with route textures; removed double 3D elevated slab and corrected nonuniform canvas rotation scaling.
