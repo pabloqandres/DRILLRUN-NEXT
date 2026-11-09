@@ -1,6 +1,6 @@
 // Narrative UI — phone conversation rendering and typing animation
 import {CHARACTERS,activeCharacters,characterConversation,characterUnread,narrativeUnread} from './narrative.mjs';
-import {characterAvatar} from './icons.mjs';
+import {narrativePortrait} from '../assets/narrative-portraits.mjs';
 
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -15,7 +15,7 @@ export function renderContactList(s,t,icon){
   const preview=t(ch.lastBodyKey)||'';
   const previewShort=preview.replace(/\{name\}/g,'').replace(/\n/g,' ').slice(0,60);
   html+=`<button class="narrativeContactCard" data-narrative-char="${ch.id}">
-   <span class="narrativeAvatar" style="--char-color:${ch.color};--char-bg:${CHARACTERS[ch.id]?.color||'#888'}55">${characterAvatar(ch.avatarIcon)}</span>
+   <span class="narrativeAvatar" style="--char-color:${ch.color};--char-bg:${CHARACTERS[ch.id]?.color||'#888'}55">${narrativePortrait(ch.avatarIcon)}</span>
    <span class="narrativeContactInfo">
     <b>${esc(t(ch.nameKey))}</b>
     <small>${esc(t(ch.roleKey)||'')}</small>
@@ -34,7 +34,7 @@ export function renderConversation(s,charId,t,icon,playerName){
  if(!ch)return '';
  const msgs=characterConversation(s,charId);
  let html=`<div class="conversationHeader">
-  <span class="narrativeAvatar" style="--char-color:${ch.color};--char-bg:${ch.color}55">${characterAvatar(ch.avatarIcon)}</span>
+  <span class="narrativeAvatar" style="--char-color:${ch.color};--char-bg:${ch.color}55">${narrativePortrait(ch.avatarIcon)}</span>
   <span><b>${esc(t(ch.nameKey))}</b><small>${esc(t(ch.roleKey)||'')}</small></span>
  </div><div class="messageThread">`;
 
@@ -48,7 +48,7 @@ export function renderConversation(s,charId,t,icon,playerName){
 
   html+=`<div class="narrativeBubble${needsTyping?' narrativeTypingTarget':''}" data-msg-id="${esc(m.id)}">
    <div class="narrativeBubbleSender">
-    <span class="narrativeAvatar narrativeBubbleAvatar" style="--char-color:${ch.color};--char-bg:${ch.color}33">${characterAvatar(ch.avatarIcon)}</span>
+    <span class="narrativeAvatar narrativeBubbleAvatar" style="--char-color:${ch.color};--char-bg:${ch.color}33">${narrativePortrait(ch.avatarIcon)}</span>
     <span class="narrativeSenderIdentity"><b>${esc(t(ch.nameKey))}</b><small>${esc(t(ch.roleKey)||'')}</small></span>
    </div>
    <div class="narrativeBody">${needsTyping?'':formatBody(resolved)}</div>
