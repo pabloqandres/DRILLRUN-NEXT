@@ -21,6 +21,7 @@ import {purchaseDrill,installTool} from '../mission3/drills.mjs';
 import {placeOrder,placeMachineryOrder,reconcileDeliveredMachinery} from '../mission3/headquarters.mjs';
 import {buildWorkshop,finishWorkshopConstruction,upgradeWorkshop,workshopLevel,workshopCapacity,workshopUsed,workshopFree,WORKSHOP_LEVELS,workshopUpgradeJob,workshopUpgradeProgress,finishWorkshopUpgrade,accelerateWorkshop,canDemolishWorkshop,demolishWorkshop} from '../mission3/inventory.mjs';
 import {canStartMission3,startMission3,updateMission3Phase} from '../mission3/mission3-state.mjs';
+import {mission3Readout} from '../mission3/mission-readout.mjs';
 import {createDrillModel,animateDrill} from '../mission3/drill-models.mjs';
 import {createBoreholeMarker,updateMarkerProgress} from '../mission3/borehole-marker.mjs';
 import {createDeliveryVehicle,startDelivery,updateDelivery,departDelivery} from '../mission3/delivery-vehicle.mjs';
@@ -602,7 +603,22 @@ function renderHUD(){if(!s)return;
  }
  const m3Active=s.mission3&&s.mission3.phase!=='inactive';
  if(narrativeMission==='m2'&&hsecActive(s)){const step=missionStep(s);const completed=!!s.hsec.completedAt;const eyebrow=$('#objective .eyebrow');if(eyebrow)eyebrow.textContent=completed?'MISIÓN COMPLETADA':'MISIÓN ACTUAL';const title=$('#objectiveTitle');if(title)title.textContent=completed?'Operación preparada':'Prepara tu operación';const detail=$('#objectiveDetail');if(detail){if(completed){detail.classList.add('hidden');}else{detail.classList.remove('hidden');detail.innerHTML=HSEC_STEPS.map((text,i)=>`<span class="hsecStep ${i<step?'done':i===step?'active':''}">${text}</span>`).join('');}}setText($('#objectiveCount'),completed?'✓':`${Math.min(5,Math.max(0,step))}/5`);$('#objectiveProgress').style.width=completed?'100%':(Math.min(5,Math.max(0,step))*20)+'%';}
- if(narrativeMission==='m3'&&m3Active){const phase=s.mission3.phase;const eyebrow=$('#objective .eyebrow');if(eyebrow)eyebrow.textContent='MISIÓN 3';const title=$('#objectiveTitle');if(title)title.textContent='Tu Primer Contrato';const detail=$('#objectiveDetail');if(detail){detail.classList.remove('hidden');if(phase==='drilling'&&s.contract){const m=Math.round(s.contract.metersCompleted);const t2=s.contract.totalMeters;const bh=(s.boreholes||[]).filter(b=>b.status==='completed').length;detail.textContent=`${m}/${t2}m · Sondaje ${Math.min(bh+1,s.boreholes.length)}/${s.boreholes.length}`;}else{detail.textContent=phase==='briefing'?'Revisa los mensajes del mentor':phase==='setup'?'Compra una perforadora y contrata personal':phase==='survey'?'Solicita el análisis geológico':phase==='equip'?'Instala herramientas en la perforadora':phase==='drilling'?'Perforación en progreso':phase==='delivery'?'Entrega el contrato completado':phase==='complete'?'¡Contrato completado!':'Preparando misión';}}let prog;if(phase==='drilling'&&s.contract){prog=.45+.45*(s.contract.metersCompleted/s.contract.totalMeters);}else{prog=phase==='complete'?1:phase==='delivery'?.9:phase==='drilling'?.6:phase==='equip'?.45:phase==='survey'?.3:phase==='setup'?.15:phase==='briefing'?.05:0;}$('#objectiveProgress').style.width=(prog*100)+'%';setText($('#objectiveCount'),phase==='complete'?'✓':'');}
+ if(narrativeMission==='m3'&&m3Active){
+  const checklist=mission3Readout(s);
+  const eyebrow=$('#objective .eyebrow');
+  if(eyebrow)eyebrow.textContent='MISIÓN 3';
+  const title=$('#objectiveTitle');
+  if(title)title.textContent='Tu Primer Contrato';
+  const detail=$('#objectiveDetail');
+  if(detail){
+   detail.classList.remove('hidden');
+   const next=checklist.pending;
+   detail.textContent=next?next.name+(next.value?' · '+next.value:''):'Todos los objetivos completados. Revisa el mensaje final.';
+   detail.title=next?next.hint:'Todos los requisitos del contrato están cumplidos.';
+  }
+  $('#objectiveProgress').style.width=(checklist.progress*100)+'%';
+  setText($('#objectiveCount'),s.mission3.phase==='complete'?'✓':checklist.done+'/'+checklist.total);
+}
  /* Mission timer card */
  const timerEl=$('#missionTimer');if(timerEl){const showTimer=m3Active&&s.contract?.drillingStartedAt&&(s.contract.status==='active'||s.contract.status==='completed');hidden(timerEl,!showTimer);if(showTimer){const deadline=contractDeadline(s);const now2=Date.now();const remaining=Math.max(0,deadline-now2);const totalDur=s.contract.duration*1000;const secs=Math.ceil(remaining/1000);const mins=Math.floor(secs/60);const ss=secs%60;$('#timerValue').textContent=String(mins).padStart(2,'0')+':'+String(ss).padStart(2,'0');const pct=totalDur>0?remaining/totalDur:0;$('#timerProgress').style.width=(pct*100)+'%';const bh=(s.boreholes||[]).filter(b=>b.status==='completed').length;$('#timerDetail').textContent=`Sondaje ${Math.min(bh+1,s.boreholes.length)}/${s.boreholes.length} · ${Math.round(s.contract.metersCompleted)}/${s.contract.totalMeters}m`;timerEl.classList.toggle('warning',pct<.3&&pct>=.1);timerEl.classList.toggle('danger',pct<.1);}}
  // M4 objective panel
