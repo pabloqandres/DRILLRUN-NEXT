@@ -131,6 +131,13 @@ if($('#cloudSyncNow'))$('#cloudSyncNow').onclick=async()=>{
  const status=$('#cloudSyncNowStatus');
  if(cloudSyncing||cloudLocked){if(status)status.textContent='Esta sesión todavía no puede guardar en la nube';return;}
  if(status)status.textContent='Sincronizando…';
+ if(s?.cloudResetPending){
+  // Retry the transactional promotion of a deliberately restarted game.
+  // A normal autosave must never overwrite the official generation blindly.
+  await reconcileGoogleSave();
+  if(status)status.textContent=cloudStatus;
+  return;
+ }
  save();
  const ok=await cloudFlushNow(CONFIG.saveKey);
  cloudStatus=ok?'Partida sincronizada con Google':'No se pudo subir · comprueba la conexión y la cuenta';
