@@ -130,11 +130,11 @@ function renderCatalog(s,t,fmt,icon,cb){
  html+=`<div class="sectionHeading">Perforadoras RC</div>`;
  if(s.drill){
   const d=drillDefinition(s.drill.id);
-  html+=`<article class="inventoryCard"><span class="inventoryIcon rigPreview" data-rc-rig="${esc(s.drill.id)}">${icon('machine')}</span><div><b>${esc(d?.labelKey||s.drill.id)}</b><small>Estado: ${s.drill.state}</small><span class="itemStatus isInstalled">${icon('check')} Adquirida</span></div></article>`;
+  html+=`<article class="inventoryCard m3RigCatalogCard"><span class="inventoryIcon rigPreview" data-rc-rig="${esc(s.drill.id)}">${icon('machine')}</span><div><b>${esc(d?.id==='rig_rc_advanced'?'Perforadora RC Alta Capacidad':'Perforadora RC Compacta')}</b><small>Estado: ${s.drill.state}</small><span class="itemStatus isInstalled">${icon('check')} Adquirida</span></div></article>`;
  }else{
   for(const d of DRILLS){
    const blocked=canPurchaseDrill(s,d.id);
-   html+=`<article class="inventoryCard"><span class="inventoryIcon rigPreview" data-rc-rig="${esc(d.id)}">${icon('machine')}</span><div><b>${esc(d.labelKey)}</b><small>Prof. máx: ${d.maxDepth}m · ${fmt(d.price)}</small><small>Martillos: ${d.compatibleHammers.join(', ')}</small>${blocked&&blocked!=='drillOwned'?`<span class="itemStatus">${icon('lock')} ${esc(blocked)}</span>`:''}</div><button data-buy-drill="${d.id}" ${blocked?'disabled':''}>${icon('store')}<span>${fmt(d.price)}</span></button></article>`;
+   html+=`<article class="inventoryCard m3RigCatalogCard"><span class="inventoryIcon rigPreview" data-rc-rig="${esc(d.id)}">${icon('machine')}</span><div><b>${esc(d.id==='rig_rc_advanced'?'Perforadora RC Alta Capacidad':'Perforadora RC Compacta')}</b><small>Prof. máx: ${d.maxDepth}m · ${fmt(d.price)}</small><small>Martillos: ${d.compatibleHammers.join(', ')}</small>${blocked&&blocked!=='drillOwned'?`<span class="itemStatus">${icon('lock')} ${esc(blocked)}</span>`:''}</div><button data-buy-drill="${d.id}" ${blocked?'disabled':''}>${icon('store')}<span>${fmt(d.price)}</span></button></article>`;
   }
  }
  // Hammers section
