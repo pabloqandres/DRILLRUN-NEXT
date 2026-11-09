@@ -4,6 +4,8 @@
 
 ## Currently Active
 
+- **ChatGPT — HSEC scroll V10:** `chatgpt/hsec-panel-scroll-v10`; scoped to `dist/hsec/hsec.css`. CSS structural validation complete, browser/mobile scroll acceptance pending.
+
 - **ChatGPT — HSEC V9 crossings and shed lights:** `chatgpt/hsec-crosswalk-shed-lights-v9`. Rendering-only `dist/hsec/world.mjs` and `dist/hsec/shed-model.mjs`. JS parses successfully; gameplay/WebGL screenshots and real-night lighting QA pending.
 
 

@@ -1,5 +1,9 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — HSEC mission panel scrolling V10
+
+- Restored dedicated touch/wheel scroll region for HSEC objectives and risks while keeping heading and tabs visible. The HUD objective detail also supports vertical touch scrolling. No HSEC scoring, mission, economy or save changes. See `CHANGES/2026-11-09_hsec-scroll-v10.md`.
+
 ## 2026-11-09 — HSEC crossing / maintenance shed light V9
 
 - Crosswalk uses a single flush painted decal aligned with route textures; removed double 3D elevated slab and corrected nonuniform canvas rotation scaling.
