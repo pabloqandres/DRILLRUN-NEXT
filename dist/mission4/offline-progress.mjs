@@ -8,7 +8,7 @@ export function calculateOfflineProduction(s,now=Date.now()){
  const result={elapsedMs:elapsed,incomeCycles:0,totalIncome:0};
  // Permanent production uses physical travel, stocked tools and serviced changes.
  // Do not credit offline cycles without simulating the inventory and logistics.
- if(s.mission4?.productionMode==='single-dth-v2')return result;
+ if(s.mission4?.productionMode==='single-dth-v2'||s.mission4?.phase==='complete')return result;
  for(const zone of (s.mission4?.zones||[])){
   if(zone.status!=='producing'||!zone.lastCycleAt)continue;
   const sinceLastCycle=now-zone.lastCycleAt;
