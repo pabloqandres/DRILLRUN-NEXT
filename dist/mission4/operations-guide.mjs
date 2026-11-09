@@ -65,7 +65,7 @@ export function mission4Readout(s){
   totalMinimum:M4_ENTRY_TOTAL,
   cash:s.cash||0,
   drill:dth,
-  drillStatus:dth?(dth.assignedZone?'Produciendo en '+dth.assignedZone:'Recibida · resguardo en taller'):incoming('dthDrill')?'En tránsito (3 minutos)':'Sin comprar',
+  drillStatus:dth?(dth.assignedZone?(dth.state==='producing'?'Produciendo en '+dth.assignedZone:'En zona '+dth.assignedZone+' · esperando mantenimiento'):'Recibida · resguardo en taller'):incoming('dthDrill')?'En tránsito (3 minutos)':'Sin comprar',
   rcStatus:s.drill?(s.contract?.status==='delivered'?'En reserva tras exploración':'Operativa en exploración'):'Sin perforadora RC',
   hammerCount:hammers.length,bitCount:bits.length,
   hammerInstalled:!!dth?.installedHammer,bitInstalled:!!dth?.installedBit,
