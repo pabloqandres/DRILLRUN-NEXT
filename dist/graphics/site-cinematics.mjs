@@ -43,6 +43,24 @@ export class SiteCinematics{
   const doorLight=new T.PointLight(0xb2f1fa,.6,8,2.4);
   doorLight.castShadow=false;doorLight.position.set(0,3.45,3.12);
   this.workshop.add(doorLight);this.workshopLight=doorLight;
+  // Powered rooftop extractor adds visible life to the maintenance facility,
+  // strictly after the real workshop is built. Purely visual fan, no collision.
+  const housingMat=new T.MeshStandardMaterial({color:0x273b43,roughness:.65,metalness:.43});
+  const bladeMat=new T.MeshStandardMaterial({color:0xc5cdd0,roughness:.39,metalness:.61});
+  const housing=new T.Mesh(new T.CylinderGeometry(.64,.64,.18,14),housingMat);
+  housing.position.set(1.65,4.74,-.9);this.workshop.add(housing);
+  const ventilator=new T.Group();
+  ventilator.position.set(1.65,4.86,-.9);
+  for(let b=0;b<5;b++){
+   const blade=new T.Mesh(new T.BoxGeometry(.73,.024,.18),bladeMat);
+   const a=b*Math.PI*2/5;
+   blade.position.set(Math.cos(a)*.25,0,Math.sin(a)*.25);
+   blade.rotation.y=-a;
+   ventilator.add(blade);
+  }
+  const hub=new T.Mesh(new T.CylinderGeometry(.12,.12,.06,12),housingMat);
+  hub.position.y=.025;ventilator.add(hub);
+  this.workshop.add(ventilator);this.ventilator=ventilator;
   scene.add(this.workshop);
   this.office=new T.Group();this.office.position.set(-6,0,0);
   this.office.name='site-fx-office-live';this.office.visible=false;
@@ -136,6 +154,7 @@ export class SiteCinematics{
   }
   if(this.workshop.visible){
    this.workshopLight.intensity=.56+.09*Math.sin(time*.8);
+   this.ventilator.rotation.y+=dt*3.3;
   }
   if(this.rig.visible){
    this.rig.position.copy(drill.position);
