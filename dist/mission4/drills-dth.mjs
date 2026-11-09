@@ -119,7 +119,9 @@ export function assignDthDrillToZone(s,zoneId,now=Date.now()){
  if(!zone)fail('zoneNotFound');
  drill.assignedZone=zoneId;
  drill.position={x:zone.position.x,z:zone.position.z};
- drill.state='producing';
+ // Assigning the rig is not the same as starting production. The DrillTruck
+ // must service the zone first; only then is the production cycle active.
+ drill.state='idle';
  return drill;
 }
 
