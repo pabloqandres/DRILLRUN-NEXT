@@ -4,6 +4,8 @@
 
 ## Currently Active
 
+- **ChatGPT — V24 Mission 4 operational overhaul:** chatgpt/m4-operations-audit-v24. Real five-stage/11-check mission path, Casa Matriz two category tabs, functional DTH workshop and tool installation, state-conditional DTH visual + RC staging, truthful startup after maintenance, budget and pending shipments. Isolated M4 end-to-end function tests pass; live mobile and GLB asset optimization pending.
+
 - **ChatGPT — V23 ETA seconds + Casa Matriz layout:** chatgpt/order-eta-seconds-v23. ETA and two-column rig cards checked with static/runtime tests; real phone screenshot QA pending.
 
 - **ChatGPT — V22 workshop booster accounting:** chatgpt/workshop-boost-economy-v22. Workshop speed-ups now spend booster inventory and reject zero stock; buttons show/disable current count and update HUD. JS smoke and parse checks passed; device QA pending.
