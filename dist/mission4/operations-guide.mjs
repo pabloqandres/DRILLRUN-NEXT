@@ -50,7 +50,18 @@ export function mission4Readout(s){
  const tools=s.toolInventory||[];
  const hammers=tools.filter(t=>t.type==='hammer'&&t.model?.startsWith('puma-dth')&&t.status!=='spent');
  const bits=tools.filter(t=>t.type==='bit'&&t.model?.startsWith('dth-')&&t.status!=='spent');
- return {groups,total,done,progress:total?done/total:0,next,
+ const waitingTool=prefix=>pending.some(o=>(o.items||[]).some(i=>i.model?.startsWith(prefix)));
+ const hasTechnician=(s.personnel||[]).some(p=>p.role==='tecnicoDrillco');
+ const budgetPending={
+  workshop:(s.workshop?.level||0)>=2?0:M4_ENTRY_PACKAGE.workshop,
+  dthDrill:dth||incoming('dthDrill')?0:M4_ENTRY_PACKAGE.dthDrill+DISPATCH_FEE,
+  hammer:hammers.length||waitingTool('puma-dth')?0:M4_ENTRY_PACKAGE.hammer+DISPATCH_FEE,
+  bit:bits.length||waitingTool('dth-')?0:M4_ENTRY_PACKAGE.bit+DISPATCH_FEE,
+  technician:hasTechnician?0:M4_ENTRY_PACKAGE.technician,
+  drillTruck:s.mission4?.drillTruck||incoming('drillTruck')?0:M4_ENTRY_PACKAGE.drillTruck+DISPATCH_FEE
+ };
+ const remainingMinimum=Object.values(budgetPending).reduce((sum,n)=>sum+n,0);
+ return {groups,total,done,progress:total?done/total:0,next,remainingMinimum,
   totalMinimum:M4_ENTRY_TOTAL,
   cash:s.cash||0,
   drill:dth,
