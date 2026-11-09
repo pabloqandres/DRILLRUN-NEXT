@@ -4,6 +4,9 @@
 
 ## Currently Active
 
+- **ChatGPT — World materials V5:** `chatgpt/world-materials-v5`, surface-only updates to `dist/graphics/desert.mjs` and `dist/graphics/world-finish.mjs`. Syntax checked, awaiting visual review/PR. No shared or Claude-owned files modified.
+
+
 - **ChatGPT — Catalog visual correction / Equipment 02:** fix Vehicles identity-rail overlap (144px desktop, 101px compact); show one exploration RC and one production DTH with descriptive temporary labels pending user's express brand/name approval; legacy advanced RC save/order remains visible. Branch `chatgpt/catalog-vehicles-rail-two-rigs`; focused JS and responsive browser CSS geometry verified, awaiting PR/real-game visual acceptance. No product economics or saved identity changes.
 - **ChatGPT — Category Audit 01 · Vehículos/DrillTruck:** canonical GLB snapshot shared by Catalog vehicle card, technical sheet, M4 Phone; visually balanced icons and category layout. Branch `chatgpt/drilltruck-real-glb-catalog-audit`, code complete pending PR/production and browser screenshot QA. No state/economy/model behavior changes.
 
