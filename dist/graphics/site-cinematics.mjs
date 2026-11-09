@@ -119,8 +119,9 @@ export class SiteCinematics{
    const pulse=truckMoving?(.5+.5*Math.sin(time*12)):0;
    this.truckGlow.material.opacity=truckMoving?.14+.34*pulse:.035;
   }
-  const dustOn=active&&truckMoving&&!!truck;
-  this.dust.visible=dustOn||this.particles.some(p=>p.life>0);
+  const reducedQuality=this.world.quality==='low';
+  const dustOn=active&&!reducedQuality&&truckMoving&&!!truck;
+  this.dust.visible=active&&!reducedQuality&&(dustOn||this.particles.some(p=>p.life>0));
   this.tick+=dt;
   if(dustOn&&this.tick>.085){
    this.tick=0;
@@ -141,7 +142,7 @@ export class SiteCinematics{
   }
   if(this.dust.visible)this.dust.geometry.attributes.position.needsUpdate=true;
   const nearWorkshop=builtWorkshop&&d2(s.position,{x:-7.6,z:-9.3})<14;
-  const sparkActive=active&&nearWorkshop&&Math.sin(time*.43)>.92;
+  const sparkActive=active&&!reducedQuality&&nearWorkshop&&Math.sin(time*.43)>.92;
   this.sparks.visible=sparkActive;
   if(sparkActive){
    for(let i=0;i<16;i++){
