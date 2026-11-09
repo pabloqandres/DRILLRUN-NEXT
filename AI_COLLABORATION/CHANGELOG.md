@@ -1,5 +1,11 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — HSEC crossing / maintenance shed light V9
+
+- Crosswalk uses a single flush painted decal aligned with route textures; removed double 3D elevated slab and corrected nonuniform canvas rotation scaling.
+- Maintenance shed now has warm actual lamps at night, subject to operational condition and light budget; emissive lens materials reinforce the appearance. No HSEC scoring, saved-data, mission or collision changes. See `CHANGES/2026-11-09_hsec-crossing-shed-light-v9.md`.
+
+
 ## 2026-11-09 — Narrative phone V8 and SMS-gated mission lifecycle
 
 - High-contrast phone text, illustrated portraits of Elena/Marco/Camila and first-open, per-message typewriter (fixed premature read marking).
