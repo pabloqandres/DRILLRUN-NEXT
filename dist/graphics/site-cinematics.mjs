@@ -71,6 +71,27 @@ export class SiteCinematics{
   truckGlow.position.set(0,2.34,0);this.truck.add(truckGlow);
   this.truckGlow=truckGlow;
   scene.add(this.truck);
+  // Grounded, soft contact under real machinery. No walk-surface geometry.
+  const shadowCanvas=document.createElement('canvas');
+  shadowCanvas.width=shadowCanvas.height=64;
+  const sc=shadowCanvas.getContext('2d');
+  const radial=sc.createRadialGradient(32,32,4,32,32,32);
+  radial.addColorStop(0,'rgba(8,19,23,.58)');
+  radial.addColorStop(.48,'rgba(12,25,29,.35)');
+  radial.addColorStop(1,'rgba(16,33,39,0)');
+  sc.fillStyle=radial;sc.fillRect(0,0,64,64);
+  this.shadowTexture=new T.CanvasTexture(shadowCanvas);
+  this.shadowTexture.colorSpace=T.SRGBColorSpace;
+  const shadowMaterial=new T.MeshBasicMaterial({map:this.shadowTexture,
+   transparent:true,opacity:.73,depthWrite:false,side:T.DoubleSide,polygonOffset:true,polygonOffsetFactor:-1});
+  this.rigShadow=new T.Mesh(new T.PlaneGeometry(4.8,5.9),shadowMaterial);
+  this.rigShadow.rotation.x=-Math.PI/2;this.rigShadow.position.y=.035;
+  this.rigShadow.visible=false;this.rigShadow.renderOrder=2;
+  scene.add(this.rigShadow);
+  this.truckShadow=new T.Mesh(new T.PlaneGeometry(3.6,6.4),shadowMaterial);
+  this.truckShadow.rotation.x=-Math.PI/2;this.truckShadow.position.y=.037;
+  this.truckShadow.visible=false;this.truckShadow.renderOrder=2;
+  scene.add(this.truckShadow);
   // A tiny fixed-size GPU dust pool avoids allocating meshes per truck frame.
   const count=34;this.dustCount=count;this.pos=new Float32Array(count*3);
   for(let i=0;i<count;i++)this.pos[i*3+1]=-100;
@@ -102,6 +123,14 @@ export class SiteCinematics{
   this.workshop.visible=active&&builtWorkshop;
   this.rig.visible=active&&!!drill;
   this.truck.visible=active&&!!truck;
+  this.rigShadow.visible=this.rig.visible;
+  this.truckShadow.visible=this.truck.visible;
+  if(this.rigShadow.visible){this.rigShadow.position.x=drill.position.x;this.rigShadow.position.z=drill.position.z;}
+  if(this.truckShadow.visible){
+   this.truckShadow.position.x=truck.position.x;
+   this.truckShadow.position.z=truck.position.z;
+   this.truckShadow.rotation.z=-(truck.rotation?.y||0);
+  }
   if(this.office.visible){
    const glow=this.office.children[0];glow.material.opacity=.14+.045*Math.sin(time*.7);
   }
@@ -156,7 +185,9 @@ export class SiteCinematics{
  }
  dispose(){
   const scene=this.world?.scene;
-  for(const group of [this.workshop,this.office,this.rig,this.truck,this.dust,this.sparks])group?.removeFromParent();
+  for(const group of [this.workshop,this.office,this.rig,this.truck,this.dust,this.sparks,this.rigShadow,this.truckShadow])group?.removeFromParent();
+  this.rigShadow.geometry.dispose();this.truckShadow.geometry.dispose();
+  this.rigShadow.material.dispose();this.shadowTexture.dispose();
   this.dust.geometry.dispose();this.sparks.geometry.dispose();
   this.dust.material.dispose();this.sparks.material.dispose();
   for(const t of Object.values(this.mats))t.dispose();
