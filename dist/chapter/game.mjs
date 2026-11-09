@@ -790,6 +790,8 @@ function renderHUD(){if(!s)return;
   // Permanent, useful navigation in gameplay — not dependent on an unfinished mission.
   // Keep original game/phone/HSEC actions; the six destinations simply expose them.
   hidden($('#bottomNav'),phase!=='play');
+  const operationsNav=$('#bottomNav [data-nav="m4-operations"]');
+  if(operationsNav)hidden(operationsNav,!(s.mission4&&s.mission4.phase!=='inactive'));
  const job=pendingConstruction(s),building=!!job;hidden($('#buildHud'),!building);if(building){const seconds=Math.max(0,Math.ceil((job.ends-Date.now())/1000));setText($('#buildTime'),String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0'));$('#buildProgress').value=progress(s);$('#boostButton').disabled=s.boosters<1;}
  const a=phase==='play'?nearInteraction():null;$('#handButton').disabled=!a||!!busy||!!a?.blocked;$('#handButton').classList.toggle('available',!!a&&!a.blocked);$('#handButton').classList.toggle('blocked',!!a?.blocked);scene?.setInteraction(a,s);$('#handButton').setAttribute('aria-label',a?t(a.blocked?'noEnergy':a.kind==='boost'?'boostAction':a.label):t('hand'));$('#handButton').style.setProperty('--action-progress',busy?Math.min(1,busy.elapsed/CONFIG.clearSeconds):0);$('#handButton').style.opacity=a||busy?'1':'.45';document.body.classList.toggle('interior',s.inside);if(obj!==lastObjective){lastObjective=obj;$('#hud').dataset.objective=obj;}$('#hud').dataset.cleared=s.cleared.length;$('#hud').dataset.chapterComplete=String(!!s.chapterCompletedAt);
 }
@@ -833,6 +835,7 @@ $('#builderButton').onclick=openBuilder;
   const nav=b.dataset.nav;
   if(nav==='builder'){openBuilder();return;}
   if(nav==='hsec'){if(!isMissionAccepted(s,'m2')&&!isMissionCollected(s,'m2')){if(!showPendingMissionMessage())openPhone('objectives');return;}if(hsecUI&&s?.hsec)hsecUI.open();else openPhone('objectives');return;}
+  if(nav==='m4-operations'){if(s?.mission4&&s.mission4.phase!=='inactive')openPhone('m4-operaciones');return;}
   if(nav==='m4-zones'){openPhone(s?.mission4?.phase&&s.mission4.phase!=='inactive'?'m4-zones':'objectives');return;}
   if(nav==='m3-contract'){openPhone(s?.mission3?.phase&&s.mission3.phase!=='inactive'?'m3-contract':'objectives');return;}
   if(nav==='m3-inventory'){openPhone(s?.mission4?.phase&&s.mission4.phase!=='inactive'?'m4-workshop':s?.mission3?.phase&&s.mission3.phase!=='inactive'?'m3-inventory':'inventory');return;}
