@@ -81,7 +81,7 @@ export function finishConcretePad(world,group,x,z,width,depth){
  for(let i=1;i<=divisions;i++){
   const offset=-span/2+span*i/(divisions+1);
   const score=new T.Mesh(
-   new T.PlaneGeometry(longAxis?.024:width-.38,longAxis?depth-.38:.024),
+   new T.PlaneGeometry(longAxis ? .024 : width-.38, longAxis ? depth-.38 : .024),
    lineMaterial
   );
   score.rotation.x=-Math.PI/2;
