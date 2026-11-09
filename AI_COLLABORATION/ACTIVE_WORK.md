@@ -4,6 +4,8 @@
 
 ## Currently Active
 
+- **ChatGPT — V13 HUD right-side telemetry:** `chatgpt/hud-right-rail-v13`; visual-only HTML HSEC button reparent and final-layer CSS styling. HTML presence/unique ID and CSS structure checked; live layout QA pending.
+
 - **ChatGPT — V12 road-junction render:** `chatgpt/hsec-unified-junction-paint-v12` corrects material pass order and metric widths on existing HSEC road canvas. Syntax and mock Canvas2D T-junction tests passed; live browser screenshot QA pending.
 
 - **ChatGPT — V10 road junctions:** `chatgpt/hsec-road-junctions-v10`; cosmetic `dist/hsec/world.mjs`, JS syntax checked. Runtime render QA pending.
