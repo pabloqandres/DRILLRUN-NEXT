@@ -145,7 +145,10 @@ function renderDthWorkshop(s,t,fmt,icon,cb){
 function renderDthCatalog(s,t,fmt,icon,cb){
  const m=s.mission4;
  const drill=m?.productionDrill;
- let html=`<div class="m3Header">${icon('build')}<div><span class="eyebrow">PRODUCCIÓN DTH</span><h3>Perforadora y herramientas</h3></div></div>`;
+ let html=`<div class="m3Header">${icon('build')}<div><span class="eyebrow">CASA MATRIZ · PRODUCCIÓN</span><h3>Perforadoras y productos PUMA® DTH</h3></div></div>
+ <nav class="m4CatalogTabs" aria-label="Categorías Casa Matriz"><button data-app="m3-catalog">EXPLORA® · Sondaje RC</button><span class="selected">PUMA® DTH · Producción</span></nav>
+ <p class="m4CatalogExplanation">Compra aquí la DTH, martillos PUMA® y bits de producción. Los pedidos llegan al taller; para instalarlos abre Taller → Equipar DTH.</p>
+ <button class="m4CatalogWorkshop" data-app="m4-workshop">${icon('inventory')} Ir al taller · Ver stock e instalar herramientas</button>`;
  // DTH Drill section
  html+=`<div class="sectionHeading">Perforadora DTH</div>`;
  if(!drill){
@@ -156,8 +159,8 @@ function renderDthCatalog(s,t,fmt,icon,cb){
   html+=`<div style="padding:0 16px 16px"><button class="startDrillBtn" data-m4-action="buyDthDrill" data-drill="${d.id}" ${blocked?'disabled':''}>${icon('store')} ${pendingRig?'Perforadora DTH en camino':'Solicitar perforadora DTH'} · ${fmt(d.price)} + despacho</button></div>`;
  }else{
   const def=dthDrillDefinition(drill.id);
-  const stateLabels={idle:'En taller',producing:'En producción',maintenance:'En mantenimiento'};
-  html+=`<article class="inventoryCard"><span class="inventoryIcon">${icon('build')}</span><div><b>${def?.labelKey||'Perforadora DTH'}</b><small>${stateLabels[drill.state]||drill.state} · ${def?.bitDiameter||8}" Ø</small><span class="itemStatus isInstalled">${icon('check')} Adquirida</span></div></article>`;
+  const stateLabels={idle:'En resguardo junto al taller',producing:'En producción',maintenance:'En mantenimiento'};
+  html+=`<article class="inventoryCard"><span class="inventoryIcon">${icon('build')}</span><div><b>${def?.labelKey||'Perforadora DTH'}</b><small>${stateLabels[drill.state]||drill.state} · ${def?.bitDiameter||8}" Ø</small><span class="itemStatus isInstalled">${icon('check')} Recibida</span></div><button data-app="m4-workshop">Abrir taller</button></article>`;
   // Installed tools
   const installedHammer=drill.installedHammer?(s.toolInventory||[]).find(t2=>t2.id===drill.installedHammer):null;
   const installedBit=drill.installedBit?(s.toolInventory||[]).find(t2=>t2.id===drill.installedBit):null;
