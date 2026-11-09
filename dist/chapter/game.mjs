@@ -797,11 +797,17 @@ world.cameraFocus=inWorldConstruction?hsecUI.focus():managingOffice?{x:-6,z:0}:n
  scene.update(s,dt,wall,{blueprint,interactive:phase==='play'});hsecWorld?.update(s,dt,phase);if(phase==='play'&&world.isBlocked(s.position.x,s.position.z,avatarDefinition(s.character).radius))ensureSafe();world.update(s,dt,clock,walking,false,false);
  // Environmental spectacle + sound read the actual saved/world state only.
  // They never write mission, contract, economy or placement data.
- const activeDrill=!!s.drill&&s.drill.state==='drilling';
+ const activeRC=!!s.drill&&s.drill.state==='drilling';
+ const activeDTH=s.mission4?.productionDrill?.state==='producing';
  const movingTruck=!!m4DrillTruckModel&&truckRouteActive(m4DrillTruckModel);
- const siteInputs={drill:m3DrillModel,truck:m4DrillTruckModel,drilling:activeDrill,truckMoving:movingTruck,playing:phase==='play'};
+ const siteInputs={drill:m3DrillModel,truck:m4DrillTruckModel,drilling:activeRC,truckMoving:movingTruck,playing:phase==='play'};
  siteCinematics?.update(s,dt,clock,siteInputs);
- worksiteAudio.update(s,dt,{...siteInputs,position:s.position,moving:walking&&!builderOpen&&!phoneOpen&&!modalOpen,walkSurfaces:world.walkSurfaces||[]});
+ worksiteAudio.update(s,dt,{...siteInputs,
+  drill:activeRC?m3DrillModel:activeDTH?s.mission4.productionDrill:null,
+  drilling:activeRC||activeDTH,
+  position:s.position,moving:walking&&!builderOpen&&!phoneOpen&&!modalOpen,
+  walkSurfaces:world.walkSurfaces||[]
+ });
  constructionCallout?.update(s,phase==='play'&&!builderOpen&&!modalOpen&&!phoneOpen,t);world.player.visible=phase!=='start'&&(phase!=='character'||!!CONFIG.protagonists.find(p=>p.id===selectedAvatar)?.available);
  guidance?.update(s,phase==='play'&&!builderOpen&&!modalOpen&&!phoneOpen&&!placement);if(phase==='play')showNextReward();
  if(now-lastHud>150){renderHUD();cameraDebug?.update();lastHud=now;}if(now-lastSave>2000){save();lastSave=now;}
