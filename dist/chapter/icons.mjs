@@ -2,6 +2,12 @@ import {hsecSymbol} from '../hsec/icons.mjs';
 // DRILL RUN visual iconography V3: one consistent 24px, rounded-line pictogram set.
 // Keep all keys, signatures and semantics. No third-party font/assets or scripts.
 const paths={
+ // Unified five-item gameplay dock icon set (24px rounded-line)
+ "dock-package":'<path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="M3 7v10l9 5 9-5V7M12 12v10"/>',
+ "dock-clipboard":'<rect x="5.5" y="4" width="13" height="18" rx="2"/><path d="M9 4V2h6v2M9 10h6M9 14h6M9 18h4"/>',
+ "dock-hard-hat":'<path d="M4 14v-2a8 8 0 0 1 16 0v2M3 14h18v3H3zM9 5V3m6 2V3M8 20h8"/>',
+ "dock-users":'<path d="M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 20v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+ "dock-gauge":'<path d="M3.3 17a9 9 0 1 1 17.4 0"/><path d="M12 17l4.5-6.5"/><circle cx="12" cy="17" r="1.5"/><path d="M6.2 15.1 5 14m2.7-5.5L6.6 7.4M12 6v-2m5.5 4.5 1.1-1.1"/>',
  "dock-catalog":"<path d=\"m12 2 8.5 5-8.5 5L3.5 7 12 2Z\"/><path d=\"M3.5 7v9.5L12 22l8.5-5.5V7M12 12v10\"/><path d=\"m8 12 3 3 5-5\"/>",
  "dock-contract":"<rect x=\"5.5\" y=\"4\" width=\"13\" height=\"18\" rx=\"1.5\"/><path d=\"M9 4V2h6v2M9 10h6M9 14h6M9 18h4\"/>",
  "dock-equipment":"<path d=\"M3 18h18M5 18v-5l3-5h8l3 5v5M8 8V5.5h8V8M8 13h8M9 18v3m6-3v3\"/><path d=\"M12 2v3\"/>",
