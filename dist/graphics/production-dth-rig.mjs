@@ -3,8 +3,11 @@
 // Pure 3D scenery; location and ownership come from the real game state.
 import * as T from '../vendor/three.module.js';
 
-export const RC_RESERVE={x:-18,z:-9.3};
-export const DTH_RESERVE={x:-23,z:-9.3};
+// These bays must remain inside the FLAT playable yard (desert relief starts
+// outside x:-13..30, z:-13..9). The earlier negative-x staging was buried
+// under raised desert terrain and players appeared to sink into the ground.
+export const RC_RESERVE={x:9,z:-7.2};
+export const DTH_RESERVE={x:15,z:-7.2};
 const color={
  navy:0x203848,graphite:0x17262e,steel:0x607883,orange:0xe38b42,
  cream:0xd7d6ca,light:0xa5bfc7,white:0xf3efe6,earth:0x3b4e51
