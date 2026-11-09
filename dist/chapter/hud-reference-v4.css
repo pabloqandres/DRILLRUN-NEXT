@@ -251,3 +251,62 @@
  #hud #objective #objectiveDetail:not(.hidden){font-size:10px!important;max-height:48px!important}
  #hud #objective .missionCardProgress #objectiveCount{font-size:10px!important}
 }
+
+
+/* V13 — compact, non-overlapping mission telemetry rail.
+   Two read-only HUD cards occupy the top-right below the resources header.
+   Mission objectives remain exclusively on the left. */
+#hud>#hsecInline:not(.hidden),
+body.interior #hud>#hsecInline:not(.hidden){
+ position:fixed!important;
+ top:calc(var(--dr-hud-top,16px) + 78px)!important;
+ right:max(16px,var(--dr-hud-side,16px))!important;
+ left:auto!important;bottom:auto!important;
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ width:auto!important;min-width:108px!important;max-width:160px!important;
+ min-height:35px!important;height:35px!important;
+ padding:5px 12px!important;margin:0!important;
+ border:1px solid #75b9ca85!important;border-radius:11px!important;
+ background:linear-gradient(120deg,#132f43f5,#071e2eeb)!important;
+ box-shadow:0 5px 14px #05152275,inset 0 1px #dff9ff30!important;
+ font-size:10px!important;font-weight:750!important;
+ letter-spacing:.2px!important;white-space:nowrap!important;
+ color:#d9edf4!important;pointer-events:auto!important;z-index:11!important;
+}
+#hud>#hsecInline .hsecIcon{width:16px!important;height:16px!important;flex-shrink:0!important}
+#hud>#hsecInline b{font-size:13px!important;color:#82e0b6!important;font-variant-numeric:tabular-nums}
+#hud>#hsecInline.hsecWarning b{color:#ffbc74!important}
+#hud>#hsecInline:focus-visible{outline:2px solid #f7d27a!important;outline-offset:2px!important}
+#hud>#geoCard:not(.hidden),
+body.interior #hud>#geoCard:not(.hidden){
+ position:fixed!important;
+ top:calc(var(--dr-hud-top,16px) + 123px)!important;
+ right:max(16px,var(--dr-hud-side,16px))!important;
+ left:auto!important;bottom:auto!important;
+ width:clamp(177px,17vw,226px)!important;max-width:calc(100vw - 26px)!important;
+ min-height:57px!important;
+ margin:0!important;padding:10px 12px!important;
+ border-radius:12px!important;
+ background:linear-gradient(135deg,#142f42f5,#0a2030f4)!important;
+ box-shadow:0 7px 22px #03132180,inset 0 1px #def6ff3c!important;
+ z-index:10!important;pointer-events:auto!important;
+}
+#hud>#geoCard b{font-size:11px!important}
+#hud>#geoCard small{font-size:10px!important;line-height:1.25!important}
+#hud>#geoCard .geoProgress{height:4px!important;margin-top:6px!important}
+@media(max-height:540px){
+ #hud>#hsecInline:not(.hidden),body.interior #hud>#hsecInline:not(.hidden){
+  top:calc(var(--dr-hud-top,12px) + 62px)!important;
+  min-height:30px!important;height:30px!important;
+  padding:4px 9px!important;
+ }
+ #hud>#geoCard:not(.hidden),body.interior #hud>#geoCard:not(.hidden){
+  top:calc(var(--dr-hud-top,12px) + 100px)!important;
+  min-height:48px!important;padding:7px 9px!important;
+ }
+}
+@media(max-width:680px){
+ #hud>#hsecInline:not(.hidden){min-width:96px!important;max-width:128px!important}
+ #hud>#geoCard:not(.hidden){width:clamp(144px,33vw,180px)!important;padding:8px!important}
+ #hud>#geoCard .uiIcon{width:18px!important;height:18px!important}
+}

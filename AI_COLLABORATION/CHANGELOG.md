@@ -1,5 +1,9 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — V13 compact HUD telemetry rail
+
+- Independent, compact HSEC score chip moved outside the mission card and placed at top-right below resources; the geological analysis timer sits below it on the right. Eliminates the overlapping stack on left mission instructions. No mission, save, interaction, scoring or economy changes. See `CHANGES/2026-11-09_hud-right-rail-v13.md`.
+
 ## 2026-11-09 — V12 unified painted road junctions
 
 - Repaired material-layer seams at HSEC road intersections, curves and T-junctions by painting every route in shared passes. Corrected metric road width under non-square terrain decal map. Zebra marks remain clipped to the actual vehicle pavement. No gameplay or saved-state changes. See `CHANGES/2026-11-09_road-junctions-v12.md`.
