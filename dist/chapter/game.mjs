@@ -56,7 +56,7 @@ import {newGame,setPlayerIdentity,restore,tick,startModule,useOfficeComputer,con
 import {LANGUAGES,deviceLanguage,translator} from './i18n.mjs';
 import {ChapterScene} from './world.mjs';
 import {prepareAuth} from './auth.mjs';
-import {initCloudSave,cloudSave,cloudTakeControl,cloudUserId,cloudFlushNow} from './cloud-save.mjs';
+import {initCloudSave,cloudSave,cloudTakeControl,cloudUserId,cloudFlushNow,cloudStartNewGame,cloudGeneration} from './cloud-save.mjs';
 import {LocomotionReview} from './review-locomotion.mjs';
 import {AvatarRoster} from './avatar-roster.mjs';
 import {avatarDefinition} from './avatars.mjs';
@@ -84,6 +84,7 @@ let m4DthModel=null,m4DthCollider=null,m4Staging=null;
 let siteCinematics=null;
 let world,scene,phase='start',phoneApp=null,phoneOpen=false,category='desks',modalOpen=false,blueprint=false,placement=null,busy=null,keys={},joy={x:0,y:0},pointer=null,target=null,auth={configured:false},account=null,audioContext=null,last=performance.now(),clock=0,lastSave=0,lastHud=0,introAt=0,lastObjective='',qaRoute=false;
 let cloudSyncing=true,cloudLocked=false,cloudStatus='Verificando Google…',cloudEpoch=0;
+let freshGameRequested=false,previousCloudGeneration=0;
 const motion=createMotion(),qa=new URLSearchParams(location.search).has('chapterqa'),cameraDev=new URLSearchParams(location.search).get('dev')==='camera';
 function loadCameraSettings(){try{return cameraSettings(JSON.parse(localStorage.getItem(CAMERA_KEY)));}catch{return cameraSettings();}}
 function persistCamera(){try{localStorage.setItem(CAMERA_KEY,JSON.stringify(world.cameraRig.settings));}catch{}}
@@ -178,7 +179,7 @@ async function reconcileGoogleSave(){
   cloudSyncing=false;cloudLocked=true;cloudStatus='No se pudo sincronizar · No se sobrescribió la partida';
   phase='cloud-locked';hidden($('#startScreen'),false);hidden($('#hud'),true);showCloudLock();updateStartAccount();return;
  }
- const changed=result.source==='cloud'&&!!result.state;
+ const changed=(result.source==='cloud'||result.source==='new-game')&&!!result.state;
  if(changed){
   localStorage.setItem(CONFIG.saveKey,result.raw);
   s=readSave();hasSave=!!s;
@@ -222,7 +223,7 @@ async function ensureWorld(forSelection=false){
  if(cameraDev){cameraDebug=new CameraDebug({onOfficeThumbnail:()=>builderUI.thumbnail,onRecordGraphics:()=>{cinemaRecorder.start();setTimeout(()=>cinemaRecorder.stop(),12000);},rig:world.cameraRig,world,onPreset:()=>{stop();world.snapCamera=true;resetOrbit(world.orbit);},onFreeze:stop,onReplay:(orbitOnly,record)=>replayCinematic(orbitOnly,record),onFixture:cameraReviewScene,onRestore:restoreReviewScene,onCapture:id=>{world.cameraRig.setPreset(id);world.snapCamera=true;resetOrbit(world.orbit);world.update(s,0,clock,false);world.renderer.last=0;world.renderer.render(world.scene,world.camera);return world.renderer.domElement.toDataURL('image/png');}});cinemaRecorder=new CinematicRecorder(world,cinematic,cameraDebug.host);}
  if(qa)installQA();last=performance.now();if(qa)setInterval(()=>frame(performance.now()),1000/30);else requestAnimationFrame(frame);loadingProgress(1,1);hidden($('#loading'),true);
 }
-async function chooseCharacter(){try{await ensureWorld(true);s=newGame(prefs.lang,'operator01');selectedAvatar='operator01';avatars.activate(selectedAvatar);world.playerGround=0;$('#playerNameInput').value='';s.sound=prefs.sound;notices.clear();rewardQueue.length=0;phase='character';world.inspect=true;world.inspectMode='worker';world.inspectAngle='three';world.zoom=.8;world.player.rotation.y=0;motion.yaw=0;hidden($('#startScreen'),true);hidden($('#characterScreen'),false);renderCharacters();}catch(e){console.error(e);setText($('#loadStage'),t('invalid'));}}
+async function chooseCharacter(fresh=false){try{await ensureWorld(true);freshGameRequested=!!fresh;previousCloudGeneration=cloudGeneration(readSave());s=newGame(prefs.lang,'operator01');selectedAvatar='operator01';avatars.activate(selectedAvatar);world.playerGround=0;$('#playerNameInput').value='';s.sound=prefs.sound;notices.clear();rewardQueue.length=0;phase='character';world.inspect=true;world.inspectMode='worker';world.inspectAngle='three';world.zoom=.8;world.player.rotation.y=0;motion.yaw=0;hidden($('#startScreen'),true);hidden($('#characterScreen'),false);renderCharacters();}catch(e){console.error(e);setText($('#loadStage'),t('invalid'));}}
 // Cards and visible 3D characters share exactly one selection flow.
 function selectAvatar(id){
  if(phase!=='character'||!avatars?.entries.has(id))return false;
@@ -232,9 +233,9 @@ function selectAvatar(id){
 // by the canvas gesture handler, while roster buttons call selectAvatar directly.
 function renderCharacters(){const node=$('#characterSlots');node.innerHTML=CONFIG.protagonists.map((p,i)=>`<button data-character="${p.id}" class="avatarChoice ${selectedAvatar===p.id?'selected':''}" aria-pressed="${selectedAvatar===p.id}"><span class="avatarThumb">${avatars.portrait(p.id)||icon('player')}</span><span><b>${esc(t(p.roleKey))}</b><small>${esc(t(p.labelKey))}</small></span><i>${String(i+1).padStart(2,'0')}</i></button>`).join('');node.querySelectorAll('button').forEach(b=>b.onclick=()=>selectAvatar(b.dataset.character));const p=avatarDefinition(selectedAvatar);setText($('#avatarTitle'),t(p.roleKey));setText($('#avatarDetail'),t(p.summaryKey));$('#avatarPerk').innerHTML=`<span class="perkSymbol">${icon(p.perkIcon)}</span><div><span class="perkHeading">${esc(t('specialtyBonus'))}</span><strong>${esc(t(p.perkKey))}</strong><small class="perkStatus">${icon(p.id==='operator04'?'check':'lock')}${esc(t(p.id==='operator04'?'bonusActive':'bonusFuture'))}</small></div>`;$('#startAdventure').disabled=!avatars.entries.has(p.id)||$('#playerNameInput').value.trim().length<2;hidden($('#provisionalNote'),true);}
 $('#playerNameInput').oninput=renderCharacters;
-$('#play').onclick=async()=>{if(cloudSyncing||cloudLocked)return;if(!hasSave)return chooseCharacter();try{requestImmersive();await ensureWorld();s=readSave();if(!s){hasSave=false;return chooseCharacter();}prefs.lang=s.lang;prefs.sound=s.sound;t=translator(s.lang);applyText();hasSave=true;beginPlay(true);}catch(e){console.error(e);toast('invalid');}};
-$('#newGame').onclick=()=>{if(cloudSyncing||cloudLocked)return;modal(`<h2>${esc(t('newGame'))}</h2><p>${esc(t('resetAsk'))}</p><div class="modalActions">${button('cancel','keepSave')}${button('confirm','replaceSave',true)}</div>`);$('#keepSave').onclick=closeModal;$('#replaceSave').onclick=()=>{closeModal();chooseCharacter();};};
-$('#backStart').onclick=()=>{phase='start';hidden($('#characterScreen'),true);hidden($('#startScreen'),false);s=readSave();hasSave=!!s;applyText();};
+$('#play').onclick=async()=>{if(cloudSyncing||cloudLocked)return;if(!hasSave)return chooseCharacter(true);try{requestImmersive();await ensureWorld();s=readSave();if(!s){hasSave=false;return chooseCharacter();}prefs.lang=s.lang;prefs.sound=s.sound;t=translator(s.lang);applyText();hasSave=true;beginPlay(true);}catch(e){console.error(e);toast('invalid');}};
+$('#newGame').onclick=()=>{if(cloudSyncing||cloudLocked)return;modal(`<h2>${esc(t('newGame'))}</h2><p>${esc(t('resetAsk'))}</p><div class="modalActions">${button('cancel','keepSave')}${button('confirm','replaceSave',true)}</div>`);$('#keepSave').onclick=closeModal;$('#replaceSave').onclick=()=>{closeModal();void chooseCharacter(true);};};
+$('#backStart').onclick=()=>{freshGameRequested=false;phase='start';hidden($('#characterScreen'),true);hidden($('#startScreen'),false);s=readSave();hasSave=!!s;applyText();};
 $('#startAdventure').onclick=()=>{try{setPlayerIdentity(s,selectedAvatar,$('#playerNameInput').value);}catch(e){toast(e.key);return;}hasSave=true;avatars.activate(s.character);world.setCharacter(s.character);world.inspect=false;hidden($('#characterScreen'),true);hidden($('#provisionalNote'),true);s.facing=Math.PI;s.position={...CONFIG.spawn};requestImmersive();startCinematic(false,false);save();};
 function requestImmersive(){const el=document.documentElement;if(!document.fullscreenElement&&el.requestFullscreen)el.requestFullscreen({navigationUI:'hide'}).catch(()=>{});}
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
