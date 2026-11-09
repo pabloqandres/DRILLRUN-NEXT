@@ -1,5 +1,12 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — World materials V5 (ChatGPT)
+
+- Enhanced procedural Atacama ground striation with muted wind abrasion and texture filtering; added flush concrete pad joints, mineral streaks and edge wear to actual 3D world surfaces.
+- Visual-only; building footprints, HSEC, economy, collisions, saves and mission flow unchanged. Module syntax checked; live WebGL QA pending.
+- See `CHANGES/2026-11-09_world-materials-v5.md`.
+
+
 ## 2026-11-09 — Atacama atmosphere V5 (ChatGPT)
 
 - New high-resolution procedural sky gradient with subtle mineral horizon haze and broadly distributed deterministic ambient wind dust; visual-only in `dist/graphics/atmosphere.mjs`.
