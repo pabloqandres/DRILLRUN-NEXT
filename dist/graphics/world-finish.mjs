@@ -1,4 +1,4 @@
-// DRILL RUN NEXT GENERATION · WORLD ART V4
+// DRILL RUN NEXT GENERATION · WORLD ART V5
 // Visual-only detail layers shared by actual world buildings and their 3D previews.
 // All meshes are decorative: no collider, walk surface, purchase, save or route writes.
 import * as T from '../vendor/three.module.js';
@@ -25,6 +25,14 @@ function textureCanvas(size=256){
   c.beginPath();c.moveTo(x,y);
   for(let j=0;j<4;j++){x+=(random()-.5)*25;y+=5+random()*18;c.lineTo(x,y);}
   c.strokeStyle='rgba(51,67,69,.12)';c.lineWidth=.65;c.stroke();
+ }
+ // Fine shuttering lines and mineral streaks make prefab concrete read as
+ // industrial material without introducing photoreal textures.
+ for(let i=0;i<28;i++){
+  const y=random()*size,x=random()*size,length=7+random()*35;
+  c.beginPath();c.moveTo(x,y);c.lineTo(x+length,y+(random()-.5)*2);
+  c.strokeStyle=i%3===0?'rgba(241,232,211,.12)':'rgba(60,76,76,.08)';
+  c.lineWidth=.3+random()*.45;c.stroke();
  }
  const texture=new T.CanvasTexture(canvas);
  texture.wrapS=texture.wrapT=T.RepeatWrapping;
@@ -60,6 +68,38 @@ export function finishConcretePad(world,group,x,z,width,depth){
  for(const side of[-1,1]){
   const edge=new T.Mesh(new T.BoxGeometry(width-.15,.006,.035),joint);
   edge.position.set(x,.130,z+side*(depth/2-.11));group.add(edge);
+ }
+ // Flush expansion joints and inset edge scoring on the same pad. They are
+ // surface-only markings, not walls, railings or player-blocking meshes.
+ const lineMaterial=new T.MeshBasicMaterial({
+  color:0x617276,transparent:true,opacity:.19,depthWrite:false,
+  polygonOffset:true,polygonOffsetFactor:-2
+ });
+ const longAxis=width>=depth;
+ const span=longAxis?width:depth;
+ const divisions=Math.min(5,Math.max(1,Math.floor(span/2.8)));
+ for(let i=1;i<=divisions;i++){
+  const offset=-span/2+span*i/(divisions+1);
+  const score=new T.Mesh(
+   new T.PlaneGeometry(longAxis ? .024 : width-.38, longAxis ? depth-.38 : .024),
+   lineMaterial
+  );
+  score.rotation.x=-Math.PI/2;
+  score.position.set(x+(longAxis?offset:0),.137,z+(longAxis?0:offset));
+  score.name='World Art V5 · slab expansion joint';
+  score.castShadow=false;score.receiveShadow=false;
+  group.add(score);
+ }
+ const borderMaterial=new T.MeshBasicMaterial({
+  color:0xece9dc,transparent:true,opacity:.27,depthWrite:false,
+  polygonOffset:true,polygonOffsetFactor:-2
+ });
+ for(const side of[-1,1]){
+  const lip=new T.Mesh(new T.PlaneGeometry(width-.36,.025),borderMaterial);
+  lip.rotation.x=-Math.PI/2;
+  lip.position.set(x,.138,z+side*(depth/2-.22));
+  lip.name='World Art V5 · concrete edge wear';
+  group.add(lip);
  }
  return surface;
 }
