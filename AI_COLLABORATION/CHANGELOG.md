@@ -1,5 +1,9 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — V15 camera navigation during construction
+
+- Wider builder aerial zoom (10–70 m), 80° elevated entry outside nearby buildings, independent camera pan from existing joystick/touch-drag and arrow keys, and no zoom reset when choosing new placement points. Preserves character camera and all game-state mechanics. New targeted tests in `tests/builder-camera-v15.test.mjs`; mock camera checks passed; live WebGL QA pending. See `CHANGES/2026-11-09_builder-camera-navigation-v15.md`.
+
 ## 2026-11-09 — V14 universal M1–M4 mission card polish
 
 - Rebuilt the shared mission HUD visually with a bounded flex layout, integrated collapse tab, contained “Ver detalles” footer/arrow, improved content spacing, progress and compact-screen sizing. CSS-only; no changes to mission data, input events or game state. See `CHANGES/2026-11-09_mission-card-v14.md`.

@@ -1,5 +1,9 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — Camera-only hookup in Claude-owned gameplay loop
+
+**User authorization:** Directly fix limited construction zoom, strange aerial movement and camera entering buildings. ChatGPT modifies the camera renderer (`dist/camera/follow-camera.mjs`) and just the existing world gesture handler and existing game-frame camera dispatch in `dist/chapter/game.mjs`. This does not touch movement/mission logic beyond dispatching the same joystick to camera-only pan while HSEC placing is active; the joystick continues moving the character in ordinary exploration. Review in `CHANGES/2026-11-09_builder-camera-navigation-v15.md`. Any concurrent Claude changes to `game.mjs` must be reconciled before merge; no broad refactoring authorized.
+
 ## 2026-11-09 — Shared HTML visual HSEC relocation
 
 **User instruction:** Compact the HSEC score and move geologic progress to the right to avoid mission-panel collisions. **Coordination scope:** ChatGPT moves only the existing `#hsecInline` DOM button one level out of `#objective` within `#hud` in `dist/index.html`, while retaining its ID and bound event handlers, and applies visual overrides in `dist/chapter/hud-reference-v4.css`. No change to HSEC scoring or mission logic; Claude Code integrations accessing `#hsecInline` by ID continue unchanged. See `CHANGES/2026-11-09_hud-right-rail-v13.md`.
