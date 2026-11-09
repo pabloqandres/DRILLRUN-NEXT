@@ -1,5 +1,10 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — Foundation contact art V7
+
+- Added subtle wider ambient ground-shadow layer around actual office and other structure bases, including real model previews. No footprint/collider, economy, save, mission or HSEC changes.
+- V8 module syntax checked; browser WebGL QA pending. See `CHANGES/2026-11-09_foundation-v7.md`.
+
 ## 2026-11-09 — Office L1 visible detail V6
 
 - Decorative, non-colliding fascia caps, rivets, rear air intake and service marker lenses added to real level-1 office. Preserves PUMA burgundy and original doors/geometry/upgrade gating.
