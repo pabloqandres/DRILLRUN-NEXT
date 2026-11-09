@@ -557,31 +557,30 @@ function showWorkshopCard(){
  wc.hidden=false;workshopCardOpen=true;
 }
 function detectWorkshopObstacles(){
- // Scan 3D scene for objects in the extension zone (right side: world x=-4.2 to -0.3, z=-12.2 to -6.4)
- const found=[];const seen=new Set();
- world.scene.traverse(o=>{
-  if(!o.isMesh||!o.visible)return;
-  const wp=new T.Vector3();o.getWorldPosition(wp);
-  if(wp.x>-4.5&&wp.x<0&&wp.z>-12.5&&wp.z<-6.2&&wp.y>0.1&&wp.y<6){
-   // Find label for this object
-   let label=null,parent=o;
-   while(parent){if(parent.name){label=parent.name;break;}parent=parent.parent;}
-   const key=`${Math.round(wp.x)},${Math.round(wp.z)}`;
-   if(!seen.has(key)&&wp.y>0.3){seen.add(key);
-    // Identify what it is by height/shape
-    if(wp.y>2)found.push({x:wp.x,z:wp.z,type:'Poste de luz',icon:'light'});
-    else if(wp.y>0.5)found.push({x:wp.x,z:wp.z,type:'Obstáculo',icon:'lock'});
-   }
-  }
- });
- return found;
+ // Only actual SAVED, BUILT HSEC installations can be reported. Walking over
+ // the entire 3D render scene previously mislabelled every mesh above 2m
+ // (including workshop walls, scenery and light fixtures) as a "light post".
+ const staticTypes={
+  tower:'Torre de iluminación',
+  post:'Poste de iluminación',
+  sign:'Señal HSEC',
+  extinguisher:'Extintor',
+  fence:'Cierre perimetral',
+  railing:'Baranda',
+  bollard:'Bolardo',
+  cone:'Cono de seguridad'
+ };
+ return (s.hsec?.assets||[])
+  .filter(a=>a.status==='built'&&staticTypes[a.type]&&Number.isFinite(a.x)&&Number.isFinite(a.z)
+   &&a.x>-4.5&&a.x<0&&a.z>-12.5&&a.z<-6.2)
+  .map(a=>({id:a.id,x:a.x,z:a.z,type:staticTypes[a.type],icon:['tower','post'].includes(a.type)?'light':'lock'}));
 }
 function workshopStartUpgrade(){
  const nextDef=WORKSHOP_LEVELS.find(w=>w.level===workshopLevel(s)+1);
  if(!nextDef)return;
  const buildTime=v=>{const m=Math.floor(v/60),ss=v%60;return String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');};
  const obstacles=detectWorkshopObstacles();
- const obstacleHtml=obstacles.length?`<div style="margin:10px 0;padding:8px 12px;background:#ff980015;border:1px solid #ff980044;border-radius:10px"><small style="color:#ffb74d;font-weight:600">⚠ Objetos en la zona de ampliación (se retirarán automáticamente):</small>${obstacles.map(o=>`<div style="font-size:11px;color:#fff;margin-top:4px">${icon(o.icon)} ${esc(o.type)} (${o.x.toFixed(1)}, ${o.z.toFixed(1)})</div>`).join('')}</div>`:'';
+ const obstacleHtml=obstacles.length?`<div style="margin:10px 0;padding:8px 12px;background:#ff980015;border:1px solid #ff980044;border-radius:10px"><small style="color:#ffb74d;font-weight:600">Instalaciones HSEC registradas cerca de la ampliación (no se eliminan automáticamente):</small>${obstacles.map(o=>`<div style="font-size:11px;color:#fff;margin-top:4px">${icon(o.icon)} ${esc(o.type)} (${o.x.toFixed(1)}, ${o.z.toFixed(1)})</div>`).join('')}</div>`:'';
  modal(`<span class="eyebrow">TALLER · AMPLIACIÓN</span><h2>Ampliar a Nv.${nextDef.level} — ${nextDef.label}</h2><p>Aumenta la capacidad del taller de ${workshopCapacity(s)} a ${nextDef.capacity} espacios para herramientas.</p>${obstacleHtml}<div class="moduleFacts"><span>Costo<b>${money(nextDef.upgradeCost)}</b></span><span>Duración<b>${buildTime(nextDef.constructionSeconds)}</b></span><span>Capacidad<b>${nextDef.capacity} espacios</b></span></div><div class="modalActions"><button id="cancelWsUpgrade">${icon('close')} Cancelar</button><button id="confirmWsUpgrade" class="primary" ${s.cash<nextDef.upgradeCost?'disabled':''}>${icon('wallet')} Confirmar ampliación</button></div>${s.cash<nextDef.upgradeCost?'<small style="color:#ef5350;text-align:center;display:block;margin-top:8px">Fondos insuficientes</small>':''}`);
  $('#cancelWsUpgrade').onclick=closeModal;
  $('#confirmWsUpgrade')?.addEventListener('click',()=>{try{upgradeWorkshop(s);save();closeModal();hideWorkshopCard();showWorkshopCard();scene.update(s,0,Date.now());renderHUD();sound('build');notices.push({title:`Ampliación a Nv.${nextDef.level} iniciada`,symbol:'bell'});}catch(e){notices.push({title:e.message==='noMoney'?'Fondos insuficientes':e.message,symbol:'lock'});}});
