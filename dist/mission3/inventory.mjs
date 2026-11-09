@@ -11,7 +11,7 @@ export const WORKSHOP_LEVELS=[
 ];
 
 export const WORKSHOP_L1_COST=2500;
-export const WORKSHOP_L1_SECONDS=30;
+export const WORKSHOP_L1_SECONDS=180;
 export function workshopBuilt(s){return !!s.workshop&&s.workshop.status!=='building';}
 export function workshopLevel(s){return workshopBuilt(s)?s.workshop.level:0;}
 export function canBuildWorkshop(s){
@@ -27,6 +27,17 @@ export function buildWorkshop(s,now=Date.now()){
  s.workshop={level:1,status:'building',started:now,ends:now+WORKSHOP_L1_SECONDS*1000};
  s.ledger.push({id:s.nextId++,key:'workshopBuild',amount:-WORKSHOP_L1_COST,at:now});
  return s.workshop;
+}
+// Use one owned boost to shorten the initial L1 build by 60 seconds.
+// Does not retroactively rewrite timers of pre-existing saves.
+export function accelerateWorkshopL1(s,now=Date.now(),seconds=60){
+ const w=s.workshop;
+ if(!w||w.status!=='building')throw new Error('noWorkshopConstruction');
+ if((s.boosters||0)<1)throw new Error('noBoosters');
+ if(!Number.isFinite(w.ends)||!Number.isFinite(w.started))throw new Error('invalidWorkshopTimer');
+ s.boosters-=1;
+ w.ends=Math.max(now,w.ends-seconds*1000);
+ return w;
 }
 export function finishWorkshopConstruction(s,now=Date.now()){
  const w=s.workshop;
