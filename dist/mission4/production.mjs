@@ -7,6 +7,31 @@ export const BASE_INCOME_PER_CYCLE=500;
 // One hour of unattended cycles per zone at most when reopening the game.
 export const MAX_OFFLINE_PRODUCTION_CYCLES=4;
 
+// Read-only UI status for the first real production cycle, based on the
+// persisted zone.lastCycleAt used by tickProduction. Never invent a countdown
+// while DrillTruck maintenance is still pending or after the first payout.
+export function firstProductionCycleStatus(s,now=Date.now()){
+ const m=s?.mission4;
+ if(!m||m.phase==='inactive'||m.phase==='complete'||(m.productionCycles||0)>0)
+  return {visible:false,phase:'done',remainingSeconds:0,progress:1,zoneId:null};
+ const zones=m.zones||[];
+ const live=zones.filter(z=>z.status==='producing'&&Number.isFinite(z.lastCycleAt)&&z.lastCycleAt>0)
+  .sort((a,b)=>(a.lastCycleAt||0)-(b.lastCycleAt||0));
+ if(live.length){
+  const z=live[0];
+  const remain=Math.max(0,CYCLE_DURATION*1000-(now-z.lastCycleAt));
+  return {visible:true,phase:remain>0?'producing':'finishing',
+   remainingSeconds:Math.ceil(remain/1000),
+   progress:Math.max(0,Math.min(1,1-remain/(CYCLE_DURATION*1000))),zoneId:z.id};
+ }
+ const staged=zones.find(z=>z.status==='maintenance');
+ const awaiting=zones.find(z=>z.status==='idle'&&m.productionDrill?.assignedZone===z.id);
+ const zone=staged||awaiting;
+ if(zone)return {visible:true,phase:staged?'maintenance':'waiting',
+  remainingSeconds:null,progress:0,zoneId:zone.id};
+ return {visible:false,phase:'not-started',remainingSeconds:null,progress:0,zoneId:null};
+}
+
 // Income for a single zone per cycle
 export function zoneIncomePerCycle(zone){
  if(!zone)return 0;
