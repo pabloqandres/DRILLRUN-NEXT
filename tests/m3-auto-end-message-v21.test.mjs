@@ -15,8 +15,13 @@ function paidM3(){
   personnel:[{role:'admin'},{role:'driller'}],drill:{id:'rig01'},
   toolInventory:[{type:'bit'}],orders:[{status:'delivered'}],
   geoAnalysis:{requested:true,completed:true,reportAvailable:true},
-  narrative:{messages:[{id:'n:m3:start',characterId:'contractAdmin',missionId:'m3',readAt:1,actionTaken:'accept'}],
-  accepted:['m1','m2','m3'],rewardsCollected:['m1','m2']}
+  narrative:{messages:[
+   {id:'n:m1:start',characterId:'benefactor',missionId:'m1',readAt:1,actionTaken:'accept'},
+   {id:'n:m1:end',characterId:'benefactor',missionId:'m1',readAt:1,actionTaken:'collect'},
+   {id:'n:m2:start',characterId:'safetySpecialist',missionId:'m2',readAt:1,actionTaken:'accept'},
+   {id:'n:m2:end',characterId:'safetySpecialist',missionId:'m2',readAt:1,actionTaken:'collect'},
+   {id:'n:m3:start',characterId:'contractAdmin',missionId:'m3',readAt:1,actionTaken:'accept'}
+  ],accepted:['m1','m2','m3'],rewardsCollected:['m1','m2']}
  };
 }
 test('M3 payout is followed by Camila closing message, never a second payout',()=>{
@@ -50,4 +55,24 @@ test('closing delivery is wired to immediate presentation in M3 contract action'
  assert(code.includes("if(type==='completeContract'&&s.mission3?.phase==='complete')narrativeTick(1.5)"));
  assert(code.includes("const isM3Closing=msg.id==='n:m3:end'"));
  assert(code.includes("missedM3End=s.narrative.messages.find"));
+});
+
+test('workshop upgrade labels only actual built HSEC objects, never tall scene meshes',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const code=readFileSync(new URL('../dist/chapter/game.mjs',import.meta.url),'utf8');
+ const start=code.indexOf('function detectWorkshopObstacles(){');
+ const end=code.indexOf('function workshopStartUpgrade(){',start);
+ assert(start>=0&&end>start);
+ const state={hsec:{assets:[
+  {id:'tower-real',type:'tower',status:'built',x:-2,z:-8},
+  {id:'ghost-building',type:'post',status:'building',x:-2,z:-8},
+  {id:'far-post',type:'post',status:'built',x:10,z:10}
+ ]}};
+ const det=new Function('s',code.slice(start,end)+';return detectWorkshopObstacles;')(state);
+ const found=det();
+ assert.equal(found.length,1);
+ assert.equal(found[0].id,'tower-real');
+ assert.equal(found[0].type,'Torre de iluminación');
+ assert(!code.slice(start,end).includes('world.scene.traverse'));
+ assert(!code.includes('se retirarán automáticamente'));
 });
