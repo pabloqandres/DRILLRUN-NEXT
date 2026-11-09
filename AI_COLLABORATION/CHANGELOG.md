@@ -1,5 +1,9 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — V23 second-accurate order ETAs and Casa Matriz UI repair
+
+- Orders and Casa Matriz display seconds below 60s for every equipment/material order via one shared ETA formatter, refresh each second. Correct Casa Matriz rig previews and purchasing rows with phone-scoped 2-column layout; scroll preservation untouched. See CHANGES/2026-11-09_order-eta-and-casa-matriz-v23.md.
+
 ## 2026-11-09 — V22 workshop acceleration consumes boosters
 
 - Fix infinite free workshop accelerations: each valid boost subtracts one inventory booster, saves audit record and removes up to one minute. Button indicates balance and disables at zero; guard prevents repeat clicks and timer overrun. Existing completed builds unaffected. See CHANGES/2026-11-09_workshop-boost-v22.md.

@@ -181,6 +181,25 @@ export function reconcileDeliveredMachinery(s,now=Date.now()){
 export function allOrders(s){return s.orders||[];}
 
 // Delivery progress for a specific order (0..1)
+// Shared ETA for all Casa Matriz orders (bits, hammers, RC/DTH rigs, DrillTruck).
+// Source-of-truth delivery timing stays in dispatchDuration / dispatchedAt.
+// Once under 60 seconds, never round back up to "1 min".
+export function orderSecondsRemaining(order,now=Date.now()){
+ if(!order||order.status==='delivered')return 0;
+ if(order.status!=='dispatched'||!Number.isFinite(order.dispatchedAt))return null;
+ const duration=Number(order.dispatchDuration);
+ if(!Number.isFinite(duration)||duration<=0)return 0;
+ return Math.max(0,Math.ceil(duration-(now-order.dispatchedAt)/1000));
+}
+export function formatOrderETA(order,now=Date.now()){
+ const seconds=orderSecondsRemaining(order,now);
+ if(seconds===null)return 'Pendiente de despacho';
+ if(seconds<=0)return 'Llegando...';
+ if(seconds<60)return seconds+' s restantes';
+ const minutes=Math.ceil(seconds/60);
+ return minutes+' min restantes';
+}
+
 export function deliveryProgress(order,now=Date.now()){
  if(!order||order.status==='delivered')return 1;
  if(order.status!=='dispatched')return 0;

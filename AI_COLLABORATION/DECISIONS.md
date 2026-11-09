@@ -1,5 +1,9 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — V23 non-economic order ETA and Casa Matriz layout repair
+
+User screenshots confirmed final-minute delivery ETA always said 1 minute, and Casa Matriz was distorted. Changed only shared read-only ETA formatting and phone-scoped CSS/markup plus one-second re-render in existing game loop; no actual dispatch durations, purchases, or saved data changed. Controlled scoping avoids changing unrelated phone applications. See CHANGES/2026-11-09_order-eta-and-casa-matriz-v23.md.
+
 ## 2026-11-09 — V22 workshop accelerator economy fix
 
 **User issue:** Repeated workshop-acceleration clicks finish a 5-minute upgrade without consuming their single booster. ChatGPT applies tightly scoped user-requested economy bug fix in Claude-owned dist/mission3/inventory.mjs and workshop UI handler in dist/chapter/game.mjs. Every acceleration must atomically spend exactly one booster, reduce by up to 60 seconds and immediately update HUD; no balance means no time reduction. Existing save and already-finished upgrades unchanged. See CHANGES/2026-11-09_workshop-boost-v22.md.

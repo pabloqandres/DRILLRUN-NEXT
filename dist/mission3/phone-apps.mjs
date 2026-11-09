@@ -5,7 +5,7 @@ import {crewPortrait} from '../chapter/crew-portraits.mjs';
 import {CONTRACT_TEMPLATES,contractTemplate,canAcceptContract,contractProgress,contractDeadline,isContractComplete,startDrilling} from './contracts.mjs';
 import {analysisProgress,analysisReport,requestAnalysis,accelerateAnalysis} from './geology.mjs';
 import {DRILLS,HAMMERS,BITS,drillDefinition,compatibleHammers,compatibleBits,canPurchaseDrill} from './drills.mjs';
-import {pendingOrders,deliveryProgress,allOrders,canPlaceOrder} from './headquarters.mjs';
+import {pendingOrders,deliveryProgress,allOrders,canPlaceOrder,formatOrderETA} from './headquarters.mjs';
 import {inventorySummary,availableTools,workshopLevel,workshopCapacity,workshopUsed,workshopFree,canUpgradeWorkshop,workshopUpgradeJob,workshopUpgradeProgress,WORKSHOP_LEVELS} from './inventory.mjs';
 import {toolCondition} from './wear.mjs';
 import {mission3Phase,mission3Objectives,mission3Objective} from './mission3-state.mjs';
@@ -124,7 +124,7 @@ function renderContract(s,t,fmt,icon,cb){
 
 function renderCatalog(s,t,fmt,icon,cb){
  const free=workshopFree(s),cap=workshopCapacity(s),used=workshopUsed(s);
- let html=`<div class="m3Header">${icon('store')}<div><span class="eyebrow">CASA MATRIZ</span><h3>Solicitud de equipos</h3></div><span class="storeWallet">${icon('wallet')}${fmt(s.cash)}</span></div>`;
+ let html=`<div class="m3Header m3CatalogHeader">${icon('store')}<div><span class="eyebrow">CASA MATRIZ</span><h3>Solicitud de equipos</h3></div><span class="storeWallet">${icon('wallet')}${fmt(s.cash)}</span></div>`;
  html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 12px;background:${free<2?'#ef535022':'#0e2a4044'};border:1px solid ${free<2?'#ef535066':'#5ab8e822'};border-radius:8px;margin-bottom:10px;font-size:10px"><span style="color:${free<2?'#ef5350':'#9ec5dd'}">${icon('store')} Taller: ${used}/${cap} ocupado</span><b style="color:${free<2?'#ef5350':'#fff'}">${free} libres</b></div>`;
  // Drills section
  html+=`<div class="sectionHeading">Perforadoras RC</div>`;
@@ -157,8 +157,8 @@ function renderCatalog(s,t,fmt,icon,cb){
   for(const o of pending){
    const pct=Math.round(deliveryProgress(o)*100);
    const itemNames=o.items.map(i=>i.model||i.type).join(', ');
-   const eta=o.dispatchDuration?Math.max(0,Math.ceil((o.dispatchDuration-((Date.now()-o.dispatchedAt)/1000))/60)):0;
-   html+=`<div class="orderCard"><small>${icon('store')} ${esc(itemNames)}</small><div class="orderBar"><i style="width:${pct}%"></i></div><div class="orderPct"><span>${pct}% completado</span><span>${eta>0?eta+' min':'Llegando...'}</span></div></div>`;
+   const eta=formatOrderETA(o);
+   html+=`<div class="orderCard"><small>${icon('store')} ${esc(itemNames)}</small><div class="orderBar"><i style="width:${pct}%"></i></div><div class="orderPct"><span>${pct}% completado</span><span>${esc(eta)}</span></div></div>`;
   }
  }
  return html;
@@ -321,12 +321,12 @@ function renderOrders(s,t,fmt,icon,cb){
   html+=`<div class="sectionHeading">En tránsito<span>${active.length}</span></div>`;
   for(const o of active){
    const pct=Math.round(deliveryProgress(o)*100);
-   const eta=o.dispatchDuration?Math.max(0,Math.ceil((o.dispatchDuration-((Date.now()-o.dispatchedAt)/1000))/60)):0;
+   const eta=formatOrderETA(o);
    const items=o.items.map(i=>typeLabels[i.type]||i.model).join(', ');
    html+=`<div class="orderCard" style="background:var(--surface);border-radius:12px;padding:12px;margin:6px 0;border:1px solid var(--border)">`;
    html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:11px;font-weight:700">${esc(items)}</span><span style="font-size:9px;color:var(--accent)">${esc(statusLabels[o.status])}</span></div>`;
    html+=`<div style="height:6px;border-radius:3px;background:var(--border);overflow:hidden"><div style="height:100%;border-radius:3px;background:linear-gradient(90deg,#64b5f6,#42a5f5);width:${pct}%;transition:width .3s"></div></div>`;
-   html+=`<div style="display:flex;justify-content:space-between;font-size:9px;margin-top:4px;opacity:.7"><span>${pct}%</span><span>${eta>0?eta+' min':'Llegando...'}</span></div>`;
+   html+=`<div style="display:flex;justify-content:space-between;font-size:9px;margin-top:4px;opacity:.7"><span>${pct}%</span><span>${esc(eta)}</span></div>`;
    html+=`<small style="display:block;margin-top:4px;font-size:9px;opacity:.5">Total: ${fmt(o.totalCost)} (envío: ${fmt(o.deliveryFee)})</small>`;
    html+=`</div>`;
   }
