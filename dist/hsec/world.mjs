@@ -272,6 +272,7 @@ export class HsecWorld{
     // previous d.w+.08 stroke at the end reintroduced a hard rim.
     stroke(d.w-.13,'#c8ccc8',.30);
    }
+   ctx.globalAlpha=1;
    ctx.setLineDash([.45,.45]);
    ctx.lineWidth=.06;
    ctx.strokeStyle=veh?'#f0c46b':'#e8efdf';
