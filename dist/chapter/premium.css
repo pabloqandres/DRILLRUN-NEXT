@@ -234,3 +234,19 @@ body.builderOpen #joystick,body.builderOpen #handButton,body.builderOpen #object
 @media(prefers-reduced-motion:reduce){
  #phone #phoneContent .narrativeTypingTarget .narrativeBody.narrativeTyping::after{animation:none}
 }
+
+
+/* Narrative handoff · the phone rings once but keeps a silent call-to-action
+   glow until the start/finish SMS is confirmed by the player. */
+@keyframes missionPhoneAwaiting{
+ 0%,100%{box-shadow:0 0 0 1px #ffc83d88,0 0 13px #ffcf4a44,inset 0 1px #fff3}
+ 50%{box-shadow:0 0 0 3px #ffda78cc,0 0 26px #ffd36dba,inset 0 1px #fff7}
+}
+#hud #phoneButton.missionAwaiting{
+ border-color:#ffd96d!important;
+ animation:missionPhoneAwaiting 1.7s ease-in-out infinite!important;
+}
+#hud #phoneButton.missionAwaiting .uiIcon{color:#ffe7a4!important}
+@media(prefers-reduced-motion:reduce){
+ #hud #phoneButton.missionAwaiting{animation:none!important;box-shadow:0 0 0 2px #ffda78!important}
+}
