@@ -1,6 +1,8 @@
 // Mission 4 — Maintenance sequence
 // 7-phase animated maintenance cycle when DrillTruck services a zone.
 
+import {serviceDthFromStock} from './production.mjs';
+
 export const MAINTENANCE_PHASES=[
  {id:'detection',duration:3,label:'Detección de zona'},
  {id:'dispatch',duration:0,label:'Enviando DrillTruck'},      // duration handled by route animation
@@ -69,9 +71,16 @@ export function completeMaintenance(s,now=Date.now()){
  truck.state='parked';
  truck.position={x:-13.5,z:-9.3};
  truck.assignedZone=null;
- // Zone transitions to producing
+ // Permanent automation: service stock before restoring any production.
  const zone=s.mission4.zones.find(z=>z.id===zoneId);
- if(zone){
+ if(s.mission4.productionMode==='single-dth-v2'){
+  if(s.mission4.serviceRequested){
+   const ready=serviceDthFromStock(s,now);
+   if(zone){zone.status=ready?'producing':'idle';zone.lastCycleAt=ready?now:null;}
+  }else if(zone&&zone.id===s.mission4.productionDrill?.assignedZone){
+   zone.status='producing';zone.lastCycleAt=now;
+  }
+ }else if(zone){
   zone.status='producing';
   zone.lastCycleAt=now;
   if(s.mission4.productionDrill?.assignedZone===zoneId)s.mission4.productionDrill.state='producing';
