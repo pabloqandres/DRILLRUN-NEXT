@@ -210,3 +210,44 @@
 @media(max-width:1050px){
  #hud #objective,body.interior #hud #objective{right:max(12px,var(--dr-hud-side))!important;top:calc(var(--dr-hud-top) + 53px)!important}
 }
+
+
+/* M1 objective visibility repair — keep the live progress legible at the left.
+   Pure presentation: counters come from game.mjs / state.cleared, not CSS. */
+#hud #objective:not(.hidden),body.interior #hud #objective:not(.hidden){
+ left:max(12px,var(--dr-hud-side))!important;
+ right:auto!important;
+ max-height:min(48vh,310px)!important;
+}
+#hud #objective.collapsed,body.interior #hud #objective.collapsed{
+ transform:translateX(calc(-100% + 22px))!important;
+}
+#hud #objective #objToggle{
+ left:auto!important;right:-13px!important;
+ border-radius:0 10px 10px 0!important;
+}
+#hud #objective #objectiveDetail:not(.hidden){
+ display:block!important;
+ max-height:min(16vh,105px)!important;
+ overflow-y:auto!important;
+ touch-action:pan-y;
+ font-size:clamp(10px,.85vw,12px)!important;
+ line-height:1.4!important;
+ color:#e0ebeb!important;
+}
+#hud #objective .missionCardProgress #objectiveCount{
+ display:block!important;
+ min-width:45px!important;max-width:none!important;
+ white-space:nowrap!important;
+ font-size:12px!important;
+ font-variant-numeric:tabular-nums;
+ color:#ffdf99!important;
+}
+@media(max-width:810px),(max-height:490px){
+ #hud #objective:not(.hidden),body.interior #hud #objective:not(.hidden){
+  top:calc(var(--dr-hud-top) + 53px)!important;
+  max-height:min(46vh,205px)!important;
+ }
+ #hud #objective #objectiveDetail:not(.hidden){font-size:10px!important;max-height:48px!important}
+ #hud #objective .missionCardProgress #objectiveCount{font-size:10px!important}
+}

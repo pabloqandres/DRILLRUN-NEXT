@@ -1,5 +1,11 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — M1 HUD summary presentational exception (User + ChatGPT)
+
+**Reported:** Opening mission summary lacked visible obstacle counts. The underlying game already computes the count; its explanatory element remained hidden from initial HTML and V4 HUD pushed the panel to the right.
+
+**Scoped shared-file exception:** ChatGPT may change only the visual summary display block inside `dist/chapter/game.mjs` (read-only use of `s.cleared` and `CLEARABLES`, no state mutation), and restore presentational left-side layout in `dist/chapter/hud-reference-v4.css`. Preserve narrative gating, mission logic, purchases, save data, and existing objective ids. See `CHANGES/2026-11-09_m1-hud-summary-fix.md`.
+
 ## 2026-11-06 — Narrative Reward Deferral (Claude Code)
 
 **Decision:** Mission rewards (M1: 5,000 cash, M2: 35,000 cash + booster) are no longer given immediately upon objective completion. Instead, they are deferred to narrative `confirmCompletion()`, triggered when the player reads the end-of-mission message and presses the confirm button.
