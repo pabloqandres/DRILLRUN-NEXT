@@ -7,24 +7,28 @@ import {convertableBoreholes,availableZones,zoneById} from './zones.mjs';
 import {maintenanceProgress,MAINTENANCE_PHASES} from './maintenance.mjs';
 import {zoneIncomePerCycle,incomePerHour,CYCLE_DURATION,totalAutomatedIncome} from './production.mjs';
 import {canBuildParking} from './parking.mjs';
+import {mission4Readout,M4_ENTRY_PACKAGE} from './operations-guide.mjs';
 import {workshopLevel,canUpgradeWorkshop,workshopUpgradeJob,WORKSHOP_LEVELS} from '../mission3/inventory.mjs';
 import {hasRole,canHire} from '../mission3/personnel.mjs';
 
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-export const M4_APPS=['m4-objectives','m4-drilltruck','m4-zones','m4-dth-catalog'];
+export const M4_APPS=['m4-objectives','m4-operaciones','m4-workshop','m4-drilltruck','m4-zones','m4-dth-catalog'];
 
 export function isM4App(app){return M4_APPS.includes(app);}
 
 export function m4HomeApps(s,t,icon){
  if(!s.mission4||mission4Phase(s)==='inactive')return '';
  const apps=[];
+ apps.push({id:'m4-operaciones',icon:'inventory',label:'Operación',css:'m4-operaciones'});
  apps.push({id:'m4-zones',icon:'geology',label:'Zonas',css:'m4-zones'});
  return apps.map(a=>`<button data-app="${a.id}"><span class="appTile app-${a.css}">${icon(a.icon)}</span><span>${esc(a.label)}</span></button>`).join('');
 }
 
 export function renderM4App(app,s,t,fmt,icon,callbacks){
  if(app==='m4-objectives')return renderM4Objectives(s,t,fmt,icon,callbacks);
+ if(app==='m4-operaciones')return renderM4Operations(s,t,fmt,icon,callbacks);
+ if(app==='m4-workshop')return renderDthWorkshop(s,t,fmt,icon,callbacks);
  if(app==='m4-drilltruck')return renderDrillTruck(s,t,fmt,icon,callbacks);
  if(app==='m4-zones')return renderZones(s,t,fmt,icon,callbacks);
  if(app==='m4-dth-catalog')return renderDthCatalog(s,t,fmt,icon,callbacks);
@@ -71,6 +75,69 @@ function renderM4Objectives(s,t,fmt,icon,cb){
  if(phase==='complete'){
   html+=`<div class="bankCard"><div class="bankBrand">${icon('check')}<span>COMPLETADA</span></div><small>Operación automatizada exitosamente</small><b>${fmt(totalAutomatedIncome(s))} generados</b></div>`;
  }
+ return html;
+}
+
+// Unified M4 operations dashboard: every link opens an existing working app.
+function renderM4Operations(s,t,fmt,icon,cb){
+ const view=mission4Readout(s);
+ const next=view.next;
+ let html=`<div class="m3Header"><span class="inventoryIcon">${icon('inventory')}</span><div><span class="eyebrow">OPERACIONES · MISIÓN 4</span><h3>Del sondaje a la producción</h3></div></div>`;
+ html+=`<section class="m4OpsSummary"><b>PROGRESO REAL · ${view.done}/${view.total} requisitos</b><div class="m4OpsBar"><i style="width:${Math.round(view.progress*100)}%"></i></div>
+   <span>Primero equipa tu DTH, luego despliega la maquinaria y automatiza la producción.</span></section>`;
+ if(next){
+  html+=`<section class="m4OpsNext"><small>SIGUIENTE PASO · ETAPA ${next.stageId}/5</small><h3>${esc(next.label)}</h3><p>${esc(next.description)}</p>
+  <button class="primary" data-app="${next.app}">${icon('arrow')} Ir a ${esc(next.app==='m4-dth-catalog'?'Casa Matriz DTH':next.app==='m4-workshop'?'Taller':next.app==='m4-zones'?'Zonas':next.app==='m3-personnel'?'Personal':next.app==='m4-drilltruck'?'DrillTruck':'Operaciones')}</button></section>`;
+ }
+ html+=`<div class="sectionHeading">Dónde hacer cada cosa</div><div class="m4OpsLinks">
+ <button data-app="m3-catalog">${icon('store')}<span><b>Casa Matriz</b><small>Comprar equipos RC, EXPLORA® y PUMA® DTH</small></span></button>
+ <button data-app="m4-workshop">${icon('inventory')}<span><b>Taller</b><small>Stock, martillos, bits e instalación en DTH</small></span></button>
+ <button data-app="m4-zones">${icon('geology')}<span><b>Zonas</b><small>Convertir sondajes y desplegar DTH</small></span></button>
+ <button data-app="m4-drilltruck">${icon('machine')}<span><b>DrillTruck</b><small>Estacionar, contratar servicio y automatizar</small></span></button></div>`;
+ html+=`<div class="sectionHeading">¿Dónde están mis equipos?</div>
+ <div class="m4OpsEquipment"><b>Perforadora RC</b><span>${esc(view.rcStatus)}</span><b>Perforadora DTH</b><span>${esc(view.drillStatus)}</span>
+ <b>Martillos PUMA® DTH</b><span>${view.hammerCount} recibidos · ${view.hammerInstalled?'instalado':'sin instalar'}</span>
+ <b>Bits DTH</b><span>${view.bitCount} recibidos · ${view.bitInstalled?'instalado':'sin instalar'}</span>
+ <b>Pedidos en tránsito</b><span>${view.pendingDeliveries}</span></div>`;
+ html+=`<div class="sectionHeading">Presupuesto de referencia</div>
+ <div class="m4OpsBudget"><p>Paquete mínimo desde taller L1 y sin maquinaria DTH: ${fmt(view.totalMinimum)} en total, incluyendo cuatro despachos.</p>
+ <small>Ampliación ${fmt(M4_ENTRY_PACKAGE.workshop)} · DTH ${fmt(M4_ENTRY_PACKAGE.dthDrill)} · Martillo ${fmt(M4_ENTRY_PACKAGE.hammer)} · Bit ${fmt(M4_ENTRY_PACKAGE.bit)} · Técnico ${fmt(M4_ENTRY_PACKAGE.technician)} · DrillTruck ${fmt(M4_ENTRY_PACKAGE.drillTruck)} · Envíos ${fmt(M4_ENTRY_PACKAGE.dispatch)}.</small>
+ <b>Saldo disponible: ${fmt(view.cash)}</b>
+ <small>No es un cobro adicional ni un paquete de compra: son los costos reales de las acciones separadas. Los elementos ya adquiridos no se vuelven a pagar.</small></div>`;
+ html+=`<div class="sectionHeading">Checklist completo</div><div class="m4OpsChecklist">`;
+ for(const group of view.groups){
+  html+=`<section><h4>${group.id}. ${esc(group.title)}</h4>`;
+  for(const check of group.checks)html+=`<div class="m4OpsCheck ${check.done?'complete':'pending'}"><span>${check.done?'✓':'○'}</span><b>${esc(check.label)}</b><small>${check.done?'Cumplido':'Pendiente'}</small>${check.done?'':`<button data-app="${check.app}">Abrir</button>`}</div>`;
+  html+=`</section>`;
+ }
+ return html+`</div>`;
+}
+
+// A real tool and equipment workbench, using the same inventory and action
+// callbacks as M4's catalog. Nothing is manufactured or purchased here.
+function renderDthWorkshop(s,t,fmt,icon,cb){
+ const v=mission4Readout(s),drill=v.drill;
+ const items=(s.toolInventory||[]).filter(t2=>t2.status!=='spent');
+ let html=`<div class="m3Header"><span class="inventoryIcon">${icon('inventory')}</span><div><span class="eyebrow">TALLER · NIVEL ${workshopLevel(s)}</span><h3>Gestión de maquinaria y herramientas</h3></div></div>`;
+ html+=`<div class="m4OpsEquipment"><b>RC exploración</b><span>${esc(v.rcStatus)}</span><b>DTH producción</b><span>${esc(v.drillStatus)}</span>
+ <b>Martillo instalado</b><span>${drill?.installedHammer?esc(items.find(x=>x.id===drill.installedHammer)?.model||'Instalado'):'No instalado'}</span>
+ <b>Bit instalado</b><span>${drill?.installedBit?esc(items.find(x=>x.id===drill.installedBit)?.model||'Instalado'):'No instalado'}</span></div>`;
+ if(!drill){html+=`<div class="m4OpsNext"><b>DTH aún no recibida</b><p>Solicita una perforadora en Casa Matriz → DTH. Cuando llegue al taller podrás instalar sus herramientas.</p><button data-app="m4-dth-catalog">Ir a Casa Matriz DTH</button></div>`;}
+ for(const type of ['hammer','bit']){
+  const available=items.filter(t2=>t2.type===type&&(t2.status==='new'||t2.status==='worn'));
+  const dth=available.filter(t2=>type==='hammer'?t2.model?.startsWith('puma-dth'):t2.model?.startsWith('dth-'));
+  const inUse=items.filter(t2=>t2.type===type&&t2.status==='installed');
+  html+=`<div class="sectionHeading">${type==='hammer'?'Martillos':'Bits'} · disponibles ${dth.length}, instalados ${inUse.length}</div>`;
+  if(!dth.length)html+=`<p class="m4OpsHint">Sin ${type==='hammer'?'martillos PUMA® DTH':'bits DTH'} libres. Revisa Pedidos o solicita desde Casa Matriz.</p>`;
+  for(const tool of dth){
+   const blocked=canInstallDthTool(s,tool.id);
+   const installed=type==='hammer'?!!drill?.installedHammer:!!drill?.installedBit;
+   html+=`<article class="inventoryCard"><span class="inventoryIcon">${icon('build')}</span><div><b>${esc(tool.model)}</b><small>Vida disponible: ${Math.round(tool.lifeRemaining||0)} / ${Math.round(tool.lifeTotal||0)} m</small></div><button data-m4-action="installDthTool" data-tool="${esc(tool.id)}" ${blocked||installed?'disabled':''}>${icon('arrow')} Instalar en DTH</button></article>`;
+  }
+ }
+ const onOrder=(s.orders||[]).filter(o=>o.status==='pending'||o.status==='dispatched');
+ if(onOrder.length)html+=`<div class="m4OpsHint">Tienes ${onOrder.length} pedido(s) en tránsito. Las herramientas aparecen aquí al entregarse.</div>`;
+ html+=`<button class="primary" data-app="m4-dth-catalog">Comprar martillos, bits o perforadora DTH</button><button data-app="m4-zones">Ir a Zonas para desplegar DTH</button>`;
  return html;
 }
 
