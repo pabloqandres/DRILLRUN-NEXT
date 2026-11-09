@@ -4,6 +4,8 @@
 
 ## Currently Active
 
+- **ChatGPT — V23 ETA seconds + Casa Matriz layout:** chatgpt/order-eta-seconds-v23. ETA and two-column rig cards checked with static/runtime tests; real phone screenshot QA pending.
+
 - **ChatGPT — V22 workshop booster accounting:** chatgpt/workshop-boost-economy-v22. Workshop speed-ups now spend booster inventory and reject zero stock; buttons show/disable current count and update HUD. JS smoke and parse checks passed; device QA pending.
 
 - **ChatGPT — V21 M3 closing SMS + phantom posts:** chatgpt/m3-auto-closing-message-v21. Direct targeted closure UI and workshop obstacle reporting fixes; actual narrative + detector mock checks passed. Browser test pending.
