@@ -125,6 +125,7 @@ function renderContract(s,t,fmt,icon,cb){
 function renderCatalog(s,t,fmt,icon,cb){
  const free=workshopFree(s),cap=workshopCapacity(s),used=workshopUsed(s);
  let html=`<div class="m3Header m3CatalogHeader">${icon('store')}<div><span class="eyebrow">CASA MATRIZ</span><h3>Solicitud de equipos</h3></div><span class="storeWallet">${icon('wallet')}${fmt(s.cash)}</span></div>`;
+ if(s.mission4?.phase&&s.mission4.phase!=='inactive')html+=`<nav class="m4CatalogTabs" aria-label="Categorías Casa Matriz"><span class="selected">EXPLORA® · Sondaje RC</span><button data-app="m4-dth-catalog">PUMA® DTH · Producción</button></nav><p class="m4CatalogExplanation">EXPLORA®: productos para exploración con perforadora RC. Para producción DTH, selecciona la segunda categoría.</p>`;
  html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 12px;background:${free<2?'#ef535022':'#0e2a4044'};border:1px solid ${free<2?'#ef535066':'#5ab8e822'};border-radius:8px;margin-bottom:10px;font-size:10px"><span style="color:${free<2?'#ef5350':'#9ec5dd'}">${icon('store')} Taller: ${used}/${cap} ocupado</span><b style="color:${free<2?'#ef5350':'#fff'}">${free} libres</b></div>`;
  // Drills section
  html+=`<div class="sectionHeading">Perforadoras RC</div>`;
@@ -145,7 +146,7 @@ function renderCatalog(s,t,fmt,icon,cb){
   html+=`<article class="inventoryCard"><span class="inventoryIcon">${icon('build')}</span><div><b>${esc(h.nameKey)}</b><small>Ø${h.diameter}" · Vida: ${h.lifeTotal}m · ${fmt(h.price)}</small>${!compat?`<span class="itemStatus">${icon('lock')} Incompatible</span>`:''}</div><button data-add-cart="hammer:${h.id}:${h.price}" ${!compat||!s.drill?'disabled':''}>${icon('store')}<span>${fmt(h.price)}</span></button></article>`;
  }
  // Bits section
- html+=`<div class="sectionHeading">Bits DTH</div>`;
+ html+=`<div class="sectionHeading">Bits para exploración RC</div>`;
  for(const b of BITS){
   const compat=drill?drill.compatibleBits.includes(b.id):true;
   html+=`<article class="inventoryCard"><span class="inventoryIcon">${icon('build')}</span><div><b>${esc(b.nameKey)}</b><small>Ø${b.diameter}" · ${b.type} · Vida: ${b.lifeTotal}m · ${fmt(b.price)}</small>${!compat?`<span class="itemStatus">${icon('lock')} Incompatible</span>`:''}</div><button data-add-cart="bit:${b.id}:${b.price}" ${!compat||!s.drill?'disabled':''}>${icon('store')}<span>${fmt(b.price)}</span></button></article>`;
@@ -205,6 +206,7 @@ function renderInventory(s,t,fmt,icon,cb){
  const nextLvl=WORKSHOP_LEVELS.find(w=>w.level===lvl+1);
  const capPct=cap>0?Math.round(used/cap*100):0;
  let html=`<div class="m3Header">${icon('inventory')}<div><span class="eyebrow">TALLER · Nv.${lvl}</span><h3>Inventario de herramientas</h3></div></div>`;
+ if(s.mission4?.phase&&s.mission4.phase!=='inactive')html+=`<div class="m4OpsLinks"><button data-app="m4-workshop">${icon('build')}<span><b>Gestionar perforadora DTH</b><small>Localizar máquina, ver stock e instalar martillos y bits DTH</small></span></button><button data-app="m4-operaciones">${icon('inventory')}<span><b>Guía de misión 4</b><small>Pasos, compras y costos reales</small></span></button></div>`;
  // Capacity bar
  html+=`<div class="workshopCap"><div class="workshopCapHead"><span>${icon('store')} Capacidad</span><b>${used} / ${cap}</b></div><div class="workshopCapBar"><i style="width:${capPct}%;background:${capPct>85?'linear-gradient(90deg,#ef5350,#c62828)':capPct>60?'linear-gradient(90deg,#ffb74d,#f57c00)':'linear-gradient(90deg,#4caf50,#388e3c)'}"></i></div><small>${free} espacios libres</small></div>`;
  // Upgrade option

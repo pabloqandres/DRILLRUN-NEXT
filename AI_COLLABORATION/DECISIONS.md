@@ -1,5 +1,9 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — V24 direct M4 functional audit and user-requested operational repairs
+
+**User direct instruction:** Audit and simplify M4 because even the game creator cannot navigate purchases, stock, DTH location, installation or deployment. Coordination scope: ChatGPT may modify targeted Claude-owned mission4/mission4-state.mjs, drills-dth.mjs, maintenance.mjs, phone-apps.mjs, mission3/phone-apps.mjs, chapter/phone-ui.mjs and game.mjs only for the specifically documented M4 workflow. New graphics and CSS remain ChatGPT-owned. Preserve M1–M3 economics, all purchases, save identities and M4 price values. Full GLB production assets are not used until mobile optimization and binary transfer are feasible; use branded-free generic provisional DTH. Future M5 secure equipment yard remains a specification, not a hidden auto-build or a replacement for real HSEC requirements. See CHANGES/2026-11-09_mission4-audit-operational-flow-v24.md.
+
 ## 2026-11-09 — V23 non-economic order ETA and Casa Matriz layout repair
 
 User screenshots confirmed final-minute delivery ETA always said 1 minute, and Casa Matriz was distorted. Changed only shared read-only ETA formatting and phone-scoped CSS/markup plus one-second re-render in existing game loop; no actual dispatch durations, purchases, or saved data changed. Controlled scoping avoids changing unrelated phone applications. See CHANGES/2026-11-09_order-eta-and-casa-matriz-v23.md.

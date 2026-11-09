@@ -1,5 +1,9 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — V24 M4 guided procurement, workshop/3D deployment and reliable production
+
+- Audit actual M4 engine. Unify Casa Matriz EXPLORA® RC and PUMA® DTH through visible category tabs, add five-stage/11-step operational checklist and remaining budget, restore useful DTH tool installation to Taller, display actual DTH rig and preserve RC in reserve bay, correctly activate DTH only after DrillTruck maintenance, keep completed truck-link check stable. M5 equipment-yard concept documented only. See CHANGES/2026-11-09_mission4-audit-operational-flow-v24.md.
+
 ## 2026-11-09 — V23 second-accurate order ETAs and Casa Matriz UI repair
 
 - Orders and Casa Matriz display seconds below 60s for every equipment/material order via one shared ETA formatter, refresh each second. Correct Casa Matriz rig previews and purchasing rows with phone-scoped 2-column layout; scroll preservation untouched. See CHANGES/2026-11-09_order-eta-and-casa-matriz-v23.md.
