@@ -186,8 +186,41 @@ for(let x=-3.2;x<3.5;x+=.5){this.box(g,.025,3.6,.02,x,2.2,-2.8,0xb7b7a7);}this.s
   for(const o of this._zoneObstacles[zoneId]){o.visible=o.userData._zoneWasVisible??true;delete o.userData._zoneWasVisible;}
   delete this._zoneObstacles[zoneId];
  }
+ // Workshop L1 construction: architectural hologram aligned with the real
+ // workshop footprint. It never creates walk blockers or active building pads.
+ syncWorkshopBlueprint(building){
+  if(!building){
+   this._workshopBlueprint?.removeFromParent();
+   this._workshopBlueprint=null;
+   return;
+  }
+  if(this._workshopBlueprint)return;
+  const g=new T.Group();g.name='Taller L1 · holograma en construcción';
+  g.position.set(-7.6,0,-9.3);
+  const material=new T.LineBasicMaterial({color:0x55d9ee,transparent:true,opacity:.78,depthWrite:false});
+  const fill=new T.MeshBasicMaterial({color:0x3ecde0,transparent:true,opacity:.065,depthWrite:false,side:T.DoubleSide});
+  const addFrame=(w,h,d,x,y,z)=>{
+   const shape=new T.BoxGeometry(w,h,d);
+   const edges=new T.LineSegments(new T.EdgesGeometry(shape),material);
+   edges.position.set(x,y,z);g.add(edges);
+   const pane=new T.Mesh(shape,fill);pane.position.set(x,y,z);g.add(pane);
+  };
+  addFrame(7.2,.13,5.4,0,.44,0);
+  addFrame(7.2,3.9,5.4,0,2.40,0);
+  addFrame(7.6,.14,5.8,0,4.50,0);
+  for(const x of[-3.6,3.6])for(const z of[-2.7,2.7])addFrame(.10,4.3,.10,x,2.35,z);
+  for(const x of[-2.4,0,2.4])addFrame(.07,4.1,.07,x,2.35,-2.7);
+  // Access remains an outline, not a solid ghost barrier.
+  const door=new T.LineSegments(new T.EdgesGeometry(new T.BoxGeometry(2.8,3.3,.05)),material);
+  door.position.set(0,2.10,2.73);g.add(door);
+  g.userData.outline=material;
+  this.scene.add(g);this._workshopBlueprint=g;
+ }
  // Workshop upgrade visuals: scaffold during construction + expanded structure at Nv.2+
  updateWorkshop(workshopState){
+  this.syncWorkshopBlueprint(!!workshopState&&workshopState.status==='building');
+  if(this._workshopBlueprint?.userData.outline)
+   this._workshopBlueprint.userData.outline.opacity=.67+.16*Math.sin(performance.now()*.003);
   if(!workshopState||workshopState.status==='building'){
    if(this._workshopBuilt){
     this.workshopModel?.removeFromParent();this.workshopPad?.removeFromParent();
