@@ -1,5 +1,12 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — World materials V5 (ChatGPT)
+
+- Enhanced procedural Atacama ground striation with muted wind abrasion and texture filtering; added flush concrete pad joints, mineral streaks and edge wear to the actual 3D world surfaces.
+- Visual-only: existing building footprint, HSEC, economy, colliders and saved state unchanged; module parsing passed, real WebGL acceptance pending.
+- See `CHANGES/2026-11-09_world-materials-v5.md`.
+
+
 ## 2026-11-07 — Avatar 02/03/04 intro videos (Claude Code)
 
 ### Added
