@@ -14,8 +14,16 @@ export function soilPixels(size=512){const data=new Uint8Array(size*size*4),norm
   // the flat, navigable yard footprint or introducing collision geometry.
   const windBand=Math.sin(Math.PI*2*(u*28+v*5+periodicNoise(u*5,v*5,5)*.6));
   const pale=Math.max(0,broad-.53)*29,gravel=grain>.985?-43:grain>.96?18:0;
-  const shade=(stone-.5)*23+(grain-.5)*12+(broad-.5)*30+gravel+windBand*6;
-  const i=(y*size+x)*4;data[i]=Math.max(0,Math.min(255,196+shade+pale*.8));data[i+1]=Math.max(0,Math.min(255,151+shade*.94+pale*.7));data[i+2]=Math.max(0,Math.min(255,112+shade*.83+pale*.55));data[i+3]=255;
+  // Multi-scale wind abrasion: muted deposits and thin striation lines
+  // are colors only, keeping existing height and player navigation unchanged.
+  const abrasion=Math.sin((u*51+v*8+periodicNoise(u*8,v*8,8)*.8)*Math.PI*2);
+  const deposition=Math.max(0,periodicNoise(u*13,v*13,13)-.58);
+  const shade=(stone-.5)*23+(grain-.5)*12+(broad-.5)*30+gravel+windBand*6+abrasion*3.2-deposition*17;
+  const i=(y*size+x)*4;
+  data[i]=Math.max(0,Math.min(255,192+shade+pale*.8));
+  data[i+1]=Math.max(0,Math.min(255,150+shade*.92+pale*.7));
+  data[i+2]=Math.max(0,Math.min(255,115+shade*.8+pale*.55));
+  data[i+3]=255;
  }
  // Small embedded pebbles, warm highlights and cool contact edges; no photo texture.
  for(let stone=0;stone<Math.round(period*period/470);stone++){
@@ -38,6 +46,9 @@ export function createDesert(w){
  const group=new T.Group();group.name='Atacama · premium';const pixels=soilPixels(),map=tex(pixels.color,pixels.size,true),normalMap=tex(pixels.normal,pixels.size);
  const geo=new T.PlaneGeometry(240,240,96,96);geo.rotateX(-Math.PI/2);const p=geo.attributes.position,col=[];
  for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i);p.setY(i,reliefHeight(x,z));const n=noise(x*.17,z*.17),c=new T.Color().setRGB(1-.09*n,1-.075*n,1-.06*n);col.push(c.r,c.g,c.b);}geo.setAttribute('color',new T.Float32BufferAttribute(col,3));geo.computeVertexNormals();
+ // The high-frequency normal map adds granular definition without a
+ // physically bumpy walk surface or expensive extra geometry.
+ map.anisotropy=4;normalMap.anisotropy=4;
  const material=new T.MeshStandardMaterial({color:0xffffff,map,normalMap,normalScale:new T.Vector2(.57,.57),roughness:.99,metalness:0,vertexColors:true});material.userData.premiumSoil=true;const ground=new T.Mesh(geo,material);ground.name='terrain-ground';ground.receiveShadow=true;group.add(ground);w.soilMaterial=material;
  // Four staggered ridgelines. Far colours absorb the sky haze; near ridges retain warm strata.
  for(let layer=3;layer>=0;layer--){const depth=24+layer*5,g=new T.PlaneGeometry(210,depth,110,20);g.rotateX(-Math.PI/2);const a=g.attributes.position;
