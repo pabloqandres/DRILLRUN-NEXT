@@ -403,7 +403,7 @@ function narrativeTick(dt){
  // Repair already-paid saves from previous versions: the end SMS may have
  // arrived silently while the Contract app was open. Show it exactly once
  // while unread; PhoneUI marks it read when Camila's thread is opened.
- const missedM3End=s.narrative.messages.find(m=>m.id==='n:m3:end'&&!m.readAt&&!m.actionTaken);
+ const missedM3End=s.narrative.messages.find(m=>['n:m3:end','n:m4:end'].includes(m.id)&&!m.readAt&&!m.actionTaken);
  if(missedM3End&&!modalOpen&&!builderOpen&&!busy){
   phoneUI.narrativeCharacter=missedM3End.characterId;
   phoneUI.conversation=true;
@@ -420,7 +420,7 @@ function narrativeTick(dt){
   // M3 has already paid in completeContract(); its closing Camila message
   // must open by itself even if the player is still viewing the Contract app.
   // This only switches the phone view and never collects/pays a reward.
-  const isM3Closing=msg.id==='n:m3:end';
+  const isM3Closing=msg.id==='n:m3:end'||msg.id==='n:m4:end';
   if((isM3Closing||msg.id.endsWith(':start'))&&!modalOpen&&!builderOpen&&!busy&&(!phoneOpen||isM3Closing)){
    phoneUI.narrativeCharacter=msg.characterId;
    phoneUI.conversation=true;
@@ -901,7 +901,14 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
   if(phoneOpen&&(phoneApp==='m3-geology'||phoneApp==='m3-contract'||phoneApp==='m3-catalog'||phoneApp==='m3-orders'||phoneApp==='m4-drilltruck'||phoneApp==='m4-zones'||phoneApp==='m4-operaciones'||phoneApp==='m4-workshop'||phoneApp==='m4-dth-catalog')){geoRefreshTimer=(geoRefreshTimer||0)+dt;const deliveryView=phoneApp==='m3-orders'||phoneApp==='m3-catalog';if(geoRefreshTimer>=(deliveryView?1:2)){geoRefreshTimer=0;const c=$('#phoneContent');const scrollTop=c?.scrollTop||0;renderPhone();if(c)c.scrollTop=scrollTop;}}else geoRefreshTimer=0;
   if(drillCardOpen)showDrillCard();
   // === M4 tick ===
-  initM4Visuals();const m4events=tickMission4(s,dt,wall);if(m4events){for(const e of m4events){if(e==='incomeGenerated'){/* Auto-credit silently. The wallet and production report display actual funds. */}else if(e==='maintenanceComplete'){notices.push({title:'Mantenimiento completado',symbol:'bell'});if(phoneOpen)renderPhone();}else if(e==='truckDispatch'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'out');}else if(e==='truckReturn'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'return');}else if(e==='missionComplete'){sound('finish');showMissionComplete('Automatiza tu operación',null,0,'Producción automatizada habilitada');}}save();}
+  initM4Visuals();const m4events=tickMission4(s,dt,wall);if(m4events){for(const e of m4events){if(e==='incomeGenerated'){/* Auto-credit silently. The wallet and production report display actual funds. */}else if(e==='maintenanceComplete'){notices.push({title:'Mantenimiento completado',symbol:'bell'});if(phoneOpen)renderPhone();}else if(e==='truckDispatch'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'out');}else if(e==='truckReturn'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'return');}else if(e==='missionComplete'){
+   // The first actual production income completed M4. Keep the DTH running
+   // and deliver the benefactor's closing message instead of showing a
+   // premature 4-second overlay before narrative confirmation.
+   sound('finish');
+   notices.push({title:'Primer ciclo DTH completado',detail:'Ingresos acreditados · confirma el cierre de Misión 4 en Mensajes',symbol:'bell'});
+   narrativeTick(1.5);
+  }}save();}
   updateM4Visuals(dt);
   // Auto-start M4 when M3 completes
   if(s.mission3?.phase==='complete'&&s.contract?.status==='delivered'&&isMissionAccepted(s,'m4')&&canStartMission4(s)&&(!s.mission4||s.mission4.phase==='inactive')){startMission4(s);notices.push({title:'Misión 4 desbloqueada — Automatiza tu operación',symbol:'bell'});save();}
