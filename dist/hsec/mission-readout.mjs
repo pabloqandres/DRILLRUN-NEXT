@@ -1,9 +1,9 @@
 // Mission 2 display-only requirements. Mirrors the current tickHsec close gate.
-import {evaluation,built,routeLength} from './state.mjs';
+import {evaluation,routeLength} from './state.mjs';
 import {HSEC_BALANCE} from './catalog.mjs';
 export function mission2Readout(s){
  const h=s.hsec||{assets:[]},e=evaluation(s),office=s.office?.level||1;
- const shed=built(h,'shed').length,unsafe=e.conflicts.unsafe.length;
+ const shed=(h.assets||[]).filter(a=>a.type==='shed'&&a.status==='built').length,unsafe=e.conflicts.unsafe.length;
  const items=[
  {id:'office',name:'Oficina nivel 2',done:office>=2,value:'Nivel '+office+'/2',hint:'Mejora la oficina hasta nivel 2.'},
  {id:'shed',name:'Galpón terminado',done:shed>0,value:shed+' construido(s)',hint:'Finaliza el montaje del galpón.'},
