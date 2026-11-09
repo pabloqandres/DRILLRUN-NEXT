@@ -13,7 +13,11 @@ import {boxHit,footprint,segmentDistance} from './network.mjs';
 const C={steel:0x374d59,silver:0xb9c5c7,red:0x762538,cream:0xe2d2b6,yellow:0xffbd24,black:0x192932,orange:0xf78424,white:0xedf3ed,green:0x339f8d};
 export function assetModel(asset,{ghost=false}={}){
  const d=assetDefinition(asset.type),g=new T.Group(),mats=new Map(),colliders=[];g.name=d.name;
- const mat=c=>{if(!mats.has(c))mats.set(c,new T.MeshStandardMaterial({color:c,roughness:.76,metalness:[C.steel,C.silver].includes(c)?.45:.05}));return mats.get(c);};
+ const mat=c=>{if(!mats.has(c))mats.set(c,new T.MeshStandardMaterial({
+  color:c,roughness:c===0xffe8bf?.31:.76,
+  metalness:[C.steel,C.silver].includes(c)?.45:.05,
+  ...(c===0xffe8bf?{emissive:0xffc676,emissiveIntensity:1.25}: {})
+ }));return mats.get(c);};
  const add=(geo,c,x,y,z,rot=0)=>{const m=new T.Mesh(geo,mat(c));m.position.set(x,y,z);m.rotation.y=rot;m.castShadow=m.receiveShadow=true;g.add(m);return m;};
  const box=(w,h,dep,x,y,z,c,rot=0)=>add(new T.BoxGeometry(w,h,dep),c,x,y,z,rot);
  const cyl=(r,h,x,y,z,c,top=r)=>add(new T.CylinderGeometry(top,r,h,10),c,x,y,z);
@@ -123,14 +127,13 @@ export function assetModel(asset,{ghost=false}={}){
   }
   g.userData.light={y:h,range:d.range};
  }else if(d.id==='crossing'){
-  // Road surface base
-  box(3.8,.015,1.8,0,.015,0,0x4a5355);
-  // Zebra crossing stripes
-  for(let x=-1.6;x<1.8;x+=.44)box(.24,.006,1.55,x,.028,0,C.white);
-  // Edge lines
-  box(3.8,.006,.06,0,.028,-.88,C.yellow);box(3.8,.006,.06,0,.028,.88,C.yellow);
-  // Tactile paving indicators at ends
-  for(const z of[-.92,.92])for(let x=-1.5;x<=1.5;x+=.15)box(.08,.012,.06,x,.028,z,C.yellow);
+  // The finished crossing is painted ON the road canvas by paintRoads().
+  // Do not stack a raised asphalt slab/striped boxes above the painted road.
+  // During construction retain a visible holographic footprint only.
+  if(ghost){
+   box(3.8,.012,1.8,0,.012,0,C.silver);
+   for(let x=-1.54;x<=1.55;x+=.46)box(.24,.006,1.46,x,.021,0,C.white);
+  }else add(new T.CircleGeometry(.01,4),C.steel,0,.001,0);
  }else if(d.id==='sign'){
   // Base plate
   box(.24,.035,.24,0,.02,0,C.steel);
@@ -216,7 +219,8 @@ export class HsecWorld{
   const tx=x=>(x-ox)/wx*W,tz=z=>(z-oz)/wz*H,tw=w=>w/wx*W;
   ctx.clearRect(0,0,W,H);
   const routes=h.assets.filter(a=>['vehicle','pedestrian'].includes(a.type)&&a.status==='built'&&a.points?.length>=2);
-  if(!routes.length){this.roadTex.needsUpdate=true;return;}
+  // Crossings must remain visible even when a route is added later.
+  // An empty route list no longer skips the crossing decal pass.
   const tracePath=(ctx,pts)=>{ctx.beginPath();ctx.moveTo(tx(pts[0].x),tz(pts[0].z));for(let i=1;i<pts.length;i++)ctx.lineTo(tx(pts[i].x),tz(pts[i].z));};
   // Merge connected routes of same type into continuous chains for seamless painting
   const mergeChains=(type)=>{const assets=routes.filter(a=>a.type===type);if(!assets.length)return[];const chains=assets.map(a=>[...a.points]);let merged=true;while(merged){merged=false;for(let i=0;i<chains.length;i++){if(!chains[i])continue;for(let j=i+1;j<chains.length;j++){if(!chains[j])continue;const ai=chains[i],aj=chains[j],d1=Math.hypot(ai[ai.length-1].x-aj[0].x,ai[ai.length-1].z-aj[0].z),d2=Math.hypot(ai[ai.length-1].x-aj[aj.length-1].x,ai[ai.length-1].z-aj[aj.length-1].z),d3=Math.hypot(ai[0].x-aj[0].x,ai[0].z-aj[0].z),d4=Math.hypot(ai[0].x-aj[aj.length-1].x,ai[0].z-aj[aj.length-1].z);const tol=.6;if(d1<tol){chains[i]=ai.concat(aj.slice(1));chains[j]=null;merged=true;}else if(d2<tol){chains[i]=ai.concat(aj.reverse().slice(1));chains[j]=null;merged=true;}else if(d3<tol){chains[i]=aj.reverse().concat(ai.slice(1));chains[j]=null;merged=true;}else if(d4<tol){chains[i]=aj.concat(ai.slice(1));chains[j]=null;merged=true;}}}}return chains.filter(Boolean);};
@@ -265,18 +269,30 @@ export class HsecWorld{
    // 6) Pedestrian edge dashes
    if(d.id==='pedestrian'){ctx.lineWidth=tw(d.w+.08);ctx.strokeStyle='#c8ccc8';tracePath(ctx,pts);ctx.stroke();}
    ctx.setLineDash([]);ctx.restore();}
-  // Paint crossings on top of roads
+  // V9: one shared surface for roads and crossings. Painting at the same
+  // roadPlane depth eliminates 3D slab overlap, Z-fighting and raised edges.
   const crossings=h.assets.filter(a=>a.type==='crossing'&&a.status==='built');
-  for(const a of crossings){const fp=assetDefinition('crossing'),r=a.rotation||0;
-   ctx.save();ctx.translate(tx(a.x),tz(a.z));ctx.rotate(-r);
-   // Dark base under crossing
-   ctx.fillStyle='#3a3e3a';ctx.fillRect(-tw(fp.w)/2,-tw(fp.d)/2,tw(fp.w),tw(fp.d));
-   // Zebra stripes
-   ctx.fillStyle='#e8ede8';const sw=tw(.22),gap=tw(.22),count=Math.floor(tw(fp.w)/(sw+gap));
-   for(let i=0;i<count;i++){const sx=-tw(fp.w)/2+gap/2+i*(sw+gap);ctx.fillRect(sx,-tw(fp.d*.42),sw,tw(fp.d*.84));}
-   // Yellow edge lines
-   ctx.fillStyle='#d4a430';ctx.fillRect(-tw(fp.w)/2,-tw(fp.d)/2,tw(fp.w),tw(.04));ctx.fillRect(-tw(fp.w)/2,tw(fp.d)/2-tw(.04),tw(fp.w),tw(.04));
-   ctx.restore();}
+  const sx=W/wx,sz=H/wz;
+  for(const a of crossings){
+   const fp=assetDefinition('crossing'),r=a.rotation||0,c=Math.cos(r),sn=Math.sin(r);
+   ctx.save();
+   // Convert local crossing metres to canvas pixels with independent X/Z
+   // scales. A normal ctx.rotate() skews rotated crossings on this 30x24 map.
+   ctx.setTransform(c*sx,-sn*sz,sn*sx,c*sz,tx(a.x),tz(a.z));
+   // Subtle transparent road tint; no dark rectangular slab or raised border.
+   ctx.fillStyle='rgba(22,37,43,.14)';
+   ctx.fillRect(-fp.w/2,-fp.d/2,fp.w,fp.d);
+   ctx.fillStyle='#f4f3e9';
+   for(let x=-fp.w/2+.22;x+0.26<fp.w/2;x+=.47){
+    ctx.fillRect(x,-fp.d*.39,.26,fp.d*.78);
+   }
+   // Fine stop demarcations align with the existing road instead of
+   // extending into thick independent pavement borders.
+   ctx.fillStyle='#e8ba46';
+   ctx.fillRect(-fp.w/2,-fp.d/2+.065,fp.w,.045);
+   ctx.fillRect(-fp.w/2,fp.d/2-.11,fp.w,.045);
+   ctx.restore();
+  }
   // Grain noise for texture over painted areas
   const imageData=ctx.getImageData(0,0,W,H),px=imageData.data;
   for(let i=0;i<px.length;i+=4){if(px[i+3]<10)continue;// Stable pseudo-grain prevents roads flickering whenever HSEC redraws.
@@ -333,10 +349,29 @@ export class HsecWorld{
  this.colliders=[];const keep=new Set();let lightCount=0;const hour=(10+h.time/600*24)%24,night=hour>=19||hour<6;const day=Math.max(.12,Math.min(1,(hour<12?hour-5:20-hour)/2));this.w.sun.intensity=2.65*day;this.w.hemi.intensity=.95*(.28+.72*day);this.w.scene.background=night?this.nightSky:this.originalSky;this.w.sun.color.set(night?0xabc2e0:0xffdfae);this.w.hemi.color.set(night?0x879bb9:0xc8e4ff);if(this.w.scene.fog)this.w.scene.fog.color.set(night?0x233449:0xb8c2c9);
  const sorted=[...h.assets].sort((a,b)=>(['tower','post'].includes(b.type)?1:0)-(['tower','post'].includes(a.type)?1:0));for(const a of sorted){keep.add(a.id);const key=[a.type,a.status,a.level,...Object.values(a.condition).map(v=>Math.floor(v/5))].join(':');let e=this.models.get(a.id);if(!e||e.key!==key){const justBuilt=e?.status==='building'&&a.status==='built';if(justBuilt&&e?.model.userData.constructionHologram){e.model.finish(performance.now()/1000);this.fadingHolograms.push(e.model);}else releaseModel(e?.model);let model=assetModel(a,{ghost:a.status==='building'&&a.type!=='shed'});if(a.status==='building'&&a.type==='shed'){const original=model;model=new ConstructionHologram(original,{software:this.w.renderer.isSoftwareRenderer,quality:this.w.quality,footprint:{width:6,depth:4.8}});releaseModel(original);}if(justBuilt)this.onBuilt?.(a);let modelY=0;const ad=assetDefinition(a.type);if(ad.route&&a.points?.length){for(let pi=0;pi<a.points.length;pi++){modelY=Math.max(modelY,this.baseGround(a.points[pi].x,a.points[pi].z));}if(a.points.length>1)for(let pi=1;pi<a.points.length;pi++){const pa=a.points[pi-1],pb=a.points[pi];modelY=Math.max(modelY,this.baseGround((pa.x+pb.x)/2,(pa.z+pb.z)/2));}}if(a.type==='crossing')modelY=.05;model.position.set(a.x,modelY,a.z);model.rotation.y=a.rotation||0;this.group.add(model);e={key,model,status:a.status};this.models.set(a.id,e);this.w.renderer.staticFrame=null;if(a.status==='building'&&a.type!=='shed'){const d=assetDefinition(a.type);for(const x of[-d.w/2,d.w/2])for(const z of[-d.d/2,d.d/2]){const pole=new T.Mesh(new T.CylinderGeometry(.025,.025,Math.max(1,d.h),6),new T.MeshBasicMaterial({color:0xffbd24}));pole.position.set(x,Math.max(1,d.h)/2,z);model.add(pole);}}if(model.userData.light){const info=model.userData.light,light=new T.PointLight(0xffd494,0,Math.hypot(info.range,info.y),1.1);light.position.set(0,info.y,0);model.add(light);e.light=light;
   if(!this.glowTex){const c=document.createElement('canvas');c.width=c.height=64;const ctx=c.getContext('2d'),grad=ctx.createRadialGradient(32,32,0,32,32,32);grad.addColorStop(0,'rgba(255,220,160,1)');grad.addColorStop(.25,'rgba(255,180,80,.6)');grad.addColorStop(.6,'rgba(255,140,40,.15)');grad.addColorStop(1,'rgba(255,100,20,0)');ctx.fillStyle=grad;ctx.fillRect(0,0,64,64);this.glowTex=new T.CanvasTexture(c);}
-  const glow=new T.Sprite(new T.SpriteMaterial({map:this.glowTex,color:0xffd494,transparent:true,opacity:0,blending:T.AdditiveBlending,depthWrite:false}));glow.scale.set(3,3,1);glow.position.set(0,info.y,0);model.add(glow);e.glow=glow;}}
+  const glow=new T.Sprite(new T.SpriteMaterial({map:this.glowTex,color:0xffd494,transparent:true,opacity:0,blending:T.AdditiveBlending,depthWrite:false}));glow.scale.set(3,3,1);glow.position.set(0,info.y,0);model.add(glow);e.glow=glow;}
+  if(a.type==='shed'&&a.status==='built'){
+   // Actual low-cost workshop illumination, not only unlit decorative bulbs.
+   // One warm entry pool and two interior fixtures; no dynamic shadow maps.
+   e.shedLights=[
+    [-1.3,2.48,0,7,5.4],
+    [1.3,2.48,0,7,5.4],
+    [0,2.82,2.83,5,4.3]
+   ].map(([x,y,z,power,range])=>{
+    const light=new T.PointLight(0xffddab,0,range,2);
+    light.position.set(x,y,z);light.castShadow=false;
+    model.add(light);return {light,power};
+   });
+  }
+ }
  if(e.model.userData.constructionHologram)e.model.update(performance.now()/1000,(h.time-a.started)/(a.ends-a.started||1),{quality:this.w.quality,resolution:this.w.renderer.domElement});
  if(a.status==='building'&&a.type==='shed')this.colliders.push({x:a.x,z:a.z,w:6.2,d:5,minY:0,maxY:3.8});
- if(a.status==='built'){for(const b of e.model.userData.colliders||[]){const c=Math.cos(a.rotation||0),q=Math.sin(a.rotation||0);this.colliders.push({x:a.x+b.x*c+b.z*q,z:a.z-b.x*q+b.z*c,w:Math.abs(c)*b.w+Math.abs(q)*b.d,d:Math.abs(q)*b.w+Math.abs(c)*b.d,minY:0,maxY:assetDefinition(a.type).h});}const litOn=night&&a.condition.functional>=40&&lightCount<16;if(litOn)lightCount++;if(e.light)e.light.intensity=litOn?7*a.condition.functional/100:0;if(e.glow)e.glow.material.opacity=litOn?.55+.15*Math.sin(this.animTime*1.5+a.x):0;}}
+ if(a.status==='built'){for(const b of e.model.userData.colliders||[]){const c=Math.cos(a.rotation||0),q=Math.sin(a.rotation||0);this.colliders.push({x:a.x+b.x*c+b.z*q,z:a.z-b.x*q+b.z*c,w:Math.abs(c)*b.w+Math.abs(q)*b.d,d:Math.abs(q)*b.w+Math.abs(c)*b.d,minY:0,maxY:assetDefinition(a.type).h});}const lightSlots=(e.shedLights?.length||0)+(e.light?1:0);
+  const litOn=night&&a.condition.functional>=40&&lightCount+lightSlots<=16;
+  if(litOn)lightCount+=lightSlots;
+  if(e.light)e.light.intensity=litOn?7*a.condition.functional/100:0;
+  if(e.glow)e.glow.material.opacity=litOn?.55+.15*Math.sin(this.animTime*1.5+a.x):0;
+  for(const lamp of e.shedLights||[])lamp.light.intensity=litOn?lamp.power*a.condition.functional/100:0;}}
  for(const hologram of [...this.fadingHolograms])if(!hologram.update(performance.now()/1000,1,{quality:this.w.quality,resolution:this.w.renderer.domElement})){hologram.dispose();this.fadingHolograms.splice(this.fadingHolograms.indexOf(hologram),1);this.w.renderer.staticFrame=null;}
  for(const [id,e]of this.models)if(!keep.has(id)){releaseModel(e.model);this.models.delete(id);}
  // Repaint road overlay when assets change

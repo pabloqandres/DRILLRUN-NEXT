@@ -1,5 +1,12 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — HSEC visual crossing and maintenance light correction
+
+**User report:** crossing asphalt and zebra geometry overlaps road markings, and maintenance shed luminaires do not illuminate at night.
+
+**Visual implementation boundary:** Modify the rendering-only functions in `dist/hsec/world.mjs` and the shed appearance builder in `dist/hsec/shed-model.mjs`. Remove duplicated crossing mesh, keep built texture and orientation; add non-shadow-casting warm PointLights on existing shed model. No `dist/hsec/state.mjs`, road graph, HSEC scoring, saved state, economy or mission changes. See `CHANGES/2026-11-09_hsec-crossing-shed-light-v9.md`.
+
+
 ## 2026-11-09 — User-authorized ChatGPT mission-flow / phone component changes
 
 **Decision:** User expressly requested ChatGPT to implement directly (not generate a Claude Code prompt) the narrative phone readability/typing changes and a strict four-mission SMS start–accept–completion–collect lifecycle. Therefore a scoped one-time cross-owner exception applies to `dist/chapter/game.mjs`, `dist/chapter/phone-ui.mjs`, `dist/chapter/narrative-ui.mjs`, `dist/chapter/narrative-strings.mjs`. The core state/saving, HSEC scoring algorithms and narrative engine were not modified.
