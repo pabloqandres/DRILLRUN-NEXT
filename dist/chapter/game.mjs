@@ -315,8 +315,11 @@ function updateM4Visuals(dt){
  if(!m4Staging){m4Staging=createMachineryStaging();world.scene.add(m4Staging);}
  if(s.mission4.productionDrill&&!m4DthModel){
   m4DthModel=createDthProductionRig();
+  const initialZone=s.mission4?.zones?.find(z=>z.id===s.mission4.productionDrill?.assignedZone);
+  const p=initialZone?.position||DTH_RESERVE;
+  m4DthModel.position.set(p.x,0,p.z);
   world.scene.add(m4DthModel);
-  m4DthCollider={x:DTH_RESERVE.x,z:DTH_RESERVE.z,w:3.2,d:4.5,_dth:true};
+  m4DthCollider={x:m4DthModel.position.x,z:m4DthModel.position.z,w:3.2,d:4.5,_dth:true};
   world.colliders.push(m4DthCollider);
  }
  if(m4DthModel){
@@ -573,12 +576,14 @@ function showWorkshopCard(){
   +`<div class="dcTool">${icon('store')}<span>Ocupación</span><div class="dcTrack"><div class="dcFill" style="width:${pct}%;background:${barColor}"></div></div><b>${pct}%</b></div>`
   +(spent?`<div style="font-size:9px;color:#9ec5dd;margin-top:4px;text-align:center">${spent} material${spent>1?'es':''} usado${spent>1?'s':''}</div>`:'')
   +(job?`<div class="dcConstruction"><div class="dcConstructLabel">${icon('time')} Ampliación a Nv.${job.targetLevel} en curso</div><div class="dcTrack"><div class="dcFill" style="width:${buildPct}%;background:#64b5f6"></div></div><b>${buildPct}%</b><small>Restante: ${buildTime(Math.max(0,Math.ceil((job.ends-Date.now())/1000)))}</small><button class="dcBoost" id="workshopBoost" ${(s.boosters||0)<1||Date.now()>=job.ends?'disabled':''} title="Consume 1 acelerador y reduce hasta 60 segundos">${icon('boost')} Acelerar 1 min · ${s.boosters||0} disponible${s.boosters===1?'':'s'}</button></div>`:'')
+  +(s.mission4?.phase&&s.mission4.phase!=='inactive'?`<div class="dcTool" style="margin-top:9px"><b>MAQUINARIA Y HERRAMIENTAS</b><small>RC: ${s.drill?'En resguardo':'Sin máquina'} · DTH: ${s.mission4.productionDrill?(s.mission4.productionDrill.assignedZone?'En zona '+s.mission4.productionDrill.assignedZone:'En resguardo'):'Sin recibir'}</small><button id="workshopDthManage" class="dcBoost">${icon('inventory')} Ver stock · Instalar herramientas en DTH</button></div>`:'' )
   +`<div class="dcActions">`
   +(canUpgrade&&!job?`<button class="dcUpgrade" id="workshopUpgradeBtn">${icon('boost')} Ampliar a Nv.${nextDef.level}<small>${money(nextDef.upgradeCost)} · ${buildTime(nextDef.constructionSeconds)}</small></button>`:'')
   +(!nextDef&&!job?`<small class="dcMaxLevel">${icon('check')} Nivel máximo alcanzado</small>`:'')
   +(job?'':(canDemolish?`<button class="dcDemolish" id="workshopDemolishBtn">${icon('close')} Demoler</button>`:''))
   +`</div>`;
  wc.querySelector('#workshopCardClose').onclick=e=>{e.stopPropagation();hideWorkshopCard();};
+ wc.querySelector('#workshopDthManage')?.addEventListener('click',()=>{hideWorkshopCard();openPhone('m4-workshop');});
  wc.querySelector('#workshopUpgradeBtn')?.addEventListener('click',()=>{workshopStartUpgrade();});
  wc.querySelector('#workshopBoost')?.addEventListener('click',()=>{
   try{
@@ -732,9 +737,24 @@ function renderHUD(){if(!s)return;
    timerEl.classList.remove('complete','warning','danger');
   }
  }
- // M4 objective panel
+ // M4 objective panel — same ordered checks as the operations workbench.
  const m4Active=s.mission4&&s.mission4.phase!=='inactive';
- if(narrativeMission==='m4'&&m4Active){const phase4=s.mission4.phase;const eyebrow=$('#objective .eyebrow');if(eyebrow)eyebrow.textContent=phase4==='complete'?'MISIÓN COMPLETADA':'MISIÓN 4';const title=$('#objectiveTitle');if(title)title.textContent=phase4==='complete'?'Operación automatizada':'Automatiza tu operación';const detail=$('#objectiveDetail');if(detail){if(phase4==='complete'){detail.classList.add('hidden');}else{detail.classList.remove('hidden');const m4objs=mission4Objectives(s);const currentObj=m4objs.find(o=>o.id===s.mission4.currentObjective)||m4objs[0];const objNames={upgradeWorkshop:'Ampliar taller',equipDth:'Equipamiento DTH',deployProduction:'Desplegar producción',automateDrillTruck:'Automatizar DrillTruck',automatedProduction:'Producción activa'};const checkNames={upgradeToNv2:'Taller Nv.2',purchaseDthDrill:'Comprar perforadora DTH',orderPumaTools:'Pedir herramientas PUMA',installDthTools:'Instalar martillo + bit',convertBorehole:'Convertir sondaje a zona',assignDthToZone:'Asignar DTH a zona',hireTecnicoDrillco:'Contratar Técnico DRILLCO',purchaseDrillTruck:'Comprar DrillTruck',linkTruckToZone:'Vincular DrillTruck a zona',completeProductionCycle:'Completar ciclo',convertAllZones:'Automatizar todas las zonas'};if(currentObj){detail.innerHTML=`<b style="font-size:10px;color:#e7c886;display:block;margin-bottom:4px">${objNames[currentObj.nameKey]||currentObj.nameKey}</b>`+currentObj.checks.map(c=>`<span class="hsecStep ${c.done?'done':'active'}">${c.done?'✓ ':'○ '}${checkNames[c.labelKey]||c.labelKey}</span>`).join('');}else{detail.textContent='Preparando misión';}}}const totalChecks=mission4Objectives(s).reduce((n,o)=>n+o.checks.length,0);const doneChecks=mission4Objectives(s).reduce((n,o)=>n+o.checks.filter(c=>c.done).length,0);const prog4=totalChecks>0?doneChecks/totalChecks:0;$('#objectiveProgress').style.width=(prog4*100)+'%';setText($('#objectiveCount'),phase4==='complete'?'✓':`${doneChecks}/${totalChecks}`);}
+ if(narrativeMission==='m4'&&m4Active){
+  const view=mission4Readout(s);
+  const phase4=s.mission4.phase;
+  const eyebrow=$('#objective .eyebrow');
+  if(eyebrow)eyebrow.textContent=phase4==='complete'?'MISIÓN COMPLETADA':'MISIÓN 4';
+  const title=$('#objectiveTitle');
+  if(title)title.textContent=phase4==='complete'?'Operación automatizada':'Automatiza tu operación';
+  const detail=$('#objectiveDetail');
+  if(detail){
+   detail.classList.remove('hidden');
+   detail.textContent=view.next?view.next.label:'Todos los requisitos de producción completados';
+   detail.title=view.next?view.next.description:'Misión completada';
+  }
+  $('#objectiveProgress').style.width=(view.progress*100)+'%';
+  setText($('#objectiveCount'),phase4==='complete'?'✓':view.done+'/'+view.total);
+ }
  // Status pill is derived from real mission state, never hardcoded.
  const missionDone=narrativeMission==='m4'?s.mission4?.phase==='complete':narrativeMission==='m3'?s.mission3?.phase==='complete':narrativeMission==='m2'?!!s.hsec?.completedAt:narrativeMission==='m1'?!!s.chapterCompletedAt:false;
  const missionStage=$('#missionStage');
