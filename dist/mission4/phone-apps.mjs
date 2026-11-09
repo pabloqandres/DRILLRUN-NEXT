@@ -78,8 +78,40 @@ function renderM4Objectives(s,t,fmt,icon,cb){
  return html;
 }
 
+// Permanent production overview shown after the narrative mission is completed.
+// Read-only: it never modifies production, tools, cash, or the player's save.
+function renderCompletedOperations(s,fmt,icon){
+ const m=s.mission4,drill=m.productionDrill||{},truck=m.drillTruck||{};
+ const zones=m.zones||[],active=zones.find(z=>z.id===drill.assignedZone)||null;
+ const inventory=s.toolInventory||[];
+ const hammer=inventory.find(t=>t.id===drill.installedHammer);
+ const bit=inventory.find(t=>t.id===drill.installedBit);
+ const unused=type=>inventory.filter(t=>t.type===type&&(t.status==='new'||t.status==='worn')&&(type==='bit'?t.model?.startsWith('dth-'):t.model?.startsWith('puma-dth'))).length;
+ const discarded=inventory.filter(t=>t.status==='spent').length;
+ const now=Date.now();
+ const remaining=z=>Number.isFinite(z.lastCycleAt)&&z.lastCycleAt>0?Math.max(0,Math.ceil((CYCLE_DURATION*1000-(now-z.lastCycleAt))/1000)):null;
+ const clock=secs=>secs===null?'Sin ciclo activo':String(Math.floor(secs/60)).padStart(2,'0')+':'+String(secs%60).padStart(2,'0');
+ const toolLabel=t=>t?esc(t.model||t.type)+' · '+(Number.isFinite(t.lifeRemaining)?Math.max(0,Math.round(t.lifeRemaining))+' vida restante':'vida sin datos'):'No instalado';
+ let html=`<div class="m3Header"><span class="inventoryIcon">${icon('inventory')}</span><div><span class="eyebrow">CENTRO DE OPERACIONES · PRODUCCIÓN PERMANENTE</span><h3>Zona 1 · Producción DTH</h3></div></div>`;
+ html+=`<section class="m4OpsSummary"><b>MISIÓN 4 COMPLETADA · OPERACIÓN ACTIVA</b><p>La faena continúa después de la misión. Estos son los estados registrados; la rotación automática entre puntos y el desgaste por ciclo aún no están habilitados.</p></section>`;
+ html+=`<div class="dcGrid"><div class="dcStat"><small>Puntos convertidos</small><b>${zones.length}</b></div><div class="dcStat"><small>Ciclos acreditados</small><b>${m.productionCycles||0}</b></div><div class="dcStat"><small>Ingresos reales</small><b>${fmt(m.totalAutomatedIncome||0)}</b></div><div class="dcStat"><small>Producción estimada/h</small><b>${fmt(incomePerHour(s))}</b></div></div>`;
+ html+=`<div class="sectionHeading">Perforadora DTH · ${esc(active?.id||'Sin zona asignada')}</div><div class="m4OpsEquipment"><b>Estado</b><span>${esc(drill.state||'Sin perforadora')}</span><b>Martillo</b><span>${toolLabel(hammer)}</span><b>Bit</b><span>${toolLabel(bit)}</span><b>Destino actual</b><span>${esc(active?.id||'Pendiente')}</span></div>`;
+ html+=`<div class="sectionHeading">Puntos de producción</div>`;
+ if(!zones.length)html+='<p class="m4OpsHint">No hay puntos convertidos.</p>';
+ for(let i=0;i<zones.length;i++){
+  const z=zones[i],isCurrent=z.id===drill.assignedZone,secs=z.status==='producing'?remaining(z):null;
+  const state=z.status==='producing'?'Produciendo':z.status==='maintenance'?'En mantenimiento':'En espera';
+  html+=`<section class="m4OpsNext"><small>PUNTO ${i+1} · ${esc(z.id)}${isCurrent?' · DTH ASIGNADA':''}</small><h3>${state}</h3><p>Ciclos acreditados: ${z.cycleCount||0} · Ingresos: ${fmt(z.totalIncome||0)}</p>${secs!==null?`<b>Próximo cierre de ciclo: ${clock(secs)}</b>`:'<small>Sin cuenta regresiva activa</small>'}</section>`;
+ }
+ html+=`<div class="sectionHeading">DrillTruck® y consumibles</div><div class="m4OpsEquipment"><b>DrillTruck®</b><span>${esc(truck.maintenancePhase?'Atendiendo · '+truck.maintenancePhase:truck.state||'No disponible')}</span><b>Bits DTH en bodega</b><span>${unused('bit')}</span><b>Martillos DTH en bodega</b><span>${unused('hammer')}</span><b>Herramientas descartadas</b><span>${discarded} registradas en inventario</span></div>`;
+ html+='<p class="m4OpsHint">Los consumibles descartados se conservarán para el futuro sistema de reciclaje. Esta pantalla no simula recambios ni registra descartes nuevos.</p>';
+ html+=`<div class="m4OpsLinks"><button data-app="m4-zones">${icon('geology')}<span><b>Ver zonas</b><small>Estado y asignación</small></span></button><button data-app="m4-workshop">${icon('inventory')}<span><b>Taller y stock</b><small>Herramientas y perforadora</small></span></button><button data-app="m4-drilltruck">${icon('machine')}<span><b>DrillTruck®</b><small>Servicio y logística</small></span></button><button data-app="m3-catalog">${icon('store')}<span><b>Casa Matriz</b><small>Pedidos de consumibles</small></span></button></div>`;
+ return html;
+}
+
 // Unified M4 operations dashboard: every link opens an existing working app.
 function renderM4Operations(s,t,fmt,icon,cb){
+ if(s.mission4?.phase==='complete')return renderCompletedOperations(s,fmt,icon);
  const view=mission4Readout(s);
  const next=view.next;
  let html=`<div class="m3Header"><span class="inventoryIcon">${icon('inventory')}</span><div><span class="eyebrow">OPERACIONES · MISIÓN 4</span><h3>Del sondaje a la producción</h3></div></div>`;
