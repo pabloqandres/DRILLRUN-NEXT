@@ -1,5 +1,10 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — Mission 1 obstacle HUD summary restored
+
+- M1 objective card now reveals live obstacle removal count/total and description; left-side position and legibility fixed without changing mission state/economy/save schema.
+- Syntax and CSS balance checks passed; live browser test pending. See `CHANGES/2026-11-09_m1-hud-summary-fix.md`.
+
 ## 2026-11-09 — Office L1 visible detail V6
 
 - Decorative, non-colliding fascia caps, rivets, rear air intake and service marker lenses added to real level-1 office. Preserves PUMA burgundy and original doors/geometry/upgrade gating.
