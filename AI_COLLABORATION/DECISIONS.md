@@ -1,5 +1,11 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — M1 informational HUD before narrative acceptance
+
+**User visual bug:** Fresh M1 game shows no objective card because `activeNarrativeMission` returns null while its start message is unread/unaccepted.
+
+**Scoped visual exception:** In `dist/chapter/game.mjs`, display existing objective card for uncollected M1 before acceptance, without accepting mission, claiming rewards or altering narrative engine, existing M2–M4 gates or saved-state semantics. Keep the current rendered obstacle count from `s.cleared/CLEARABLES`. See `CHANGES/2026-11-09_m1-pending-hud-visibility.md`.
+
 ## 2026-11-09 — M1 HUD summary presentational exception (User + ChatGPT)
 
 **Reported:** Opening mission summary lacked visible obstacle counts. The underlying game already computes the count; its explanatory element remained hidden from initial HTML and V4 HUD pushed the panel to the right.
