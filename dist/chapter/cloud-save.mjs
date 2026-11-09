@@ -29,8 +29,8 @@ export function cloudProgressStage(s){return stage(s);}
 export function cloudGeneration(s){return Math.max(0,Math.floor(Number(s?.cloudGeneration)||0));}
 export function cloudChoice(local,remote,ownerMatches=false){
  if(!local)return {state:remote,source:remote?'cloud':'empty'};
- if(!remote)return {state:local,source:'device'};
  if(local.cloudResetPending)return {state:{...local,cloudGeneration:Math.max(cloudGeneration(local),cloudGeneration(remote))+1,cloudResetPending:false},source:'new-game'};
+ if(!remote)return {state:local,source:'device'};
  if(cloudGeneration(local)!==cloudGeneration(remote))
   return cloudGeneration(local)>cloudGeneration(remote)?{state:local,source:'device'}:{state:remote,source:'cloud'};
  // The same save generation keeps the original monotonic progression fallback.
@@ -154,6 +154,9 @@ async function upload(saveKey){
  const requestUid=uid;
  const raw=localStorage.getItem(saveKey);
  if(!raw||raw===lastCloud)return true;
+ // A new local game awaiting canonical promotion is never uploaded via
+ // normal autosave; it needs cloudStartNewGame/cloudTakeControl first.
+ try{if(JSON.parse(raw).cloudResetPending)return false;}catch{return false;}
  const {doc,runTransaction}=await import('https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js');
  const ref=doc(db,COLLECTION,requestUid);
  const wrote=await runTransaction(db,async tx=>{
