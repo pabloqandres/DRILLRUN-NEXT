@@ -103,7 +103,9 @@ function renderM4Operations(s,t,fmt,icon,cb){
  <div class="m4OpsBudget"><p>Paquete mínimo desde taller L1 y sin maquinaria DTH: ${fmt(view.totalMinimum)} en total, incluyendo cuatro despachos.</p>
  <small>Ampliación ${fmt(M4_ENTRY_PACKAGE.workshop)} · DTH ${fmt(M4_ENTRY_PACKAGE.dthDrill)} · Martillo ${fmt(M4_ENTRY_PACKAGE.hammer)} · Bit ${fmt(M4_ENTRY_PACKAGE.bit)} · Técnico ${fmt(M4_ENTRY_PACKAGE.technician)} · DrillTruck ${fmt(M4_ENTRY_PACKAGE.drillTruck)} · Envíos ${fmt(M4_ENTRY_PACKAGE.dispatch)}.</small>
  <b>Saldo disponible: ${fmt(view.cash)}</b>
- <small>No es un cobro adicional ni un paquete de compra: son los costos reales de las acciones separadas. Los elementos ya adquiridos no se vuelven a pagar.</small></div>`;
+ <b>Estimación mínima todavía pendiente: ${fmt(view.remainingMinimum)}</b>
+ ${view.remainingMinimum>view.cash?'<small>Atención: el presupuesto actual no cubre el mínimo pendiente. Revisa tus fondos antes de hacer compras.</small>':''}
+ <small>No es un cobro adicional ni un paquete de compra: son los costos reales de las acciones separadas. Los elementos ya adquiridos o pedidos y pagados no se vuelven a cobrar.</small></div>`;
  html+=`<div class="sectionHeading">Checklist completo</div><div class="m4OpsChecklist">`;
  for(const group of view.groups){
   html+=`<section><h4>${group.id}. ${esc(group.title)}</h4>`;
@@ -126,7 +128,7 @@ function renderDthWorkshop(s,t,fmt,icon,cb){
  for(const type of ['hammer','bit']){
   const available=items.filter(t2=>t2.type===type&&(t2.status==='new'||t2.status==='worn'));
   const dth=available.filter(t2=>type==='hammer'?t2.model?.startsWith('puma-dth'):t2.model?.startsWith('dth-'));
-  const inUse=items.filter(t2=>t2.type===type&&t2.status==='installed');
+  const inUse=items.filter(t2=>t2.type===type&&t2.status==='installed'&&(type==='hammer'?t2.model?.startsWith('puma-dth'):t2.model?.startsWith('dth-')));
   html+=`<div class="sectionHeading">${type==='hammer'?'Martillos':'Bits'} · disponibles ${dth.length}, instalados ${inUse.length}</div>`;
   if(!dth.length)html+=`<p class="m4OpsHint">Sin ${type==='hammer'?'martillos PUMA® DTH':'bits DTH'} libres. Revisa Pedidos o solicita desde Casa Matriz.</p>`;
   for(const tool of dth){
