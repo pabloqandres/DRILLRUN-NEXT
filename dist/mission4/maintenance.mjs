@@ -74,6 +74,7 @@ export function completeMaintenance(s,now=Date.now()){
  if(zone){
   zone.status='producing';
   zone.lastCycleAt=now;
+  if(s.mission4.productionDrill?.assignedZone===zoneId)s.mission4.productionDrill.state='producing';
  }
 }
 
