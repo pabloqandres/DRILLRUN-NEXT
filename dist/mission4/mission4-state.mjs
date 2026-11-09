@@ -62,7 +62,11 @@ export function mission4Objectives(s){
  const dthAssigned=dthDrillAssigned(s);
  const truckOwned=!!m.drillTruck;
  const hasTecnico=hasRole(s,'tecnicoDrillco');
- const truckLinked=truckOwned&&!!m.drillTruck.assignedZone;
+ // Once maintenance has been successfully linked and the objective advanced,
+ // the truck legitimately returns to parking and clears assignedZone.
+ // Preserve the completed checklist after it returns rather than regressing
+ // from 8/11 back to 7/11 while the player waits for production income.
+ const truckLinked=truckOwned&&(!!m.drillTruck.assignedZone||(m.objectivesCompleted||[]).includes(4));
  const hasIncome=m.productionCycles>0;
  return [
   {id:1,nameKey:'upgradeWorkshop',checks:[
