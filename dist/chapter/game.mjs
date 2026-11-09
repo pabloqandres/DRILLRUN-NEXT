@@ -7,7 +7,7 @@ import {purchaseDrillTruck,drillTruckInfo,DRILLTRUCK_COST} from '../mission4/dri
 import {convertBoreholeToZone,assignTruckToZone} from '../mission4/zones.mjs';
 import {buildParking} from '../mission4/parking.mjs';
 import {startMaintenance,advanceMaintenancePhase} from '../mission4/maintenance.mjs';
-import {startProductionCycle} from '../mission4/production.mjs';
+import {startProductionCycle,firstProductionCycleStatus} from '../mission4/production.mjs';
 import {initTruckRouteState,startTruckRoute,updateTruckRoute,truckRouteActive} from '../mission4/truck-routes.mjs';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {DRACOLoader} from '../vendor/DRACOLoader.js';
@@ -736,6 +736,31 @@ function renderHUD(){if(!s)return;
   }else{
    timerEl.classList.remove('complete','warning','danger');
   }
+ }
+ // Real first DTH production-cycle countdown (M4): right-side compact card.
+ // Reads the persisted zone.lastCycleAt, the same timestamp that grants income.
+ const cycleEl=$('#productionCycleTimer');
+ if(cycleEl){
+  const cycle=firstProductionCycleStatus(s,Date.now());
+  const show=phase==='play'&&cycle.visible;
+  hidden(cycleEl,!show);
+  if(show){
+   const seconds=cycle.remainingSeconds;
+   const title=cycle.phase==='producing'?'PRIMER CICLO DTH':
+    cycle.phase==='maintenance'?'MANTENIMIENTO DTH':
+    cycle.phase==='waiting'?'DTH EN ESPERA':'INGRESO EN PROCESO';
+   $('#productionCycleTitle').textContent=title;
+   $('#productionCycleValue').textContent=Number.isFinite(seconds)?
+    String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0'):
+    cycle.phase==='maintenance'?'EN SERVICIO':'PENDIENTE';
+   $('#productionCycleProgress').style.width=(100*cycle.progress)+'%';
+   $('#productionCycleDetail').textContent=cycle.phase==='producing'?
+    'Zona '+cycle.zoneId+' · ingreso al finalizar':
+    cycle.phase==='maintenance'?'Zona '+cycle.zoneId+' · esperando habilitación':
+    cycle.phase==='waiting'?'Zona '+cycle.zoneId+' · requiere DrillTruck':
+    'Validando ingreso de producción';
+   cycleEl.classList.toggle('cycleReady',cycle.phase==='finishing');
+  }else cycleEl.classList.remove('cycleReady');
  }
  // M4 objective panel — same ordered checks as the operations workbench.
  const m4Active=s.mission4&&s.mission4.phase!=='inactive';
