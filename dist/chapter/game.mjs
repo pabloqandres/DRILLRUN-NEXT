@@ -7,7 +7,7 @@ import {purchaseDrillTruck,drillTruckInfo,DRILLTRUCK_COST} from '../mission4/dri
 import {convertBoreholeToZone,assignTruckToZone} from '../mission4/zones.mjs';
 import {buildParking} from '../mission4/parking.mjs';
 import {startMaintenance,advanceMaintenancePhase} from '../mission4/maintenance.mjs';
-import {startProductionCycle,firstProductionCycleStatus} from '../mission4/production.mjs';
+import {startProductionCycle,firstProductionCycleStatus,dthReplacementAvailable} from '../mission4/production.mjs';
 import {initTruckRouteState,startTruckRoute,updateTruckRoute,truckRouteActive} from '../mission4/truck-routes.mjs';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {DRACOLoader} from '../vendor/DRACOLoader.js';
@@ -331,7 +331,9 @@ function updateM4Visuals(dt){
   m4DthModel.position.x+=(target.x-m4DthModel.position.x)*Math.min(1,dt*3);
   m4DthModel.position.z+=(target.z-m4DthModel.position.z)*Math.min(1,dt*3);
   if(m4DthCollider){m4DthCollider.x=m4DthModel.position.x;m4DthCollider.z=m4DthModel.position.z;}
-  animateDthRig(m4DthModel,dt,drill?.state==='producing');
+  // Drill animation runs only at the assigned site, never during relocation.
+  const atSite=Math.hypot(target.x-m4DthModel.position.x,target.z-m4DthModel.position.z)<0.25;
+  animateDthRig(m4DthModel,dt,atSite&&drill?.state==='producing');
  }
  // Ensure parking and truck are initialized on state change
  if(s.mission4.parkingBuilt&&!m4ParkingSpot)initM4Visuals();
@@ -367,6 +369,15 @@ function updateM4Visuals(dt){
 }
 function autoDispatchTruck(s){
  if(!s.mission4?.drillTruck||s.mission4.drillTruck.state!=='parked')return;
+ // Permanent automation dispatches only when a tool has exhausted and stock exists.
+ if(s.mission4.productionMode==='single-dth-v2'){
+  if(!s.mission4.serviceRequested||!dthReplacementAvailable(s))return;
+  const active=s.mission4.zones.find(z=>z.id===s.mission4.productionDrill?.assignedZone);
+  if(!active)return;
+  try{assignTruckToZone(s,active.id);startMaintenance(s,active.id);}
+  catch(e){console.error('auto DTH service:',e);}
+  return;
+ }
  let nextZone=s.mission4.zones.find(z=>z.status==='idle');
  // If no idle zones but mission complete, cycle through producing zones for ongoing maintenance rounds
  if(!nextZone&&s.mission4.phase==='complete'){
