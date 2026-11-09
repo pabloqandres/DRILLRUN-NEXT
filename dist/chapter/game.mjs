@@ -800,7 +800,7 @@ world.cameraFocus=inWorldConstruction?hsecUI.focus():managingOffice?{x:-6,z:0}:n
  const activeRC=!!s.drill&&s.drill.state==='drilling';
  const activeDTH=s.mission4?.productionDrill?.state==='producing';
  const movingTruck=!!m4DrillTruckModel&&truckRouteActive(m4DrillTruckModel);
- const siteInputs={drill:m3DrillModel,truck:m4DrillTruckModel,drilling:activeRC,truckMoving:movingTruck,playing:phase==='play'};
+ const siteInputs={drill:m3DrillModel,truck:m4DrillTruckModel,drilling:activeRC,truckMoving:movingTruck,playing:phase==='play'&&!document.hidden};
  siteCinematics?.update(s,dt,clock,siteInputs);
  worksiteAudio.update(s,dt,{...siteInputs,
   drill:activeRC?m3DrillModel:activeDTH?s.mission4.productionDrill:null,
