@@ -77,7 +77,7 @@ export function buildShed({box,cyl,add,C,colliders,walls}){
  // Integrated entry lighting and hazard-striped canopy, keeping doors unobstructed.
  box(4.70,.14,.52,0,3.02,2.66,C.red);
  box(4.73,.035,.09,0,2.935,2.94,C.yellow);
- for(const x of[-1.65,1.65]){box(.60,.06,.14,x,2.96,2.98,C.yellow);box(.49,.024,.10,x,2.916,2.98,C.white);}
+ for(const x of[-1.65,1.65]){box(.60,.06,.14,x,2.96,2.98,C.yellow);box(.49,.024,.10,x,2.916,2.98,0xffe8bf);}
  for(const x of[-1.7,1.7]){
   box(.5,.16,.52,x,3.47,-.65,C.steel);box(.63,.06,.65,x,3.6,-.65,C.silver);
  }
@@ -99,7 +99,7 @@ export function buildShed({box,cyl,add,C,colliders,walls}){
  for(const z of[-1.1,1.1])for(const x of[-1.3,1.3]){
   const top=3.55-Math.abs(x)*.73/3;beam([x,top,z],[x,2.67,z],.014,C.steel);
   add(new T.CylinderGeometry(.07,.23,.10,12),C.yellow,x,2.62,z);
-  cyl(.19,.025,x,2.56,z,C.white);
+  cyl(.19,.025,x,2.56,z,0xffe8bf); // warm luminous diffuser
  }
  // Yellow corner guards, safety equipment and exterior service bins.
  for(const x of[-2.83,2.83]){cyl(.06,.8,x,.46,2.47,C.yellow);cyl(.063,.12,x,.62,2.47,C.black);box(.19,.045,.2,x,.08,2.47,C.steel);}
