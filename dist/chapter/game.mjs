@@ -369,6 +369,16 @@ function narrativeTick(dt){
  if(!s||phase!=='play'||document.querySelector('.missionCompleteOverlay'))return;
  narrativeTimer+=dt;if(narrativeTimer<1.5)return;narrativeTimer=0;
  ensureNarrative(s);
+ // Repair already-paid saves from previous versions: the end SMS may have
+ // arrived silently while the Contract app was open. Show it exactly once
+ // while unread; PhoneUI marks it read when Camila's thread is opened.
+ const missedM3End=s.narrative.messages.find(m=>m.id==='n:m3:end'&&!m.readAt&&!m.actionTaken);
+ if(missedM3End&&!modalOpen&&!builderOpen&&!busy){
+  phoneUI.narrativeCharacter=missedM3End.characterId;
+  phoneUI.conversation=true;
+  openPhone('messages');
+  return;
+ }
  const msg=pendingMessage(s);
  if(msg&&deliverMessage(s,msg.id)){
   const char=MISSION_NARRATIVES[msg.missionId]?.character;
