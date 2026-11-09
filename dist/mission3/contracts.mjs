@@ -2,6 +2,25 @@
 // Manages the exploration contract lifecycle.
 
 const fail=msg=>{throw new Error(msg);};
+// Fractional metres (3000/3600 per second) produce 89.99999999999997.
+// Treat only sub-millimetre floating-point discrepancies as exact completion.
+const METRE_EPSILON=1e-6;
+export function drilledMetres(s){
+ return (s.boreholes||[]).reduce((sum,b)=>sum+Math.min(b.depthTarget||0,Math.max(0,b.depthDrilled||0)),0);
+}
+export function drillingComplete(s){
+ const c=s.contract;
+ if(!c||!Number.isFinite(c.totalMeters)||c.totalMeters<=0)return false;
+ const holes=s.boreholes||[];
+ if(!holes.length||!holes.every(b=>b.status==='completed'&&(b.depthDrilled||0)+METRE_EPSILON>=(b.depthTarget||0)))return false;
+ return drilledMetres(s)+METRE_EPSILON>=c.totalMeters;
+}
+export function drillingCompletedAt(s){
+ if(!drillingComplete(s))return null;
+ const times=(s.boreholes||[]).map(b=>b.completedAt).filter(v=>Number.isFinite(v)&&v>0);
+ return s.contract.drillingCompletedAt|| (times.length?Math.max(...times):null);
+}
+
 
 // Borehole site positions in the expanded east zone
 export const BOREHOLE_SITES=[
@@ -79,9 +98,9 @@ export function contractProgress(s){
  return {
   accepted:true,
   status:s.contract.status,
-  metersCompleted:s.contract.metersCompleted,
+  metersCompleted:drillingComplete(s)?s.contract.totalMeters:s.contract.metersCompleted,
   totalMeters:s.contract.totalMeters,
-  progress:s.contract.totalMeters>0?s.contract.metersCompleted/s.contract.totalMeters:0,
+  progress:s.contract.totalMeters>0?Math.min(1,(drillingComplete(s)?s.contract.totalMeters:s.contract.metersCompleted)/s.contract.totalMeters):0,
   boreholesDone:(s.boreholes||[]).filter(b=>b.status==='completed').length,
   totalBoreholes:(s.boreholes||[]).length,
   activeBoreholeIndex:s.contract.activeBoreholeIndex,
@@ -134,13 +153,22 @@ export function advanceMeters(s,meters,now=Date.now()){
   }else{
    s.drill.state='idle';
    s.drill.currentBorehole=null;
+   // Snap the accumulated metres to the contractual total when the actual
+   // borehole depths prove completion. This is NOT additional drilling.
+   if(drillingComplete(s)){
+    s.contract.metersCompleted=s.contract.totalMeters;
+    s.contract.drillingCompletedAt=now;
+   }
   }
  }
  return actual;
 }
 
 export function isContractComplete(s){
- return s.contract&&s.contract.metersCompleted>=s.contract.totalMeters;
+ if(!s.contract)return false;
+ // Existing saves may already contain all 3 completed holes but a fractional
+ // total slightly below 90. Recognize them without rewriting save history.
+ return s.contract.metersCompleted>=s.contract.totalMeters||drillingComplete(s);
 }
 
 export function completeContract(s,now=Date.now()){
@@ -151,15 +179,19 @@ export function completeContract(s,now=Date.now()){
  // Calculate reward
  let reward=s.contract.reward;
  // Speed bonus: completed within duration
- const elapsed=now-(s.contract.drillingStartedAt||now);
- if(elapsed<=s.contract.duration*1000)reward+=s.contract.bonusSpeed;
+ // Award the time bonus when the final hole was drilled, NOT when the
+ // player later opens the phone and submits the already-finished contract.
+ const actualFinish=drillingCompletedAt(s)||now;
+ const elapsed=actualFinish-(s.contract.drillingStartedAt||actualFinish);
+ const earnedSpeed=elapsed<=s.contract.duration*1000;
+ if(earnedSpeed)reward+=s.contract.bonusSpeed;
  // Under-budget bonus: expenses < 70% of reward
  if(s.contract.expenses<s.contract.reward*0.7)reward+=s.contract.bonusUnderBudget;
  s.cash+=reward;
  s.contract.paidAt=now;
  s.contract.status='delivered';
  s.ledger.push({id:s.nextId++,key:'contractPayment',amount:reward,at:now});
- return {reward,speedBonus:elapsed<=s.contract.duration*1000,budgetBonus:s.contract.expenses<s.contract.reward*0.7};
+ return {reward,speedBonus:earnedSpeed,budgetBonus:s.contract.expenses<s.contract.reward*0.7};
 }
 
 export function contractDeadline(s){
