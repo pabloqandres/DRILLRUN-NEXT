@@ -310,3 +310,241 @@ body.interior #hud>#geoCard:not(.hidden){
  #hud>#geoCard:not(.hidden){width:clamp(144px,33vw,180px)!important;padding:8px!important}
  #hud>#geoCard .uiIcon{width:18px!important;height:18px!important}
 }
+
+
+/* V14 · Universal mission briefing card — M1/M2/M3/M4.
+   All rules are presentation only: existing click, collapse and mission data
+   stay in charge. The entire card is a bounded flex layout, never a crop. */
+#hud #objective:not(.hidden),
+body.interior #hud #objective:not(.hidden){
+ --mission-inset:17px;
+ box-sizing:border-box!important;
+ display:flex!important;flex-direction:column!important;
+ width:clamp(286px,29vw,404px)!important;
+ height:auto!important;min-height:0!important;
+ max-height:min(62svh,390px)!important;
+ left:max(12px,var(--dr-hud-side,16px))!important;
+ right:auto!important;
+ padding:0!important;
+ overflow:visible!important;
+ border:1.5px solid #91bccbaf!important;
+ border-radius:20px!important;
+ background:linear-gradient(145deg,#21445aee 0%,#112e44f5 39%,#081e32fa 100%)!important;
+ box-shadow:0 14px 32px #03121fb5,inset 0 1px #e1f9ff3a,0 0 19px #2c7d9840!important;
+ backdrop-filter:blur(12px);
+ isolation:isolate;
+ cursor:pointer;
+ transition:transform .26s cubic-bezier(.22,.72,.22,1),opacity .22s ease,box-shadow .22s ease!important;
+}
+#hud #objective:not(.hidden):hover{
+ border-color:#b4d9e0cc!important;
+ box-shadow:0 16px 38px #03121fcb,inset 0 1px #ecfdff45,0 0 20px #3995aa35!important;
+}
+#hud #objective:not(.hidden):focus-visible{
+ outline:2px solid #ffd46c!important;outline-offset:3px!important;
+}
+/* A narrow corporate status accent is fully INSIDE the rounded card. */
+#hud #objective:not(.hidden)::before{
+ position:absolute!important;
+ content:""!important;
+ left:0!important;right:auto!important;
+ top:19px!important;bottom:18px!important;
+ width:4px!important;height:auto!important;
+ border-radius:0 5px 5px 0!important;
+ background:linear-gradient(180deg,#e6b554,#db7158 70%,#8c3447)!important;
+ box-shadow:1px 0 12px #dc8c4661!important;
+ pointer-events:none!important;
+}
+#hud #objective .missionCardHead{
+ display:flex!important;align-items:center!important;justify-content:space-between!important;
+ gap:10px!important;flex:0 0 auto!important;
+ width:100%!important;min-width:0!important;
+ padding:18px var(--mission-inset) 5px calc(var(--mission-inset) + 4px)!important;
+ margin:0!important;box-sizing:border-box!important;
+ overflow:visible!important;
+}
+#hud #objective .missionCardHead .eyebrow{
+ display:block!important;min-width:0!important;
+ color:#8fd4df!important;
+ font-size:clamp(10px,.85vw,13px)!important;
+ font-weight:900!important;letter-spacing:1.85px!important;
+ line-height:1.15!important;
+ white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+}
+#hud #objective .missionStage{
+ flex:0 0 auto!important;display:inline-flex!important;align-items:center!important;
+ min-height:32px!important;padding:6px 11px!important;
+ border-radius:10px!important;
+ border:1px solid #d4b37a9e!important;
+ background:linear-gradient(120deg,#c59d4930,#c3993231)!important;
+ color:#a8f2ce!important;
+ box-shadow:inset 0 1px #fff2ba27!important;
+ font-size:clamp(9px,.75vw,11px)!important;
+ font-weight:850!important;letter-spacing:.6px!important;
+ white-space:nowrap!important;
+}
+#hud #objective .missionCardTitle{
+ display:flex!important;align-items:center!important;
+ gap:12px!important;flex:0 0 auto!important;
+ min-width:0!important;width:100%!important;
+ padding:13px 48px 9px calc(var(--mission-inset) + 4px)!important;
+ margin:0!important;box-sizing:border-box!important;
+ overflow:visible!important;
+}
+#hud #objective .missionCardGlyph{
+ width:49px!important;height:49px!important;flex:0 0 49px!important;
+ display:grid!important;place-items:center!important;
+ border:1px solid #88bdcaae!important;border-radius:15px!important;
+ background:linear-gradient(145deg,#365f71cb,#17364ecf)!important;
+ box-shadow:inset 0 1px #ffffff4a,0 4px 13px #00172460!important;
+}
+#hud #objective .missionCardGlyph .uiIcon{width:27px!important;height:27px!important;color:#89e0ed!important}
+#hud #objective .missionCardTitle h3{
+ min-width:0!important;max-width:none!important;
+ flex:1 1 auto!important;
+ margin:0!important;
+ font-size:clamp(17px,1.58vw,24px)!important;
+ font-weight:850!important;line-height:1.14!important;
+ letter-spacing:-.25px!important;
+ overflow-wrap:break-word!important;
+ color:#f7fbfd!important;text-shadow:0 2px 9px #00121f88!important;
+}
+#hud #objective #objectiveDetail:not(.hidden){
+ display:block!important;box-sizing:border-box!important;
+ width:calc(100% - 2 * var(--mission-inset))!important;
+ min-width:0!important;min-height:0!important;max-height:min(14svh,82px)!important;
+ flex:0 1 auto!important;
+ margin:2px var(--mission-inset) 10px calc(var(--mission-inset) + 4px)!important;
+ padding:0 30px 0 0!important;
+ overflow-x:hidden!important;overflow-y:auto!important;
+ touch-action:pan-y!important;overscroll-behavior:contain!important;
+ color:#d5e7ec!important;
+ font-size:clamp(11px,.92vw,14px)!important;
+ line-height:1.45!important;font-weight:550!important;
+ scrollbar-width:thin;
+}
+#hud #objective #objectiveDetail.hidden{display:none!important}
+#hud #objective .missionCardProgress{
+ flex:0 0 auto!important;display:flex!important;
+ width:100%!important;min-width:0!important;
+ align-items:center!important;gap:12px!important;
+ padding:8px calc(var(--mission-inset) + 30px) 14px calc(var(--mission-inset) + 4px)!important;
+ margin:0!important;box-sizing:border-box!important;overflow:visible!important;
+}
+#hud #objective .missionCardProgress .objectiveProgress{
+ flex:1 1 auto!important;min-width:0!important;
+ height:7px!important;margin:0!important;
+ border-radius:999px!important;border:1px solid #6995a57e!important;
+ background:#021623de!important;
+ box-shadow:inset 0 1px 3px #0008!important;overflow:hidden!important;
+}
+#hud #objective .missionCardProgress .objectiveProgress i{
+ display:block!important;height:100%!important;min-height:0!important;
+ border-radius:999px!important;
+ background:linear-gradient(90deg,#ecaa48,#ffce6a)!important;
+ box-shadow:0 0 10px #ffb74c88!important;
+}
+#hud #objective .missionCardProgress #objectiveCount{
+ position:static!important;min-width:0!important;max-width:none!important;
+ flex:0 0 auto!important;display:block!important;
+ font-size:11px!important;font-variant-numeric:tabular-nums!important;
+ font-weight:850!important;color:#ffe0a4!important;
+ text-align:right!important;white-space:nowrap!important;
+}
+#hud #objective .missionCardProgress #objectiveCount:empty{display:none!important}
+#hud #objective .missionCardFooter{
+ display:flex!important;align-items:center!important;justify-content:space-between!important;
+ flex:0 0 auto!important;width:100%!important;min-height:43px!important;
+ padding:10px calc(var(--mission-inset) + 3px)!important;
+ margin:0!important;box-sizing:border-box!important;
+ border-top:1px solid #a3c9d135!important;
+ border-radius:0 0 18px 18px!important;
+ overflow:hidden!important;
+ background:linear-gradient(90deg,#25445b48,#42668033)!important;
+ color:#a6e4ec!important;
+ font-size:clamp(10px,.82vw,12px)!important;font-weight:850!important;
+ letter-spacing:1.35px!important;
+}
+#hud #objective .missionCardFooter>span:first-child{
+ flex:1 1 auto!important;min-width:0!important;
+ overflow:hidden!important;white-space:nowrap!important;
+ text-overflow:ellipsis!important;
+}
+#hud #objective .missionCardFooter .uiIcon{
+ flex:0 0 17px!important;width:17px!important;height:17px!important;
+ margin-left:12px!important;color:#d8f4fa!important;
+ transform:none!important;opacity:1!important;
+}
+#hud #objective #objToggle{
+ position:absolute!important;
+ left:auto!important;right:0!important;
+ top:50%!important;bottom:auto!important;
+ transform:translateY(-50%)!important;
+ width:37px!important;height:63px!important;min-width:37px!important;
+ display:grid!important;place-items:center!important;
+ padding:0!important;margin:0!important;
+ border:1px solid #79b9c8a1!important;border-right:0!important;
+ border-radius:12px 0 0 12px!important;
+ background:linear-gradient(135deg,#245369f5,#12354dfb)!important;
+ box-shadow:inset 1px 0 #cefbff45,-3px 0 12px #00162550!important;
+ pointer-events:auto!important;cursor:pointer!important;
+ z-index:7!important;
+}
+#hud #objective #objToggle .uiIcon{
+ width:17px!important;height:17px!important;
+ color:#8fe5f1!important;transition:transform .25s ease!important;
+}
+#hud #objective:not(.hidden).collapsed,
+body.interior #hud #objective:not(.hidden).collapsed{
+ transform:translateX(calc(-100% + 46px))!important;
+ opacity:.9!important;
+}
+#hud #objective.collapsed #objToggle{
+ box-shadow:inset 1px 0 #cefbff45,0 0 12px #49d2ef50!important;
+}
+#hud #objective.missionDone .missionStage{
+ background:#1c654b52!important;border-color:#72cba49b!important;
+ color:#beffdd!important;
+}
+@media(max-width:1050px),(max-height:600px){
+ #hud #objective:not(.hidden),body.interior #hud #objective:not(.hidden){
+  --mission-inset:13px;
+  width:clamp(246px,29vw,340px)!important;
+  max-height:min(64svh,330px)!important;
+ }
+ #hud #objective .missionCardHead{padding-top:12px!important;padding-bottom:3px!important}
+ #hud #objective .missionStage{min-height:27px!important;padding:4px 8px!important}
+ #hud #objective .missionCardTitle{gap:9px!important;padding-top:9px!important;padding-bottom:6px!important;padding-right:45px!important}
+ #hud #objective .missionCardGlyph{width:38px!important;height:38px!important;flex-basis:38px!important;border-radius:11px!important}
+ #hud #objective .missionCardGlyph .uiIcon{width:22px!important;height:22px!important}
+ #hud #objective .missionCardTitle h3{font-size:clamp(15px,1.35vw,19px)!important}
+ #hud #objective #objectiveDetail:not(.hidden){margin-bottom:5px!important;max-height:56px!important;font-size:11px!important}
+ #hud #objective .missionCardProgress{padding-top:6px!important;padding-bottom:9px!important}
+ #hud #objective .missionCardFooter{min-height:37px!important;padding-top:7px!important;padding-bottom:7px!important}
+ #hud #objective #objToggle{width:33px!important;height:53px!important;min-width:33px!important}
+ #hud #objective:not(.hidden).collapsed{transform:translateX(calc(-100% + 42px))!important}
+}
+@media(max-width:680px),(max-height:420px){
+ #hud #objective:not(.hidden),body.interior #hud #objective:not(.hidden){
+  --mission-inset:10px;
+  width:clamp(215px,41vw,270px)!important;
+  max-height:min(66svh,265px)!important;
+ }
+ #hud #objective .missionCardHead{padding-top:9px!important}
+ #hud #objective .missionCardHead .eyebrow{font-size:9px!important;letter-spacing:1.2px!important}
+ #hud #objective .missionStage{font-size:9px!important;min-height:23px!important;padding:3px 6px!important}
+ #hud #objective .missionCardTitle{padding-top:7px!important;padding-bottom:5px!important;padding-right:38px!important}
+ #hud #objective .missionCardGlyph{width:32px!important;height:32px!important;flex-basis:32px!important}
+ #hud #objective .missionCardGlyph .uiIcon{width:19px!important;height:19px!important}
+ #hud #objective .missionCardTitle h3{font-size:14px!important;line-height:1.17!important}
+ #hud #objective #objectiveDetail:not(.hidden){font-size:10px!important;max-height:40px!important;margin-bottom:3px!important}
+ #hud #objective .missionCardProgress{padding-top:4px!important;padding-bottom:6px!important}
+ #hud #objective .missionCardFooter{display:flex!important;min-height:31px!important;padding-top:5px!important;padding-bottom:5px!important;font-size:9px!important}
+ #hud #objective .missionCardFooter .uiIcon{width:14px!important;height:14px!important;flex-basis:14px!important}
+ #hud #objective #objToggle{width:30px!important;height:46px!important;min-width:30px!important}
+ #hud #objective:not(.hidden).collapsed{transform:translateX(calc(-100% + 37px))!important}
+}
+@media(prefers-reduced-motion:reduce){
+ #hud #objective:not(.hidden){transition:none!important}
+ #hud #objective #objToggle .uiIcon{transition:none!important}
+}
