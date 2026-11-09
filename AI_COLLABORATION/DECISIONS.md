@@ -1,5 +1,9 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — Cross-owner V20 floating point bug in mission engine
+
+**User issue:** Screenshot shows 3/3 boreholes, 90/90 m, M3 11/13, stuck waiting for Validate Metrage, countdown at 00:00. Root cause reproduced: summing (3000/3600) across three boreholes can yield 89.99999999999997. ChatGPT narrowly updates Claude-owned dist/mission3/contracts.mjs to normalize physical completion, recognize legacy near-exact finished saves, and calculate speed bonus at physical drill completion. In dist/chapter/game.mjs the existing timer only changes display behavior to READY after true completion. No mission sequence, economy amounts, real drilling productivity or save migration altered. User previously authorized direct work in-game; coordinate merging this targeted fix before concurrent Claude mission changes. See CHANGES/2026-11-09_m3-meter-precision-v20.md.
+
 ## 2026-11-09 — V19 UI input ownership and same-app scroll restoration
 
 **User request:** Direct repair of phone scroll blocking and resets after buying a bit, stuck keyboard controls, clipped Casa Matriz previews, loud footsteps and dark shed interior. ChatGPT modifies only rendering, UI input focus, art and audio code, including narrowly scoped input handling in Claude-owned dist/chapter/game.mjs. The same phone app preserves scrollTop on redraw; navigation resets it. V16 approved checklist and gameplay logic remain unchanged. See CHANGES/2026-11-09_phone-scroll-input-v19.md.
