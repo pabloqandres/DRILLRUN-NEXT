@@ -22,6 +22,7 @@ import {placeOrder,placeMachineryOrder,reconcileDeliveredMachinery} from '../mis
 import {buildWorkshop,finishWorkshopConstruction,upgradeWorkshop,workshopLevel,workshopCapacity,workshopUsed,workshopFree,WORKSHOP_LEVELS,workshopUpgradeJob,workshopUpgradeProgress,finishWorkshopUpgrade,accelerateWorkshop,canDemolishWorkshop,demolishWorkshop} from '../mission3/inventory.mjs';
 import {canStartMission3,startMission3,updateMission3Phase} from '../mission3/mission3-state.mjs';
 import {mission3Readout} from '../mission3/mission-readout.mjs';
+import {mission2Readout} from '../hsec/mission-readout.mjs';
 import {createDrillModel,animateDrill} from '../mission3/drill-models.mjs';
 import {createBoreholeMarker,updateMarkerProgress} from '../mission3/borehole-marker.mjs';
 import {createDeliveryVehicle,startDelivery,updateDelivery,departDelivery} from '../mission3/delivery-vehicle.mjs';
@@ -602,7 +603,23 @@ function renderHUD(){if(!s)return;
   }
  }
  const m3Active=s.mission3&&s.mission3.phase!=='inactive';
- if(narrativeMission==='m2'&&hsecActive(s)){const step=missionStep(s);const completed=!!s.hsec.completedAt;const eyebrow=$('#objective .eyebrow');if(eyebrow)eyebrow.textContent=completed?'MISIÓN COMPLETADA':'MISIÓN ACTUAL';const title=$('#objectiveTitle');if(title)title.textContent=completed?'Operación preparada':'Prepara tu operación';const detail=$('#objectiveDetail');if(detail){if(completed){detail.classList.add('hidden');}else{detail.classList.remove('hidden');detail.innerHTML=HSEC_STEPS.map((text,i)=>`<span class="hsecStep ${i<step?'done':i===step?'active':''}">${text}</span>`).join('');}}setText($('#objectiveCount'),completed?'✓':`${Math.min(5,Math.max(0,step))}/5`);$('#objectiveProgress').style.width=completed?'100%':(Math.min(5,Math.max(0,step))*20)+'%';}
+ if(narrativeMission==='m2'&&hsecActive(s)){
+  const checklist=mission2Readout(s);
+  const completed=!!s.hsec?.completedAt;
+  const eyebrow=$('#objective .eyebrow');
+  if(eyebrow)eyebrow.textContent=completed?'MISIÓN COMPLETADA':'MISIÓN 2';
+  const title=$('#objectiveTitle');
+  if(title)title.textContent=completed?'Operación preparada':'Prepara tu operación';
+  const detail=$('#objectiveDetail');
+  if(detail){
+   detail.classList.remove('hidden');
+   const next=checklist.pending;
+   detail.textContent=next?next.name+(next.value?' · '+next.value:''):'Requisitos HSEC cumplidos';
+   detail.title=next?next.hint:'Todos los requisitos HSEC se han cumplido.';
+  }
+  setText($('#objectiveCount'),completed?'✓':checklist.done+'/'+checklist.total);
+  $('#objectiveProgress').style.width=(checklist.done/checklist.total*100)+'%';
+}
  if(narrativeMission==='m3'&&m3Active){
   const checklist=mission3Readout(s);
   const eyebrow=$('#objective .eyebrow');
