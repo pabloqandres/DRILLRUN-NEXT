@@ -4,6 +4,8 @@
 
 ## Currently Active
 
+- **ChatGPT — V25 M4 production timer, staging/crops/notifications:** chatgpt/m4-visual-notifications-zones-v25. Timer from real first production cycle; DTH continues after M4; RC reserve moved to flat ground; real zone totals; direct DrillTruck UI fix; notifications safe. V8 source parse and isolated timer income test passed; browser QA pending.
+
 - **ChatGPT — V24 Mission 4 operational overhaul:** chatgpt/m4-operations-audit-v24. Real five-stage/11-check mission path, Casa Matriz two category tabs, functional DTH workshop and tool installation, state-conditional DTH visual + RC staging, truthful startup after maintenance, budget and pending shipments. Isolated M4 end-to-end function tests pass; live mobile and GLB asset optimization pending.
 
 - **ChatGPT — V23 ETA seconds + Casa Matriz layout:** chatgpt/order-eta-seconds-v23. ETA and two-column rig cards checked with static/runtime tests; real phone screenshot QA pending.

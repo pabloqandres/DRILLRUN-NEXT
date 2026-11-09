@@ -182,3 +182,106 @@
  #builderPanel.catalogTray[data-category="vehicles"] .catalogDetailVisual{flex-basis:39%!important}
 }
 @media(prefers-reduced-motion:reduce){#builderPanel .realAssetLoading{animation:none!important}}
+
+/* V25 — bounded DrillTruck catalog cards, so the thumbnail never pushes its
+   product name or level beyond the rail and technical image never overflows. */
+#builderPanel.catalogTray[data-category="vehicles"] .catalogProduct{
+ box-sizing:border-box!important;
+ min-height:0!important;
+ overflow:hidden!important;
+ display:flex!important;
+ flex-direction:column!important;
+ align-items:stretch!important;
+ gap:4px!important;
+}
+#builderPanel.catalogTray[data-category="vehicles"] .catalogArt{
+ flex:1 1 0%!important;
+ min-height:0!important;
+ height:auto!important;
+ max-height:100%!important;
+ overflow:hidden!important;
+ margin:0!important;
+ padding:3px!important;
+ box-sizing:border-box!important;
+}
+#builderPanel.catalogTray[data-category="vehicles"] .catalogArt>img{
+ box-sizing:border-box!important;
+ display:block!important;
+ position:relative!important;
+ inset:auto!important;
+ width:100%!important;
+ height:100%!important;
+ max-width:100%!important;
+ max-height:100%!important;
+ object-fit:contain!important;
+ object-position:center!important;
+ padding:3px!important;
+ margin:auto!important;
+}
+#builderPanel.catalogTray[data-category="vehicles"] .catalogName{
+ display:block!important;
+ flex:0 0 auto!important;
+ width:100%!important;
+ line-height:1.16!important;
+ margin:2px 0 0!important;
+ overflow:visible!important;
+ white-space:normal!important;
+ text-align:center!important;
+}
+#builderPanel.catalogTray[data-category="vehicles"] .catalogLevel{
+ display:block!important;
+ flex:0 0 auto!important;
+ width:100%!important;
+ margin:0!important;
+ padding-bottom:2px!important;
+ overflow:visible!important;
+ white-space:normal!important;
+ text-align:center!important;
+ line-height:1.18!important;
+}
+#builderPanel.catalogTray[data-category="vehicles"] .catalogInlineDetails{
+ min-width:0!important;
+ box-sizing:border-box!important;
+ align-items:stretch!important;
+ overflow-y:auto!important;
+ overflow-x:hidden!important;
+}
+#builderPanel.catalogTray[data-category="vehicles"] .catalogDetailVisual{
+ box-sizing:border-box!important;
+ position:relative!important;
+ display:flex!important;
+ flex:0 1 40%!important;
+ min-width:0!important;
+ min-height:0!important;
+ overflow:hidden!important;
+ align-items:center!important;
+ justify-content:center!important;
+ padding:8px!important;
+}
+#builderPanel.catalogTray[data-category="vehicles"] .catalogDetailVisual>img{
+ box-sizing:border-box!important;
+ position:relative!important;
+ inset:auto!important;
+ display:block!important;
+ width:100%!important;
+ height:100%!important;
+ max-width:100%!important;
+ max-height:100%!important;
+ object-fit:contain!important;
+ object-position:center!important;
+ margin:auto!important;
+ padding:3px!important;
+}
+#builderPanel.catalogTray[data-category="vehicles"] .catalogFacts{
+ min-width:0!important;
+ min-height:0!important;
+ overflow-y:auto!important;
+ overflow-x:hidden!important;
+ scrollbar-width:thin!important;
+}
+@media(max-height:510px){
+ #builderPanel.catalogTray[data-category="vehicles"] .catalogArt{padding:1px!important}
+ #builderPanel.catalogTray[data-category="vehicles"] .catalogProduct{gap:2px!important;padding-block:5px!important}
+ #builderPanel.catalogTray[data-category="vehicles"] .catalogName{font-size:11px!important}
+ #builderPanel.catalogTray[data-category="vehicles"] .catalogLevel{font-size:9px!important}
+}

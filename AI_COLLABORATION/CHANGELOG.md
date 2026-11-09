@@ -1,5 +1,9 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — V25 M4 countdown, actual zone count, RC safe staging and DrillTruck UI
+
+- Add compact first DTH cycle countdown to right HUD, anchored to real 15-minute production timestamps; M4 closing benefactor message auto-opens after first income and DTH continues producing after confirmation. Fix 3/6 fixed zone denominator to real sites, clip DrillTruck catalog/sheet image, move RC/DTH reserve pads to flat playable terrain, guard notification actions and repair drill localization. Rename $/hora as projected DTH income. See CHANGES/2026-11-09_m4-visual-cycle-v25.md.
+
 ## 2026-11-09 — V24 M4 guided procurement, workshop/3D deployment and reliable production
 
 - Audit actual M4 engine. Unify Casa Matriz EXPLORA® RC and PUMA® DTH through visible category tabs, add five-stage/11-step operational checklist and remaining budget, restore useful DTH tool installation to Taller, display actual DTH rig and preserve RC in reserve bay, correctly activate DTH only after DrillTruck maintenance, keep completed truck-link check stable. M5 equipment-yard concept documented only. See CHANGES/2026-11-09_mission4-audit-operational-flow-v24.md.

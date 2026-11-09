@@ -7,7 +7,7 @@ import {purchaseDrillTruck,drillTruckInfo,DRILLTRUCK_COST} from '../mission4/dri
 import {convertBoreholeToZone,assignTruckToZone} from '../mission4/zones.mjs';
 import {buildParking} from '../mission4/parking.mjs';
 import {startMaintenance,advanceMaintenancePhase} from '../mission4/maintenance.mjs';
-import {startProductionCycle} from '../mission4/production.mjs';
+import {startProductionCycle,firstProductionCycleStatus} from '../mission4/production.mjs';
 import {initTruckRouteState,startTruckRoute,updateTruckRoute,truckRouteActive} from '../mission4/truck-routes.mjs';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {DRACOLoader} from '../vendor/DRACOLoader.js';
@@ -403,7 +403,7 @@ function narrativeTick(dt){
  // Repair already-paid saves from previous versions: the end SMS may have
  // arrived silently while the Contract app was open. Show it exactly once
  // while unread; PhoneUI marks it read when Camila's thread is opened.
- const missedM3End=s.narrative.messages.find(m=>m.id==='n:m3:end'&&!m.readAt&&!m.actionTaken);
+ const missedM3End=s.narrative.messages.find(m=>['n:m3:end','n:m4:end'].includes(m.id)&&!m.readAt&&!m.actionTaken);
  if(missedM3End&&!modalOpen&&!builderOpen&&!busy){
   phoneUI.narrativeCharacter=missedM3End.characterId;
   phoneUI.conversation=true;
@@ -420,7 +420,7 @@ function narrativeTick(dt){
   // M3 has already paid in completeContract(); its closing Camila message
   // must open by itself even if the player is still viewing the Contract app.
   // This only switches the phone view and never collects/pays a reward.
-  const isM3Closing=msg.id==='n:m3:end';
+  const isM3Closing=msg.id==='n:m3:end'||msg.id==='n:m4:end';
   if((isM3Closing||msg.id.endsWith(':start'))&&!modalOpen&&!builderOpen&&!busy&&(!phoneOpen||isM3Closing)){
    phoneUI.narrativeCharacter=msg.characterId;
    phoneUI.conversation=true;
@@ -737,6 +737,31 @@ function renderHUD(){if(!s)return;
    timerEl.classList.remove('complete','warning','danger');
   }
  }
+ // Real first DTH production-cycle countdown (M4): right-side compact card.
+ // Reads the persisted zone.lastCycleAt, the same timestamp that grants income.
+ const cycleEl=$('#productionCycleTimer');
+ if(cycleEl){
+  const cycle=firstProductionCycleStatus(s,Date.now());
+  const show=phase==='play'&&cycle.visible;
+  hidden(cycleEl,!show);
+  if(show){
+   const seconds=cycle.remainingSeconds;
+   const title=cycle.phase==='producing'?'PRIMER CICLO DTH':
+    cycle.phase==='maintenance'?'MANTENIMIENTO DTH':
+    cycle.phase==='waiting'?'DTH EN ESPERA':'INGRESO EN PROCESO';
+   $('#productionCycleTitle').textContent=title;
+   $('#productionCycleValue').textContent=Number.isFinite(seconds)?
+    String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0'):
+    cycle.phase==='maintenance'?'EN SERVICIO':'PENDIENTE';
+   $('#productionCycleProgress').style.width=(100*cycle.progress)+'%';
+   $('#productionCycleDetail').textContent=cycle.phase==='producing'?
+    'Zona '+cycle.zoneId+' · ingreso al finalizar':
+    cycle.phase==='maintenance'?'Zona '+cycle.zoneId+' · esperando habilitación':
+    cycle.phase==='waiting'?'Zona '+cycle.zoneId+' · requiere DrillTruck':
+    'Validando ingreso de producción';
+   cycleEl.classList.toggle('cycleReady',cycle.phase==='finishing');
+  }else cycleEl.classList.remove('cycleReady');
+ }
  // M4 objective panel — same ordered checks as the operations workbench.
  const m4Active=s.mission4&&s.mission4.phase!=='inactive';
  if(narrativeMission==='m4'&&m4Active){
@@ -867,7 +892,7 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
  /* Workshop upgrade construction tick */const wsJob=workshopUpgradeJob(s);if(wsJob&&Date.now()>=wsJob.ends){finishWorkshopUpgrade(s);save();renderHUD();if(workshopCardOpen)showWorkshopCard();notices.push({title:`Taller ampliado a Nv.${workshopLevel(s)}`,symbol:'bell'});sound('finish');updateMission4Phase(s);}if(workshopCardOpen&&wsJob)showWorkshopCard();world.updateWorkshop(s.workshop);
  initM3Visuals();const m3events=tickMission3(s,dt,wall);if(m3events){for(const e of m3events){if(typeof e==='object'&&e.type==='machineryDelivered'){
   const m=e.machinery;
-  if(m.type==='drill'){try{purchaseDrill(s,m.model,true);spawnM3Drill(m.model);notices.push({title:'Perforadora entregada',detail:'Localizar en faena',symbol:'bell',action:'locateDrill'});updateMission3Phase(s);}catch(err){console.error('drill delivery:',err);}}
+  if(m.type==='drill'){try{purchaseDrill(s,m.model,true);spawnM3Drill(m.model);notices.push({title:'Perforadora entregada',detail:'Localizar en faena',symbol:'bell',action:()=>{if(m3DrillModel){target={x:m3DrillModel.position.x-2.5,z:m3DrillModel.position.z+3.8};closePhone();closeBuilder();}}});updateMission3Phase(s);}catch(err){console.error('drill delivery:',err);}}
   else if(m.type==='dthDrill'){try{purchaseDthDrill(s,m.model,true);notices.push({title:'Perforadora DTH entregada',detail:'En resguardo junto al taller · Equípala en Taller',symbol:'bell'});updateMission4Phase(s);}catch(err){console.error('dth delivery:',err);}}
   else if(m.type==='drillTruck'){try{purchaseDrillTruck(s,true);m4VisualsReady=false;initM4Visuals();notices.push({title:'DrillTruck entregado',detail:'Ubicar en faena',symbol:'bell',action:'locateTruck'});updateMission4Phase(s);}catch(err){console.error('truck delivery:',err);}}
   if(m3DeliveryVehicle)startDelivery(m3DeliveryVehicle,'in');
@@ -876,7 +901,14 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
   if(phoneOpen&&(phoneApp==='m3-geology'||phoneApp==='m3-contract'||phoneApp==='m3-catalog'||phoneApp==='m3-orders'||phoneApp==='m4-drilltruck'||phoneApp==='m4-zones'||phoneApp==='m4-operaciones'||phoneApp==='m4-workshop'||phoneApp==='m4-dth-catalog')){geoRefreshTimer=(geoRefreshTimer||0)+dt;const deliveryView=phoneApp==='m3-orders'||phoneApp==='m3-catalog';if(geoRefreshTimer>=(deliveryView?1:2)){geoRefreshTimer=0;const c=$('#phoneContent');const scrollTop=c?.scrollTop||0;renderPhone();if(c)c.scrollTop=scrollTop;}}else geoRefreshTimer=0;
   if(drillCardOpen)showDrillCard();
   // === M4 tick ===
-  initM4Visuals();const m4events=tickMission4(s,dt,wall);if(m4events){for(const e of m4events){if(e==='incomeGenerated'){/* Auto-credit silently. The wallet and production report display actual funds. */}else if(e==='maintenanceComplete'){notices.push({title:'Mantenimiento completado',symbol:'bell'});if(phoneOpen)renderPhone();}else if(e==='truckDispatch'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'out');}else if(e==='truckReturn'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'return');}else if(e==='missionComplete'){sound('finish');showMissionComplete('Automatiza tu operación',null,0,'Producción automatizada habilitada');}}save();}
+  initM4Visuals();const m4events=tickMission4(s,dt,wall);if(m4events){for(const e of m4events){if(e==='incomeGenerated'){/* Auto-credit silently. The wallet and production report display actual funds. */}else if(e==='maintenanceComplete'){notices.push({title:'Mantenimiento completado',symbol:'bell'});if(phoneOpen)renderPhone();}else if(e==='truckDispatch'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'out');}else if(e==='truckReturn'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'return');}else if(e==='missionComplete'){
+   // The first actual production income completed M4. Keep the DTH running
+   // and deliver the benefactor's closing message instead of showing a
+   // premature 4-second overlay before narrative confirmation.
+   sound('finish');
+   notices.push({title:'Primer ciclo DTH completado',detail:'Ingresos acreditados · confirma el cierre de Misión 4 en Mensajes',symbol:'bell'});
+   narrativeTick(1.5);
+  }}save();}
   updateM4Visuals(dt);
   // Auto-start M4 when M3 completes
   if(s.mission3?.phase==='complete'&&s.contract?.status==='delivered'&&isMissionAccepted(s,'m4')&&canStartMission4(s)&&(!s.mission4||s.mission4.phase==='inactive')){startMission4(s);notices.push({title:'Misión 4 desbloqueada — Automatiza tu operación',symbol:'bell'});save();}
