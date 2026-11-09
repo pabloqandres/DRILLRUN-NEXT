@@ -224,7 +224,7 @@ function renderDrillTruck(s,t,fmt,icon,cb){
   html+=`<span class="dcState ${stateClass}">${esc(stateLabels[truck.state]||truck.state)}</span>`;
   const zones=s.mission4.zones||[];
   const producing=zones.filter(z=>z.status==='producing').length;
-  html+=`<div class="dcGrid"><div class="dcStat"><small>Zonas</small><b>${zones.length}/${new Set([...(s.boreholes||[]).filter(b=>b.status==='completed').map(b=>b.id),...zones.map(z=>z.id)]).size}</b></div><div class="dcStat"><small>Produciendo</small><b>${producing}</b></div><div class="dcStat"><small>Ciclos</small><b>${s.mission4.productionCycles}</b></div><div class="dcStat"><small>$/hora</small><b>${fmt(incomePerHour(s))}</b></div></div>`;
+  html+=`<div class="dcGrid"><div class="dcStat"><small>Zonas</small><b>${zones.length}/${new Set([...(s.boreholes||[]).filter(b=>b.status==='completed').map(b=>b.id),...zones.map(z=>z.id)]).size}</b></div><div class="dcStat"><small>Produciendo</small><b>${producing}</b></div><div class="dcStat"><small>Ciclos</small><b>${s.mission4.productionCycles}</b></div><div class="dcStat" title="Ingreso bruto proyectado de las zonas DTH activas. Solo se acredita al finalizar un ciclo de 15 minutos."><small>Producción estimada/h</small><b>${fmt(incomePerHour(s))}</b></div></div>`;
   const mp=maintenanceProgress(s);
   if(mp){
    html+=`<div class="dcTool"><div class="dcToolHead"><small>${esc(mp.phaseLabel)}</small><b>${Math.round(mp.overallProgress*100)}%</b></div><div class="wearBar"><i style="width:${Math.round(mp.overallProgress*100)}%;background:var(--accent)"></i></div></div>`;
@@ -249,7 +249,8 @@ function renderZones(s,t,fmt,icon,cb){
  const drill=s.mission4?.productionDrill;
  let html=`<div class="m3Header">${icon('geology')}<div><span class="eyebrow">ZONAS</span><h3>Zonas de producción</h3></div></div>`;
  // Overview
- html+=`<div class="dcGrid"><div class="dcStat"><small>Convertidas</small><b>${zones.length}/${new Set([...(s.boreholes||[]).filter(b=>b.status==='completed').map(b=>b.id),...zones.map(z=>z.id)]).size}</b></div><div class="dcStat"><small>Produciendo</small><b>${zones.filter(z=>z.status==='producing').length}</b></div><div class="dcStat"><small>Ingresos</small><b>${fmt(s.mission4?.totalAutomatedIncome||0)}</b></div><div class="dcStat"><small>$/hora</small><b>${fmt(incomePerHour(s))}</b></div></div>`;
+ html+=`<div class="dcGrid"><div class="dcStat"><small>Convertidas</small><b>${zones.length}/${new Set([...(s.boreholes||[]).filter(b=>b.status==='completed').map(b=>b.id),...zones.map(z=>z.id)]).size}</b></div><div class="dcStat"><small>Produciendo</small><b>${zones.filter(z=>z.status==='producing').length}</b></div><div class="dcStat"><small>Ingresos</small><b>${fmt(s.mission4?.totalAutomatedIncome||0)}</b></div><div class="dcStat" title="Ingreso bruto proyectado de las zonas DTH activas. Solo se acredita al finalizar un ciclo de 15 minutos."><small>Producción estimada/h</small><b>${fmt(incomePerHour(s))}</b></div></div>`;
+ html+=`<p class="m4OpsHint">Ingreso bruto proyectado de las zonas DTH activas, no rendimiento del DrillTruck. El dinero se acredita al finalizar cada ciclo de 15 minutos.</p>`;
  if(!zones.length&&!convertable.length){
   html+=`<div class="emptyState">${icon('geology')}<p>Completa sondajes en la Misión 2 para crear zonas de producción.</p></div>`;
   return html;
