@@ -4,6 +4,8 @@
 
 ## Currently Active
 
+- **ChatGPT — V22 workshop booster accounting:** chatgpt/workshop-boost-economy-v22. Workshop speed-ups now spend booster inventory and reject zero stock; buttons show/disable current count and update HUD. JS smoke and parse checks passed; device QA pending.
+
 - **ChatGPT — V21 M3 closing SMS + phantom posts:** chatgpt/m3-auto-closing-message-v21. Direct targeted closure UI and workshop obstacle reporting fixes; actual narrative + detector mock checks passed. Browser test pending.
 
 - **ChatGPT — V20 Mission 3 metre precision and timer:** chatgpt/m3-meter-precision-deadline-v20. 90/90 physical completion now recognized, including saved sessions, timer freezes as ready for delivery, on-time drilling speed bonus independent of late phone submission. Targeted contract mock tests pass; Node and browser QA still pending.
