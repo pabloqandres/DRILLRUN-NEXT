@@ -1,5 +1,9 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — V16 live mission requirements shared by HUD and details
+
+- M3 left mission card and phone details use identical next-pending check from mission3Objectives: if the rig is missing, request it rather than vague equipment wording. Both show 13 real checks and matching progress. M2 HSEC overview and left mission card use the same seven completion criteria. Read-only, no mission logic/save/economy modifications. See `CHANGES/2026-11-09_live-mission-checklists-v16.md`.
+
 ## 2026-11-09 — V15 camera navigation during construction
 
 - Wider builder aerial zoom (10–70 m), 80° elevated entry outside nearby buildings, independent camera pan from existing joystick/touch-drag and arrow keys, and no zoom reset when choosing new placement points. Preserves character camera and all game-state mechanics. New targeted tests in `tests/builder-camera-v15.test.mjs`; mock camera checks passed; live WebGL QA pending. See `CHANGES/2026-11-09_builder-camera-navigation-v15.md`.
