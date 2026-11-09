@@ -1,5 +1,9 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — Shared HTML visual HSEC relocation
+
+**User instruction:** Compact the HSEC score and move geologic progress to the right to avoid mission-panel collisions. **Coordination scope:** ChatGPT moves only the existing `#hsecInline` DOM button one level out of `#objective` within `#hud` in `dist/index.html`, while retaining its ID and bound event handlers, and applies visual overrides in `dist/chapter/hud-reference-v4.css`. No change to HSEC scoring or mission logic; Claude Code integrations accessing `#hsecInline` by ID continue unchanged. See `CHANGES/2026-11-09_hud-right-rail-v13.md`.
+
 ## 2026-11-09 — HSEC visual crossing and maintenance light correction
 
 **User report:** crossing asphalt and zebra geometry overlaps road markings, and maintenance shed luminaires do not illuminate at night.
