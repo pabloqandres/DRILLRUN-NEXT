@@ -548,3 +548,53 @@ body.interior #hud #objective:not(.hidden).collapsed{
  #hud #objective:not(.hidden){transition:none!important}
  #hud #objective #objToggle .uiIcon{transition:none!important}
 }
+
+
+/* V16 — mission requirement presentation inside the existing phone screen. */
+#phoneContent .m3ChecklistSummary{display:grid;gap:10px;padding:13px 14px;margin:10px 0 14px;border:1px solid #4b93a888;border-radius:13px;background:linear-gradient(145deg,#153448e8,#0d273aef)}
+#phoneContent .m3ChecklistTop{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+#phoneContent .m3ChecklistTop>span{font-size:9px;letter-spacing:1.1px;color:#9bc9d5;font-weight:800}
+#phoneContent .m3ChecklistTop>b{flex:1;color:#edfaff;font-size:12px;line-height:1.25}
+#phoneContent .m3ChecklistTop>strong{font-size:14px;color:#f5d087;font-variant-numeric:tabular-nums}
+#phoneContent .m3ChecklistBar{height:6px;background:#071b29;border-radius:8px;overflow:hidden;border:1px solid #7199aa55}
+#phoneContent .m3ChecklistBar>i{display:block;height:100%;background:linear-gradient(90deg,#39b5be,#a5efba);border-radius:8px}
+#phoneContent .m3NextAction{display:grid;gap:5px;border-top:1px solid #94c3cf36;padding-top:10px}
+#phoneContent .m3NextAction>small{font-size:9px;font-weight:800;letter-spacing:1.2px;color:#ffce86}
+#phoneContent .m3NextAction>b{font-size:15px;color:#f6fcfd;line-height:1.3}
+#phoneContent .m3NextAction>p{margin:0;font-size:11px;line-height:1.45;color:#c4dae2}
+#phoneContent .m3NextAction>span{font-size:10px;color:#ffdf9a;font-weight:750}
+#phoneContent .m3DetailedSteps{display:grid;gap:10px}
+#phoneContent .m3DetailedSteps>div{display:flex;align-items:start;gap:10px;padding:13px 11px;min-width:0}
+#phoneContent .m3DetailedSteps .m3StepContents{display:block;flex:1;min-width:0}
+#phoneContent .m3DetailedSteps .m3StepContents>b{display:block;font-size:13px;color:#eef8fd;line-height:1.3}
+#phoneContent .m3DetailedSteps .m3StepCount{display:block;margin:4px 0 9px;font-size:10px;color:#9bc7d4}
+#phoneContent .m3CheckRow{display:flex;align-items:flex-start;gap:7px;border-top:1px solid #7da9b42a;padding:9px 0;min-width:0}
+#phoneContent .m3CheckRow .m3CheckMark{color:#f8c56e;flex:0 0 14px;font-size:14px;line-height:1.2}
+#phoneContent .m3CheckRow.done .m3CheckMark{color:#8ff2b2}
+#phoneContent .m3CheckDescription{display:block;min-width:0;flex:1}
+#phoneContent .m3CheckDescription>strong{display:block;font-size:11px;color:#eaf6fa;line-height:1.4}
+#phoneContent .m3CheckDescription>small{display:block;margin-top:3px;font-size:10px;color:#b7ced8;line-height:1.4}
+#phoneContent .m3CheckDescription>em{display:block;margin-top:4px;font-size:10px;color:#ffdd9d;font-style:normal}
+#phoneContent .m3CheckStatus{font-size:9px;line-height:1.35;color:#ffd58a;white-space:nowrap}
+#phoneContent .m3CheckRow.done .m3CheckStatus{color:#8ce2b3}
+#phoneContent .m3ChecklistReward{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;padding:12px 14px;border:1px solid #bd994e66;border-radius:12px;background:#664b2422}
+#phoneContent .m3ChecklistReward>span{font-size:10px;letter-spacing:1.2px;color:#e8cca2}
+#phoneContent .m3ChecklistReward>b{color:#ffdb88;font-size:16px}
+/* Mission 2: measured checklist in HSEC overview */
+#modalCard.hsecModal{display:flex!important;flex-direction:column!important;max-height:calc(100dvh - 20px)!important;overflow:hidden!important}
+#modalCard.hsecModal .hsecPanel{display:flex!important;flex-direction:column!important;min-height:0!important;flex:1 1 auto}
+#modalCard.hsecModal .hsecPanel>.hsecBody{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:18px}
+.hsecLiveChecklist{display:grid;gap:8px;margin:8px 0 13px}
+.hsecChecklistHeading{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px;align-items:center}
+.hsecChecklistHeading>b{font-size:12px;color:#f8f7f1}
+.hsecChecklistHeading>small{font-size:10px;color:#b4cbd3}
+.hsecRequirement{display:flex;gap:9px;align-items:flex-start;padding:9px 10px;background:#17354aaa;border-radius:10px;border:1px solid #6e9fb064}
+.hsecRequirement.done{background:#1846398a;border-color:#75cc9a66}
+.hsecRequirementIcon{flex:0 0 14px;font-size:14px;color:#f4c86d}
+.hsecRequirement.done .hsecRequirementIcon{color:#85e7ae}
+.hsecRequirementCopy{min-width:0;flex:1}
+.hsecRequirementCopy>strong{display:block;font-size:12px;color:#f2faff;line-height:1.3}
+.hsecRequirementCopy>small{display:block;font-size:10px;color:#c4d8df;margin-top:3px}
+.hsecRequirementCopy>em{display:block;font-style:normal;color:#b7d4db;font-size:10px;line-height:1.35;margin-top:4px}
+.hsecRequirement>b{font-size:10px;white-space:nowrap;color:#f8ce83}
+.hsecRequirement.done>b{color:#95eabb}

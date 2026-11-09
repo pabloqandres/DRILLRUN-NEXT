@@ -9,6 +9,7 @@ import {pendingOrders,deliveryProgress,allOrders,canPlaceOrder} from './headquar
 import {inventorySummary,availableTools,workshopLevel,workshopCapacity,workshopUsed,workshopFree,canUpgradeWorkshop,workshopUpgradeJob,workshopUpgradeProgress,WORKSHOP_LEVELS} from './inventory.mjs';
 import {toolCondition} from './wear.mjs';
 import {mission3Phase,mission3Objectives,mission3Objective} from './mission3-state.mjs';
+import {mission3Readout} from './mission-readout.mjs';
 
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -269,66 +270,39 @@ function renderInventory(s,t,fmt,icon,cb){
 }
 
 function renderM3Objectives(s,t,fmt,icon,cb){
- const phase=mission3Phase(s);
- const objs=mission3Objectives(s);
- const phaseNames={briefing:'Briefing Inicial',setup:'Preparación',survey:'Estudio Geológico',equip:'Equipamiento',drilling:'Perforación Activa',delivery:'Entrega Final',complete:'¡Misión Completa!'};
- const phaseIcons={briefing:'messages',setup:'build',survey:'location',equip:'inventory',drilling:'drill',delivery:'check',complete:'check'};
- const objNames={prepareCompany:'Preparar la empresa',knowTerrain:'Conocer el terreno',equipOperation:'Equipar la operación',executeExploration:'Ejecutar exploración',deliverContract:'Entregar contrato'};
- const checkNames={workshopReady:'Taller operativo',hireAdmin:'Administrador contratado',requestAnalysis:'Solicitar análisis geológico',waitForReport:'Esperar informe',reviewReport:'Revisar informe',purchaseDrill:'Adquirir perforadora',hireDriller:'Contratar operador',orderTools:'Ordenar herramientas',receiveDelivery:'Recibir pedido',startDrilling:'Iniciar perforación',completeBoreholes:'Completar 3 sondajes',validateMeters:'Validar metraje',submitContract:'Entregar al cliente'};
-
- // Total progress
- const totalChecks=objs.reduce((n,o)=>n+o.checks.length,0);
- const doneChecks=objs.reduce((n,o)=>n+o.checks.filter(c=>c.done).length,0);
- const totalPct=totalChecks?Math.round(doneChecks/totalChecks*100):0;
-
- // Contract stats
- const cp=contractProgress(s);
- const meters=s.contract?Math.round(s.contract.metersCompleted):0;
- const totalMeters=s.contract?s.contract.totalMeters:CONTRACT_TEMPLATES[0].totalMeters;
-
- let html=`<div class="missionHeading"><span class="eyebrow">MISIÓN 3 · TU PRIMER CONTRATO</span><h3 style="font-size:22px;margin:6px 0 0">Exploración RC</h3><p style="font-size:10px;color:#a8b8b8;margin-top:6px">Completa 90 metros de perforación en 3 sondajes de exploración geológica.</p></div>`;
-
- // Phase badge + progress ring
- html+=`<div style="display:flex;gap:14px;align-items:center;padding:14px;background:linear-gradient(135deg,#2a5040,#1e3a30);border-radius:14px;border:1px solid #4a826a55;margin-bottom:14px">`;
- html+=`<div style="position:relative;width:56px;height:56px;flex-shrink:0"><svg viewBox="0 0 36 36" style="width:56px;height:56px;transform:rotate(-90deg)"><circle cx="18" cy="18" r="16" fill="none" stroke="#ffffff15" stroke-width="2.5"/><circle cx="18" cy="18" r="16" fill="none" stroke="#67dfd0" stroke-width="2.5" stroke-dasharray="${totalPct} ${100-totalPct}" stroke-linecap="round"/></svg><span style="position:absolute;inset:0;display:grid;place-items:center;font-size:13px;font-weight:800;color:#67dfd0">${totalPct}%</span></div>`;
- html+=`<div style="flex:1"><span style="font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:#67dfd0;font-weight:700">FASE ACTUAL</span><b style="display:block;font-size:15px;margin-top:3px">${esc(phaseNames[phase]||phase)}</b>`;
- if(s.contract)html+=`<small style="font-size:9px;color:#a8c8b8;margin-top:2px;display:block">${meters} / ${totalMeters} metros perforados</small>`;
- html+=`</div>${icon(phaseIcons[phase]||'location')}</div>`;
-
- // Progress bar
- html+=`<div style="height:6px;border-radius:3px;background:#ffffff12;margin-bottom:16px;overflow:hidden"><div style="height:100%;border-radius:3px;background:linear-gradient(90deg,#67dfd0,#4ab89e);width:${totalPct}%;transition:width .4s"></div></div>`;
-
- // Objectives as steps
- html+=`<div class="steps">`;
- for(let i=0;i<objs.length;i++){
-  const obj=objs[i];
-  const allDone=obj.checks.every(c=>c.done);
-  const someStarted=obj.checks.some(c=>c.done);
-  const isActive=!allDone&&someStarted;
-  const firstUndone=!allDone&&!someStarted&&(i===0||objs[i-1].checks.every(c=>c.done));
-  html+=`<div class="${allDone?'done':isActive||firstUndone?'active':''}">`;
-  html+=`<span class="stepNumber">${allDone?icon('check'):String(i+1).padStart(2,'0')}</span>`;
-  html+=`<span style="flex:1"><b>${esc(objNames[obj.nameKey]||obj.nameKey)}</b>`;
-  for(const check of obj.checks){
-   const name=checkNames[check.labelKey]||check.labelKey;
-   const hasProg=check.progress!==undefined&&!check.done&&check.progress>0;
-   html+=`<small style="display:flex;align-items:center;gap:5px;margin:4px 0">`;
-   if(check.done)html+=`<span style="color:var(--mint)">${icon('check')}</span>`;
-   else html+=`<span style="width:14px;height:14px;border-radius:50%;border:1.5px solid ${isActive||firstUndone?'#e7c886':'#ffffff30'};display:inline-block;flex-shrink:0"></span>`;
-   html+=`<span style="${check.done?'text-decoration:line-through;opacity:.5':''}">${esc(name)}</span>`;
-   if(hasProg)html+=`<span style="margin-left:auto;font-size:8px;color:#67dfd0;font-weight:700">${Math.round(check.progress*100)}%</span>`;
-   html+=`</small>`;
-  }
+ const phase=mission3Phase(s),view=mission3Readout(s);
+ const phaseNames={briefing:'Briefing inicial',setup:'Preparación',survey:'Estudio geológico',equip:'Equipamiento',drilling:'Perforación activa',delivery:'Entrega final',complete:'Misión completada'};
+ const pct=Math.round(view.progress*100);
+ const next=view.pending;
+ const meters=s.contract?Math.round(s.contract.metersCompleted||0):0;
+ const totalMeters=s.contract?.totalMeters||CONTRACT_TEMPLATES[0].totalMeters;
+ let html=`<section class="missionHeading"><span class="eyebrow">MISIÓN 3 · TU PRIMER CONTRATO</span>
+  <h3>Exploración RC</h3>
+  <p>${meters} / ${totalMeters} m del contrato · ${view.done} de ${view.total} requisitos cumplidos</p></section>`;
+ html+=`<section class="m3ChecklistSummary"><div class="m3ChecklistTop"><span>FASE ACTUAL</span><b>${esc(phaseNames[phase]||phase)}</b><strong>${pct}%</strong></div>
+  <div class="m3ChecklistBar"><i style="width:${pct}%"></i></div>
+  <div class="m3NextAction"><small>SIGUIENTE ACCIÓN${next?' · ETAPA '+next.groupNumber+'/5':''}</small>
+   <b>${next?esc(next.name):'Requisitos completados'}</b>
+   <p>${next?esc(next.hint):'Revisa el mensaje final de la misión.'}</p>
+   ${next?.value?`<span>${esc(next.value)}</span>`:''}
+  </div></section>`;
+ html+=`<div class="steps m3DetailedSteps">`;
+ for(const group of view.groups){
+  const isCurrent=next?.groupNumber===group.number;
+  html+=`<div class="${group.done?'done':isCurrent?'active':''}"><span class="stepNumber">${group.done?icon('check'):String(group.number).padStart(2,'0')}</span>
+   <span class="m3StepContents"><b>${esc(group.name)}</b>
+   <small class="m3StepCount">${group.checks.filter(c=>c.done).length}/${group.checks.length} completados</small>`;
+  for(const check of group.checks)html+=`<span class="m3CheckRow ${check.done?'done':'pending'}">
+    <span class="m3CheckMark">${check.done?'✓':'○'}</span>
+    <span class="m3CheckDescription"><strong>${esc(check.name)}</strong>
+    ${!check.done?`<small>${esc(check.hint)}</small>`:''}
+    ${check.value?`<em>${esc(check.value)}</em>`:''}
+    </span>
+    <b class="m3CheckStatus">${check.done?'Cumplido':'Pendiente'}</b>
+   </span>`;
   html+=`</span></div>`;
  }
- html+=`</div>`;
-
- // Reward preview
- html+=`<div style="margin-top:16px;padding:14px;background:#ffffff06;border:1px solid #e7c88630;border-radius:12px;display:flex;align-items:center;gap:12px">`;
- html+=`<div style="width:40px;height:40px;border-radius:12px;background:radial-gradient(circle,#b6843b44,#77562d11);border:1px solid #e1bb7340;display:grid;place-items:center">${icon('wallet')}</div>`;
- html+=`<div><span style="font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:#e7c886;font-weight:700">RECOMPENSA</span><b style="display:block;font-size:16px;color:var(--gold);margin-top:2px">${fmt(s.contract?.reward||60000)}</b></div>`;
- html+=`</div>`;
-
+ html+=`</div><section class="m3ChecklistReward"><span>RECOMPENSA</span><b>${fmt(s.contract?.reward||60000)}</b></section>`;
  return html;
 }
 
