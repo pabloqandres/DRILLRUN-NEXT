@@ -16,7 +16,7 @@ const STEPS={
  requestAnalysis:['Solicitar análisis geológico','Pide el análisis en la aplicación Geología.'],
  waitForReport:['Esperar informe geológico','Espera el resultado del análisis solicitado.'],
  reviewReport:['Revisar informe geológico','Abre Geología y revisa el informe recibido.'],
- purchaseDrill:['Perforadora adquirida','Solicita una perforadora en Casa Matriz.'],
+ purchaseDrill:['Adquirir perforadora RC','Solicita la perforadora RC desde Casa Matriz y confirma su adquisición.'],
  hireDriller:['Operador contratado','Contrata al operador desde Personal.'],
  orderTools:['Herramientas disponibles','Solicita las brocas y demás herramientas necesarias en Casa Matriz.'],
  receiveDelivery:['Pedido recibido','Revisa Pedidos y espera a que se entregue el suministro.'],
