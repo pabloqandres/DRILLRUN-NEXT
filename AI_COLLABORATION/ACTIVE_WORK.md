@@ -4,6 +4,8 @@
 
 ## Currently Active
 
+- **ChatGPT — Foundation contact V7:** `chatgpt/office-foundation-v7`; visual-only `dist/graphics/world-finish.mjs`, code syntax verified, deployment and visual QA being tracked.
+
 - **ChatGPT — Office L1 V6:** `chatgpt/office-l1-detail-v6`, restricted to `dist/assets3d/office-shell.mjs` and collaboration documentation. Non-colliding entry-level office visual refinement; syntax checked, real-browser QA pending.
 
 - **ChatGPT — World materials V5:** prepared on `chatgpt/world-materials-v5-release` after resolving parallel changelog edits with Atacama atmosphere V5. Only `dist/graphics/desert.mjs` and `dist/graphics/world-finish.mjs` changed in game; runtime visual QA pending.
