@@ -108,7 +108,7 @@ function updateStartCard(){
  else if(chapterDone&&eyebrow&&heading){eyebrow.textContent='CAPÍTULO 01 · COMPLETADO';heading.textContent=t('firstSteps');if(brandP)brandP.textContent=t('firstSteps');}
 }
 
-function sound(kind){if(!prefs.sound)return;try{audioContext??=new (window.AudioContext||window.webkitAudioContext)();audioContext.resume();const at=audioContext.currentTime,tones=kind==='build'?[210,145,320]:kind==='finish'?[330,440,660]:kind==='transition'?[140,210]:[180];tones.forEach((freq,i)=>{const o=audioContext.createOscillator(),g=audioContext.createGain();o.type=kind==='finish'?'sine':'triangle';o.frequency.setValueAtTime(freq,at+i*.10);o.frequency.exponentialRampToValueAtTime(freq*.65,at+i*.10+.10);g.gain.setValueAtTime(kind==='transition'?.025:.07,at+i*.10);g.gain.exponentialRampToValueAtTime(.001,at+i*.10+.13);o.connect(g);g.connect(audioContext.destination);o.start(at+i*.10);o.stop(at+i*.10+.14);o.onended=()=>{o.disconnect();g.disconnect();};});}catch{}}
+function sound(kind){if(!prefs.sound)return;try{audioContext??=new (window.AudioContext||window.webkitAudioContext)();audioContext.resume();const at=audioContext.currentTime,tones=kind==='ring'?[620,800,620,800]:kind==='build'?[210,145,320]:kind==='finish'?[330,440,660]:kind==='transition'?[140,210]:[180];tones.forEach((freq,i)=>{const o=audioContext.createOscillator(),g=audioContext.createGain();o.type=kind==='finish'?'sine':'triangle';o.frequency.setValueAtTime(freq,at+i*.10);o.frequency.exponentialRampToValueAtTime(freq*.65,at+i*.10+.10);g.gain.setValueAtTime(kind==='transition'?.025:kind==='ring'?.042:.07,at+i*.10);g.gain.exponentialRampToValueAtTime(.001,at+i*.10+.13);o.connect(g);g.connect(audioContext.destination);o.start(at+i*.10);o.stop(at+i*.10+.14);o.onended=()=>{o.disconnect();g.disconnect();};});}catch{}}
 function resetJoy(){joy={x:0,y:0};pointer=null;$('#joyKnob').style.transform='translate(0,0)';}
 function stop(){resetJoy();keys={};target=null;motion.vx=motion.vz=motion.speed=0;}
 function closeModal(){if(hsecUI)hsecUI.panelOpen=false;$('#modalCard').classList.remove('hsecModal');officePanelPreview?.dispose();officePanelPreview=null;scene?.setUpgradePreview(null);managingOffice=false;hidden($('#modal'),true);$('#modal').classList.remove('buildPreview','moduleSheet','upgradeSheet','officeQuick');modalOpen=false;blueprint=builderOpen&&!!selectedBuildModule;}
@@ -340,17 +340,34 @@ function beginPlay(resuming=false){phase='play';blueprint=false;world.inspect=fa
 $('#skipIntro').onclick=()=>{if(phase!=='intro')return;cinematic.stop();world.cameraRig.reset();beginPlay(cinemaReview);cinemaRecorder?.stop();};$('#menuButton').onclick=showSettings;
 function ensureSafe(){syncOfficeAccess(s);scene.state=s;const r=avatarDefinition(s.character).radius;if(!world.isBlocked(s.position.x,s.position.z,r))return;if(s.inside){for(const z of[-.65,.1,.65])for(const x of[-1.9,-1.1,0,1,2.2])if(!world.isBlocked(-6+x,z,r)){s.position={x:-6+x,z};world.worker.reset();return;}}const cx=s.position.x,cz=s.position.z;for(let d=.5;d<=10;d+=.5)for(let a=0;a<16;a++){const angle=a*Math.PI/8,tx=cx+Math.cos(angle)*d,tz=cz+Math.sin(angle)*d;if(!world.isBlocked(tx,tz,r)){s.position={x:tx,z:tz};s.inside=false;world.worker.reset();return;}}s.position={...CONFIG.officeSlot.access};s.inside=false;world.worker.reset();}
 // ─── Narrative tick & actions ────────────────────────────
+function pendingMissionReply(){
+ return s?.narrative?.messages?.find(m=>!m.actionTaken&&
+  m.actions?.some(a=>a.type==='accept'||a.type==='collect'))||null;
+}
+function showPendingMissionMessage(){
+ const m=pendingMissionReply();if(!m)return false;
+ phoneUI.narrativeCharacter=m.characterId;phoneUI.conversation=true;
+ openPhone('messages');return true;
+}
 let narrativeTimer=0;
 function narrativeTick(dt){
- if(!s||phase!=='play')return;narrativeTimer+=dt;if(narrativeTimer<1.5)return;narrativeTimer=0;
+ // Let the player read the completion/reward overlay before the next briefing.
+ if(!s||phase!=='play'||document.querySelector('.missionCompleteOverlay'))return;
+ narrativeTimer+=dt;if(narrativeTimer<1.5)return;narrativeTimer=0;
  ensureNarrative(s);
  const msg=pendingMessage(s);
  if(msg&&deliverMessage(s,msg.id)){
   const char=MISSION_NARRATIVES[msg.missionId]?.character;
   const charName=char?t(MISSION_NARRATIVES[msg.missionId].character==='benefactor'?'char_benefactor':char==='safetySpecialist'?'char_safety':'char_contract'):'';
   notices.push({title:charName||'Nuevo mensaje',detail:t(msg.bodyKey)?.slice(0,60)+'…',symbol:'messages',action:()=>{phoneUI.narrativeCharacter=msg.characterId;phoneUI.conversation=true;openPhone('messages');}});
-  sound('transition');save();
-  if(phoneOpen&&phoneApp==='messages')renderPhone();
+  sound('ring');save();
+  renderHUD();
+  // Opening messages automatically open; closing messages only ring and glow.
+  if(msg.id.endsWith(':start')&&!phoneOpen&&!modalOpen&&!builderOpen&&!busy){
+   phoneUI.narrativeCharacter=msg.characterId;
+   phoneUI.conversation=true;
+   openPhone('messages');
+  }else if(phoneOpen&&phoneApp==='messages'&&!phoneUI.conversation)renderPhone();
  }
 }
 function handleNarrativeAction(actionType,missionId){
@@ -373,7 +390,11 @@ function handleNarrativeAction(actionType,missionId){
   const result=confirmCompletion(s,missionId);
   if(result){
    sound('finish');
-   showMissionComplete(t(result.name)||'Misión completada',result.cash,result.boosters);
+   const paidContract=(s.ledger||[]).filter(e=>e.key==='contractPayment').at(-1)?.amount||0;
+   showMissionComplete(t(result.name)||'Misión completada',
+    missionId==='m3'?paidContract:result.cash,result.boosters,
+    missionId==='m3'?'Pago ya acreditado al entregar el contrato':
+    missionId==='m4'?'Producción automatizada habilitada':'');
    save();if(phoneOpen)closePhone();renderHUD();
   }
  }
@@ -384,9 +405,11 @@ function syncUIEvents(){
   else notices.push({id:event.id,title:t(event.title),detail:t(event.detail),symbol:event.icon,action:()=>{phoneUI.conversation=false;openPhone('messages');}});
  }save();
 }
-function showNextReward(){if(!rewardQueue.length||modalOpen||phoneOpen||placement||builderOpen||busy||phase!=='play')return;const event=rewardQueue.shift(),detail=event.id==='mission:clear'?'landReward':event.id==='mission:office'?'officeReward':'workstationReward';
- const boosterBadge=event.id==='mission:clear'?`<div class="rewardBadge"><span class="badgeIcon">${icon('boost')}</span><b>×3 Acelerador de Construcción</b></div>`:'';
- sound('finish');modal(`<div class="rewardCard"><div class="rewardSeal">${icon(event.icon)}</div><span class="eyebrow">${esc(t('missionCompleted'))}</span><h2>${esc(t(event.detail))}</h2>${boosterBadge}<div class="rewardUnlock">${icon('check')}<span><small>${esc(t('reward'))}</small><b>${esc(t(detail))}</b></span></div><div class="modalActions">${button('continue','continueReward',true)}</div></div>`);$('#continueReward').onclick=closeModal;
+function showNextReward(){
+ if(!rewardQueue.length||modalOpen||phoneOpen||placement||builderOpen||busy||phase!=='play')return;
+ const event=rewardQueue.shift();
+ // Subobjectives give a notice, not a premature mission completion modal.
+ notices.push({title:t(event.detail),detail:event.id==='mission:clear'?'3 aceleradores disponibles':'Objetivo preparado',symbol:event.icon});
 }
 function showMissionComplete(name,cash,boosters,detail=''){
  document.querySelectorAll('.missionCompleteOverlay').forEach(el=>el.remove());
@@ -400,7 +423,8 @@ function showMissionComplete(name,cash,boosters,detail=''){
 function action(fn){const oldBuilt=s.office.status==='built',oldLevel=s.office.level;try{fn();scene.update(s,0,Date.now());ensureSafe();syncUIEvents();save();renderHUD();if(phoneOpen)renderPhone();if(!oldBuilt&&s.office.status==='built')onBuilt();if(oldLevel&&s.office.level>oldLevel)toast('upgradeComplete');if(builderOpen)builderUI.render();return true;}catch(e){toast(e.key||'invalid');return false;}}
 function onBuilt(){scene.builtAt=Date.now();scene.burst(-6,0);sound('finish');}
 function transition(key){setText($('#transitionText'),t(key));hidden($('#entryTransition'),false);clearTimeout(transition.timer);transition.timer=setTimeout(()=>hidden($('#entryTransition'),true),550);}
-function nearInteraction(){if(!s)return null;const nearest=CLEARABLES.filter(o=>!s.cleared.includes(o.id)).map(o=>({...o,distance:Math.hypot(o.x-s.position.x,o.z-s.position.z)})).filter(o=>o.distance<1.6).sort((a,b)=>a.distance-b.distance)[0];if(nearest)return {kind:'clear',object:nearest,label:'clearAction',blocked:s.energy<CONFIG.clearCost};
+function nearInteraction(){if(!s)return null;
+ if(!isMissionAccepted(s,'m1')&&!isMissionCollected(s,'m1'))return null;const nearest=CLEARABLES.filter(o=>!s.cleared.includes(o.id)).map(o=>({...o,distance:Math.hypot(o.x-s.position.x,o.z-s.position.z)})).filter(o=>o.distance<1.6).sort((a,b)=>a.distance-b.distance)[0];if(nearest)return {kind:'clear',object:nearest,label:'clearAction',blocked:s.energy<CONFIG.clearCost};
  if(!s.inside&&Math.hypot(s.position.x+7.99,s.position.z-2.9)<1.55)return pendingConstruction(s)?{kind:'boost',label:'accelerate'}:{kind:s.office.status==='built'?'enter':'build',label:s.office.status==='built'?'enter':'buildAction'};
  if(!s.inside&&s.workshop?.status!=='building'&&s.workshop&&Math.hypot(s.position.x+6.8,s.position.z+5.4)<2.5)return {kind:'workshop',label:'TALLER'};
  if(s.inside){if(Math.hypot(s.position.x+7.99,s.position.z-.8)<1.0)return {kind:'exit',label:'exit'};const computer=s.furniture.find(f=>s.inventory.find(v=>v.id===f.id)?.product==='computer');if(computer&&Math.hypot(s.position.x+6-computer.x,s.position.z-computer.z)<1.5)return {kind:'computer',label:'useComputer'};}
@@ -408,7 +432,10 @@ function nearInteraction(){if(!s)return null;const nearest=CLEARABLES.filter(o=>
  return null;
 }
 $('#handButton').onclick=()=>{if(busy||modalOpen||phoneOpen||builderOpen||placement)return;const a=phase==='play'?nearInteraction():null;if(!a)return;if(a.kind==='hsecStaff'){hsecUI.open('staff');return;}if(a.kind==='hsecAsset'){hsecUI.open('assets');return;}if(a.kind==='clear'){if(s.energy<CONFIG.clearCost)return toast('noEnergy');busy={object:a.object,elapsed:0};stop();sound('clear');}else if(a.kind==='build')showBuild();else if(a.kind==='boost')action(()=>accelerate(s));else if(a.kind==='workshop'){showWorkshopCard();return;}else if(a.kind==='enter')enterOffice();else if(a.kind==='exit'){transition('exitTransition');s.inside=false;s.position={...CONFIG.officeSlot.access};world.worker.reset();stop();save();}else if(a.kind==='computer'){if(!s.chapterCompletedAt){action(()=>useOfficeComputer(s));sound('finish');/* reward modal deferred to narrative confirmCompletion */return;}hsecUI.open();return;modal(`<span class="eyebrow">${esc(t('computer'))}</span><h2>${esc(t('next'))}</h2><p>${esc(t('nextDetail'))}</p><div class="modalActions">${button('close','closeComputer',true)}</div>`);$('#closeComputer').onclick=closeModal;}};
-function openBuilder(){if(phase!=='play'||placement||busy)return;closePhone();hsecWorld?.showAssetCard(null);stop();builderOpen=true;hidden($('#builderPanel'),false);document.body.classList.add('builderOpen');if(hsecUI)hsecUI.mode=hsecActive(s);builderUI.open();}
+function openBuilder(){if(phase!=='play'||placement||busy)return;
+ if(!isMissionAccepted(s,'m1')&&!isMissionCollected(s,'m1')){
+  showPendingMissionMessage();return;
+ }closePhone();hsecWorld?.showAssetCard(null);stop();builderOpen=true;hidden($('#builderPanel'),false);document.body.classList.add('builderOpen');if(hsecUI)hsecUI.mode=hsecActive(s);builderUI.open();}
 function closeBuilder(){builderUI.close();if(hsecUI?.drawing)hsecUI.cancelDraft();builderUI.close();builderOpen=false;blueprint=false;hidden($('#builderPanel'),true);document.body.classList.remove('builderOpen');if(world)world.chapterCamera=null;}
 function showBuild(){openBuilder();}
 function buildTime(seconds){return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');}
@@ -548,15 +575,16 @@ function renderHUD(){if(!s)return;
  // The last mission remains visible until its narrative closing message is confirmed.
  // Once confirmed, retire the objective card; keep production, saves and HSEC data intact.
  const narrativeMission=activeNarrativeMission(s);
- // The opening mission's status remains useful before the phone briefing is
- // accepted. Read-only visual fallback: acceptance/reward gates stay intact.
- const showPendingM1=!isMissionCollected(s,'m1')&&!narrativeMission;
- hidden($('#objective'),!(narrativeMission||showPendingM1));
- setText($('#cashValue'),money(s.cash));setText($('#energyValue'),Math.floor(s.energy)+' / '+CONFIG.maxEnergy);setText($('#boostValue'),s.boosters);const unread=unreadMessages(s).length;hidden($('#phoneBadge'),!unread);setText($('#phoneBadge'),unread);if(avatars&&lastPortraitId!==s.character){lastPortraitId=s.character;$('#playerAvatar').innerHTML=avatars.portrait(s.character);}$('#hud').dataset.avatar=s.character;setText($('#playerName'),s.playerName||t('operatorName'));const lvl=playerLevel(s);setText($('#levelValue'),lvl);const m3On=s.mission3&&s.mission3.phase!=='inactive';const m4HudOn=s.mission4&&s.mission4.phase!=='inactive';const missionSub=m4HudOn?(s.mission4.phase==='complete'?'Misión 4 · Completada':'Misión 4 · Automatiza tu operación'):m3On?(s.mission3.phase==='complete'?'Misión 3 · Completada':'Misión 3 · Tu primer contrato'):s.hsec?.completedAt?'Misión 2 · Completada':s.chapterCompletedAt?'Misión 1 · Completada':'Misión 1 · '+t('firstSteps');setText($('#playerMission'),missionSub);$('#playerProgress').style.width=(s.chapterCompletedAt?100:s.office.status==='built'?66:s.cleared.length===16?33:Math.round(s.cleared.length/16*33))+'%';
+ // Mission objectives appear only after the opening message is accepted.
+ hidden($('#objective'),!narrativeMission);
+ $('#phoneButton').classList.toggle('missionAwaiting',!!pendingMissionReply());
+ setText($('#cashValue'),money(s.cash));setText($('#energyValue'),Math.floor(s.energy)+' / '+CONFIG.maxEnergy);setText($('#boostValue'),s.boosters);const unread=unreadMessages(s).length;hidden($('#phoneBadge'),!unread);setText($('#phoneBadge'),unread);if(avatars&&lastPortraitId!==s.character){lastPortraitId=s.character;$('#playerAvatar').innerHTML=avatars.portrait(s.character);}$('#hud').dataset.avatar=s.character;setText($('#playerName'),s.playerName||t('operatorName'));const lvl=playerLevel(s);setText($('#levelValue'),lvl);const m3On=s.mission3&&s.mission3.phase!=='inactive';const m4HudOn=s.mission4&&s.mission4.phase!=='inactive';const missionSub=m4HudOn?(s.mission4.phase==='complete'?'Misión 4 · Completada':'Misión 4 · Automatiza tu operación'):m3On?(s.mission3.phase==='complete'?'Misión 3 · Completada':'Misión 3 · Tu primer contrato'):s.hsec?.completedAt?'Misión 2 · Completada':s.chapterCompletedAt?'Misión 1 · Completada':'Misión 1 · '+t('firstSteps');setText($('#playerMission'),
+ !isMissionAccepted(s,'m1')&&!isMissionCollected(s,'m1')?'Esperando mensaje de bienvenida':
+ !narrativeMission?'Esperando nueva misión':missionSub);$('#playerProgress').style.width=(s.chapterCompletedAt?100:s.office.status==='built'?66:s.cleared.length===16?33:Math.round(s.cleared.length/16*33))+'%';
  /* Geo analysis floating card */
- const geo=s.geoAnalysis;const geoCard=$('#geoCard');if(geoCard){const geoActive=!!(geo&&geo.requested&&!geo.completed);const geoDone=!!(geo&&geo.completed);const m3DrillingOrLater=s.mission3&&['drilling','delivery','complete'].includes(s.mission3.phase);const geoDismissed=!!(geo&&geo.cardDismissed)||!!(s.mission3?.reportRead)||m3DrillingOrLater;const showCard=(geoActive||(geoDone&&!s.mission3?.reportRead))&&!geoDismissed;if(geoCard._shown!==showCard){geoCard._shown=showCard;hidden(geoCard,!showCard);}if(showCard){hidden($('#geoDismiss'),!geoDone);if(geoActive){const elapsed=(Date.now()-(geo.analysisStartedAt||Date.now()))/1000;const dur=geo.analysisDuration||75;const pct=Math.min(1,elapsed/dur);setText($('#geoTitle'),'Análisis geológico');setText($('#geoDetail'),Math.round(pct*100)+'% completado');$('#geoProgressBar').style.width=(pct*100)+'%';geoCard.classList.remove('complete');}else if(geoDone){setText($('#geoTitle'),'Informe disponible');setText($('#geoDetail'),'Toca para revisar');$('#geoProgressBar').style.width='100%';geoCard.classList.add('complete');}}}const obj=objective(s);const objectiveEyebrow=$('#objective .eyebrow');if(objectiveEyebrow)objectiveEyebrow.textContent=(narrativeMission==='m1'||showPendingM1)?'MISIÓN 1':'MISIÓN ACTUAL';setText($('#objectiveTitle'),t(obj));setText($('#objectiveDetail'),t(obj+'Detail'));let value=0,count='';if(obj==='clear'){value=s.cleared.length/CLEARABLES.length;count=s.cleared.length+' / '+CLEARABLES.length;}else if(obj==='admin'){value=s.chapterCompletedAt?1:s.hasEntered?.75:0;count='';}else value=obj==='next'?1:progress(s);$('#objectiveProgress').style.width=(value*100)+'%';setText($('#objectiveCount'),count);
+ const geo=s.geoAnalysis;const geoCard=$('#geoCard');if(geoCard){const geoActive=!!(geo&&geo.requested&&!geo.completed);const geoDone=!!(geo&&geo.completed);const m3DrillingOrLater=s.mission3&&['drilling','delivery','complete'].includes(s.mission3.phase);const geoDismissed=!!(geo&&geo.cardDismissed)||!!(s.mission3?.reportRead)||m3DrillingOrLater;const showCard=(geoActive||(geoDone&&!s.mission3?.reportRead))&&!geoDismissed;if(geoCard._shown!==showCard){geoCard._shown=showCard;hidden(geoCard,!showCard);}if(showCard){hidden($('#geoDismiss'),!geoDone);if(geoActive){const elapsed=(Date.now()-(geo.analysisStartedAt||Date.now()))/1000;const dur=geo.analysisDuration||75;const pct=Math.min(1,elapsed/dur);setText($('#geoTitle'),'Análisis geológico');setText($('#geoDetail'),Math.round(pct*100)+'% completado');$('#geoProgressBar').style.width=(pct*100)+'%';geoCard.classList.remove('complete');}else if(geoDone){setText($('#geoTitle'),'Informe disponible');setText($('#geoDetail'),'Toca para revisar');$('#geoProgressBar').style.width='100%';geoCard.classList.add('complete');}}}const obj=objective(s);const objectiveEyebrow=$('#objective .eyebrow');if(objectiveEyebrow)objectiveEyebrow.textContent=narrativeMission==='m1'?'MISIÓN 1':'MISIÓN ACTUAL';setText($('#objectiveTitle'),t(obj));setText($('#objectiveDetail'),t(obj+'Detail'));let value=0,count='';if(obj==='clear'){value=s.cleared.length/CLEARABLES.length;count=s.cleared.length+' / '+CLEARABLES.length;}else if(obj==='admin'){value=s.chapterCompletedAt?1:s.hasEntered?.75:0;count='';}else value=obj==='next'?1:progress(s);$('#objectiveProgress').style.width=(value*100)+'%';setText($('#objectiveCount'),count);
  // M1 presentation only: show live removal totals; no mutation of mission state.
- if(narrativeMission==='m1'||showPendingM1){
+ if(narrativeMission==='m1'){
   const detail=$('#objectiveDetail');
   if(detail){
    detail.classList.remove('hidden');
@@ -594,7 +622,7 @@ onM3Action:(type,data)=>{try{
  if(type==='hire'){hirePersonnel(s,data,data+'-01');notices.push({title:'Personal contratado',symbol:'bell'});}
  else if(type==='buyDrill'){const d=drillDefinition(data);if(d){placeMachineryOrder(s,'drill',data,d.price);notices.push({title:'Perforadora solicitada · en camino',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}}
  else if(type==='acceptContract'){acceptContract(s,data);notices.push({title:'Contrato aceptado',symbol:'bell'});}
- else if(type==='completeContract'){const result=completeContract(s);notices.push({title:`Contrato entregado · ${money(result.reward)}`,symbol:'bell'});sound('finish');showMissionComplete('Tu primer contrato',result.reward,0);}
+ else if(type==='completeContract'){const result=completeContract(s);notices.push({title:'Contrato entregado · espera confirmación',detail:money(result.reward),symbol:'messages'});}
  else if(type==='requestGeo'){requestAnalysis(s);technicianArrives(s);startAnalysisTimer(s);notices.push({title:'Análisis geológico solicitado',symbol:'bell'});}
  else if(type==='accelerateGeo'){accelerateAnalysis(s);notices.push({title:'Análisis acelerado',symbol:'bell'});}
  else if(type==='addToCart'){const [type,model,price]=data.split(':');placeOrder(s,[{type,model,qty:1,unitPrice:Number(price)}]);notices.push({title:'Pedido enviado a Casa Matriz',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}
@@ -623,13 +651,13 @@ $('#builderButton').onclick=openBuilder;
  $$('#bottomNav [data-nav]').forEach(b=>b.onclick=()=>{
   const nav=b.dataset.nav;
   if(nav==='builder'){openBuilder();return;}
-  if(nav==='hsec'){if(hsecUI&&s?.hsec)hsecUI.open();else openPhone('objectives');return;}
+  if(nav==='hsec'){if(!isMissionAccepted(s,'m2')&&!isMissionCollected(s,'m2')){if(!showPendingMissionMessage())openPhone('objectives');return;}if(hsecUI&&s?.hsec)hsecUI.open();else openPhone('objectives');return;}
   if(nav==='m4-zones'){openPhone(s?.mission4?.phase&&s.mission4.phase!=='inactive'?'m4-zones':'objectives');return;}
   if(nav==='m3-contract'){openPhone(s?.mission3?.phase&&s.mission3.phase!=='inactive'?'m3-contract':'objectives');return;}
   if(nav==='m3-inventory'){openPhone(s?.mission3?.phase&&s.mission3.phase!=='inactive'?'m3-inventory':'inventory');return;}
   if(nav==='m3-personnel'){openPhone(s?.mission3?.phase&&s.mission3.phase!=='inactive'?'m3-personnel':'home');return;}
   openPhone(nav);
- });$('#phoneButton').onclick=()=>phoneOpen?closePhone():openPhone();$('#closePhone').onclick=$('#phoneShade').onclick=closePhone;$('#phoneBack').onclick=()=>phoneUI.backApp();$('#money').onclick=()=>notices.push({title:t('cash'),detail:money(s.cash),symbol:'wallet'});
+ });$('#phoneButton').onclick=()=>{if(phoneOpen)closePhone();else if(!showPendingMissionMessage())openPhone();};$('#closePhone').onclick=$('#phoneShade').onclick=closePhone;$('#phoneBack').onclick=()=>phoneUI.backApp();$('#money').onclick=()=>notices.push({title:t('cash'),detail:money(s.cash),symbol:'wallet'});
 $('#objective').onclick=e=>{if(e.target.closest('#objToggle'))return;showMission();};$('#objective').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showMission();}};
 $('#objToggle').onclick=e=>{e.stopPropagation();$('#objective').classList.toggle('collapsed');const gc=$('#geoCard');if(gc&&gc._shown===false)gc.classList.add('hidden');};
 $('#geoDismiss').onclick=e=>{e.stopPropagation();if(s?.geoAnalysis){s.geoAnalysis.cardDismissed=true;save();renderHUD();}};
@@ -664,7 +692,7 @@ function applyMovement(intent,dt){
 }
 function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Math.max(0,(now-last)/1000));last=now;clock+=dt;if(document.body.dataset.phase!==phase)document.body.dataset.phase=phase;if(!s)return;const wall=Date.now(),result=phase==='play'?tick(s,wall):{};if(result.built||result.upgraded){if(result.built)onBuilt();if(result.upgraded){scene.burst(-6,0);toast('upgradeComplete');}syncUIEvents();if(phoneOpen)renderPhone();if(builderOpen)builderUI.render();}
  if(phase==='intro')cinematic.update(dt);
- if(phase==='play'&&hsecActive(s)&&!document.hidden){ensureHsec(s);hsecElapsed+=dt;if(hsecElapsed>=1){tickHsec(s,hsecElapsed);if(!s.hsec.grantNotified){s.hsec.grantNotified=true;notices.push({title:'Misión 2 · Prepara tu operación',detail:`Capital de desarrollo: ${money(B.startingGrant)} · abre el panel HSEC para comenzar.`,symbol:'hsec:management'});}hsecElapsed=0;hsecUI.cachedEval=evaluation(s);const signature=[s.hsec.revision,s.hsec.orders.map(o=>o.status).join(','),s.hsec.inspection?.id,s.hsec.employee?.blocked,s.hsec.completedAt].join('|');if(signature!==hsecLastSignature){hsecLastSignature=signature;if(s.hsec.employee?.blocked)notices.push({title:'Prevencionista detenido',detail:s.hsec.employee.blocked,symbol:'lock'});if(hsecUI.panelOpen)hsecUI.refresh();if(s.hsec.completedAt&&!s.hsec.completionNotified){s.hsec.completionNotified=true;/* reward modal deferred to narrative confirmCompletion */}
+ if(phase==='play'&&hsecActive(s)&&isMissionAccepted(s,'m2')&&!document.hidden){ensureHsec(s);hsecElapsed+=dt;if(hsecElapsed>=1){tickHsec(s,hsecElapsed);if(!s.hsec.grantNotified){s.hsec.grantNotified=true;notices.push({title:'Misión 2 · Prepara tu operación',detail:`Capital de desarrollo: ${money(B.startingGrant)} · abre el panel HSEC para comenzar.`,symbol:'hsec:management'});}hsecElapsed=0;hsecUI.cachedEval=evaluation(s);const signature=[s.hsec.revision,s.hsec.orders.map(o=>o.status).join(','),s.hsec.inspection?.id,s.hsec.employee?.blocked,s.hsec.completedAt].join('|');if(signature!==hsecLastSignature){hsecLastSignature=signature;if(s.hsec.employee?.blocked)notices.push({title:'Prevencionista detenido',detail:s.hsec.employee.blocked,symbol:'lock'});if(hsecUI.panelOpen)hsecUI.refresh();if(s.hsec.completedAt&&!s.hsec.completionNotified){s.hsec.completionNotified=true;/* reward modal deferred to narrative confirmCompletion */}
  if(s.hsec.completedAt&&isMissionAccepted(s,'m3')&&canStartMission3(s)&&(!s.mission3||s.mission3.phase==='inactive')){startMission3(s);notices.push({title:'Misión 3 desbloqueada — Tu primer contrato',symbol:'bell'});save();}save();}}moveNpc(s,dt);}
  if(phase==='play'){narrativeTick(dt);/* Workshop L1 construction tick */if(finishWorkshopConstruction(s,Date.now())){save();renderHUD();notices.push({title:'Taller L1 construido',symbol:'bell'});sound('finish');updateMission3Phase(s);}
  /* Workshop upgrade construction tick */const wsJob=workshopUpgradeJob(s);if(wsJob&&Date.now()>=wsJob.ends){finishWorkshopUpgrade(s);save();renderHUD();if(workshopCardOpen)showWorkshopCard();notices.push({title:`Taller ampliado a Nv.${workshopLevel(s)}`,symbol:'bell'});sound('finish');updateMission4Phase(s);}if(workshopCardOpen&&wsJob)showWorkshopCard();world.updateWorkshop(s.workshop);

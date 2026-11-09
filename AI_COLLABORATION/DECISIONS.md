@@ -1,5 +1,11 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — User-authorized ChatGPT mission-flow / phone component changes
+
+**Decision:** User expressly requested ChatGPT to implement directly (not generate a Claude Code prompt) the narrative phone readability/typing changes and a strict four-mission SMS start–accept–completion–collect lifecycle. Therefore a scoped one-time cross-owner exception applies to `dist/chapter/game.mjs`, `dist/chapter/phone-ui.mjs`, `dist/chapter/narrative-ui.mjs`, `dist/chapter/narrative-strings.mjs`. The core state/saving, HSEC scoring algorithms and narrative engine were not modified.
+
+**Desired player experience:** Start SMS rings and opens automatically; first reading animates with avatar, name and role. Mission objectives and actions begin only on explicit acceptance. On finishing, a new SMS rings and the phone icon glows until the final confirmation; only then display the official completion modal and reward. No early final modal from intermediate goals/contract delivery. See `CHANGES/2026-11-09_narrative-phone-lifecycle-v8.md`.
+
 ## 2026-11-09 — M1 informational HUD before narrative acceptance
 
 **User visual bug:** Fresh M1 game shows no objective card because `activeNarrativeMission` returns null while its start message is unread/unaccepted.

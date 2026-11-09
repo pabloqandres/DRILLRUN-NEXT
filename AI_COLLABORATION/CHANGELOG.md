@@ -1,5 +1,12 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — Narrative phone V8 and SMS-gated mission lifecycle
+
+- High-contrast phone text, illustrated portraits of Elena/Marco/Camila and first-open, per-message typewriter (fixed premature read marking).
+- Initial mission messages ring and open; accepted SMS starts missions; final SMS rings/glows until explicit completion and displays reward overlay. M1 HUD clearing/building and M2 HSEC scoring no longer start prior to narrative acceptance. M3 final overlay now on narrative confirmation, with real already-paid contract reward.
+- No changes to core economy, state/save formats, existing narrative storage or third-party branding. V8 V8-syntax/static message-render checks pass; browser QA remains pending.
+- See `CHANGES/2026-11-09_narrative-phone-lifecycle-v8.md`.
+
 ## 2026-11-09 — M1 HUD panel shown before phone acceptance
 
 - Corrects missing entire M1 objective card when start message hasn't yet been accepted; still shows true obstacle progress and requires narrative acceptance for mission rewards. No saved-state changes.

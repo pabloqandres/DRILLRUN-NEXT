@@ -4,6 +4,8 @@
 
 ## Currently Active
 
+- **ChatGPT — Narrative phone + mission lifecycle V8:** `chatgpt/phone-narrative-readability-v8`, text contrast, portraits and M1–M4 start/finish SMS interaction. Scoped shared-file exception documented in DECISIONS; syntax/render-smoke tests passed, real-browser QA pending.
+
 - **ChatGPT — M1 pending briefing HUD:** `chatgpt/m1-hud-pending-accept-fix`; render-only show condition in `dist/chapter/game.mjs`, no narrative acceptance or saved-state change. Syntax + static assertions passed; real browser acceptance pending.
 
 - **ChatGPT — Mission 1 HUD summary fix:** `chatgpt/m1-objective-summary-v7`, small display-only update in `dist/chapter/game.mjs` and `dist/chapter/hud-reference-v4.css`; code parsed, browser verification pending. No save or mission logic changes.

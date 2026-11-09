@@ -103,7 +103,8 @@ export class PhoneUI{
   }
   // Conversation thread
   if(this.narrativeCharacter){
-   markCharacterRead(s,this.narrativeCharacter);this.onSave();
+   // Render before marking read: otherwise unread status disappears and
+   // typewriter never begins on the first opening of a message.
    c.innerHTML=renderConversation(s,this.narrativeCharacter,t,icon,s.playerName);
    // Bind narrative action buttons
    c.querySelectorAll('[data-narrative-accept]').forEach(b=>b.onclick=()=>{if(this.onNarrativeAction)this.onNarrativeAction('accept',b.dataset.narrativeAccept);});
@@ -116,12 +117,16 @@ export class PhoneUI{
     const msg=s.narrative?.messages?.find(m=>m.id===msgId);
     if(msg){
      const body=t(msg.bodyKey)||msg.bodyKey;
-     const resolved=body.replace(/\{name\}/g,esc(s.playerName||'Operador'));
-     this._typing=new NarrativeTyping(typingTarget,resolved,()=>{
-      if(msg&&!msg.readAt){msg.readAt=Date.now();this.onSave();}
-     });
+     const resolved=body.replace(/\{name\}/g,s.playerName||'Operador');
+     this._typing=new NarrativeTyping(typingTarget,resolved,()=>{});
+
     }
    }
+   // First opening is registered per message ID in the existing save model.
+   // Do this after rendering so first-time text can animate, and ensure an
+   // interrupted or closed animation does not replay on a later opening.
+   markCharacterRead(s,this.narrativeCharacter);
+   this.onSave();
   }else{
    // Legacy mentor conversation
    const messages=availableMessages(s);messages.forEach(m=>readMessage(s,m.id));this.onSave();
