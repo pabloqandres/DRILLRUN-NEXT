@@ -1,5 +1,11 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-09 — Atacama atmosphere V5 (ChatGPT)
+
+- New high-resolution procedural sky gradient with subtle mineral horizon haze and broadly distributed deterministic ambient wind dust; visual-only in `dist/graphics/atmosphere.mjs`.
+- Existing quality presets and game behavior unchanged; browser/WebGL acceptance pending. See `CHANGES/2026-11-09_atacama-atmosphere-v5.md`.
+
+
 ## 2026-11-07 — Avatar 02/03/04 intro videos (Claude Code)
 
 ### Added
