@@ -56,7 +56,7 @@ import {newGame,setPlayerIdentity,restore,tick,startModule,useOfficeComputer,con
 import {LANGUAGES,deviceLanguage,translator} from './i18n.mjs';
 import {ChapterScene} from './world.mjs';
 import {prepareAuth} from './auth.mjs';
-import {initCloudSave,cloudLoad,cloudSave} from './cloud-save.mjs';
+import {initCloudSave,cloudSave,cloudTakeControl,cloudUserId,cloudFlushNow} from './cloud-save.mjs';
 import {LocomotionReview} from './review-locomotion.mjs';
 import {AvatarRoster} from './avatar-roster.mjs';
 import {avatarDefinition} from './avatars.mjs';
@@ -83,6 +83,7 @@ let m4DrillTruckModel=null,m4ParkingSpot=null,m4VisualsReady=false,m4TruckLoadin
 let m4DthModel=null,m4DthCollider=null,m4Staging=null;
 let siteCinematics=null;
 let world,scene,phase='start',phoneApp=null,phoneOpen=false,category='desks',modalOpen=false,blueprint=false,placement=null,busy=null,keys={},joy={x:0,y:0},pointer=null,target=null,auth={configured:false},account=null,audioContext=null,last=performance.now(),clock=0,lastSave=0,lastHud=0,introAt=0,lastObjective='',qaRoute=false;
+let cloudSyncing=true,cloudLocked=false,cloudStatus='Verificando Google…',cloudEpoch=0;
 const motion=createMotion(),qa=new URLSearchParams(location.search).has('chapterqa'),cameraDev=new URLSearchParams(location.search).get('dev')==='camera';
 function loadCameraSettings(){try{return cameraSettings(JSON.parse(localStorage.getItem(CAMERA_KEY)));}catch{return cameraSettings();}}
 function persistCamera(){try{localStorage.setItem(CAMERA_KEY,JSON.stringify(world.cameraRig.settings));}catch{}}
@@ -97,7 +98,7 @@ $$('[data-icon]').forEach(el=>el.innerHTML=icon(el.dataset.icon));$('#playerAvat
 const money=value=>new Intl.NumberFormat(prefs.lang).format(Math.floor(value));
 function toast(key){notices.push({title:t(key),symbol:['noMoney','noEnergy','invalid','outside','accessBlocked','overlap'].includes(key)?'lock':'bell'});}
 function persistPrefs(){try{localStorage.setItem('drillrun-preferences',JSON.stringify(prefs));}catch{}}
-function save(){if(!s||!hasSave||phase==='character'||reviewBackup!==null)return;try{s.savedAt=Date.now();localStorage.setItem(CONFIG.saveKey,JSON.stringify(s));cloudSave(CONFIG.saveKey);setText($('#saveStatus'),t('saved'));}catch{setText($('#saveStatus'),t('saveError'));}}
+function save(){if(!s||!hasSave||phase==='character'||reviewBackup!==null||cloudSyncing||cloudLocked)return;try{s.savedAt=Date.now();localStorage.setItem(CONFIG.saveKey,JSON.stringify(s));cloudSave(CONFIG.saveKey);setText($('#saveStatus'),t('saved'));}catch{setText($('#saveStatus'),t('saveError'));}}
 function language(value){prefs.lang=value;t=translator(value);if(s)s.lang=value;persistPrefs();applyText();save();if(phoneOpen)renderPhone();}
 function languageOptions(){return LANGUAGES.map(([l,name])=>`<option value="${l}" ${l===prefs.lang?'selected':''}>${name}</option>`).join('');}
 function updateLangDropdown(){const toggle=$('#langToggle'),opts=$('#langOptions');if(!toggle||!opts)return;const cur=LANGUAGES.find(([l])=>l===prefs.lang);toggle.textContent=cur?cur[1]:'Español';opts.innerHTML=LANGUAGES.map(([l,name])=>`<button data-lang="${l}" class="${l===prefs.lang?'active':''}">${name}</button>`).join('');opts.querySelectorAll('[data-lang]').forEach(b=>b.onclick=e=>{e.stopPropagation();language(b.dataset.lang);$('#startLanguage').classList.remove('open');});}
@@ -126,9 +127,68 @@ function modal(html){$('#modalCard').classList.remove('hsecModal');$('#modal').c
 function button(key,id,primary=false){return `<button id="${id}" class="${primary?'primary':'secondary'}">${esc(t(key))}</button>`;}
 function showSettings(){const curLang=LANGUAGES.find(([l])=>l===prefs.lang);const curQ=loadQuality();const qLabels={low:t('quality_low'),balanced:t('quality_balanced'),high:t('quality_high')};modal(`<span class="eyebrow">${esc(t('settings'))}</span><h2>${esc(t('settings'))}</h2><div class="selectRow"><label for="profileName">${esc(t('yourName'))}</label><input id="profileName" maxlength="20" value="${esc(s?.playerName||'')}" placeholder="${esc(t('operatorName'))}"></div><div class="selectRow"><label>${esc(t('language'))}</label><div class="langDropdown" id="settingsLangDrop"><div class="langToggle" id="settingsLangToggle">${curLang?curLang[1]:'Español'}</div><div class="langOptions" id="settingsLangOpts">${LANGUAGES.map(([l,name])=>`<button data-lang="${l}" class="${l===prefs.lang?'active':''}">${name}</button>`).join('')}</div></div></div><div class="selectRow"><label>${esc(t('sound'))}</label><input id="soundToggle" type="checkbox" ${prefs.sound?'checked':''}></div><div class="selectRow"><label>${esc(t('graphicsQuality'))}</label><div class="langDropdown" id="settingsQualityDrop"><div class="langToggle" id="settingsQualityToggle">${esc(qLabels[curQ]||qLabels.balanced)}</div><div class="langOptions" id="settingsQualityOpts">${['low','balanced','high'].map(id=>`<button data-quality="${id}" class="${curQ===id?'active':''}">${esc(qLabels[id])}</button>`).join('')}</div></div></div><small class="qualityReadout">${esc(t('qualityHelp'))}</small><p>${esc(t('controls'))}</p><button id="resetCamera" class="textButton">${esc(t('home'))}</button><p>${esc(account?t('linked')+' · '+(account.email||''):t('guestNote'))}</p>${auth.configured?button('google','googleLink'): `<small>${esc(t('googleOff'))}</small>`}<div class="modalActions">${button('titleScreen','goTitle')}${button('close','closeSettings',true)}</div>`);$('#profileName').onchange=e=>{if(!s||phase!=='play')return;try{setPlayerIdentity(s,s.character,e.target.value);save();renderHUD();if(phoneOpen)renderPhone();}catch(err){toast(err.key);}};$('#settingsLangToggle').onclick=e=>{e.stopPropagation();$('#settingsLangDrop').classList.toggle('open');$('#settingsQualityDrop')?.classList.remove('open');};$('#settingsLangOpts').querySelectorAll('[data-lang]').forEach(b=>b.onclick=e=>{e.stopPropagation();language(b.dataset.lang);showSettings();});$('#settingsQualityToggle').onclick=e=>{e.stopPropagation();$('#settingsQualityDrop').classList.toggle('open');$('#settingsLangDrop')?.classList.remove('open');};$('#settingsQualityOpts').querySelectorAll('[data-quality]').forEach(b=>b.onclick=e=>{e.stopPropagation();if(world)applyQuality(world,b.dataset.quality);else try{localStorage.setItem('drillrun-graphics-v1',b.dataset.quality);}catch{}$('#settingsQualityDrop').classList.remove('open');$('#settingsQualityToggle').textContent=b.textContent;$('#settingsQualityOpts').querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');});$('#soundToggle').onchange=e=>{prefs.sound=e.target.checked;wind.set(prefs.sound&&phase==='play');worksiteAudio.set(prefs.sound&&phase==='play');if(s)s.sound=prefs.sound;persistPrefs();save();};$('#closeSettings').onclick=closeModal;$('#resetCamera').onclick=()=>{world&&(world.zoom=1,resetOrbit(world.orbit),world.cameraRig.reset(),persistCamera());closeModal();};$('#goTitle').onclick=()=>{closeModal();stop();save();phase='start';worksiteAudio.set(false);wind.set(false);closePhone();closeBuilder();hidden($('#hud'),true);hidden($('#startScreen'),false);applyText();};if($('#googleLink'))$('#googleLink').onclick=async()=>{try{await auth.signIn();showSettings();}catch{toast('authError');}}; document.querySelector('#modalCard')?.addEventListener('click',()=>{$('#settingsLangDrop')?.classList.remove('open');$('#settingsQualityDrop')?.classList.remove('open');});}
 $('#langToggle').onclick=e=>{e.stopPropagation();$('#startLanguage').classList.toggle('open');};document.addEventListener('click',()=>$('#startLanguage')?.classList.remove('open'));$('#startSettings').onclick=$('#settingsButton').onclick=showSettings;
-function updateStartAccount(){const info=$('#startAccountInfo'),btn=$('#startGoogle');if(account){info.textContent=t('linked')+' · '+(account.email||'');hidden(btn,true);}else if(auth.configured){info.textContent=t('guestNote');hidden(btn,false);}else{info.textContent=t('guestNote');hidden(btn,true);}}
+function updateStartAccount(){
+ const info=$('#startAccountInfo'),btn=$('#startGoogle');
+ if(account){info.textContent=t('linked')+' · '+(account.email||'');hidden(btn,true);}
+ else if(auth.configured){info.textContent=t('guestNote');hidden(btn,false);}
+ else{info.textContent=t('guestNote');hidden(btn,true);}
+ $('#play').disabled=cloudSyncing||cloudLocked;
+ let status=$('#cloudStatus');
+ if(!status){status=document.createElement('small');status.id='cloudStatus';status.style.cssText='display:block;margin:7px 0;color:#afd5e5';info.insertAdjacentElement('afterend',status);}
+ status.textContent=cloudStatus;
+}
+function cloudLock(){
+ if(cloudLocked)return;
+ cloudLocked=true;cloudSyncing=false;cloudStatus='Partida activa en otro dispositivo';
+ stop();
+ if(phase==='play'){closePhone();closeBuilder();hidden($('#hud'),true);}
+ phase='cloud-locked';hidden($('#startScreen'),false);
+ showCloudLock();applyText();
+}
+function showCloudLock(){
+ let box=$('#cloudLockPanel');
+ if(!box){
+  box=document.createElement('div');box.id='cloudLockPanel';box.style.cssText='padding:12px;margin-top:12px;border-radius:12px;border:1px solid #87b3c9;background:#123149;color:white';
+  $('.startCard').append(box);
+ }
+ hidden(box,!cloudLocked);
+ if(!cloudLocked)return;
+ box.innerHTML='<b>Sesión abierta en otro dispositivo</b><p>Este dispositivo dejó de guardar. Puedes retomar el control aquí.</p><button id="takeCloudControl" class="primary" type="button">Jugar aquí</button>';
+ $('#takeCloudControl').onclick=()=>{void reconcileGoogleSave();};
+}
+async function reconcileGoogleSave(){
+ const attempt=++cloudEpoch;
+ cloudSyncing=true;cloudStatus='Sincronizando partida…';updateStartAccount();
+ if(!cloudUserId()){
+  cloudSyncing=false;cloudLocked=false;cloudStatus='Partida local · Conecta Google';showCloudLock();updateStartAccount();return;
+ }
+ const result=await cloudTakeControl(s,cloudLock);
+ if(attempt!==cloudEpoch)return;
+ if(result.status!=='ready'){
+  cloudSyncing=false;cloudLocked=true;cloudStatus='No se pudo sincronizar · No se sobrescribió la partida';
+  phase='cloud-locked';hidden($('#startScreen'),false);hidden($('#hud'),true);showCloudLock();updateStartAccount();return;
+ }
+ const changed=result.source==='cloud'&&!!result.state;
+ if(changed){
+  localStorage.setItem(CONFIG.saveKey,result.raw);
+  s=readSave();hasSave=!!s;
+  if(s?.lang){prefs.lang=s.lang;t=translator(prefs.lang);}
+ }
+ cloudLocked=false;cloudSyncing=false;showCloudLock();
+ cloudStatus=result.source==='device'?'Partida del PC sincronizada con Google':result.source==='cloud'?'Partida de Google recuperada':'Cuenta Google vinculada';
+ if(phase==='cloud-locked')phase='start';
+ applyText();
+ if(changed&&world&&phase==='play'){location.reload();return;}
+ if(changed&&phase==='play')scene?.update(s,0,Date.now());
+ if(s&&hasSave)save();
+}
+
 $('#startGoogle').onclick=async()=>{try{await auth.signIn();}catch{toast('authError');}};
-prepareAuth(user=>{account=user;updateStartAccount();if(user)toast('linked');}).then(async value=>{auth=value;updateStartAccount();await initCloudSave(value);const cloud=await cloudLoad(CONFIG.saveKey);if(cloud){const recovered=restore(cloud);if(recovered&&(!s||recovered.savedAt>s.savedAt)){s=recovered;hasSave=true;prefs.lang=s.lang;t=translator(s.lang);applyText();toast('cloudRestored');}}});
+prepareAuth(user=>{account=user;updateStartAccount();}).then(async value=>{
+ auth=value;updateStartAccount();
+ if(!value.configured){cloudSyncing=false;cloudStatus='Partida local · Google no disponible';updateStartAccount();return;}
+ await initCloudSave(value,async user=>{account=user;updateStartAccount();await reconcileGoogleSave();});
+}).catch(e=>{console.error('[CloudSave] setup:',e);cloudSyncing=false;cloudStatus='Google no disponible · Partida local';updateStartAccount();});
 function loadingProgress(done,total){$('#loadProgress').value=done/total;setText($('#loadStage'),new Intl.NumberFormat(prefs.lang,{style:'percent',maximumFractionDigits:0}).format(done/total));}
 async function ensureWorld(forSelection=false){
  if(world){if(forSelection){hidden($('#loading'),false);await avatars.loadAll((n,total)=>{loadingProgress(n,total);});hidden($('#loading'),true);}return;}
@@ -162,8 +222,8 @@ function selectAvatar(id){
 // by the canvas gesture handler, while roster buttons call selectAvatar directly.
 function renderCharacters(){const node=$('#characterSlots');node.innerHTML=CONFIG.protagonists.map((p,i)=>`<button data-character="${p.id}" class="avatarChoice ${selectedAvatar===p.id?'selected':''}" aria-pressed="${selectedAvatar===p.id}"><span class="avatarThumb">${avatars.portrait(p.id)||icon('player')}</span><span><b>${esc(t(p.roleKey))}</b><small>${esc(t(p.labelKey))}</small></span><i>${String(i+1).padStart(2,'0')}</i></button>`).join('');node.querySelectorAll('button').forEach(b=>b.onclick=()=>selectAvatar(b.dataset.character));const p=avatarDefinition(selectedAvatar);setText($('#avatarTitle'),t(p.roleKey));setText($('#avatarDetail'),t(p.summaryKey));$('#avatarPerk').innerHTML=`<span class="perkSymbol">${icon(p.perkIcon)}</span><div><span class="perkHeading">${esc(t('specialtyBonus'))}</span><strong>${esc(t(p.perkKey))}</strong><small class="perkStatus">${icon(p.id==='operator04'?'check':'lock')}${esc(t(p.id==='operator04'?'bonusActive':'bonusFuture'))}</small></div>`;$('#startAdventure').disabled=!avatars.entries.has(p.id)||$('#playerNameInput').value.trim().length<2;hidden($('#provisionalNote'),true);}
 $('#playerNameInput').oninput=renderCharacters;
-$('#play').onclick=async()=>{if(!hasSave)return chooseCharacter();try{requestImmersive();await ensureWorld();s=readSave();if(!s){hasSave=false;return chooseCharacter();}prefs.lang=s.lang;prefs.sound=s.sound;t=translator(s.lang);applyText();hasSave=true;beginPlay(true);}catch(e){console.error(e);toast('invalid');}};
-$('#newGame').onclick=()=>{modal(`<h2>${esc(t('newGame'))}</h2><p>${esc(t('resetAsk'))}</p><div class="modalActions">${button('cancel','keepSave')}${button('confirm','replaceSave',true)}</div>`);$('#keepSave').onclick=closeModal;$('#replaceSave').onclick=()=>{closeModal();chooseCharacter();};};
+$('#play').onclick=async()=>{if(cloudSyncing||cloudLocked)return;if(!hasSave)return chooseCharacter();try{requestImmersive();await ensureWorld();s=readSave();if(!s){hasSave=false;return chooseCharacter();}prefs.lang=s.lang;prefs.sound=s.sound;t=translator(s.lang);applyText();hasSave=true;beginPlay(true);}catch(e){console.error(e);toast('invalid');}};
+$('#newGame').onclick=()=>{if(cloudSyncing||cloudLocked)return;modal(`<h2>${esc(t('newGame'))}</h2><p>${esc(t('resetAsk'))}</p><div class="modalActions">${button('cancel','keepSave')}${button('confirm','replaceSave',true)}</div>`);$('#keepSave').onclick=closeModal;$('#replaceSave').onclick=()=>{closeModal();chooseCharacter();};};
 $('#backStart').onclick=()=>{phase='start';hidden($('#characterScreen'),true);hidden($('#startScreen'),false);s=readSave();hasSave=!!s;applyText();};
 $('#startAdventure').onclick=()=>{try{setPlayerIdentity(s,selectedAvatar,$('#playerNameInput').value);}catch(e){toast(e.key);return;}hasSave=true;avatars.activate(s.character);world.setCharacter(s.character);world.inspect=false;hidden($('#characterScreen'),true);hidden($('#provisionalNote'),true);s.facing=Math.PI;s.position={...CONFIG.spawn};requestImmersive();startCinematic(false,false);save();};
 function requestImmersive(){const el=document.documentElement;if(!document.fullscreenElement&&el.requestFullscreen)el.requestFullscreen({navigationUI:'hide'}).catch(()=>{});}
@@ -895,7 +955,7 @@ addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
 addEventListener('blur',()=>{stop();save();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
 document.addEventListener('pointercancel',()=>{if(pointer!==null)resetJoy();});
-addEventListener('pagehide',()=>{stop();save();});
+addEventListener('pagehide',()=>{stop();save();void cloudFlushNow(CONFIG.saveKey);});
 function move(dt){let x=joy.x,y=joy.y;if(keys.w||keys.arrowup)y--;if(keys.s||keys.arrowdown)y++;if(keys.a||keys.arrowleft)x--;if(keys.d||keys.arrowright)x++;const len=Math.hypot(x,y);x/=Math.max(1,len);y/=Math.max(1,len);let intent=cameraRelativeIntent(x,y,world.cameraRig.heading);
  if(len>.025)target=null;else if(target){const dx=target.x-s.position.x,dz=target.z-s.position.z,d=Math.hypot(dx,dz);if(d<.08)target=null;else intent={x:dx/d*Math.min(1,d/.3),z:dz/d*Math.min(1,d/.3)};}
  return applyMovement(intent,dt);
