@@ -275,3 +275,7 @@ No alterar el progreso M1–M5, los productos reales ni economía de M4.
 
 ## 2026-11-10 — V54 HUD de conducción sin texto
 Faro (apagado gris/encendido amarillo) y freno (ícono rojo al presionar) quedan al borde derecho. Joystick horizontal y teclas se normalizan únicamente para el DrillTruck® personal mediante una transformación antes de llamar a la física. Sin duplicar controles ni modificar el DrillTruck® automático. Mantener los cambios concurrentes de catálogo.
+
+
+## 2026-11-10 — V55 Tránsito y GPU en móvil
+Los pasos pintados nunca actúan como muro. Conservar cercos, edificios, barandas y control HSEC como obstáculos, con una huella vehicular real y la posibilidad de deslizarse por cantos; no eliminar colisionadores. El Catálogo utiliza un contexto WebGL compartido para todas sus imágenes; mundo 3D conserva el contexto prioritario. Una falla de render puede reiniciar la vista solo con guardado preservado; no resetear economía/misiones.

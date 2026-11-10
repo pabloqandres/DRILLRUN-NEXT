@@ -124,6 +124,45 @@ const money=value=>new Intl.NumberFormat(prefs.lang).format(Math.floor(value));
 function toast(key){notices.push({title:t(key),symbol:['noMoney','noEnergy','invalid','outside','accessBlocked','overlap'].includes(key)?'lock':'bell'});}
 function persistPrefs(){try{localStorage.setItem('drillrun-preferences',JSON.stringify(prefs));}catch{}}
 function save(){if(!s||!hasSave||phase==='character'||reviewBackup!==null||cloudSyncing||cloudLocked)return;try{s.savedAt=Date.now();localStorage.setItem(CONFIG.saveKey,JSON.stringify(s));cloudSave(CONFIG.saveKey);setText($('#saveStatus'),t('saved'));}catch{setText($('#saveStatus'),t('saveError'));}}
+// Graphics fallback is never a game reset: always persist first, then
+// recreate ONLY the WebGL session. Existing Cloud/Local Save remains intact.
+function restart3DView(){
+ stop();try{save();}catch(error){console.warn('[RenderRecovery] save:',error);}
+ location.reload();
+}
+function installWorldRenderRecovery(){
+ if(!world?.renderer?.domElement||world.renderer.isSoftwareRenderer)return;
+ const canvas=world.renderer.domElement;
+ let timer=null;
+ const message=()=>{
+  let box=document.querySelector('#worldRenderRecovery');
+  if(box)return box;
+  box=document.createElement('div');box.id='worldRenderRecovery';
+  box.setAttribute('role','alertdialog');box.setAttribute('aria-label','Recuperar visualización 3D');
+  box.innerHTML='<div><b>Restableciendo motor gráfico</b><p>La vista 3D se desconectó. Tu partida sigue guardada.</p><button id="recoverGameView" type="button">Reanudar partida</button></div>';
+  box.querySelector('button').onclick=restart3DView;
+  document.body.append(box);return box;
+ };
+ canvas.addEventListener('webglcontextlost',event=>{
+  event.preventDefault(); // permit WebGL context restore
+  console.warn('[DRILL RUN] 3D context lost; recover without resetting the save');
+  stop();save();message();
+  // One automatic retry only; if the device repeatedly loses GPU context,
+  // leave the manual recovery button instead of entering a reload loop.
+  const key='drillrun-render-retry-v55';
+  let previous=0;try{previous=Number(sessionStorage.getItem(key))||0;}catch{}
+  if(Date.now()-previous>90_000){
+   try{sessionStorage.setItem(key,String(Date.now()));}catch{}
+   clearTimeout(timer);timer=setTimeout(restart3DView,2200);
+  }
+ },false);
+ canvas.addEventListener('webglcontextrestored',()=>{
+  clearTimeout(timer);timer=null;
+  document.querySelector('#worldRenderRecovery')?.remove();
+  world.resize();world.snapCamera=true;
+  console.info('[DRILL RUN] 3D context restored');
+ },false);
+}
 function language(value){prefs.lang=value;t=translator(value);if(s)s.lang=value;persistPrefs();applyText();save();if(phoneOpen)renderPhone();}
 function languageOptions(){return LANGUAGES.map(([l,name])=>`<option value="${l}" ${l===prefs.lang?'selected':''}>${name}</option>`).join('');}
 function updateLangDropdown(){const toggle=$('#langToggle'),opts=$('#langOptions');if(!toggle||!opts)return;const cur=LANGUAGES.find(([l])=>l===prefs.lang);toggle.textContent=cur?cur[1]:'Español';opts.innerHTML=LANGUAGES.map(([l,name])=>`<button data-lang="${l}" class="${l===prefs.lang?'active':''}">${name}</button>`).join('');opts.querySelectorAll('[data-lang]').forEach(b=>b.onclick=e=>{e.stopPropagation();language(b.dataset.lang);$('#startLanguage').classList.remove('open');});}
@@ -149,7 +188,7 @@ function stop(){resetJoy();keys={};target=null;motion.vx=motion.vz=motion.speed=
 function closeModal(){if(hsecUI)hsecUI.panelOpen=false;$('#modalCard').classList.remove('hsecModal');officePanelPreview?.dispose();officePanelPreview=null;scene?.setUpgradePreview(null);managingOffice=false;hidden($('#modal'),true);$('#modal').classList.remove('buildPreview','moduleSheet','upgradeSheet','officeQuick');modalOpen=false;blueprint=builderOpen&&!!selectedBuildModule;}
 function modal(html){$('#modalCard').classList.remove('hsecModal');$('#modal').classList.remove('buildPreview');hsecWorld?.showAssetCard(null);stop();modalOpen=true;hidden($('#modal'),false);$('#modalCard').innerHTML=`<button id="modalDismiss" class="modalDismiss" aria-label="${esc(t('close'))}">${icon('close')}</button>`+html;$('#modalDismiss').onclick=closeModal;$('#modalCard').scrollTop=0;$('#modalCard').setAttribute('role','dialog');$('#modalCard').setAttribute('aria-modal','true');const heading=$('#modalCard h2');if(heading){heading.id='modalHeading';$('#modalCard').setAttribute('aria-labelledby','modalHeading');}}
 function button(key,id,primary=false){return `<button id="${id}" class="${primary?'primary':'secondary'}">${esc(t(key))}</button>`;}
-function showSettings(){const curLang=LANGUAGES.find(([l])=>l===prefs.lang);const curQ=loadQuality();const qLabels={low:t('quality_low'),balanced:t('quality_balanced'),high:t('quality_high')};modal(`<span class="eyebrow">${esc(t('settings'))}</span><h2>${esc(t('settings'))}</h2><div class="selectRow"><label for="profileName">${esc(t('yourName'))}</label><input id="profileName" maxlength="20" value="${esc(s?.playerName||'')}" placeholder="${esc(t('operatorName'))}"></div><div class="selectRow"><label>${esc(t('language'))}</label><div class="langDropdown" id="settingsLangDrop"><div class="langToggle" id="settingsLangToggle">${curLang?curLang[1]:'Español'}</div><div class="langOptions" id="settingsLangOpts">${LANGUAGES.map(([l,name])=>`<button data-lang="${l}" class="${l===prefs.lang?'active':''}">${name}</button>`).join('')}</div></div></div><div class="selectRow"><label>${esc(t('sound'))}</label><input id="soundToggle" type="checkbox" ${prefs.sound?'checked':''}></div><div class="selectRow"><label>${esc(t('graphicsQuality'))}</label><div class="langDropdown" id="settingsQualityDrop"><div class="langToggle" id="settingsQualityToggle">${esc(qLabels[curQ]||qLabels.balanced)}</div><div class="langOptions" id="settingsQualityOpts">${['low','balanced','high'].map(id=>`<button data-quality="${id}" class="${curQ===id?'active':''}">${esc(qLabels[id])}</button>`).join('')}</div></div></div><small class="qualityReadout">${esc(t('qualityHelp'))}</small><p>${esc(t('controls'))}</p><button id="resetCamera" class="textButton">${esc(t('home'))}</button><p>${esc(account?t('linked')+' · '+(account.email||''):t('guestNote'))}</p>${auth.configured?button('google','googleLink'): `<small>${esc(t('googleOff'))}</small>`}${account?'<button id="cloudSyncNow" class="secondary" type="button">Sincronizar partida ahora</button><small id="cloudSyncNowStatus"></small>':''}<div class="modalActions">${button('titleScreen','goTitle')}${button('close','closeSettings',true)}</div>`);$('#profileName').onchange=e=>{if(!s||phase!=='play')return;try{setPlayerIdentity(s,s.character,e.target.value);save();renderHUD();if(phoneOpen)renderPhone();}catch(err){toast(err.key);}};$('#settingsLangToggle').onclick=e=>{e.stopPropagation();$('#settingsLangDrop').classList.toggle('open');$('#settingsQualityDrop')?.classList.remove('open');};$('#settingsLangOpts').querySelectorAll('[data-lang]').forEach(b=>b.onclick=e=>{e.stopPropagation();language(b.dataset.lang);showSettings();});$('#settingsQualityToggle').onclick=e=>{e.stopPropagation();$('#settingsQualityDrop').classList.toggle('open');$('#settingsLangDrop')?.classList.remove('open');};$('#settingsQualityOpts').querySelectorAll('[data-quality]').forEach(b=>b.onclick=e=>{e.stopPropagation();if(world)applyQuality(world,b.dataset.quality);else try{localStorage.setItem('drillrun-graphics-v1',b.dataset.quality);}catch{}$('#settingsQualityDrop').classList.remove('open');$('#settingsQualityToggle').textContent=b.textContent;$('#settingsQualityOpts').querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');});$('#soundToggle').onchange=e=>{prefs.sound=e.target.checked;wind.set(prefs.sound&&phase==='play');worksiteAudio.set(prefs.sound&&phase==='play');if(s)s.sound=prefs.sound;persistPrefs();save();};$('#closeSettings').onclick=closeModal;$('#resetCamera').onclick=()=>{world&&(world.zoom=1,resetOrbit(world.orbit),world.cameraRig.reset(),persistCamera());closeModal();};$('#goTitle').onclick=()=>{closeModal();stop();save();phase='start';worksiteAudio.set(false);wind.set(false);closePhone();closeBuilder();hidden($('#hud'),true);hidden($('#startScreen'),false);applyText();};if($('#googleLink'))$('#googleLink').onclick=async()=>{try{await auth.signIn();showSettings();}catch(err){cloudStatus='Google: '+(err.code||err.message||'error');updateStartAccount();toast('authError');}};
+function showSettings(){const curLang=LANGUAGES.find(([l])=>l===prefs.lang);const curQ=loadQuality();const qLabels={low:t('quality_low'),balanced:t('quality_balanced'),high:t('quality_high')};modal(`<span class="eyebrow">${esc(t('settings'))}</span><h2>${esc(t('settings'))}</h2><div class="selectRow"><label for="profileName">${esc(t('yourName'))}</label><input id="profileName" maxlength="20" value="${esc(s?.playerName||'')}" placeholder="${esc(t('operatorName'))}"></div><div class="selectRow"><label>${esc(t('language'))}</label><div class="langDropdown" id="settingsLangDrop"><div class="langToggle" id="settingsLangToggle">${curLang?curLang[1]:'Español'}</div><div class="langOptions" id="settingsLangOpts">${LANGUAGES.map(([l,name])=>`<button data-lang="${l}" class="${l===prefs.lang?'active':''}">${name}</button>`).join('')}</div></div></div><div class="selectRow"><label>${esc(t('sound'))}</label><input id="soundToggle" type="checkbox" ${prefs.sound?'checked':''}></div><div class="selectRow"><label>${esc(t('graphicsQuality'))}</label><div class="langDropdown" id="settingsQualityDrop"><div class="langToggle" id="settingsQualityToggle">${esc(qLabels[curQ]||qLabels.balanced)}</div><div class="langOptions" id="settingsQualityOpts">${['low','balanced','high'].map(id=>`<button data-quality="${id}" class="${curQ===id?'active':''}">${esc(qLabels[id])}</button>`).join('')}</div></div></div><small class="qualityReadout">${esc(t('qualityHelp'))}</small><p>${esc(t('controls'))}</p><button id="recoverView3D" class="secondary" type="button">Restablecer vista 3D (conservar partida)</button><button id="resetCamera" class="textButton">${esc(t('home'))}</button><p>${esc(account?t('linked')+' · '+(account.email||''):t('guestNote'))}</p>${auth.configured?button('google','googleLink'): `<small>${esc(t('googleOff'))}</small>`}${account?'<button id="cloudSyncNow" class="secondary" type="button">Sincronizar partida ahora</button><small id="cloudSyncNowStatus"></small>':''}<div class="modalActions">${button('titleScreen','goTitle')}${button('close','closeSettings',true)}</div>`);$('#profileName').onchange=e=>{if(!s||phase!=='play')return;try{setPlayerIdentity(s,s.character,e.target.value);save();renderHUD();if(phoneOpen)renderPhone();}catch(err){toast(err.key);}};$('#settingsLangToggle').onclick=e=>{e.stopPropagation();$('#settingsLangDrop').classList.toggle('open');$('#settingsQualityDrop')?.classList.remove('open');};$('#settingsLangOpts').querySelectorAll('[data-lang]').forEach(b=>b.onclick=e=>{e.stopPropagation();language(b.dataset.lang);showSettings();});$('#settingsQualityToggle').onclick=e=>{e.stopPropagation();$('#settingsQualityDrop').classList.toggle('open');$('#settingsLangDrop')?.classList.remove('open');};$('#settingsQualityOpts').querySelectorAll('[data-quality]').forEach(b=>b.onclick=e=>{e.stopPropagation();if(world)applyQuality(world,b.dataset.quality);else try{localStorage.setItem('drillrun-graphics-v1',b.dataset.quality);}catch{}$('#settingsQualityDrop').classList.remove('open');$('#settingsQualityToggle').textContent=b.textContent;$('#settingsQualityOpts').querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');});$('#soundToggle').onchange=e=>{prefs.sound=e.target.checked;wind.set(prefs.sound&&phase==='play');worksiteAudio.set(prefs.sound&&phase==='play');if(s)s.sound=prefs.sound;persistPrefs();save();};$('#closeSettings').onclick=closeModal;$('#recoverView3D').onclick=restart3DView;$('#resetCamera').onclick=()=>{world&&(world.zoom=1,resetOrbit(world.orbit),world.cameraRig.reset(),persistCamera());closeModal();};$('#goTitle').onclick=()=>{closeModal();stop();save();phase='start';worksiteAudio.set(false);wind.set(false);closePhone();closeBuilder();hidden($('#hud'),true);hidden($('#startScreen'),false);applyText();};if($('#googleLink'))$('#googleLink').onclick=async()=>{try{await auth.signIn();showSettings();}catch(err){cloudStatus='Google: '+(err.code||err.message||'error');updateStartAccount();toast('authError');}};
 if($('#cloudSyncNow'))$('#cloudSyncNow').onclick=async()=>{
  const status=$('#cloudSyncNowStatus');
  if(cloudSyncing||cloudLocked){if(status)status.textContent='Esta sesión todavía no puede guardar en la nube';return;}
@@ -235,6 +274,7 @@ async function ensureWorld(forSelection=false){
  if(world){if(forSelection){hidden($('#loading'),false);await avatars.loadAll((n,total)=>{loadingProgress(n,total);});hidden($('#loading'),true);}return;}
  hidden($('#loading'),false);loadingProgress(0,forSelection?4:2);
  world=new World($('#world'),{chapter:true,cameraSettings:loadCameraSettings()});scene=new ChapterScene(world);
+ installWorldRenderRecovery();
  // Non-blocking availability check: do not unlock the M5 SMS when custom
  // user GLBs are still absent from the production build.
  probeM5Assets().catch(()=>{});
@@ -244,7 +284,13 @@ async function ensureWorld(forSelection=false){
  hsecWorld.onUpgrade=(assetId)=>{try{upgradeAsset(s,assetId);save();renderHUD();notices.push({title:'Superficie mejorada',symbol:'⬆'});}catch(e){notices.push({title:e.message,symbol:'⚠️'});}};
  hsecWorld.onRemove=(assetId)=>{try{retireAsset(s,assetId);save();renderHUD();notices.push({title:'Activo retirado',symbol:'🗑'});}catch(e){notices.push({title:e.message,symbol:'⚠️'});};};hsecUI=new HsecUI({state:()=>s,world:hsecWorld,format:money,onSave:()=>{scene.update(s,0,Date.now());hsecWorld.update(s,0,'play');ensureSafe();save();renderHUD();},onStop:stop,notify:text=>notices.push({title:text,symbol:'bell'}),showModal:modal,hideModal:closeModal,openBuilder,closeBuilder,manageOffice,onGoto:p=>{target={x:p.x,z:p.z};}});builderUI.hsec=hsecUI;guidance=new ObjectiveGuide(world,$('#hud'),()=>t);constructionCallout=new ConstructionCallout(world,$('#buildHud'));characterStage=new CharacterStage(world);await world.characterReady;avatars=new AvatarRoster(world);loadingProgress(1,forSelection?4:2);
  if(forSelection)await avatars.loadAll((done,total)=>{loadingProgress(done,total);});else await avatars.load(s?.character||'operator01');
- avatars.activate(s?.character||'operator01');builderUI.world=world;builderUI.thumbnail=officeThumbnail(world);world.inspect=false;motion.turnBeforeMove=true;world.player.userData.validationCanvas=world.renderer.domElement;
+ avatars.activate(s?.character||'operator01');builderUI.world=world;
+ try{builderUI.thumbnail=officeThumbnail(world);}catch(error){
+  // The world's WebGL context is always more important than a catalog image.
+  console.warn('[Catalog] Initial office thumbnail skipped:',error);
+  builderUI.thumbnail=null;
+ }
+ world.inspect=false;motion.turnBeforeMove=true;world.player.userData.validationCanvas=world.renderer.domElement;
  installWorldGestures(world.renderer.domElement,{canLook:()=>phase==='character'||phase==='play'&&!locomotionReview?.active&&(!modalOpen||managingOffice)&&!phoneOpen&&!faenaCenter?.visible&&!busy,dragAnywhere:()=>builderOpen||managingOffice,onLook:(dx,dy)=>{if(phase!=='play')return;target=null;if(builderOpen&&(hsecUI?.drawing||hsecUI?.coneZone)){
   // Move the aerial camera independently; do not move the placement asset.
   const zoom=world.cameraRig.builderZoom||22,panScale=zoom*.0018;
@@ -866,7 +912,13 @@ function nearInteraction(){if(!s)return null;
  return null;
 }
 $('#handButton').onclick=()=>{if(busy||modalOpen||phoneOpen||builderOpen||placement)return;const a=phase==='play'?nearInteraction():null;if(!a)return;if(a.kind==='personalTruck'){togglePersonalTruck();return;}if(a.kind==='m5Staff'){openFaena('personnel');return;}if(a.kind==='hsecAsset'){hsecUI.open('assets');return;}if(a.kind==='clear'){if(s.energy<CONFIG.clearCost)return toast('noEnergy');busy={object:a.object,elapsed:0};stop();sound('clear');}else if(a.kind==='build')showBuild();else if(a.kind==='boost')action(()=>accelerate(s));else if(a.kind==='workshop'){openFaena('workshop');return;}else if(a.kind==='warehouse'){openFaena('logistics');return;}else if(a.kind==='enter')enterOffice();else if(a.kind==='exit'){transition('exitTransition');s.inside=false;s.position={...CONFIG.officeSlot.access};world.worker.reset();stop();save();}else if(a.kind==='computer'){if(!s.chapterCompletedAt){action(()=>useOfficeComputer(s));sound('finish');/* reward modal deferred to narrative confirmCompletion */return;}hsecUI.open();return;modal(`<span class="eyebrow">${esc(t('computer'))}</span><h2>${esc(t('next'))}</h2><p>${esc(t('nextDetail'))}</p><div class="modalActions">${button('close','closeComputer',true)}</div>`);$('#closeComputer').onclick=closeModal;}};
-function openBuilder(){if(phase!=='play'||placement||busy)return;closeFaena();
+function openBuilder(){
+ if(phase!=='play'||placement||busy)return;
+ if(personalTruck(s)?.mode==='driving'){
+  notices.push({title:'Detén y estaciona el DrillTruck® antes de abrir Catálogo',detail:'Usa la mano para salir del vehículo',symbol:'lock'});
+  return;
+ }
+ closeFaena();
  catalogPreviewWalk=false;hidden($('#endBuildPreviewWalk'),true);
  if(!isMissionAccepted(s,'m1')&&!isMissionCollected(s,'m1')){
   showPendingMissionMessage();return;
@@ -1100,6 +1152,8 @@ function workshopConfirmDemolish(){
 function hideWorkshopCard(){const wc=$('#workshopCard');if(wc)wc.hidden=true;workshopCardOpen=false;workshopDemolishPending=false;}
 function renderHUD(){if(!s)return;
  const driving=personalTruck(s)?.mode==='driving';
+ const catalogNav=$('#bottomNav [data-nav="builder"]');
+ if(catalogNav){catalogNav.disabled=driving;catalogNav.setAttribute('aria-disabled',String(driving));}
  document.body.classList.toggle('drilltruckDriving',driving);
  hidden($('#personalTruckBrake'),!driving);
  hidden($('#personalTruckLights'),!driving);

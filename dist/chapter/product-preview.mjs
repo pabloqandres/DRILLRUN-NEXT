@@ -5,13 +5,43 @@ import {moduleFixtures} from './module-catalog.mjs';
 import {furnitureModel} from './furniture.mjs';
 import {fitPreviewCamera} from './preview-framing.mjs';
 import {createDrillModel} from '../mission3/drill-models.mjs';
+// The Catalog's static snapshots share ONE offscreen WebGL context. Android
+// browsers often lose the MAIN gameplay context after 8–16 independent
+// renderers; creating/destroying one for every HSEC product is not safe.
+let snapshotRenderer=null;
+function sharedSnapshotRenderer(){
+ if(!snapshotRenderer||snapshotRenderer.getContext?.()?.isContextLost?.()){
+  snapshotRenderer=new T.WebGLRenderer({
+   antialias:false,alpha:true,preserveDrawingBuffer:true,powerPreference:'low-power'
+  });
+  snapshotRenderer.setClearColor(0,0);
+  snapshotRenderer.setPixelRatio(Math.min(devicePixelRatio,1));
+  snapshotRenderer.outputColorSpace=T.SRGBColorSpace;
+  snapshotRenderer.toneMapping=T.ACESFilmicToneMapping;
+  snapshotRenderer.toneMappingExposure=1.1;
+ }
+ return snapshotRenderer;
+}
 // One demand-rendered view. Same mesh factory and variants as the installed object.
 export class ProductPreview{
- constructor(host,world,{transparent=false}={}){
+ constructor(host,world,{transparent=false,ephemeral=false}={}){
   this.host=host;this.world=world;this.transparent=transparent;this.scene=new T.Scene();this.scene.background=transparent?null:new T.Color(0x152c40);this.camera=new T.PerspectiveCamera(36,1,.01,60);this.angle=-.65;
   this.scene.add(new T.HemisphereLight(0xfff5e5,0x79746d,2.5));const sun=new T.DirectionalLight(0xfff0d7,2.8);sun.position.set(-3,5,4);this.scene.add(sun);
-  if(world.renderer.isSoftwareRenderer)this.renderer=new SoftwareRenderer({alpha:transparent});else try{this.renderer=new T.WebGLRenderer({antialias:true,alpha:transparent,preserveDrawingBuffer:transparent,powerPreference:'low-power'});if(transparent)this.renderer.setClearColor(0,0);}catch{this.renderer=new SoftwareRenderer({alpha:transparent});}
-  this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));this.renderer.outputColorSpace=T.SRGBColorSpace;this.renderer.toneMapping=T.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.1;host.prepend(this.renderer.domElement);
+  this.sharedRenderer=false;
+  if(world.renderer.isSoftwareRenderer)this.renderer=new SoftwareRenderer({alpha:transparent});
+  else try{
+   if(ephemeral&&transparent){
+    this.renderer=sharedSnapshotRenderer();
+    this.sharedRenderer=true;
+   }else{
+    this.renderer=new T.WebGLRenderer({antialias:false,alpha:transparent,preserveDrawingBuffer:transparent,powerPreference:'low-power'});
+    if(transparent)this.renderer.setClearColor(0,0);
+   }
+  }catch(error){
+   console.warn('[Catalog] WebGL preview unavailable; using safe fallback',error);
+   this.renderer=new SoftwareRenderer({alpha:transparent});
+  }
+  this.renderer.setPixelRatio(Math.min(devicePixelRatio,1));this.renderer.outputColorSpace=T.SRGBColorSpace;this.renderer.toneMapping=T.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.1;host.prepend(this.renderer.domElement);
   this.renderer.domElement.setAttribute('aria-label',host.dataset.previewLabel||'3D');this.renderer.domElement.setAttribute('role','img');
   if(!transparent){const ground=new T.Mesh(new T.PlaneGeometry(30,30),world.mat(0x183044));ground.rotation.x=-Math.PI/2;ground.position.y=-.015;this.scene.add(ground);}
   this.observer=new ResizeObserver(()=>this.draw());this.observer.observe(host);let x=0,pointer=null;
@@ -45,7 +75,26 @@ export class ProductPreview{
  rotate(delta){this.angle+=delta;this.draw();}
  draw(){if(!this.model)return;if(this.interior){this.model.traverse(o=>{if(o.isGroup&&o.name.startsWith('03 ·'))o.visible=false;if(o.isGroup&&o.name.startsWith('04 ·'))o.visible=Math.cos(this.angle)<0;if(o.isGroup&&o.name.startsWith('05 ·'))o.visible=Math.cos(this.angle)>=0;if(o.isGroup&&o.name.startsWith('06 ·'))o.visible=Math.sin(this.angle)>=0;if(o.isGroup&&o.name.startsWith('07 ·'))o.visible=Math.sin(this.angle)<0;});}const width=this.host.clientWidth,height=this.host.clientHeight;if(width<2||height<2)return;this.renderer.setSize(width,height);fitPreviewCamera(this.camera,new T.Box3().setFromObject(this.model),width/height,this.angle);this.renderer.staticFrame=null;this.renderer.last=0;this.renderer.render(this.scene,this.camera);}
  releaseModel(){if(!this.model)return;this.model.traverse(o=>{o.geometry?.dispose();if(o.isLineSegments)o.material.dispose();});this.model.removeFromParent();this.model=null;}
- dispose(){this.observer.disconnect();this.releaseModel();this.scene.traverse(o=>o.geometry?.dispose());this.renderer.dispose?.();this.renderer.domElement.remove();this.host.onpointerdown=this.host.onpointermove=this.host.onpointerup=this.host.onpointercancel=null;}
+ dispose(){
+  this.observer.disconnect();
+  this.releaseModel();
+  this.scene.traverse(o=>o.geometry?.dispose());
+  // A WebGLRenderer.dispose() frees textures/buffers but DOES NOT necessarily
+  // release the browser's WebGL context. The Catalog can make dozens of
+  // transparent thumbnails, exhausting Android's context budget and causing
+  // the separate GAME renderer to display only white.
+  // Each ProductPreview owns its renderer: losing THIS context never touches
+  // the gameplay canvas. Free it explicitly before removing the snapshot.
+  // Never destroy the shared snapshot renderer: its single GPU context is
+  // reused by every following catalog thumbnail. Long-lived interactive
+  // previews DO own separate contexts and must release them on close.
+  if(!this.sharedRenderer){
+   this.renderer.dispose?.();
+   if(!this.renderer.isSoftwareRenderer)this.renderer.forceContextLoss?.();
+  }
+  this.renderer.domElement.remove();
+  this.host.onpointerdown=this.host.onpointermove=this.host.onpointerup=this.host.onpointercancel=null;
+ }
 }
 
 // The M3 equipment panel uses the very same physical rig model as the world.
@@ -57,7 +106,7 @@ export function rcDrillThumbnail(world,drillId){
  document.body.append(host);
  let preview=null;
  try{
-  preview=new ProductPreview(host,world,{transparent:true});
+  preview=new ProductPreview(host,world,{transparent:true,ephemeral:true});
   preview.model=createDrillModel(drillId);
   preview.model.visible=true;
   preview.scene.add(preview.model);
@@ -81,7 +130,7 @@ export function patioThumbnail(world,structuralSource){
  document.body.append(host);
  let preview=null;
  try{
-  preview=new ProductPreview(host,world,{transparent:true});
+  preview=new ProductPreview(host,world,{transparent:true,ephemeral:true});
   preview.angle=-.76;
   preview.setBuilding(structuralSource);
   preview.draw();
@@ -108,7 +157,7 @@ export function workshopThumbnail(world,level=1){
   if(advancedRoof)advancedRoof.visible=level>=2;
   const models=[base];
   if(level>=2&&world._workshopExt)models.push(world._workshopExt);
-  preview=new ProductPreview(host,world,{transparent:true});
+  preview=new ProductPreview(host,world,{transparent:true,ephemeral:true});
   preview.setBuilding(models);
   return cutoutPNG(preview.renderer.domElement);
  }finally{
@@ -128,7 +177,7 @@ export function officeThumbnail(world,level=1){
  document.body.append(host);
  let preview=null;
  try{
-  preview=new ProductPreview(host,world,{transparent:true});
+  preview=new ProductPreview(host,world,{transparent:true,ephemeral:true});
   preview.setModule({id:'office-l'+level,level});
   // When level 2 is built, include the exact installed office extension as well.
   if(level>=2&&world.extension?.children.length){
