@@ -681,7 +681,7 @@ function openPatioPanel(){
   }catch(e){notices.push({title:e.message==='noMoney'?'Saldo insuficiente':e.message,symbol:'lock'});}
  });
 }
-function showMission(){const m4On=s.mission4&&s.mission4.phase!=='inactive';const m3On=s.mission3&&s.mission3.phase!=='inactive';if(m4On){openPhone('m4-operaciones');return;}if(hsecActive(s)&&!(s.hsec.completedAt&&m3On)){hsecUI.open();return;}if(m3On){openPhone('m3-objectives');return;}const obj=objective(s);modal(`<span class="eyebrow">${esc(t('chapter'))}</span><h2>${esc(t(obj))}</h2><p>${esc(t(obj+'Detail'))}</p><div class="modalActions">${button('close','closeMission',true)}</div>`);$('#closeMission').onclick=closeModal;}
+function showMission(){if(s?.mission5&&s.mission5.status!=='locked'){openPhone('m5-patio');return;}const m4On=s.mission4&&s.mission4.phase!=='inactive';const m3On=s.mission3&&s.mission3.phase!=='inactive';if(m4On){openPhone('m4-operaciones');return;}if(hsecActive(s)&&!(s.hsec.completedAt&&m3On)){hsecUI.open();return;}if(m3On){openPhone('m3-objectives');return;}const obj=objective(s);modal(`<span class="eyebrow">${esc(t('chapter'))}</span><h2>${esc(t(obj))}</h2><p>${esc(t(obj+'Detail'))}</p><div class="modalActions">${button('close','closeMission',true)}</div>`);$('#closeMission').onclick=closeModal;}
 $('#boostButton').onclick=()=>action(()=>accelerate(s));
 function enterOffice(){if(s.office.status!=='built'||pendingConstruction(s))return;transition('entryTransition');stop();world.office.userData.api.opened.entry=true;world.office.userData.api.angles.entry=Math.PI/2;s.position={x:-7.99,z:-.5};s.inside=true;s.hasEntered=true;world.worker.reset();$('#shade').classList.remove('entryFade');void $('#shade').offsetWidth;$('#shade').classList.add('entryFade');resetOrbit(world.orbit);syncUIEvents();save();renderHUD();}
 function playerLevel(s){let lvl=1;if(s.cleared.length>=16)lvl=2;if(s.office.status==='built')lvl=3;if(s.chapterCompletedAt)lvl=4;if(s.hsec?.completedAt)lvl=5;if(s.mission3&&s.mission3.phase!=='inactive')lvl=6;if(s.mission3?.phase==='drilling'||s.mission3?.phase==='delivery')lvl=7;if(s.mission3?.phase==='complete')lvl=8;if(s.mission4&&s.mission4.phase!=='inactive')lvl=9;if(s.mission4?.phase==='complete')lvl=10;return lvl;}
@@ -852,7 +852,7 @@ function renderHUD(){if(!s)return;
  // Mission objectives appear only after the opening message is accepted.
  hidden($('#objective'),!narrativeMission);
  $('#phoneButton').classList.toggle('missionAwaiting',!!pendingMissionReply());
- setText($('#cashValue'),money(s.cash));setText($('#energyValue'),Math.floor(s.energy)+' / '+CONFIG.maxEnergy);setText($('#boostValue'),s.boosters);const unread=unreadMessages(s).length;hidden($('#phoneBadge'),!unread);setText($('#phoneBadge'),unread);if(avatars&&lastPortraitId!==s.character){lastPortraitId=s.character;$('#playerAvatar').innerHTML=avatars.portrait(s.character);}$('#hud').dataset.avatar=s.character;setText($('#playerName'),s.playerName||t('operatorName'));const lvl=playerLevel(s);setText($('#levelValue'),lvl);const m3On=s.mission3&&s.mission3.phase!=='inactive';const m4HudOn=s.mission4&&s.mission4.phase!=='inactive';const missionSub=m4HudOn?(s.mission4.phase==='complete'?'Misión 4 · Completada':'Misión 4 · Automatiza tu operación'):m3On?(s.mission3.phase==='complete'?'Misión 3 · Completada':'Misión 3 · Tu primer contrato'):s.hsec?.completedAt?'Misión 2 · Completada':s.chapterCompletedAt?'Misión 1 · Completada':'Misión 1 · '+t('firstSteps');setText($('#playerMission'),
+ setText($('#cashValue'),money(s.cash));setText($('#energyValue'),Math.floor(s.energy)+' / '+CONFIG.maxEnergy);setText($('#boostValue'),s.boosters);const unread=unreadMessages(s).length;hidden($('#phoneBadge'),!unread);setText($('#phoneBadge'),unread);if(avatars&&lastPortraitId!==s.character){lastPortraitId=s.character;$('#playerAvatar').innerHTML=avatars.portrait(s.character);}$('#hud').dataset.avatar=s.character;setText($('#playerName'),s.playerName||t('operatorName'));const lvl=playerLevel(s);setText($('#levelValue'),lvl);const m3On=s.mission3&&s.mission3.phase!=='inactive';const m4HudOn=s.mission4&&s.mission4.phase!=='inactive';const missionSub=s.mission5?(s.mission5.status==='operational'?'Misión 5 · Patio operativo':'Misión 5 · Patio de Maquinarias'):m4HudOn?(s.mission4.phase==='complete'?'Misión 4 · Completada':'Misión 4 · Automatiza tu operación'):m3On?(s.mission3.phase==='complete'?'Misión 3 · Completada':'Misión 3 · Tu primer contrato'):s.hsec?.completedAt?'Misión 2 · Completada':s.chapterCompletedAt?'Misión 1 · Completada':'Misión 1 · '+t('firstSteps');setText($('#playerMission'),
  !isMissionAccepted(s,'m1')&&!isMissionCollected(s,'m1')?'Esperando mensaje de bienvenida':
  !narrativeMission?'Esperando nueva misión':missionSub);$('#playerProgress').style.width=(s.chapterCompletedAt?100:s.office.status==='built'?66:s.cleared.length===16?33:Math.round(s.cleared.length/16*33))+'%';
  /* Geo analysis floating card */
@@ -996,9 +996,11 @@ function renderHUD(){if(!s)return;
   const hsecNav=$('#bottomNav [data-nav="hsec"]');
   if(hsecNav)hidden(hsecNav,m4DockUnlocked);
  const job=pendingConstruction(s),building=!!job;hidden($('#buildHud'),!building);if(building){const seconds=Math.max(0,Math.ceil((job.ends-Date.now())/1000));setText($('#buildTime'),String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0'));$('#buildProgress').value=progress(s);$('#boostButton').disabled=s.boosters<1;}
+ const pBuild=$('#patioBuildHud'),m5Job=s?.mission5?.status==='building';
+ if(pBuild){hidden(pBuild,!m5Job);if(m5Job){const p=patioProgress(s);setText($('#patioBuildTime'),String(Math.floor(p.remainingSeconds/60)).padStart(2,'0')+':'+String(p.remainingSeconds%60).padStart(2,'0'));setText($('#patioBuildPhase'),p.label||'En construcción');$('#patioBuildProgress').style.width=(p.progress*100)+'%';}}
  const a=phase==='play'?nearInteraction():null;$('#handButton').disabled=!a||!!busy||!!a?.blocked;$('#handButton').classList.toggle('available',!!a&&!a.blocked);$('#handButton').classList.toggle('blocked',!!a?.blocked);scene?.setInteraction(a,s);$('#handButton').setAttribute('aria-label',a?t(a.blocked?'noEnergy':a.kind==='boost'?'boostAction':a.label):t('hand'));$('#handButton').style.setProperty('--action-progress',busy?Math.min(1,busy.elapsed/CONFIG.clearSeconds):0);$('#handButton').style.opacity=a||busy?'1':'.45';document.body.classList.toggle('interior',s.inside);if(obj!==lastObjective){lastObjective=obj;$('#hud').dataset.objective=obj;}$('#hud').dataset.cleared=s.cleared.length;$('#hud').dataset.chapterComplete=String(!!s.chapterCompletedAt);
 }
-function openPhone(app='home'){if(placement||phase!=='play')return;stop();closeBuilder();hsecWorld?.showAssetCard(null);hideDrillCard();hideWorkshopCard();if(!['home','messages','bank','inventory','objectives'].includes(app)&&!app.startsWith('m3-')&&!app.startsWith('m4-'))app='messages';stop();phoneApp=app;phoneOpen=true;hidden($('#phone'),false);hidden($('#phoneShade'),false);document.body.classList.add('phoneOpen');renderPhone();}
+function openPhone(app='home'){if(placement||phase!=='play')return;stop();closeBuilder();hsecWorld?.showAssetCard(null);hideDrillCard();hideWorkshopCard();if(!['home','messages','bank','inventory','objectives'].includes(app)&&!app.startsWith('m3-')&&!app.startsWith('m4-')&&!app.startsWith('m5-'))app='messages';stop();phoneApp=app;phoneOpen=true;hidden($('#phone'),false);hidden($('#phoneShade'),false);document.body.classList.add('phoneOpen');renderPhone();}
 function closePhone(){stop();phoneUI.release();phoneOpen=false;hidden($('#phoneShade'),true);hidden($('#phone'),true);document.body.classList.remove('phoneOpen');}
 const phoneUI=new PhoneUI({shell:$('#phone'),content:$('#phoneContent'),title:$('#phoneTitle'),back:$('#phoneBack'),state:()=>s,translate:()=>t,format:money,getWorld:()=>world,onSave:save,onHUD:renderHUD,onNavigate:app=>{if(app==='builder'){openBuilder();return;}phoneApp=app;renderPhone();},onClose:closePhone,onTransfer:(direction,amount)=>{if(action(()=>transfer(s,direction,amount)))notices.push({title:t('transactionDone'),detail:money(s.cash),symbol:'bank'});},
 onM3Action:(type,data)=>{try{
@@ -1034,6 +1036,7 @@ onM4Action:(type,data)=>{try{
 onNarrativeAction:handleNarrativeAction,
 });
 $('#builderButton').onclick=openBuilder;
+$('#patioBuildHud')?.addEventListener('click',()=>{if(phase==='play')openPatioPanel();});
  $$('#bottomNav [data-nav]').forEach(b=>b.onclick=()=>{
   const nav=b.dataset.nav;
   if(nav==='builder'){openBuilder();return;}
@@ -1053,6 +1056,7 @@ $('#hsecInline').onclick=e=>{e.stopPropagation();if(hsecUI)hsecUI.open();};
 let geoRefreshTimer=0;
 const builderUI=new BuilderUI({host:$('#builderPanel'),state:()=>s,translate:()=>t,format:money,onClose:closeBuilder,onSelection:m=>{selectedBuildModule=m;blueprint=!!m;},onConfirm:confirmModule,onInspect:inspectModule,onManage:manageOffice,onWorkshopManage:()=>{showWorkshopCard();},
 onPhoneNav:app=>{closeBuilder();openPhone(app);},
+onPatioAction:()=>openPatioPanel(),
 onCatalogAction:(type,data)=>{try{
  if(type==='buildWorkshop'){buildWorkshop(s);notices.push({title:'Construcción del taller L1 iniciada · 30 s',symbol:'build'});}
  else if(type==='buyDrill'){const d=drillDefinition(data);if(!d)throw new Error('invalid');placeMachineryOrder(s,'drill',data,d.price);notices.push({title:'Perforadora solicitada · en camino',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}
@@ -1095,6 +1099,8 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
  if(phase==='play'&&hsecActive(s)&&isMissionAccepted(s,'m2')&&!document.hidden){ensureHsec(s);hsecElapsed+=dt;if(hsecElapsed>=1){tickHsec(s,hsecElapsed);if(!s.hsec.grantNotified){s.hsec.grantNotified=true;notices.push({title:'Misión 2 · Prepara tu operación',detail:`Capital de desarrollo: ${money(B.startingGrant)} · abre el panel HSEC para comenzar.`,symbol:'hsec:management'});}hsecElapsed=0;hsecUI.cachedEval=evaluation(s);const signature=[s.hsec.revision,s.hsec.orders.map(o=>o.status).join(','),s.hsec.inspection?.id,s.hsec.employee?.blocked,s.hsec.completedAt].join('|');if(signature!==hsecLastSignature){hsecLastSignature=signature;if(s.hsec.employee?.blocked)notices.push({title:'Prevencionista detenido',detail:s.hsec.employee.blocked,symbol:'lock'});if(hsecUI.panelOpen)hsecUI.refresh();if(s.hsec.completedAt&&!s.hsec.completionNotified){s.hsec.completionNotified=true;/* reward modal deferred to narrative confirmCompletion */}
  if(s.hsec.completedAt&&isMissionAccepted(s,'m3')&&canStartMission3(s)&&(!s.mission3||s.mission3.phase==='inactive')){startMission3(s);notices.push({title:'Misión 3 desbloqueada — Tu primer contrato',symbol:'bell'});save();}save();}}moveNpc(s,dt);}
  if(phase==='play'){narrativeTick(dt);/* Workshop L1 construction tick */if(finishWorkshopConstruction(s,Date.now())){save();renderHUD();notices.push({title:'Taller L1 construido',symbol:'bell'});sound('finish');updateMission3Phase(s);}
+ /* M5 fixed modular yard real-time construction. No reward is minted on completion. */
+  if(finishPatio(s,wall)){save();renderHUD();if(phoneOpen)renderPhone();notices.push({title:'Misión 5 · Patio L1 operativo',detail:'Inspección HSEC finalizada · acceso habilitado',symbol:'bell'});sound('finish');}
  /* Workshop upgrade construction tick */const wsJob=workshopUpgradeJob(s);if(wsJob&&Date.now()>=wsJob.ends){finishWorkshopUpgrade(s);save();renderHUD();if(workshopCardOpen)showWorkshopCard();notices.push({title:`Taller ampliado a Nv.${workshopLevel(s)}`,symbol:'bell'});sound('finish');updateMission4Phase(s);}if(workshopCardOpen&&wsJob)showWorkshopCard();world.updateWorkshop(s.workshop);
  initM3Visuals();const m3events=tickMission3(s,dt,wall);if(m3events){for(const e of m3events){if(typeof e==='object'&&e.type==='machineryDelivered'){
   const m=e.machinery;
@@ -1116,12 +1122,14 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
    narrativeTick(1.5);
   }}save();}
   updateM4Visuals(dt);
+  initM5Visuals(wall);
   // Auto-start M4 when M3 completes
   if(s.mission3?.phase==='complete'&&s.contract?.status==='delivered'&&isMissionAccepted(s,'m4')&&canStartMission4(s)&&(!s.mission4||s.mission4.phase==='inactive')){startMission4(s);notices.push({title:'Misión 4 desbloqueada — Automatiza tu operación',symbol:'bell'});save();}
   }
  avatars?.updateSelector(phase==='character',selectedAvatar,s,dt,clock);characterStage?.update(phase==='character',clock,selectedAvatar);
  if(phase==='character'){world.chapterCamera={target:new T.Vector3(-4.55+Math.max(0,Math.min(.5,(730-innerWidth)/324)),1.0,5.35),offset:new T.Vector3(0,.55,6.1)};}
- if(phase!=='character')world.chapterCamera=null;
+ else if(phase==='play'&&patioOverviewUntil>wall)world.chapterCamera={target:new T.Vector3(PATIO_L1.center.x,1,PATIO_L1.center.z),offset:new T.Vector3(39,42,44)};
+ else world.chapterCamera=null;
  world.avatarHeight=avatarDefinition(s.character).height;
 // Catalog browsing (including collapsing) is UI-only: do not force a builder camera.
 // Only an actual HSEC in-world placement/drawing or office preview uses the overhead view.
