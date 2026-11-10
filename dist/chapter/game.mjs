@@ -4,7 +4,7 @@ import {tickMission4,restoreMission4} from '../mission4/tick.mjs';
 import {canStartMission4,startMission4,updateMission4Phase,mission4Phase,mission4Objectives} from '../mission4/mission4-state.mjs';
 import {purchaseDthDrill,installDthTool,assignDthDrillToZone,DTH_DRILLS,DTH_HAMMERS,DTH_BITS,dthHammerDefinition,dthBitDefinition} from '../mission4/drills-dth.mjs';
 import {purchaseDrillTruck,drillTruckInfo,DRILLTRUCK_COST} from '../mission4/drilltruck.mjs';
-import {personalTruck,canOrderPersonalTruck,enterPersonalTruck,exitPersonalTruck,exitPositions,drivePersonalTruck,PERSONAL_DRILLTRUCK_PRICE,PERSONAL_DRILLTRUCK_MODEL} from '../mission5/personal-drilltruck.mjs';
+import {personalTruck,canOrderPersonalTruck,enterPersonalTruck,exitPersonalTruck,exitPositions,drivePersonalTruck,personalTruckVisualSteer,PERSONAL_DRILLTRUCK_PRICE,PERSONAL_DRILLTRUCK_MODEL} from '../mission5/personal-drilltruck.mjs';
 import {convertBoreholeToZone,assignTruckToZone} from '../mission4/zones.mjs';
 import {buildParking} from '../mission4/parking.mjs';
 import {startMaintenance,advanceMaintenancePhase} from '../mission4/maintenance.mjs';
@@ -695,7 +695,7 @@ function togglePersonalTruck(){
     truck.headlightsOn=hour>=19||hour<6;
    }
    target=null;world.snapCamera=true;
-   notices.push({title:'Conducción habilitada',detail:'Joystick arriba: acelerar · izquierda/derecha: girar · FRENO para detenerte',symbol:'machine'});
+   notices.push({title:'Conducción habilitada',detail:'Joystick arriba: acelerar · derecha/izquierda: dirección · ícono de freno: detener · faros: encender o apagar',symbol:'machine'});
   }
   stop();syncPersonalTruckVisual();save();renderHUD();
  }catch(err){notices.push({title:err.message,symbol:'lock'});}
@@ -709,7 +709,7 @@ function stepPersonalTruck(dt){
  const i=world.colliders.indexOf(m5PersonalTruckCollider);
  if(i>=0)world.colliders.splice(i,1); // the car cannot collide with itself
  try{
-  const result=drivePersonalTruck(s,{throttle,steer,brake:truckBrakePressed||!!keys[' ']},dt,
+  const result=drivePersonalTruck(s,{throttle,steer:personalTruckVisualSteer(steer),brake:truckBrakePressed||!!keys[' ']},dt,
    (x,z,r)=>world.isBlocked(x,z,r));
   syncPersonalTruckVisual();
   return !!result?.moving;
@@ -1107,7 +1107,9 @@ function renderHUD(){if(!s)return;
   const on=!!personalTruck(s).headlightsOn;
   $('#personalTruckLights').classList.toggle('lightsOn',on);
   $('#personalTruckLights').setAttribute('aria-pressed',String(on));
-  $('#personalTruckLights').textContent=on?'LUCES ON':'LUCES OFF';
+  // Preserve SVG icon: never replace button children with a text label.
+  $('#personalTruckLights').setAttribute('aria-label',on?'Apagar luces del DrillTruck® personal':'Encender luces del DrillTruck® personal');
+  $('#personalTruckLights').title=on?'Apagar luces':'Encender luces';
  }
  if(driving)setText($('#personalTruckSpeedValue'),Math.round(Math.abs(personalTruck(s).speed)*3.6));
  // The last mission remains visible until its narrative closing message is confirmed.
