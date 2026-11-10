@@ -1626,7 +1626,8 @@ world.update(s,dt,clock,walking,false,personalTruck(s)?.mode==='driving');
  });
  constructionCallout?.update(s,phase==='play'&&!builderOpen&&!modalOpen&&!phoneOpen,t);world.player.visible=phase!=='start'&&personalTruck(s)?.mode!=='driving'&&(phase!=='character'||!!CONFIG.protagonists.find(p=>p.id===selectedAvatar)?.available);
  guidance?.update(s,phase==='play'&&!builderOpen&&!modalOpen&&!phoneOpen&&!placement);if(phase==='play')showNextReward();
- if(faenaCenter?.visible&&now-faenaRefreshAt>1500){faenaRefreshAt=now;faenaCenter.render();}
+ if(faenaCenter?.visible&&now-faenaRefreshAt>2600&&
+   !$('#faenaCenter').contains(document.activeElement)){faenaRefreshAt=now;faenaCenter.render();}
  if(now-lastHud>150){renderHUD();cameraDebug?.update();lastHud=now;}if(now-lastSave>2000){save();lastSave=now;}
  if(qaComputerPath&&phase==='play'&&!phoneOpen&&!modalOpen){while(qaComputerPath.length&&Math.hypot(qaComputerPath[0].x-s.position.x,qaComputerPath[0].z-s.position.z)<.12)qaComputerPath.shift();if(qaComputerPath.length)target={...qaComputerPath[0]};else qaComputerPath=null;}
  if(qaRoute&&phase==='play'&&!busy&&!phoneOpen&&!modalOpen){
