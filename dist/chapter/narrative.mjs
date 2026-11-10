@@ -48,6 +48,13 @@ export const MISSION_NARRATIVES={
   end:{id:'n:m4:end',bodyKey:'narr_m4_end',actions:[{type:'collect',labelKey:'narr_confirmMission'}],
    reward:null}, // M4 production income already tracked
  },
+ m5:{
+  character:'benefactor',
+  missionNameKey:'narr_m5_name',
+  missionNumber:5,
+  start:{id:'n:m5:start',bodyKey:'narr_m5_start',actions:[{type:'accept',labelKey:'narr_acceptMission'}]},
+  end:{id:'n:m5:end',bodyKey:'narr_m5_end',actions:[{type:'collect',labelKey:'narr_completeMission'}],reward:null}
+ },
 };
 
 // ─── State helpers ──────────────────────────────────────
@@ -106,6 +113,15 @@ export function pendingMessage(s){
  // M4 end: mission4 phase==='complete' but not narratively confirmed
  if(isAccepted(s,'m4')&&s.mission4?.phase==='complete'&&!hasMessage(s,'n:m4:end')&&!isCollected(s,'m4'))
   return mkMsg('n:m4:end','m4',MISSION_NARRATIVES.m4);
+
+ // M5 starts only after the player confirms M4's final SMS.
+ // Already-built M5 yards from older saves don't need to be re-purchased.
+ if(isCollected(s,'m4')&&s.mission4?.phase==='complete'&&!hasMessage(s,'n:m5:start'))
+  return mkMsg('n:m5:start','m5',MISSION_NARRATIVES.m5);
+ // End SMS is tied to operational patio + two hires + guard/warehouse checks,
+ // never to the construction timer alone.
+ if(isAccepted(s,'m5')&&s.mission5?.commissionedAt&&!hasMessage(s,'n:m5:end')&&!isCollected(s,'m5'))
+  return mkMsg('n:m5:end','m5',MISSION_NARRATIVES.m5);
 
  return null;
 }
@@ -186,7 +202,7 @@ export function confirmCompletion(s,missionId,now=Date.now()){
 // It remains visible while the objectives are done but the closing text is unconfirmed.
 export function activeNarrativeMission(s){
  ensureNarrative(s);
- for(const missionId of ['m1','m2','m3','m4']){
+ for(const missionId of ['m1','m2','m3','m4','m5']){
   if(isAccepted(s,missionId)&&!isCollected(s,missionId))return missionId;
  }
  return null;
