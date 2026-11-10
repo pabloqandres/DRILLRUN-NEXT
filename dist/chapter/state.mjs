@@ -65,7 +65,17 @@ export function restore(data,now=Date.now()){
  s.uiEvents=Array.isArray(data.uiEvents)?[...new Set(data.uiEvents.filter(v=>typeof v==='string'))].slice(-100):['message:welcome',...(landReady(s)?['mission:clear']:[]),...(s.office.status==='built'?['mission:office','message:office-store']:[]),...(s.chapterCompletedAt?['mission:chapter']:[])];
  s.nextId=Math.max(1,Math.floor(s.nextId),...s.inventory.map(o=>Number(o.id.split('-')[1])+1||1));
  s.ledger=(Array.isArray(s.ledger)?s.ledger:[]).filter(o=>finite(o.amount)&&finite(o.at)).slice(-100);
- if(!s.position||![s.position.x,s.position.z].every(finite)||s.position.x<-16||s.position.x>33||Math.abs(s.position.z)>13)s.position={...CONFIG.spawn};
+ {
+  // M5's NW plot is a legitimate saved position once M4 is completed.
+  // Old restore bounds incorrectly teleported players away from their patio.
+  const pos=s.position,x=pos?.x,z=pos?.z;
+  const main=finite(x)&&finite(z)&&x>=-16&&x<=33&&Math.abs(z)<=13;
+  const patio=finite(x)&&finite(z)&&s.mission4?.phase==='complete'&&
+   x>=-80&&x<=-18&&z>=-41&&z<=8;
+  const connector=finite(x)&&finite(z)&&s.mission4?.phase==='complete'&&
+   x>=-26&&x<=-11&&z>=-18&&z<=-10;
+  if(!main&&!patio&&!connector)s.position={...CONFIG.spawn};
+ }
  if(s.office.status==='building'&&(!finite(s.office.started)||!finite(s.office.ends)||s.office.ends<s.office.started))return null;
  if(s.office.status==='built'){s.office.level=s.office.level===2?2:1;installModuleFixtures(s);}else s.inside=false;
  if(s.office.upgrade&&(!finite(s.office.upgrade.started)||!finite(s.office.upgrade.ends)||s.office.upgrade.targetLevel!==2||s.office.upgrade.ends<s.office.upgrade.started))delete s.office.upgrade;
