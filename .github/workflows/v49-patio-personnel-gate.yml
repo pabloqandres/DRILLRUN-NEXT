@@ -1,0 +1,25 @@
+name: V49 Patio Personal y barrera
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  v49-patio:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: V49 modules compile
+        run: |
+          node --check dist/mission3/phone-apps.mjs
+          node --check dist/chapter/phone-ui.mjs
+          node --check dist/mission5/patio-ui.mjs
+          node --check dist/mission5/gate-control.mjs
+          node --check dist/mission5/patio-world.mjs
+          node --check dist/chapter/game.mjs
+      - name: Personnel gates and M5 regression
+        run: node --test tests/v49-patio-personnel-gate-finish.test.mjs tests/m5-stepwise-checklist-reward-v46.test.mjs tests/m5-staff-narrative-and-walk-v43.test.mjs tests/m5-patio-navigation-v34.test.mjs tests/m5-office-patio-passability-v40.test.mjs
