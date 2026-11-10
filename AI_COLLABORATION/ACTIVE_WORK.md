@@ -100,3 +100,17 @@
 ## Blocked / Waiting
 
 _Nothing blocked._
+
+- **2026-11-10 ChatGPT — V52 Patio y conducción nocturna:** rama
+  `chatgpt/v52-night-patio-drilltruck-audio`. Focos reales Patio,
+  focos delanteros opcionales camioneta personal, motor con RPM, eliminar
+  avatar/pasos durante conducción. Código preparado para PR, sin publicar;
+  QA en navegador Android y CI pendientes. No tocar M5 misión ni M4.
+
+
+- **V53 Centro de Faena integrado (2026-11-10)** — rama
+  `chatgpt/v53-unified-faena-workshop-logistics`: nueva UI unificada,
+  Taller de recuperación técnica, Bodega logística, rutas y accesos,
+  V51+V52 incluidos. Revisar
+  `CHANGES/2026-11-10_v53-centro-faena-taller-logistica.md`.
+  PR68 biblioteca 3D no integrado: faltan GLB reales en GitHub.

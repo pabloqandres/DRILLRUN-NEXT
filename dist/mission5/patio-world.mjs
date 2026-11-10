@@ -67,10 +67,39 @@ function roof(g,x,z,w,d,h){
  block(g,w,.12,.20,x,h+.13,z+d/2,trim);
  block(g,.10,h-1,.11,x-w/2+1,(h+1)/2,z+d/2,C.steel);
 }
+// A single soft-pool texture gives every fixture a visible lit surface,
+ // including distant lights disabled by the mobile dynamic-light budget.
+let patioLightPoolTexture=null;
+function patioLightPool(x,z,diameter=20){
+ if(!patioLightPoolTexture){
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=96;
+  const ctx=canvas.getContext('2d');
+  const glow=ctx.createRadialGradient(48,48,2,48,48,47);
+  glow.addColorStop(0,'rgba(255,243,206,.83)');
+  glow.addColorStop(.20,'rgba(255,228,163,.44)');
+  glow.addColorStop(.55,'rgba(255,214,153,.15)');
+  glow.addColorStop(1,'rgba(255,214,153,0)');
+  ctx.fillStyle=glow;ctx.fillRect(0,0,96,96);
+  patioLightPoolTexture=new T.CanvasTexture(canvas);
+ }
+ const pool=new T.Mesh(new T.PlaneGeometry(diameter,diameter),
+  new T.MeshBasicMaterial({map:patioLightPoolTexture,color:0xffebc6,
+   transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending,
+   side:T.DoubleSide}));
+ pool.rotation.x=-Math.PI/2;pool.position.set(x,.16,z);pool.renderOrder=5;
+ pool.name='Patio L1 · luz difusa sobre terreno';return pool;
+}
 function spotlight(g,x,z,h=6){
  block(g,.17,h,.17,x,h/2+.1,z,C.steel);
  block(g,1.3,.17,.32,x+.55,h+.14,z,C.steel);
- block(g,1,.08,.26,x+.62,h+.06,z,C.light);
+ const lens=block(g,1,.08,.26,x+.62,h+.06,z,C.light);
+ lens.material=new T.MeshBasicMaterial({color:0x77746b});
+ // These fixtures light the ground, not merely resemble illuminated boxes.
+ const light=new T.PointLight(0xffe6b2,0,26,2);
+ light.name='Patio L1 · luminaria real';light.castShadow=false;
+ light.position.set(x+.62,h-.06,z);g.add(light);
+ const pool=patioLightPool(x+.62,z,22);g.add(pool);
+ return {x,z,lens,light,pool};
 }
 function fences(g){
  // Perimeter link-fence on slim wine-red poles with galvanized chain-link.
@@ -273,13 +302,15 @@ function yardDetail(g){
 function operationalDetails(w,g){
  fences(g);
  yardDetail(g);
+ const lamps=[];
  for(const [x,z]of [[-24,-19],[-6,-19],[11,-19],[25,-19],[-24,19],[-7,19],[8,19],[25,19]])
-  spotlight(g,x,z,6.4);
+  lamps.push(spotlight(g,x,z,6.4));
  for(let z=-17;z<-6;z+=2.3)block(g,.18,.65,.18,25,.48,z,C.yellow);
  for(const x of[-22,22])for(const z of[-17,17]){
   block(g,.38,1.15,.38,x,.70,z,C.red);
   block(g,.56,.1,.56,x,1.31,z,C.white);
  }
+ return lamps;
 }
 function blueprint(w,root){
  const g=new T.Group();g.name='M5 · Holograma blueprint';root.add(g);
@@ -320,7 +351,15 @@ export function createPatioWorld(w){
  buildLogistics(w,structures);
  buildFuel(w,structures);
  const access=buildAccess(w,structures);
- const final=new T.Group();root.add(final);operationalDetails(w,final);
+ const final=new T.Group();root.add(final);const yardLamps=operationalDetails(w,final);
+ // Task lighting underneath roofs, at logistics and at the single HSEC gate.
+ const taskLights=[[-14.4,14.1],[-19,-11.2],[1.5,14.3],[24,2.5]].map(([x,z])=>{
+  const light=new T.PointLight(0xffe9c6,0,15,2);
+  light.name='Patio L1 · luz de trabajo';light.castShadow=false;
+  light.position.set(x,3.65,z);final.add(light);
+  const pool=patioLightPool(x,z,12);final.add(pool);
+  return {x,z,light,pool};
+ });
  const future=futurePlots(w);
  // The structural source is an exact clone of the final prefab modules,
  // local to the patio's centre. Holograms read its geometry only.
@@ -369,6 +408,22 @@ export function createPatioWorld(w){
    if(!enabled){root.visible=false;future.visible=false;w.yardL1Open=false;return;}
    root.visible=true;future.visible=status!=='locked';
    const info=patioProgress(s,now);
+   // Mirror the HSEC day/night sun cycle, with an Android-friendly budget
+   // of powered lamps near the player/driver rather than eight shadow maps.
+   const hour=(10+(s.hsec?.time||0)/600*24)%24;
+   const night=status==='operational'&&(hour>=19||hour<6);
+   const pos=s.mission5?.personalTruck?.mode==='driving'
+    ?s.mission5.personalTruck.position:s.position||PATIO_L1.center;
+   const distance=l=>Math.hypot(pos.x-(PATIO_L1.center.x+l.x),pos.z-(PATIO_L1.center.z+l.z));
+   const budget=w.quality==='low'?3:w.quality==='high'?6:4;
+   const nearest=night?new Set([...yardLamps].sort((a,b)=>distance(a)-distance(b)).slice(0,budget)):new Set();
+   for(const lamp of yardLamps){lamp.light.intensity=nearest.has(lamp)?23:0;
+    lamp.lens.material.color.setHex(night?0xffebba:0x77746b);
+    lamp.pool.material.opacity=night?.42:0;}
+   const taskBudget=w.quality==='low'?1:2;
+   const closestTasks=night?new Set([...taskLights].sort((a,b)=>distance(a)-distance(b)).slice(0,taskBudget)):new Set();
+   for(const lamp of taskLights){lamp.light.intensity=closestTasks.has(lamp)?13:0;
+    lamp.pool.material.opacity=night?.36:0;}
    const stateKey=status+':'+info.phase;
    if(stateKey!==previousState){
     previousState=stateKey;

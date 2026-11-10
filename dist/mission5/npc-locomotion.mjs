@@ -25,6 +25,10 @@ export class NPCWalkRig{
   // whether the sculpt's shoulders run along X or Z from observed bounds.
   const wideZ=size.z>size.x*1.22;
   const wide=wideZ?'z':'x';
+  // Both approved M5 GLBs have shoulder width along local Z. Walk joints
+  // must then swing in their X/Y sagittal plane (rotation.z), not around X.
+  this.sideAxis=wide;
+  this.forwardCorrectionYaw=wideZ?-Math.PI/2:0;
   const p=geo.attributes.position,min=bounds.min.y,max=bounds.max.y,h=Math.max(.001,max-min);
   const center=(bounds.min[wide]+bounds.max[wide])*.5;
   const hipY=min+h*.43,shoulderY=min+h*.76,neckY=min+h*.86;
@@ -104,11 +108,14 @@ export class NPCWalkRig{
   head.rotation.y=Math.sin(time*.00042)*.06*(1-w);
   for(const [side,mult] of[['Left',1],['Right',-1]]){
    const stride=Math.sin(phase+(mult<0?Math.PI:0))*w;
-   leg[side].ul.rotation.x=stride*.52;
-   leg[side].knee.rotation.x=Math.max(0,-stride)*.42;
-   leg[side].foot.rotation.x=-stride*.10;
-   arm[side].up.rotation.x=-stride*.31;
-   arm[side].low.rotation.x=-.12+Math.max(0,stride)*.12;
+   // For Z-wide meshes the previous X-rotation spread limbs sideways like
+   // jumping jacks. Use Z flexion for forward/back walking instead.
+   const axis=this.sideAxis==='z'?'z':'x';
+   leg[side].ul.rotation[axis]=stride*.42;
+   leg[side].knee.rotation[axis]=Math.max(0,-stride)*.34;
+   leg[side].foot.rotation[axis]=-stride*.09;
+   arm[side].up.rotation[axis]=-stride*.24;
+   arm[side].low.rotation[axis]=-.10+Math.max(0,stride)*.10;
   }
  }
  dispose(){

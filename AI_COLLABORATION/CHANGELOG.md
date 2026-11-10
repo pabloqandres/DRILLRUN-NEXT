@@ -305,3 +305,19 @@
 - `AI_COLLABORATION/` directory with RULES.md, CURRENT_STATE.md, CHANGELOG.md, COMPONENT_OWNERSHIP.md, DESIGN_SYSTEM.md, ACTIVE_WORK.md, DECISIONS.md, CHANGES/
 - `CLAUDE.md` — Claude Code entry point
 - `AGENTS.md` — ChatGPT entry point
+
+## 2026-11-10 — V52 Patio real nocturno y DrillTruck personal
+Rama `chatgpt/v52-night-patio-drilltruck-audio`. Implementados
+PointLights reales con presupuesto GPU y focos SpotLight orientados
+hacia delante del DrillTruck 02, botón de luces, avatar oculto
+antes del render y audio de motor con velocidad. No altera misiones,
+guardado de progreso, costos o DTH automático. CI + Android QA pendientes.
+Ver `CHANGES/2026-11-10_v52-night-patio-personal-driving.md`.
+
+
+## 2026-11-10 — V53 Centro de Faena, Logística y Taller
+UI operativa única, detalle de instalaciones, Taller de recuperación
+con kits y despachos pagados, acceso contextual y teléfono simplificado
+post M4. Integra V51 animación NPC/Patio y V52 iluminación nocturna/
+conducción. Tests enfocados verdes; 2 regresiones preexistentes
+M4 offline en CI global no resueltas. Biblioteca 3D PR68 sin binarios.

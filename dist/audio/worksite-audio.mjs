@@ -50,6 +50,7 @@ export class WorksiteAudio{
   this.workshop=engine(68,240,680);
   this.drill=engine(48,540,1750);
   this.truck=engine(72,390,550);
+  this.personalTruck=engine(65,450,450); // audible RPM feedback in truck 02
   this.office=engine(90,170,160);
   this.ready=true;
  }
@@ -59,7 +60,7 @@ export class WorksiteAudio{
  }
  set(enabled){
   this.enabled=!!enabled;
-  if(!enabled){if(this.ready)for(const channel of ['workshop','drill','truck','office'])this.fade(this[channel].out,0,.1);return;}
+  if(!enabled){if(this.ready)for(const channel of ['workshop','drill','truck','personalTruck','office'])this.fade(this[channel].out,0,.1);return;}
   // Only called from an established game audio-enabled user interaction.
   try{this.create();if(this.ctx?.state==='suspended')this.ctx.resume().catch(()=>{});}catch{}
  }
@@ -92,9 +93,9 @@ export class WorksiteAudio{
   osc.start(at);osc.stop(at+.21);
   osc.onended=()=>{osc.disconnect();filter.disconnect();gain.disconnect();};
  }
- update(s,dt,{position,moving=false,walkSurfaces=[],drill=null,drilling=false,truck=null,truckMoving=false,playing=true}={}){
+ update(s,dt,{position,moving=false,walkSurfaces=[],drill=null,drilling=false,truck=null,truckMoving=false,personalDriving=false,personalSpeed=0,playing=true}={}){
   this.time+=Math.max(0,dt||0);
-  if(!this.enabled||!playing){if(this.ready)for(const channel of ['workshop','drill','truck','office'])this.fade(this[channel].out,0);return;}
+  if(!this.enabled||!playing){if(this.ready)for(const channel of ['workshop','drill','truck','personalTruck','office'])this.fade(this[channel].out,0);return;}
   if(!this.ready){try{this.create()}catch{return;}}
   if(!this.ready)return;
   const player=position||s.position||{x:0,z:0};
@@ -107,6 +108,13 @@ export class WorksiteAudio{
   this.fade(this.office.out,(s.inside?.055:officeGain*.035));
   this.fade(this.drill.out,drillGain*.54);
   this.fade(this.truck.out,truckGain*.40);
+  // Distinct engine rumble for the driver's own vehicle; no walking SFX.
+  const rpm=Math.min(1,Math.abs(Number(personalSpeed)||0)/8.3);
+  this.fade(this.personalTruck.out,personalDriving?.48:0);
+  if(this.personalTruck.lowOsc)this.personalTruck.lowOsc.frequency.setTargetAtTime(
+   68+rpm*105,this.ctx.currentTime,.11);
+  if(this.personalTruck.filter)this.personalTruck.filter.frequency.setTargetAtTime(
+   280+rpm*570,this.ctx.currentTime,.15);
   if(this.workshop.lowOsc)this.workshop.lowOsc.frequency.setTargetAtTime(66+Math.sin(this.time*1.2)*3,this.ctx.currentTime,.18);
   if(this.drill.lowOsc)this.drill.lowOsc.frequency.setTargetAtTime(51+Math.sin(this.time*17)*7,this.ctx.currentTime,.04);
   if(this.truck.lowOsc)this.truck.lowOsc.frequency.setTargetAtTime(67+Math.sin(this.time*3.2)*8,this.ctx.currentTime,.15);
@@ -114,6 +122,7 @@ export class WorksiteAudio{
    this.nextClank=this.time+2.5+Math.random()*3.5;
    this.metalTick(workshopGain);
   }
+  if(personalDriving){this.stepDistance=0;return;}
   if(moving&&!s.inside&&dt>0){
    this.stepDistance+=Math.min(.18,dt*2);
    if(this.stepDistance>=.64){
@@ -127,7 +136,7 @@ export class WorksiteAudio{
  }
  dispose(){
   if(!this.ready)return;
-  for(const name of ['workshop','drill','truck','office']){
+  for(const name of ['workshop','drill','truck','personalTruck','office']){
    const c=this[name];try{c.lowOsc.stop();c.src.stop();c.lowOsc.disconnect();c.src.disconnect();c.out.disconnect()}catch{}
   }
   try{this.master.disconnect()}catch{}

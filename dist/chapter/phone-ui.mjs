@@ -55,7 +55,17 @@ export class PhoneUI{
   if(app==='home'){
    const name=s.playerName||t('operatorName'),count=unreadMessages(s).length+narrativeUnread(s);
    
-   c.innerHTML=`<div class="phoneGreeting"><span class="eyebrow">${esc(t('fieldNetwork'))}</span><b>${esc(name)}</b><small>${esc(t('operator'))}</small></div><div class="apps">${['messages'].map(a=>`<button data-app="${a}"><span class="appTile app-${a}">${icon(a)}${count?`<i class="appBadge">${count}</i>`:''}</span><span>${esc(t(a))}</span></button>`).join('')}${m3HomeApps(s,t,icon)}${m4HomeApps(s,t,icon)}</div><div class="phoneFooter">DRILL RUN <span>·</span> ${esc(t('firstSteps'))}</div>`;
+   const patioAvailable=!!s.narrative?.accepted?.includes('m5')||['building','operational'].includes(s.mission5?.status);
+   // The field phone remains a communications device. Once operations are
+   // mature, expose only communication/supply shortcuts, not 10 duplicate apps.
+   // Original M3/M4 apps remain accessible by deep link and the unified hub.
+   const consolidated=!!(s.mission4&&s.mission4.phase!=='inactive');
+   const shortcuts=consolidated
+    ?'<button data-app="faena-center"><span class="appTile app-m4-operaciones">'+icon('inventory')+'</span><span>Centro de Faena</span></button>'+
+     '<button data-app="m3-catalog"><span class="appTile app-m3-catalog">'+icon('store')+'</span><span>Casa Matriz</span></button>'+
+     '<button data-app="m3-orders"><span class="appTile app-m3-orders">'+icon('build')+'</span><span>Pedidos</span></button>'
+    :m3HomeApps(s,t,icon)+m4HomeApps(s,t,icon);
+   c.innerHTML=`<div class="phoneGreeting"><span class="eyebrow">${esc(t('fieldNetwork'))}</span><b>${esc(name)}</b><small>${esc(t('operator'))}</small></div><div class="apps">${['messages'].map(a=>`<button data-app="${a}"><span class="appTile app-${a}">${icon(a)}${count?`<i class="appBadge">${count}</i>`:''}</span><span>${esc(t(a))}</span></button>`).join('')}${shortcuts}${patioAvailable?`<button data-app="m5-patio"><span class="appTile app-m5-patio">${icon('build')}</span><span>Patio</span></button>`:''}</div><div class="phoneFooter">DRILL RUN <span>·</span> ${esc(t('firstSteps'))}</div>`;
   }else if(app==='messages')this.renderMessages(s,t);
   else if(app==='bank'){
    s.bankViewed=true;this.onSave();c.innerHTML=`<div class="bankCard"><div class="bankBrand">${icon('bank')}<span>DR / BANK</span></div><small>${esc(t('bankAccount'))}</small><b>${fmt(s.bank)}</b><div class="bankWallet"><span>${esc(t('wallet'))}</span><strong>${fmt(s.cash)}</strong></div></div><div class="sectionHeading">${esc(t('bankTransfer'))}</div><label class="bankInput">${esc(t('amount'))}<input id="bankAmount" type="number" min="1" step="1" value="2500" inputmode="numeric"></label><div class="bankActions"><button class="primary" data-transfer="withdraw">${esc(t('withdraw'))}</button><button data-transfer="deposit">${esc(t('deposit'))}</button></div><small>${esc(t('bankNote'))}</small><div class="sectionHeading">${esc(t('operations'))}</div><ul class="transactions">${[...s.ledger].reverse().map(o=>`<li><span class="transactionIcon">${icon(o.key==='capital'?'bank':o.key==='withdraw'?'arrow':o.key==='deposit'?'bank':'store')}</span><span>${esc(t(o.key))}<small>${new Date(o.at).toLocaleTimeString(s.lang,{hour:'2-digit',minute:'2-digit'})}</small></span><b>${fmt(o.amount)}</b></li>`).join('')}</ul>`;

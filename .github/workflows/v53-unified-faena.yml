@@ -1,0 +1,24 @@
+name: V53 Centro de Faena, Logistics and Recovery
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  v53:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax of new and touched modules
+        run: |
+          node --check dist/chapter/faena-center.mjs
+          node --check dist/chapter/game.mjs
+          node --check dist/chapter/phone-ui.mjs
+          node --check dist/mission3/headquarters.mjs
+          node --check dist/mission5/workshop-recovery.mjs
+          node --check dist/mission5/patio-world.mjs
+          node --check dist/graphics/personal-drilltruck-headlights.mjs
+      - name: Functional and previous regressions
+        run: node --test tests/v53-faena-and-recovery.test.mjs tests/v52-night-patio-driving.test.mjs tests/v50-personal-drilltruck-driving.test.mjs tests/v49-patio-personnel-gate-finish.test.mjs tests/m5-stepwise-checklist-reward-v46.test.mjs tests/m5-staff-narrative-and-walk-v43.test.mjs tests/mission3-meter-precision-v20.test.mjs tests/m5-fleet-depot-v33.test.mjs tests/m5-patio-navigation-v34.test.mjs
