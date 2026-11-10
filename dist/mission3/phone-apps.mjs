@@ -2,6 +2,7 @@
 // Renders M3 UI panels inside the existing PhoneUI system.
 import {ROLES,personnelRoster,canHire,hasRole} from './personnel.mjs';
 import {crewPortrait} from '../chapter/crew-portraits.mjs';
+import {PATIO_STAFF,hiredPatioStaff,canHirePatioStaff} from '../mission5/patio-staff.mjs';
 import {CONTRACT_TEMPLATES,contractTemplate,canAcceptContract,contractProgress,contractDeadline,isContractComplete,startDrilling} from './contracts.mjs';
 import {analysisProgress,analysisReport,requestAnalysis,accelerateAnalysis} from './geology.mjs';
 import {DRILLS,HAMMERS,BITS,drillDefinition,compatibleHammers,compatibleBits,canPurchaseDrill} from './drills.mjs';
@@ -59,6 +60,28 @@ function renderPersonnel(s,t,fmt,icon,cb){
   }
  }else{
   html+=`<div class="emptyState">${icon('player')}<p>No tienes personal contratado aún.</p></div>`;
+ }
+ // All M5 employment is managed in Personal. The M5 infrastructure app
+ // only audits the patio; it never creates or hires staff.
+ if(s.narrative?.accepted?.includes('m5')||s.mission5?.status==='operational'){
+  const status=s.mission5?.status==='operational'?'Patio construido':'Primero construye el Patio L1';
+  html+='<div class="sectionHeading">Logística · Patio de Maquinarias</div>';
+  html+='<p class="m4OpsHint">Contratación centralizada en Personal. '+esc(status)+'. Las personas contratadas aparecen físicamente en la faena.</p>';
+  const explanations={buildPatioFirst:'Termina primero la construcción del Patio L1',
+   acceptM5First:'Acepta la Misión 5',hireGuardFirst:'Contrata antes al guardia de acceso',
+   noMoney:'Saldo insuficiente',alreadyHired:'Contratado'};
+  for(const def of PATIO_STAFF){
+   const hired=hiredPatioStaff(s,def.id),blocked=canHirePatioStaff(s,def.id);
+   const detail=hired?'Asignado a su puesto · personal activo':
+    'Pago único de contratación · '+fmt(def.cost);
+   html+='<article class="inventoryCard staffCard"><span class="inventoryIcon crewPortrait">'+
+    icon(def.role==='security'?'lock':'personnel')+'</span><div><b>'+esc(def.label)+
+    '</b><small>'+esc(detail)+'</small>'+
+    (hired?'<span class="itemStatus">'+icon('check')+' Contratado</span>':
+      blocked?'<span class="itemStatus">'+icon('lock')+' '+esc(explanations[blocked]||blocked)+'</span>':'')+
+    '</div>'+(hired?'':'<button data-hire-patio="'+esc(def.id)+'" '+(blocked?'disabled':'')+
+     '>'+icon('personnel')+'<span>Contratar</span></button>')+'</article>';
+  }
  }
  // Hire buttons
  html+=`<div class="sectionHeading">Contratar</div>`;
