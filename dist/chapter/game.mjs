@@ -59,6 +59,7 @@ import {CinematicRecorder} from '../camera/recorder.mjs';
 import {DesertWind} from '../camera/ambient.mjs';
 import {WorksiteAudio} from '../audio/worksite-audio.mjs';
 import {SiteCinematics} from '../graphics/site-cinematics.mjs';
+import {installPersonalTruckHeadlights} from '../graphics/personal-drilltruck-headlights.mjs';
 import * as T from '../vendor/three.module.js';
 import {World} from '../scene.mjs';
 import {createMotion,moveController} from '../animation/movement.mjs';
@@ -98,7 +99,7 @@ let m3DrillModel=null,m3BoreholeMarkers=[],m3DeliveryVehicle=null,m3DrillingFx=n
 let m4DrillTruckModel=null,m4ParkingSpot=null,m4VisualsReady=false,m4TruckLoading=false,m4TruckCollider=null;
 let m4DthModel=null,m4DthCollider=null,m4Staging=null;
 let m5World=null,patioOverviewUntil=0,m5RcRoute=null,m5DthRoute=null,m5DthDepartRoute=null;
-let m5NpcWorld=null,m5PersonalTruckModel=null,m5PersonalTruckCollider=null,truckBrakePressed=false;
+let m5NpcWorld=null,m5PersonalTruckModel=null,m5PersonalTruckCollider=null,m5TruckLighting=null,truckBrakePressed=false;
 let catalogBlueprint=null,catalogConstructionCamera=false,catalogPreviewWalk=false;
 let workshopBuildHologram=null,workshopHologramKey=null;
 let siteCinematics=null;
@@ -641,6 +642,7 @@ function syncPersonalTruckVisual(){
  if(!world||!s)return;
  const truck=personalTruck(s);
  if(!truck){
+  m5TruckLighting?.dispose();m5TruckLighting=null;
   if(m5PersonalTruckModel){m5PersonalTruckModel.removeFromParent();m5PersonalTruckModel=null;}
   if(m5PersonalTruckCollider){
    const i=world.colliders.indexOf(m5PersonalTruckCollider);
@@ -654,6 +656,7 @@ function syncPersonalTruckVisual(){
   m5PersonalTruckModel=m4DrillTruckModel.clone(true);
   m5PersonalTruckModel.name='drilltruck-personal-02';
   m5PersonalTruckModel.userData={personal:true};
+  m5TruckLighting=installPersonalTruckHeadlights(m5PersonalTruckModel);
   world.scene.add(m5PersonalTruckModel);
   m5PersonalTruckCollider={x:truck.position.x,z:truck.position.z,
    w:2.55,d:5,angle:truck.heading,_personalTruck:true};
@@ -662,6 +665,7 @@ function syncPersonalTruckVisual(){
  m5PersonalTruckModel.visible=true;
  m5PersonalTruckModel.position.set(truck.position.x,.12,truck.position.z);
  m5PersonalTruckModel.rotation.y=truck.heading;
+ m5TruckLighting?.set(truck.mode==='driving'&&!!truck.headlightsOn,world.quality);
  if(m5PersonalTruckCollider){
   m5PersonalTruckCollider.x=truck.position.x;
   m5PersonalTruckCollider.z=truck.position.z;
@@ -680,6 +684,11 @@ function togglePersonalTruck(){
    notices.push({title:'Saliste del DrillTruck® personal',symbol:'personnel'});
   }else{
    enterPersonalTruck(s);
+   // Auto-enable when first boarding at night. Later choices persist.
+   if(typeof truck.headlightsOn!=='boolean'){
+    const hour=(10+(s.hsec?.time||0)/600*24)%24;
+    truck.headlightsOn=hour>=19||hour<6;
+   }
    target=null;world.snapCamera=true;
    notices.push({title:'Conducción habilitada',detail:'Joystick arriba: acelerar · izquierda/derecha: girar · FRENO para detenerte',symbol:'machine'});
   }
@@ -1086,7 +1095,14 @@ function hideWorkshopCard(){const wc=$('#workshopCard');if(wc)wc.hidden=true;wor
 function renderHUD(){if(!s)return;
  const driving=personalTruck(s)?.mode==='driving';
  hidden($('#personalTruckBrake'),!driving);
+ hidden($('#personalTruckLights'),!driving);
  hidden($('#personalTruckSpeed'),!driving);
+ if(driving){
+  const on=!!personalTruck(s).headlightsOn;
+  $('#personalTruckLights').classList.toggle('lightsOn',on);
+  $('#personalTruckLights').setAttribute('aria-pressed',String(on));
+  $('#personalTruckLights').textContent=on?'LUCES ON':'LUCES OFF';
+ }
  if(driving)setText($('#personalTruckSpeedValue'),Math.round(Math.abs(personalTruck(s).speed)*3.6));
  // The last mission remains visible until its narrative closing message is confirmed.
  // Once confirmed, retire the objective card; keep production, saves and HSEC data intact.
@@ -1401,6 +1417,13 @@ brakeButton.onpointerdown=e=>{e.preventDefault();truckBrakePressed=true;
  brakeButton.classList.add('pressed');brakeButton.setPointerCapture?.(e.pointerId);};
 const releaseTruckBrake=()=>{truckBrakePressed=false;brakeButton.classList.remove('pressed');};
 brakeButton.onpointerup=brakeButton.onpointercancel=brakeButton.onlostpointercapture=releaseTruckBrake;
+$('#personalTruckLights').onclick=()=>{
+ const truck=personalTruck(s);
+ if(truck?.mode!=='driving')return;
+ truck.headlightsOn=!truck.headlightsOn;
+ m5TruckLighting?.set(truck.headlightsOn,world.quality);
+ save();renderHUD();
+};
 $('#cameraHome').onclick=()=>{world.zoom=1;resetOrbit(world.orbit);world.cameraRig.reset();persistCamera();};
 $('#endBuildPreviewWalk').onclick=()=>{
  catalogPreviewWalk=false;catalogBlueprint?.hide();
@@ -1528,7 +1551,9 @@ world.cameraFocus=inWorldConstruction?hsecUI.focus():managingOffice?{x:-6,z:0}:n
  }
  if(world.worker)world.worker.clearing=busy?1:0;
  catalogBlueprint?.update(wall/1000);
- scene.update(s,dt,wall,{blueprint,interactive:phase==='play'});hsecWorld?.update(s,dt,phase);if(phase==='play'&&personalTruck(s)?.mode!=='driving'&&world.isBlocked(s.position.x,s.position.z,avatarDefinition(s.character).radius))ensureSafe();world.update(s,dt,clock,walking,false,false);
+ scene.update(s,dt,wall,{blueprint,interactive:phase==='play'});hsecWorld?.update(s,dt,phase);if(phase==='play'&&personalTruck(s)?.mode!=='driving'&&world.isBlocked(s.position.x,s.position.z,avatarDefinition(s.character).radius))ensureSafe();// Pass driving as lobby visibility BEFORE World renders: otherwise World
+ // makes the operator visible again every frame even after a post-render hide.
+world.update(s,dt,clock,walking,false,personalTruck(s)?.mode==='driving');
  // Environmental spectacle + sound read the actual saved/world state only.
  // They never write mission, contract, economy or placement data.
  const activeRC=!!s.drill&&s.drill.state==='drilling';
@@ -1539,7 +1564,9 @@ world.cameraFocus=inWorldConstruction?hsecUI.focus():managingOffice?{x:-6,z:0}:n
  worksiteAudio.update(s,dt,{...siteInputs,
   drill:activeRC?m3DrillModel:activeDTH?m4DthModel:null,
   drilling:activeRC||activeDTH,
-  position:s.position,moving:walking&&!builderOpen&&!phoneOpen&&!modalOpen,
+  position:s.position,moving:walking&&personalTruck(s)?.mode!=='driving'&&!builderOpen&&!phoneOpen&&!modalOpen,
+  personalDriving:personalTruck(s)?.mode==='driving',
+  personalSpeed:personalTruck(s)?.speed||0,
   walkSurfaces:world.walkSurfaces||[]
  });
  constructionCallout?.update(s,phase==='play'&&!builderOpen&&!modalOpen&&!phoneOpen,t);world.player.visible=phase!=='start'&&personalTruck(s)?.mode!=='driving'&&(phase!=='character'||!!CONFIG.protagonists.find(p=>p.id===selectedAvatar)?.available);
