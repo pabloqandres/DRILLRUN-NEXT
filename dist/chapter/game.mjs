@@ -868,7 +868,7 @@ let workshopCardOpen=false,workshopDemolishPending=false;
 function showWorkshopCard(){
  const wc=$('#workshopCard');
  if(!wc||!s)return;
- const scroll=wc.hidden?0:wc.scrollTop;
+ const scroll=wc.hidden?0:(wc.querySelector('.wsContent')?.scrollTop||0);
  // The status card is read-only; all economic and technical operations stay
  // behind the existing inventory / DTH / upgrade confirmation controllers.
  wc.classList.add('workshopV37');
@@ -916,7 +916,8 @@ function showWorkshopCard(){
   }
  });
  wc.querySelector('#workshopDemolishBtn')?.addEventListener('click',()=>workshopConfirmDemolish());
- wc.hidden=false;workshopCardOpen=true;wc.scrollTop=scroll;
+ wc.hidden=false;workshopCardOpen=true;
+ if(wc.querySelector('.wsContent'))wc.querySelector('.wsContent').scrollTop=scroll;
 }
 function detectWorkshopObstacles(){
  // Only actual SAVED, BUILT HSEC installations can be reported. Walking over
