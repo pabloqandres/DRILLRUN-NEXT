@@ -86,7 +86,9 @@ function patioLightPool(x,z,diameter=20){
   new T.MeshBasicMaterial({map:patioLightPoolTexture,color:0xffebc6,
    transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending,
    side:T.DoubleSide}));
- pool.rotation.x=-Math.PI/2;pool.position.set(x,.16,z);pool.renderOrder=5;
+ // Keep the halo ABOVE the asphalt (.18 m), painted lanes (.26 m)
+ // and other paved surfaces, rather than hiding it inside the road mesh.
+ pool.rotation.x=-Math.PI/2;pool.position.set(x,.295,z);pool.renderOrder=5;
  pool.name='Patio L1 · luz difusa sobre terreno';return pool;
 }
 function spotlight(g,x,z,h=6){
@@ -95,10 +97,10 @@ function spotlight(g,x,z,h=6){
  const lens=block(g,1,.08,.26,x+.62,h+.06,z,C.light);
  lens.material=new T.MeshBasicMaterial({color:0x77746b});
  // These fixtures light the ground, not merely resemble illuminated boxes.
- const light=new T.PointLight(0xffe6b2,0,26,2);
+ const light=new T.PointLight(0xffe6b2,0,34,2);
  light.name='Patio L1 · luminaria real';light.castShadow=false;
  light.position.set(x+.62,h-.06,z);g.add(light);
- const pool=patioLightPool(x+.62,z,22);g.add(pool);
+ const pool=patioLightPool(x+.62,z,27);g.add(pool);
  return {x,z,lens,light,pool};
 }
 function fences(g){
@@ -354,12 +356,19 @@ export function createPatioWorld(w){
  const final=new T.Group();root.add(final);const yardLamps=operationalDetails(w,final);
  // Task lighting underneath roofs, at logistics and at the single HSEC gate.
  const taskLights=[[-14.4,14.1],[-19,-11.2],[1.5,14.3],[24,2.5]].map(([x,z])=>{
-  const light=new T.PointLight(0xffe9c6,0,15,2);
+  const light=new T.PointLight(0xffe9c6,0,19,2);
   light.name='Patio L1 · luz de trabajo';light.castShadow=false;
   light.position.set(x,3.65,z);final.add(light);
-  const pool=patioLightPool(x,z,12);final.add(pool);
+  const pool=patioLightPool(x,z,16);final.add(pool);
   return {x,z,light,pool};
  });
+ // Broad pools on open heavy-machinery bays and the personal P01 stall.
+ // These are inexpensive ground-lit passes from nearby perimeter floodlights,
+ // not extra point lights or collision/mission objects.
+ const bayPools=[[-7,-13,18],[5,-13,18],[17,-13,18],[20,-3.2,14]]
+  .map(([x,z,size])=>{
+   const pool=patioLightPool(x,z,size);final.add(pool);return pool;
+  });
  const future=futurePlots(w);
  // The structural source is an exact clone of the final prefab modules,
  // local to the patio's centre. Holograms read its geometry only.
@@ -417,13 +426,22 @@ export function createPatioWorld(w){
    const distance=l=>Math.hypot(pos.x-(PATIO_L1.center.x+l.x),pos.z-(PATIO_L1.center.z+l.z));
    const budget=w.quality==='low'?3:w.quality==='high'?6:4;
    const nearest=night?new Set([...yardLamps].sort((a,b)=>distance(a)-distance(b)).slice(0,budget)):new Set();
-   for(const lamp of yardLamps){lamp.light.intensity=nearest.has(lamp)?23:0;
+   for(const lamp of yardLamps){
+    const selected=nearest.has(lamp);
+    // Real local illumination on the nearest fixtures; all night fixtures
+    // retain a faint baked pool so unselected lights never look dead.
+    lamp.light.intensity=selected?(w.quality==='low'?34:48):0;
     lamp.lens.material.color.setHex(night?0xffebba:0x77746b);
-    lamp.pool.material.opacity=night?.42:0;}
+    lamp.pool.material.opacity=night?(selected?.56:.23):0;
+   }
    const taskBudget=w.quality==='low'?1:2;
    const closestTasks=night?new Set([...taskLights].sort((a,b)=>distance(a)-distance(b)).slice(0,taskBudget)):new Set();
-   for(const lamp of taskLights){lamp.light.intensity=closestTasks.has(lamp)?13:0;
-    lamp.pool.material.opacity=night?.36:0;}
+   for(const lamp of taskLights){
+    const selected=closestTasks.has(lamp);
+    lamp.light.intensity=selected?(w.quality==='low'?17:24):0;
+    lamp.pool.material.opacity=night?(selected?.48:.20):0;
+   }
+   for(const pool of bayPools)pool.material.opacity=night?.27:0;
    const stateKey=status+':'+info.phase;
    if(stateKey!==previousState){
     previousState=stateKey;
