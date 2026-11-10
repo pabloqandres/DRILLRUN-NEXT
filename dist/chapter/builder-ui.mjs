@@ -76,6 +76,9 @@ export class BuilderUI{
   this.store.render({lang:s.lang,products,categories:catalogCategories(s.lang),category,selected,format:this.format,
    thumbnail:p=>p.kind==='module'?this.getOfficeThumbnail(p.level):p.kind==='workshop'?this.getWorkshopThumbnail(p.level):p.kind==='vehicle'&&p.id==='drilltruck'?this.getDrillTruckThumbnail():p.kind==='hsec'&&p.status!=='future'&&this.hsec?.world?this.hsec.world.thumbnail(p.id):null,
    onCategory,onSelect,onClose:this.onClose,onStaff:()=>this.hsec?.open('staff'),
+   onWalkPreview:()=>this.onWalkBuildingPreview?.(),
+   onTogglePreviewCamera:()=>this.onToggleCatalogPreviewCamera?.(),
+   previewCameraActive:!!this.onCatalogPreviewCamera?.(),
    onManage:p=>{
     if(p.kind==='module')return s.office.status==='building'?this.onClose():this.onManage();
     if(p.kind==='workshop')return (this.onClose(),this.onWorkshopManage?.());
