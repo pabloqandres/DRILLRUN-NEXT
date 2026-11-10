@@ -254,8 +254,9 @@ function renderDrillTruck(s,t,fmt,icon,cb){
  }else{
   const stateLabels={parked:'Estacionado',dispatched:'En ruta',onsite:'En zona',maintenance:'Mantenimiento',returning:'Retornando'};
   const stateClass=truck.state==='parked'?'idle':truck.state==='maintenance'?'active':'moving';
+  const patioHome=s.mission5?.status==='operational',isRelocated=!!s.mission5?.truckRelocated;
   html+=`<div class="dcHead">${icon('store')}<div><b>DRILLTRUCK</b><small>Camión autónomo</small></div></div>`;
-  html+=`<span class="dcState ${stateClass}">${esc(stateLabels[truck.state]||truck.state)}</span>`;
+  html+=`<span class="dcState ${stateClass}">${esc(patioHome&&!isRelocated?'Trasladándose a Patio L1':stateLabels[truck.state]||truck.state)}</span><small style="display:block;padding:4px 12px;color:#91bfc8">${esc(patioHome?(isRelocated?'Base oficial · Patio L1 · plaza C03':'Nueva base asignada · Patio L1'):'Base temporal · junto al taller Nv.2')}</small>`;
   const zones=s.mission4.zones||[];
   const producing=zones.filter(z=>z.status==='producing').length;
   html+=`<div class="dcGrid"><div class="dcStat"><small>Zonas</small><b>${zones.length}/${new Set([...(s.boreholes||[]).filter(b=>b.status==='completed').map(b=>b.id),...zones.map(z=>z.id)]).size}</b></div><div class="dcStat"><small>Produciendo</small><b>${producing}</b></div><div class="dcStat"><small>Ciclos</small><b>${s.mission4.productionCycles}</b></div><div class="dcStat" title="Ingreso bruto proyectado de las zonas DTH activas. Solo se acredita al finalizar un ciclo de 15 minutos."><small>Producción estimada/h</small><b>${fmt(incomePerHour(s))}</b></div></div>`;
