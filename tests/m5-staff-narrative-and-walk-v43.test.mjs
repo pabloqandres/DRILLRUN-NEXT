@@ -20,7 +20,7 @@ test('M5 opens only after player confirms M4 SMS; no automatic paid building',()
  const s=fixture();const before=s.cash;
  assert.equal(pendingMessage(s)?.id,'n:m5:start');
  assert.equal(patioCanStart(s),'needsMission5');
- assert.equal(s.cash,before);assert.equal(s.mission5,undefined);
+ assert.equal(s.cash,before);assert(!s.mission5,'M5 was not purchased automatically');
  assert(deliverMessage(s,'n:m5:start'));
  assert(acceptMission(s,'m5'));
  assert.equal(patioCanStart(s),null);
