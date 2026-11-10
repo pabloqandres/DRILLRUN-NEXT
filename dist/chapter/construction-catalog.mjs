@@ -52,7 +52,7 @@ export function catalogProducts(s,t){
   benefit:'Patio modular real, seguridad HSEC y circulación para flota pesada',
   price:m5Status==='building'||m5Status==='operational'?null:PATIO_L1.price,
   seconds:patioStatus==='available'?PATIO_L1.constructionSeconds:null,
-  w:PATIO_L1.width,d:PATIO_L1.depth,h:5.5,capacity:'6 vehículos ligeros · 3 perforadoras · 4 equipos pesados',
+  w:PATIO_L1.width,d:PATIO_L1.depth,h:5.5,capacity:'6 vehículos ligeros · 2 perforadoras · 3 equipos pesados',
   status:patioStatus,
   reason:!patioUnlocked(s)?'Completa Misión 4':patioStatus==='building'?'Obra en ejecución · 20 minutos':'',
   model:PATIO_L1,canStart:patioStatus==='available',action:patioStatus==='available'?'buy':'manage',
