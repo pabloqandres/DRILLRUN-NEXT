@@ -48,6 +48,47 @@ export function deliverPersonalTruck(s,now=Date.now()){
  commissionPatio(s,now); // Sixth real M5 objective completes on delivery, not payment.
  return truck;
 }
+// Recover ownership only when the saved mission history proves that M5 was
+// fully commissioned AND its completion was collected. A stray mission flag
+// alone can never mint a second free vehicle or advance the storyline.
+export function restoreMissingPersonalTruck(s,now=Date.now()){
+ if(personalTruck(s)||s?.mission5?.status!=='operational')return false;
+ if(!s.mission5.commissionedAt||!s.narrative?.rewardsCollected?.includes('m5'))return false;
+ deliverPersonalTruck(s,now);
+ s.mission5.personalTruck.restoredFromCompletedM5At=now;
+ return true;
+}
+const finiteLocation=p=>!!p&&Number.isFinite(p.x)&&Number.isFinite(p.z);
+export function personalTruckAtPlayableLocation(truck){
+ const p=truck?.position;
+ if(!finiteLocation(p))return false;
+ // Entire original mission area plus the continuous Office–Patio corridor.
+ return p.x>=-80&&p.x<=35&&p.z>=-42&&p.z<=15;
+}
+export function repairPersonalTruckPose(s,now=Date.now()){
+ const truck=personalTruck(s);if(!truck||personalTruckAtPlayableLocation(truck))return false;
+ const bay=FLEET_BAYS.personalTruck;
+ truck.position={x:bay.x,z:bay.z};truck.heading=bay.heading;
+ truck.speed=0;truck.mode='parked';truck.recoveredAt=now;
+ // The player may have been inside the invalid-position truck on a
+ // previous session. Reposition only if the saved avatar is also invalid.
+ if(!finiteLocation(s.position)||!Number.isFinite(s.position.x)||Math.abs(s.position.x)>90||
+    Math.abs(s.position.z)>48){s.position={x:bay.x-3.8,z:bay.z};s.inside=false;}
+ return true;
+}
+// Explicit valet recovery for a PAID/owned vehicle only. No new order, charge,
+// duplicate entity, mission reward or maintenance event is generated.
+export function recoverPersonalTruckToBay(s,now=Date.now()){
+ const truck=personalTruck(s);
+ if(!truck)throw new Error('notDelivered');
+ if(Math.abs(truck.speed||0)>.42)throw new Error('stopFirst');
+ const wasDriving=truck.mode==='driving';
+ const bay=FLEET_BAYS.personalTruck;
+ truck.position={x:bay.x,z:bay.z};truck.heading=bay.heading;
+ truck.mode='parked';truck.speed=0;truck.parkedAt=now;truck.recoveredAt=now;
+ if(wasDriving){s.position={x:bay.x-3.8,z:bay.z};s.inside=false;}
+ return truck;
+}
 export function canEnterPersonalTruck(s){
  const truck=personalTruck(s);
  if(!truck)return 'notDelivered';
