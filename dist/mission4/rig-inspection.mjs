@@ -2,6 +2,7 @@
 // No inventory, mission, timer, ledger or saved value is modified here.
 import {dthBitDefinition,dthHammerDefinition} from './drills-dth.mjs';
 import {CYCLE_DURATION} from './production.mjs';
+import {dthTravelPose} from './dth-travel.mjs';
 
 const finite=(n,fallback=0)=>Number.isFinite(Number(n))?Number(n):fallback;
 export function dthRigInspection(s,now=Date.now()){
@@ -21,11 +22,15 @@ export function dthRigInspection(s,now=Date.now()){
    status:remaining<=0||item.status==='spent'?'spent':item.status||'installed'};
  };
  const zone=(m.zones||[]).find(z=>z.id===drill.assignedZone)||null;
- const pending=m.travelUntil&&m.travelUntil>now?'moving':
+ const transit=dthTravelPose(s,now);
+ const pending=transit?.moving?'moving':
   m.serviceRequested?'paused':drill.state||'idle';
  const nextSeconds=zone?.status==='producing'&&Number.isFinite(zone.lastCycleAt)
   ?Math.max(0,Math.ceil((CYCLE_DURATION*1000-(now-zone.lastCycleAt))/1000)):null;
- return {rigId:drill.id,state:pending,zoneId:zone?.id||null,cycleCount:finite(m.productionCycles),
+ return {rigId:drill.id,state:pending,zoneId:zone?.id||null,
+  travel:transit?.moving?{from:transit.fromZoneId,to:transit.toZoneId,
+   remainingSeconds:transit.remainingSeconds,progress:transit.progress}:null,
+  cycleCount:finite(m.productionCycles),
   metersProduced:finite(m.zone1Meterage),nextSeconds,bit:makeTool(drill.installedBit,'bit'),
   hammer:makeTool(drill.installedHammer,'hammer')};
 }
