@@ -11,7 +11,7 @@ export class NPCWalkRig{
  constructor(model){
   this.model=model;this.body=model;
   let src=null;model.traverse(o=>{if(!src&&o.isMesh&&!o.isSkinnedMesh&&o.geometry?.attributes?.position)src=o;});
-  this.skinned=false;this.phase=0;this.last=null;this.walkWeight=0;this.cycleDistance=.95;
+  this.skinned=false;this.phase=0;this.last=null;this.walkWeight=0;this.cycleDistance=.95;this.baseHipY=0;
   if(!src)return;
   // Don't alter original asset or shared geometry. A temporary local rig
   // supports the same GPU skinning as the avatar rigs on mobile WebGL2.
@@ -32,7 +32,7 @@ export class NPCWalkRig{
    const b=new T.Bone();b.name=name;
    b.position.set(x,y,z);par.add(b);return b;
   };
-  const hip=new T.Bone();hip.name='Hips';hip.position.set(0,hipY,0);
+  const hip=new T.Bone();hip.name='Hips';hip.position.set(0,hipY,0);this.baseHipY=hipY;
   const torso=joint('Spine',hip,0,shoulderY-hipY-.04,0);
   const neck=joint('Neck',torso,0,neckY-(shoulderY-.04),0);
   const head=joint('Head',neck,0,h*.045,0);
@@ -98,7 +98,7 @@ export class NPCWalkRig{
   if(travel>0)this.phase+=(travel/this.cycleDistance)*Math.PI*2;
   const w=this.walkWeight,phase=this.phase;
   const {hip,torso,head,arm,leg}=this.bones;
-  hip.position.y+=(Math.sin(phase*2)*.003*w);
+  hip.position.y=this.baseHipY+Math.sin(phase*2)*.003*w;
   hip.rotation.x=Math.sin(phase*2)*.022*w;
   torso.rotation.y=Math.sin(phase)*.042*w;
   head.rotation.y=Math.sin(time*.00042)*.06*(1-w);
