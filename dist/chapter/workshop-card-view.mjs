@@ -63,7 +63,7 @@ export function workshopCardData(s,now=Date.now()){
   };
   else if(bitNeeded||hammerNeeded)attention={
    title:'Instalación pendiente',
-   detail:'La DTH necesita '+(bitNeeded&&hammerNeeded?'bit y martillo':bitNeeded?'bit':'martillo')+' compatibles.',
+   detail:'La DTH necesita '+(bitNeeded&&hammerNeeded?'bit y martillo compatibles':bitNeeded?'un bit compatible':'un martillo compatible')+'.',
    label:'Gestionar instalación',app:'m4-workshop'
   };
  }
@@ -97,7 +97,7 @@ export function renderWorkshopCard(s,{icon,money,now=Date.now(),demolitionAllowe
   <span class="wsMachineState ${data.tone}">${value(data.label)}</span>
  </div>`;
  let html=`<div class="wsHeading"><span class="wsMark">${icon('wrench')}</span>
- <div class="wsHeadingText"><small>OPERACIONES · MANTENIMIENTO</small><h2>TALLER</h2></div>
+ <div class="wsHeadingText"><small>INSTALACIONES / MANTENIMIENTO</small><h2 id="workshopCardHeading">TALLER</h2></div>
  <span class="wsLevel">Nv.${v.lvl} · ${value(v.lvlName)}</span>
  <button type="button" class="wsClose" id="workshopCardClose" aria-label="Cerrar ficha del taller">${icon('close')}</button></div>`;
  html+='<div class="wsContent">';
@@ -107,14 +107,14 @@ export function renderWorkshopCard(s,{icon,money,now=Date.now(),demolitionAllowe
   <span class="wsCapacityFree"><strong>${v.free}</strong><small>libres</small></span>
  </div>
  <div class="wsOccupancy"><span>Ocupación</span><div class="wsTrack"><i style="width:${v.pct}%"></i></div><b>${v.pct}%</b></div>`;
- html+=`<div class="wsSectionTitle wsInventoryTitle">HERRAMIENTAS EN BODEGA</div>
- <div class="wsMetricGrid">${stat('Bits',v.storedBits)}${stat('Martillos',v.storedHammers)}${stat('Descartes M8',v.discarded,'wsMetricDiscard')}</div>`;
+ html+=`<div class="wsSectionTitle wsInventoryTitle">INVENTARIO DISPONIBLE</div>
+ <div class="wsMetricGrid">${stat('Bits',v.storedBits)}${stat('Martillos',v.storedHammers)}${stat('Usados · M8',v.discarded,'wsMetricDiscard')}</div>`;
  if(v.job)html+=`<div class="wsConstruction">
  <div class="wsConstructionHeading">${icon('time')} Ampliación a Nv.${v.job.targetLevel} <b>${v.job.remaining}</b></div>
  <div class="wsTrack"><i style="width:${v.job.progress}%"></i></div>
  <button type="button" id="workshopBoost" ${v.job.boosters<1?'disabled':''}>${icon('boost')} Acelerar 1 min · ${v.job.boosters} disponible(s)</button>
  </div>`;
- if(v.activeM4)html+=`<div class="wsSectionTitle wsRigTitle">ESTADO DE MAQUINARIA</div>
+ if(v.activeM4)html+=`<div class="wsSectionTitle wsRigTitle">MAQUINARIA · ESTADO ACTUAL</div>
  <div class="wsRigList">
  ${machinery('RC',v.rc,'machine')}${machinery('DTH',v.dth,'machine')}
  </div>`;
@@ -123,7 +123,7 @@ export function renderWorkshopCard(s,{icon,money,now=Date.now(),demolitionAllowe
  html+=`<div class="wsFooter">
  <div class="wsPrimaryActions">
   <button type="button" id="workshopStock">${icon('inventory')} Ver stock</button>
-  ${v.activeM4?`<button type="button" id="workshopDthManage">${icon('build')} Gestionar DTH</button>`:''}
+  ${v.activeM4?`<button type="button" id="workshopDthManage">${icon('build')} Gestionar herramientas</button>`:''}
  </div>
  ${v.nextLevel?`<button type="button" id="workshopUpgradeBtn" class="wsUpgrade" ${v.nextLevel.affordable?'':'disabled'}>
   ${icon('boost')} Ampliar a Nv.${v.nextLevel.level} · ${money(v.nextLevel.upgradeCost)}
