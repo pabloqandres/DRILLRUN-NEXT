@@ -100,3 +100,5 @@
 ## Blocked / Waiting
 
 _Nothing blocked._
+
+- **ChatGPT — Asset Library Wave 01 (2026-11-10):** rama `chatgpt/assets-lote01-optimizacion`. Primera pasada de 14 GLB y catálogo de revisión disponibles en ZIP entregado al usuario. Solo documentos/metadatos propuestos en esta rama: NO hay binarios GitHub ni compras activas. Pendiente validar apariencia en Three.js y copiar assets. No editar los archivos compartidos bloqueados `dist/chapter/catalog-view.mjs`, `dist/chapter/builder-ui.mjs`, `dist/chapter/game.mjs` ni la economía. Ver `CHANGES/2026-11-10_asset-library-wave1.md`.
