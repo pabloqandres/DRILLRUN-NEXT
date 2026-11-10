@@ -6,6 +6,7 @@ import {drillTruckImage} from './drilltruck-image.mjs';
 import {icon,workerAvatar} from './icons.mjs';
 import {isM3App,m3HomeApps,renderM3App} from '../mission3/phone-apps.mjs';
 import {isM4App,m4HomeApps,renderM4App} from '../mission4/phone-apps.mjs';
+import {renderPatioApp} from '../mission5/patio-ui.mjs';
 import {renderContactList,renderConversation,NarrativeTyping} from './narrative-ui.mjs';
 import {markCharacterRead,narrativeUnread} from './narrative.mjs';
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -40,6 +41,11 @@ export class PhoneUI{
   }else if(isM3App(app)){
    this.title.textContent=app.replace('m3-','').replace(/^\w/,c=>c.toUpperCase());this.back.style.visibility='visible';
    c.className='appContent';c.innerHTML=renderM3App(app,s,t,fmt,icon,{onSave:this.onSave,onNavigate:this.onNavigate});
+  }else if(app==='m5-patio'){
+   this.title.textContent='Patio de Maquinarias';
+   this.back.style.visibility='visible';
+   c.className='appContent';
+   c.innerHTML=renderPatioApp(s,fmt,icon);
   }else if(isM4App(app)){
    const m4Titles={'m4-operaciones':'Operaciones','m4-workshop':'Taller','m4-dth-catalog':'Casa Matriz · DTH','m4-drilltruck':'DrillTruck','m4-zones':'Zonas','m4-objectives':'Objetivos'};
    this.title.textContent=m4Titles[app]||'Operaciones';this.back.style.visibility='visible';
@@ -140,5 +146,5 @@ export class PhoneUI{
   }
  }
  _disposeTyping(){if(this._typing){this._typing.dispose();this._typing=null;}}
- backApp(){if(this.app==='messages'&&this.conversation){this._disposeTyping();this.conversation=false;this.narrativeCharacter=null;this.render('messages');return;}if(this.app==='messages'||isM3App(this.app)||isM4App(this.app)||this.app==='inventory'||this.app==='bank'||this.app==='objectives'){this.onNavigate('home');return;}this.onClose();}
+ backApp(){if(this.app==='messages'&&this.conversation){this._disposeTyping();this.conversation=false;this.narrativeCharacter=null;this.render('messages');return;}if(this.app==='messages'||isM3App(this.app)||isM4App(this.app)||this.app==='m5-patio'||this.app==='inventory'||this.app==='bank'||this.app==='objectives'){this.onNavigate('home');return;}this.onClose();}
 }
