@@ -1176,6 +1176,11 @@ let geoRefreshTimer=0;
 const builderUI=new BuilderUI({host:$('#builderPanel'),state:()=>s,translate:()=>t,format:money,onClose:closeBuilder,onSelection:m=>{selectedBuildModule=m;blueprint=!!m;},onConfirm:confirmModule,onInspect:inspectModule,onManage:manageOffice,onWorkshopManage:()=>{showWorkshopCard();},
 onPhoneNav:app=>{closeBuilder();openPhone(app);},
 onPatioAction:()=>openPatioPanel(),
+getPatioPreviewSource:()=>{
+ // Single in-world prefab geometry; no purchase/save or duplicate structures.
+ if(!m5World&&s?.mission4?.phase==='complete')initM5Visuals();
+ return m5World?.structuralSource||null;
+},
 onBuildingPreview:product=>{
  if(!world||phase!=='play')return;
  if(!catalogBlueprint)catalogBlueprint=new BuildingBlueprint(world,()=>m5World);
