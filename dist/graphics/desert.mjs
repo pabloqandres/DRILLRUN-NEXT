@@ -6,7 +6,15 @@ function periodicNoise(x,z,period){
  const a=Math.floor(x),b=Math.floor(z),u=smooth(x-a),v=smooth(z-b),ax=((a%period)+period)%period,az=((b%period)+period)%period,bx=(ax+1)%period,bz=(az+1)%period;
  return mix(mix(hash(ax,az),hash(bx,az),u),mix(hash(ax,bz),hash(bx,bz),u),v);
 }
-export function reliefHeight(x,z){const outside=Math.max(-13-x,x-30,-13-z,z-9,0),fade=smooth(Math.min(1,outside/12));return fade*(.45+noise(x*.06,z*.06)*2+noise(x*.17,z*.17)*.55);}
+export function reliefHeight(x,z){
+ const outside=Math.max(-13-x,x-30,-13-z,z-9,0),fade=smooth(Math.min(1,outside/12));
+ // Fixed north-west M5 grading reserve + corridor to existing M4 service road.
+ // Fade outside the planned site. Core chapter-one terrain remains unchanged.
+ const plotDistance=Math.max(-79-x,x+23,-40-z,z-6,0);
+ const accessDistance=Math.max(-24-x,x+11,-17-z,z+11,0);
+ const flatten=smooth(Math.min(1,Math.min(plotDistance,accessDistance)/6));
+ return fade*flatten*(.45+noise(x*.06,z*.06)*2+noise(x*.17,z*.17)*.55);
+}
 export function soilPixels(size=512){const data=new Uint8Array(size*size*4),normal=new Uint8Array(size*size*4),heights=new Float32Array(size*size),period=size-1,wrap=v=>((v%period)+period)%period;
  for(let y=0;y<period;y++)for(let x=0;x<period;x++){
   const u=x/period,v=y/period,broad=periodicNoise(u*7,v*7,7),stone=periodicNoise(u*36,v*36,36),grain=hash(x,y),ridge=Math.sin(u*Math.PI*60+periodicNoise(u*9,v*9,9)*9)*.5+.5;
