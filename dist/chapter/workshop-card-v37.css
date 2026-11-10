@@ -268,3 +268,79 @@
  #workshopCard.workshopV37 .wsFooter{padding:8px 11px}
  #workshopCard.workshopV37 .wsCapacityValue small{font-size:9px;margin-left:4px}
 }
+
+/* V38 · Compact landscape cockpit layout.
+   On 832×384-class phones, display capacity and inventory side-by-side,
+   then machinery states as full-width rows. Header and actions remain fixed;
+   long content scrolls INSIDE the card, never over the action buttons. */
+@media (min-width:650px) and (max-height:520px){
+ #workshopCard.workshopV37{
+  top:clamp(39px,11vh,52px)!important;
+  width:min(492px,calc(100vw - 36px))!important;
+  max-width:492px!important;
+  max-height:calc(100dvh - 101px)!important
+ }
+ #workshopCard.workshopV37 .wsHeading{padding:7px 13px 8px}
+ #workshopCard.workshopV37 .wsHeadingText h2{font-size:16px}
+ #workshopCard.workshopV37 .wsContent{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  grid-template-areas:
+   "capacityTitle inventoryTitle"
+   "capacity inventory"
+   "occupancy inventory"
+   "rigTitle rigTitle"
+   "rigList rigList"
+   "construction construction"
+   "attention attention";
+  align-content:start;column-gap:13px;row-gap:5px;
+  padding:9px 12px 10px;
+  overflow-y:auto!important;
+ }
+ #workshopCard.workshopV37 .wsContent>.wsSectionTitle:first-child{
+  grid-area:capacityTitle;margin:0;align-self:end
+ }
+ #workshopCard.workshopV37 .wsCapacity{
+  grid-area:capacity;margin:0;gap:4px;align-self:center
+ }
+ #workshopCard.workshopV37 .wsCapacityValue strong{font-size:24px}
+ #workshopCard.workshopV37 .wsCapacityValue>span{font-size:13px}
+ #workshopCard.workshopV37 .wsCapacityValue small{
+  max-width:60px;font-size:8px;line-height:1.15;margin-left:4px
+ }
+ #workshopCard.workshopV37 .wsCapacityFree{padding:5px 7px}
+ #workshopCard.workshopV37 .wsCapacityFree strong{font-size:17px}
+ #workshopCard.workshopV37 .wsOccupancy{grid-area:occupancy;gap:5px}
+ #workshopCard.workshopV37 .wsOccupancy>span{font-size:9px}
+ #workshopCard.workshopV37 .wsInventoryTitle{
+  grid-area:inventoryTitle;margin:0;padding:0;border:0;align-self:end
+ }
+ #workshopCard.workshopV37 .wsMetricGrid{grid-area:inventory}
+ #workshopCard.workshopV37 .wsMetric{min-height:49px;padding:4px 3px}
+ #workshopCard.workshopV37 .wsMetric small{font-size:8px}
+ #workshopCard.workshopV37 .wsMetric strong{font-size:18px;margin-top:2px}
+ #workshopCard.workshopV37 .wsRigTitle{
+  grid-area:rigTitle;margin:5px 0 0;padding:8px 0 0
+ }
+ #workshopCard.workshopV37 .wsRigList{grid-area:rigList}
+ #workshopCard.workshopV37 .wsMachine{min-height:38px;padding:6px 10px}
+ #workshopCard.workshopV37 .wsMachineName{font-size:11px}
+ #workshopCard.workshopV37 .wsMachineName small{font-size:9px;margin-top:1px}
+ #workshopCard.workshopV37 .wsMachineState{font-size:10px;max-width:145px}
+ #workshopCard.workshopV37 .wsConstruction{grid-area:construction;margin:3px 0 0}
+ #workshopCard.workshopV37 .wsAttention{grid-area:attention;margin:3px 0 0}
+ #workshopCard.workshopV37 .wsFooter{padding:7px 12px 8px;gap:4px}
+ #workshopCard.workshopV37 .wsPrimaryActions button{
+  min-height:35px;font-size:11px;padding:5px 7px
+ }
+ #workshopCard.workshopV37 .wsLimit{font-size:9px}
+}
+/* Never let buttons escape their own cells on Android landscape. */
+#workshopCard.workshopV37 .wsFooter button,
+#workshopCard.workshopV37 .wsAttention button{
+ min-width:0;overflow-wrap:anywhere;white-space:normal
+}
+#workshopCard.workshopV37 .wsMachineState,
+#workshopCard.workshopV37 .wsMetric small{
+ overflow-wrap:anywhere
+}
