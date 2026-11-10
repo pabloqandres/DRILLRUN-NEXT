@@ -63,6 +63,7 @@ export class FaenaCenterUI{
   function m3or4(app){return app.startsWith('m3-')?m3(app):m4(app);}
   switch(this.route){
    case 'production':{
+    if(!s.mission3||s.mission3.phase==='inactive')return '<p class="faenaHint">La geología operativa se desbloquea en Misión 3.</p>';
     const before=section('01 · Estudio geológico',m3('m3-geology'));
     const after=s.mission4&&s.mission4.phase!=='inactive'
      ?section('02 · Habilitar y asignar zonas',m4('m4-zones'))
@@ -97,12 +98,12 @@ export class FaenaCenterUI{
     const active=lvl>0;
     return '<p class="faenaLead">El Taller ya no es otra bodega. Reafila bits, repara martillos con kits y devuelve herramientas recuperadas a la operación.</p>'+
      '<div class="faenaMetrics">'+small('Nivel técnico',lvl)+small('Trabajos pendientes',info.jobs.length)+small('Recuperaciones realizadas',info.completed)+'</div>'+
-     !active?'<p class="faenaHint">Construye el Taller desde Catálogo para habilitarlo.</p>':
+     (!active?'<p class="faenaHint">Construye el Taller desde Catálogo para habilitarlo.</p>':
      section('Trabajos de recuperación',jobs||'<p class="faenaHint">No hay trabajos en proceso.</p>')+
      section('Herramientas para recuperar',stock||'<p class="faenaHint">No hay piezas desgastadas para recuperar. El material agotado que vuelva de perforación aparecerá aquí.</p>')+
      section('Kits en el Taller',Object.values(REPAIR_KITS).map(k=>small(k.label,info.kits[k.id]||0)).join('')+button('logistics','Solicitar kits en Bodega'))+
      section('Instalación y mantenimiento DTH',s.mission4&&s.mission4.phase!=='inactive'?m4('m4-workshop'):'<p class="faenaHint">La perforadora DTH se habilita en la Misión 4.</p>')+
-     '<nav class="faenaQuickLinks">'+button('logistics','Ver inventario de Bodega')+button('headquarters','Casa Matriz')+'</nav>';
+     '<nav class="faenaQuickLinks">'+button('logistics','Ver inventario de Bodega')+button('headquarters','Casa Matriz')+'</nav>');
    }
    case 'fleet':{
     const yard=fleetOccupancy(s),truck=s.mission5?.personalTruck;
