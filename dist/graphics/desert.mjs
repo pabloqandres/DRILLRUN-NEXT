@@ -7,14 +7,36 @@ function periodicNoise(x,z,period){
  const a=Math.floor(x),b=Math.floor(z),u=smooth(x-a),v=smooth(z-b),ax=((a%period)+period)%period,az=((b%period)+period)%period,bx=(ax+1)%period,bz=(az+1)%period;
  return mix(mix(hash(ax,az),hash(bx,az),u),mix(hash(ax,bz),hash(bx,bz),u),v);
 }
+// The exact same height source is used to build the terrain mesh and to
+// support the player's feet. M5 plot and access corridor are graded to zero.
+const GAME_PLOT={minX:-79,maxX:-23,minZ:-40,maxZ:6};
+const GAME_LINK={minX:-26,maxX:-10,minZ:-18,maxZ:-10};
+function clearance(x,z,area){
+ return Math.max(area.minX-x,x-area.maxX,area.minZ-z,z-area.maxZ,0);
+}
 export function reliefHeight(x,z){
- const outside=Math.max(-13-x,x-30,-13-z,z-9,0),fade=smooth(Math.min(1,outside/12));
- // Fixed north-west M5 grading reserve + corridor to existing M4 service road.
- // Fade outside the planned site. Core chapter-one terrain remains unchanged.
- const plotDistance=Math.max(-79-x,x+23,-40-z,z-6,0);
- const accessDistance=Math.max(-24-x,x+11,-17-z,z+11,0);
- const flatten=smooth(Math.min(1,Math.min(plotDistance,accessDistance)/6));
- return fade*flatten*(.45+noise(x*.06,z*.06)*2+noise(x*.17,z*.17)*.55);
+ const outside=Math.max(-13-x,x-30,-13-z,z-9,0);
+ const fade=smooth(Math.min(1,outside/12));
+ // A generous flat foundation (L1 and connecting access) with a gradual
+ // transition to natural desert. A person must not sink through high sand.
+ const dist=Math.min(clearance(x,z,GAME_PLOT),clearance(x,z,GAME_LINK));
+ const graded=smooth(Math.min(1,dist/8));
+ return fade*graded*(.45+noise(x*.06,z*.06)*2+noise(x*.17,z*.17)*.55);
+}
+// Terrain uses PlaneGeometry(240,240,96,96), whose index triangles divide
+// a 2.5m cell along the negative diagonal. Interpolate the same vertices
+// instead of sampling height 0 (old bug) or approximating at arbitrary x/z.
+export function desertGroundHeight(x,z){
+ const step=240/96;
+ const cx=Math.max(0,Math.min(95,Math.floor((x+120)/step)));
+ const cz=Math.max(0,Math.min(95,Math.floor((z+120)/step)));
+ const ax=-120+cx*step,az=-120+cz*step;
+ const u=Math.max(0,Math.min(1,(x-ax)/step));
+ const v=Math.max(0,Math.min(1,(z-az)/step));
+ const h00=reliefHeight(ax,az),h10=reliefHeight(ax+step,az);
+ const h01=reliefHeight(ax,az+step),h11=reliefHeight(ax+step,az+step);
+ if(u+v<=1)return h00+(h10-h00)*u+(h01-h00)*v;
+ return h11+(h01-h11)*(1-u)+(h10-h11)*(1-v);
 }
 export function soilPixels(size=512){const data=new Uint8Array(size*size*4),normal=new Uint8Array(size*size*4),heights=new Float32Array(size*size),period=size-1,wrap=v=>((v%period)+period)%period;
  for(let y=0;y<period;y++)for(let x=0;x<period;x++){
@@ -64,7 +86,7 @@ export function createDesert(w){
   for(let i=0;i<a.count;i++){const x=a.getX(i),z=a.getZ(i),v=(z+depth/2)/depth,ridge=Math.pow(Math.max(0,Math.sin(v*Math.PI)),1.2),peaks=2.5+Math.pow(noise(x*.045,layer*4+3),2)*9+Math.pow(noise(x*.16,layer*9+2),2)*4,clefts=Math.abs(Math.sin(x*.29+z*.35))*1.1;a.setY(i,.2+ridge*(peaks+layer*1.7-clefts));}
   const flat=g.toNonIndexed();g.dispose();flat.computeVertexNormals();const pos=flat.attributes.position,colors=[];
   for(let i=0;i<pos.count;i+=3){const h=(pos.getY(i)+pos.getY(i+1)+pos.getY(i+2))/3,n=noise(pos.getX(i)*.17,h*.4),base=new T.Color([0xb58c6c,0xb49887,0xaaa0a8,0xa8b4c4][layer]);const strata=Math.sin(h*1.65+pos.getX(i)*.07)*.065;base.multiplyScalar(.68+n*.36+strata+(h>12?.04:0));for(let j=0;j<3;j++)colors.push(base.r,base.g,base.b);}
-  flat.setAttribute('color',new T.Float32BufferAttribute(colors,3));const m=new T.MeshLambertMaterial({color:0xffffff,vertexColors:true});const mountain=new T.Mesh(flat,m);mountain.name='ridge-'+layer;mountain.position.set(layer*7-6,-.2,-42-layer*20);group.add(mountain);
+  flat.setAttribute('color',new T.Float32BufferAttribute(colors,3));const m=new T.MeshLambertMaterial({color:0xffffff,vertexColors:true});const mountain=new T.Mesh(flat,m);mountain.name='ridge-'+layer;mountain.position.set(layer*7-6,-.2,-74-layer*20);group.add(mountain);
  }
  // V18 cinematic relief: faceted high-altitude mesas in the far world.
  // Entirely outside the playable parcel: no colliders, no traversable paths,
