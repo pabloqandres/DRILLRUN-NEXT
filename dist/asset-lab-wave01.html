@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>DRILL RUN · Biblioteca 3D · Lote 01</title>
+<style>
+:root{color-scheme:dark;font:14px/1.45 system-ui,-apple-system,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:#071b2c;color:#eaf8ff}
+header{padding:13px 18px;background:#0c2c42;border-bottom:1px solid #30607b}
+header b{letter-spacing:.12em}header small{display:block;color:#98b7c8}
+main{display:grid;grid-template-columns:minmax(210px,270px) 1fr;min-height:calc(100dvh - 69px)}
+aside{padding:12px;overflow-y:auto;max-height:calc(100dvh - 69px);background:#0b2437}
+#entries{display:grid;gap:6px}button{background:#18384f;color:#f4faff;border:1px solid #315d75;border-radius:8px;padding:7px 10px;text-align:left;cursor:pointer}
+button:focus-visible{outline:2px solid #5cdbff}button[aria-pressed="true"]{border-color:#5cdbff;background:#17465b}
+.choice{display:flex;align-items:center;gap:10px}.choice img{height:42px;width:60px;object-fit:contain;background:#143040;border-radius:5px}
+.choice span{flex:1} .choice i{font-style:normal;color:#a1bccb;font-size:11px;display:block}
+article{position:relative;min-height:400px;overflow:hidden}#stage{position:absolute;inset:0}
+#stage canvas{width:100%;height:100%;display:block;touch-action:none}
+#toolbar{position:absolute;top:12px;left:12px;right:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;pointer-events:none}
+#toolbar>*{pointer-events:auto}#meta{background:#0c2c42df;padding:8px 10px;border:1px solid #326681;border-radius:9px;flex:1;min-width:160px}
+#status{position:absolute;bottom:15px;left:16px;background:#092235dd;color:#c5e4f5;padding:5px 10px;border-radius:6px}
+@media(max-width:700px){main{grid-template-columns:1fr;grid-template-rows:178px minmax(380px,1fr)}aside{max-height:178px;overflow-x:auto;overflow-y:hidden}#entries{display:flex}.choice{min-width:165px}article{min-height:60dvh}}
+</style></head>
+<body>
+<header><b>DRILL RUN NEXT GENERATION · ASSET LAB 01</b><small>Biblioteca técnica 3D · 14 modelos optimizados · revisión visual antes de comprar</small></header>
+<main><aside><div id="entries" role="group" aria-label="Modelos de biblioteca"></div></aside>
+<article><div id="stage"></div><div id="toolbar"><div id="meta">Selecciona un modelo</div><button id="holo" type="button" disabled>Blueprint celeste</button><button id="reset" type="button">Recentrar</button></div><div id="status" role="status">Arrastra para girar · rueda para zoom</div></article></main>
+<script type="module">
+import * as T from './vendor/three.module.js';
+import {WAVE01_MODELS,wave01Instance,wave01Blueprint,wave01ThumbnailUrl} from './chapter/asset-wave01-runtime.mjs';
+
+const names={
+ cono_seguridad:'Cono HSEC',cerco_perimetral:'Cerco modular',contenedor_azul_reciclaje:'Contenedor azul',
+ contenedor_verde_reciclaje:'Contenedor verde',contenedor_oscuro_residuos:'Contenedor general',
+ pallet_bodega:'Pallet de bodega',cajon_bodega:'Cajón de almacenamiento',montacargas_bodega:'Montacargas',
+ cargador_frontal_a:'Cargador frontal compacto',cargador_frontal_b:'Cargador frontal pesado',
+ galpon_bodega:'Galpón logístico',edificio_industrial_49:'Edificio de servicios',
+ estructura_auxiliar:'Estructura auxiliar',maquinaria_obra_auxiliar:'Maquinaria auxiliar'
+};
+const list=document.querySelector('#entries'),host=document.querySelector('#stage'),meta=document.querySelector('#meta'),status=document.querySelector('#status');
+const scene=new T.Scene();scene.background=new T.Color(0x102a40);
+const camera=new T.PerspectiveCamera(40,1,.1,400);
+const renderer=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=T.SRGBColorSpace;
+renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1;
+host.append(renderer.domElement);
+scene.add(new T.HemisphereLight(0xc9efff,0x435465,2.2));
+const sunlight=new T.DirectionalLight(0xffedd5,2.6);sunlight.position.set(-8,14,8);scene.add(sunlight);
+const ground=new T.Mesh(new T.CircleGeometry(70,64),new T.MeshBasicMaterial({color:0x1c3a49,side:T.DoubleSide}));
+ground.rotation.x=-Math.PI/2;ground.position.y=-.025;scene.add(ground);
+let object=null,hologram=null,selected=null,seq=0,theta=-.6,phi=.58,zoom=9,centerY=1,building=false;
+function fit(){
+ const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);
+ renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
+}
+new ResizeObserver(fit).observe(host);fit();
+function cameraUpdate(){
+ const r=Math.max(2,Math.min(180,zoom)),up=Math.max(.15,Math.min(1.43,phi));
+ camera.position.set(Math.sin(theta)*Math.sin(up)*r,centerY+Math.cos(up)*r,Math.cos(theta)*Math.sin(up)*r);
+ camera.lookAt(0,centerY,0);
+}
+function clear(){
+ if(object){object.removeFromParent();object=null;}
+ if(hologram){hologram.dispose();hologram=null;}
+}
+function choose(id){
+ const def=WAVE01_MODELS.find(x=>x.id===id);if(!def)return;
+ selected=id;building=def.kind==='building';const serial=++seq;clear();
+ document.querySelector('#holo').disabled=!building;document.querySelector('#holo').textContent='Blueprint celeste';
+ for(const b of list.querySelectorAll('button'))b.setAttribute('aria-pressed',String(b.dataset.id===id));
+ meta.textContent=names[id]+' · '+def.kind+' · GLB original';
+ status.textContent='Cargando GLB real…';
+ wave01Instance(id,{toon:true,normalize:true}).then(mesh=>{
+  if(serial!==seq)return;
+  object=mesh;scene.add(mesh);const bounds=new T.Box3().setFromObject(mesh),sz=new T.Vector3();bounds.getSize(sz);
+  const span=Math.max(sz.x,sz.y,sz.z);zoom=Math.max(4,span*2.1);
+  centerY=Math.max(.3,sz.y*.42);theta=-.6;phi=.7;
+  status.textContent='Modelo cargado · gira y acerca para inspeccionar';
+ }).catch(e=>{if(serial===seq)status.textContent='GLB no instalado: '+String(e.message||e)});
+}
+for(const x of WAVE01_MODELS){
+ const button=document.createElement('button');button.type='button';button.className='choice';button.dataset.id=x.id;button.setAttribute('aria-pressed','false');
+ const img=document.createElement('img');img.src=wave01ThumbnailUrl(x.id);img.alt='Miniatura real del asset '+x.id;img.loading='lazy';
+ const label=document.createElement('span');label.textContent=names[x.id];const sub=document.createElement('i');sub.textContent=x.kind;label.append(sub);
+ button.append(img,label);button.onclick=()=>choose(x.id);list.append(button);
+}
+document.querySelector('#holo').onclick=async()=>{
+ if(!selected||!building)return;
+ if(hologram){hologram.dispose();hologram=null;if(object)object.visible=true;document.querySelector('#holo').textContent='Blueprint celeste';return;}
+ const serial=seq;try{
+  const next=await wave01Blueprint(selected,{quality:'balanced'});
+  if(serial!==seq){next.dispose();return;}
+  hologram=next;scene.add(hologram);if(object)object.visible=false;
+  document.querySelector('#holo').textContent='Ver modelo final';
+ }catch(e){status.textContent='Blueprint no disponible: '+String(e.message||e)}
+};
+document.querySelector('#reset').onclick=()=>{theta=-.6;phi=.7};
+let pointer=null,x0=0,y0=0;
+renderer.domElement.addEventListener('pointerdown',e=>{pointer=e.pointerId;x0=e.clientX;y0=e.clientY;renderer.domElement.setPointerCapture(pointer)});
+renderer.domElement.addEventListener('pointermove',e=>{if(e.pointerId!==pointer)return;theta-=(e.clientX-x0)*.009;phi=Math.max(.18,Math.min(1.43,phi+(e.clientY-y0)*.005));x0=e.clientX;y0=e.clientY});
+renderer.domElement.addEventListener('pointerup',()=>pointer=null);
+renderer.domElement.addEventListener('pointercancel',()=>pointer=null);
+renderer.domElement.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(2,Math.min(180,zoom*Math.exp(e.deltaY*.001)))},{passive:false});
+function loop(time){cameraUpdate();if(hologram)hologram.update(time/1000,.35,{quality:'balanced',resolution:renderer.domElement});renderer.render(scene,camera);requestAnimationFrame(loop)}
+requestAnimationFrame(loop);choose(WAVE01_MODELS[0].id);
+</script>
+</body></html>
