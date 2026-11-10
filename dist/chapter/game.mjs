@@ -30,6 +30,7 @@ import {mission4Readout} from '../mission4/operations-guide.mjs';
 import {PATIO_L1,PATIO_FUTURE,patioState,patioUnlocked,patioProgress,startPatio,finishPatio} from '../mission5/patio-state.mjs';
 import {createPatioWorld} from '../mission5/patio-world.mjs';
 import {PatioNPCWorld} from '../mission5/patio-npc-world.mjs';
+import {probeM5Assets} from '../mission5/assets-ready.mjs';
 import {hirePatioStaff,inspectPatioGate,inspectPatioWarehouse,mission5Objectives} from '../mission5/patio-staff.mjs';
 import {FLEET_BAYS,patioFleetActive,rcAvailableToPark,dthAvailableToPark} from '../mission5/fleet-base.mjs';
 import {rigRouteToPatio,rigRouteFromPatio,advanceRigRoute} from '../mission5/fleet-routes.mjs';
@@ -226,6 +227,9 @@ async function ensureWorld(forSelection=false){
  if(world){if(forSelection){hidden($('#loading'),false);await avatars.loadAll((n,total)=>{loadingProgress(n,total);});hidden($('#loading'),true);}return;}
  hidden($('#loading'),false);loadingProgress(0,forSelection?4:2);
  world=new World($('#world'),{chapter:true,cameraSettings:loadCameraSettings()});scene=new ChapterScene(world);
+ // Non-blocking availability check: do not unlock the M5 SMS when custom
+ // user GLBs are still absent from the production build.
+ probeM5Assets().catch(()=>{});
  siteCinematics?.dispose();siteCinematics=new SiteCinematics(world);hsecWorld=new HsecWorld(world);hsecWorld.onBuilt=a=>{scene.burst(a.x,a.z);sound('finish');};hsecWorld.onAlert=(text,sym)=>{notices.push({title:text,symbol:sym||'bell'});};
  hsecWorld.onRepair=(orderId)=>{const h=ensureHsec(s);const o=h.orders.find(o=>o.id===orderId);if(!o)return;try{assignOrder(s,orderId,'player');save();renderHUD();notices.push({title:'Reparación iniciada',symbol:'🔧'});}catch(e){notices.push({title:e.message,symbol:'⚠️'});}};
  hsecWorld.onInspect=(assetId)=>{try{const h=ensureHsec(s),before=h.orders.filter(o=>o.assetId===assetId&&o.status==='pending').length;inspectAsset(s,assetId);save();renderHUD();const after=h.orders.filter(o=>o.assetId===assetId&&o.status==='pending').length,created=after-before;notices.push({title:created>0?`${created} reparación${created>1?'es':''} detectada${created>1?'s':''} — toca para reparar`:'Sin problemas detectados',symbol:'🔍'});}catch(e){notices.push({title:e.message,symbol:'⚠️'});}};
