@@ -2,6 +2,7 @@
 // blueprint-to-commissioning visualisation. No equipment is ever created here.
 // Heavy vehicles and DTH/RC stay in OPEN pads; only small fleet under roof.
 import * as T from '../vendor/three.module.js';
+import {ConstructionHologram} from '../chapter/construction-hologram.mjs';
 import {PATIO_L1,patioProgress,patioState} from './patio-state.mjs';
 
 const C={red:0xb92832,redBright:0xe04542,ink:0x172e40,dark:0x243b4a,
@@ -203,9 +204,35 @@ export function createPatioWorld(w){
  const access=buildAccess(w,structures);
  const final=new T.Group();root.add(final);operationalDetails(w,final);
  const future=futurePlots(w);
- let previousState='',registered=false;
+ // The structural source is an exact clone of the final prefab modules,
+ // local to the patio's centre. Holograms read its geometry only.
+ const structuralSource=new T.Group();
+ structuralSource.name='M5 · Fuente real para holograma arquitectónico';
+ for(const part of [grading,structures,final])structuralSource.add(part.clone(true));
+ let constructionHologram=null,previousState='',registered=false;
+ const updateHologram=(s,now,info)=>{
+  if(s.mission5?.status!=='building'){
+   if(constructionHologram){constructionHologram.finish(now/1000);
+    if(!constructionHologram.update(now/1000,1,
+      {quality:w.quality,resolution:w.renderer.domElement})){
+     constructionHologram.dispose();constructionHologram=null;
+    }
+   }
+   return;
+  }
+  if(!constructionHologram){
+   // Exactly the Office L1 effect, now around the REAL full-size patio.
+   constructionHologram=new ConstructionHologram(structuralSource,{
+    software:w.renderer.isSoftwareRenderer,quality:w.quality,
+    footprint:{width:PATIO_L1.width,depth:PATIO_L1.depth}
+   });
+   root.add(constructionHologram);
+  }
+  constructionHologram.update(now/1000,info.progress,
+    {quality:w.quality,resolution:w.renderer.domElement});
+ };
  return {
-  root,access,future,
+  root,access,future,structuralSource,
   update(s,now=Date.now()){
    const status=patioState(s),enabled=!!(s?.mission4?.phase==='complete');
    if(!enabled){root.visible=false;future.visible=false;w.yardL1Open=false;return;}
@@ -214,10 +241,13 @@ export function createPatioWorld(w){
    const stateKey=status+':'+info.phase;
    if(stateKey!==previousState){
     previousState=stateKey;
-    hologram.visible=status==='locked'||(status==='building'&&info.progress<.98);
+    // The old 2D wireframe is only a survey outline before purchase.
+    // During construction the real Office L1 hologram (below) scans the
+    // actual building meshes, while physical modules mount progressively.
+    hologram.visible=status==='locked';
     grading.visible=status==='operational'||(status==='building'&&info.progress>=.10);
-    structures.visible=status==='operational'||(status==='building'&&info.progress>=.30);
-    final.visible=status==='operational'||(status==='building'&&info.progress>=.80);
+    structures.visible=status==='operational'||(status==='building'&&info.progress>=.38);
+    final.visible=status==='operational'||(status==='building'&&info.progress>=.91);
     w.yardL1Open=enabled;
     // Once grading is visible (from 10% of the build), support the player's
     // feet on the actual 19cm-high yard surface, not on the buried sand.
@@ -253,10 +283,14 @@ export function createPatioWorld(w){
     w.walkSurfaces.push({x:-18.6,z:-14,w:11.4,d:8.5,y:.17});
    }
    if(status==='building'){
-    // The hologram pulses while real time (including offline time) advances.
-    const pulse=.66+.29*Math.sin(now*.003);
-    hologram.traverse(x=>{if(x.material?.isLineBasicMaterial)x.material.opacity=pulse;});
+    // Blueprint -> graded earth -> assembly -> HSEC. The same physical
+    // modular parts become solid in this order, never all at once at 30%.
+    for(const [index,part] of structures.children.entries())
+      part.visible=info.progress>=.38+index*.12;
+   }else if(status==='operational'){
+    for(const part of structures.children)part.visible=true;
    }
+   updateHologram(s,now,info);
    // Barrier is up for vehicles using its one fixed entrance.
    const truck=s.mission4?.drillTruck;
    const truckNear=!!truck?.position&&
@@ -264,6 +298,6 @@ export function createPatioWorld(w){
    const desired=truckNear||w.fleetGateInUse?-Math.PI/2:0;
    access.rotation.x+=(desired-access.rotation.x)*.12;
   },
-  dispose(){root.removeFromParent();future.removeFromParent();}
+  dispose(){constructionHologram?.dispose();root.removeFromParent();future.removeFromParent();}
  };
 }
