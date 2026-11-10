@@ -33,8 +33,16 @@ export function mission5Readout(s,now=Date.now()){
   rewardCash:M5_REWARD_CASH};
 }
 
-export function renderMission5HudChecklist(readout){
- const rows=readout.steps.map(step=>{
+export function mission5HudVisibleSteps(readout){
+ // At most two steps in the world HUD. Full five-step breakdown stays in
+ // Teléfono → Patio de Maquinarias, available through Ver detalles.
+ const active=readout.steps.findIndex(step=>step.status==='current');
+ return active>=0?readout.steps.slice(active,active+2):readout.steps.slice(-1);
+}
+
+export function renderMission5HudChecklist(readout,{compact=false}={}){
+ const visible=compact?mission5HudVisibleSteps(readout):readout.steps;
+ const rows=visible.map(step=>{
   const marker=step.status==='done'?'✓':step.status==='locked'?'–':String(step.number);
   const suffix=step.remainingSeconds!==null?' · '+clock(step.remainingSeconds)+' restantes':'';
   const activity=step.status==='current'?' aria-current="step"':'';
@@ -43,6 +51,6 @@ export function renderMission5HudChecklist(readout){
    '<span class="m5HudLabel">'+esc(step.label)+esc(suffix)+'</span></span>';
  }).join('');
  const closure=readout.completed?'<span class="m5HudClosing">Revisa el mensaje final de Elena para cobrar el bono.</span>':'';
- return '<span class="m5HudChecklist" role="list" aria-label="Cinco objetivos de Misión 5">'+rows+'</span>'+
+ return '<span class="m5HudChecklist" role="list" aria-label="'+(compact?'Paso actual y siguiente de Misión 5':'Cinco objetivos de Misión 5')+'">'+rows+'</span>'+
   closure+'<span class="m5HudReward">Bono por completar · 🪙 '+readout.rewardCash.toLocaleString('es-CL')+'</span>';
 }
