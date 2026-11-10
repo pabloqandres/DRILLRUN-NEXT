@@ -39,7 +39,7 @@ export function catalogProducts(s,t){
  // Workshop entry in catalog
  const wsLvl=workshopLevel(s),wsBuilding=s.workshop?.status==='building',wsJob=workshopUpgradeJob(s),wsDef=WORKSHOP_LEVELS.find(w=>w.level===wsLvl),wsNext=WORKSHOP_LEVELS.find(w=>w.level===wsLvl+1);
  const wsStatus=wsBuilding||wsJob?'building':wsLvl?'installed':canBuildWorkshop(s)===null?'available':'locked';
- const wsDescs={1:'Almacenamiento de herramientas y mantenimiento básico',2:'Mayor capacidad + estacionamiento DrillTruck',3:'Capacidad industrial para operaciones a gran escala'};
+ const wsDescs={1:'Almacenamiento de herramientas y mantenimiento básico',2:s.mission5?.status==='operational'?'Mayor capacidad de herramientas · flota estacionada en Patio L1':'Mayor capacidad + estacionamiento temporal M4'};
  products.push({id:'workshop',kind:'workshop',category:'infrastructure',title:'Taller',level:wsLvl,description:wsDescs[wsLvl]||'',benefit:`Capacidad: ${wsDef?.capacity||8} herramientas`,price:wsLvl?(wsNext?wsNext.upgradeCost:null):WORKSHOP_L1_COST,seconds:wsLvl?(wsNext?wsNext.constructionSeconds:null):WORKSHOP_L1_SECONDS,w:7.2,d:5.4,h:4.5,capacity:(wsDef?.capacity||8)+' herramientas',status:wsStatus,reason:wsBuilding||wsJob?c.constructionPending:!wsLvl&&canBuildWorkshop(s)?c.later:'',model:{id:'workshop-l'+(wsLvl||1),level:wsLvl||1,nameKey:'workshop'},canStart:wsStatus==='available',action:wsLvl||wsBuilding?'manage':'buy',insufficient:!wsLvl?s.cash<WORKSHOP_L1_COST:wsNext?s.cash<wsNext.upgradeCost:false});
  // M5 · Fixed large yard unlocked as soon as M4 is complete.
  // Browsing is read-only; the explicit construction confirmation pays once.
