@@ -9,6 +9,7 @@ import {buildParking} from '../mission4/parking.mjs';
 import {startMaintenance,advanceMaintenancePhase} from '../mission4/maintenance.mjs';
 import {startProductionCycle,firstProductionCycleStatus,dthReplacementAvailable} from '../mission4/production.mjs';
 import {dthRigInspection} from '../mission4/rig-inspection.mjs';
+import {dthTravelPose} from '../mission4/dth-travel.mjs';
 import {initTruckRouteState,startTruckRoute,updateTruckRoute,truckRouteActive} from '../mission4/truck-routes.mjs';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {DRACOLoader} from '../vendor/DRACOLoader.js';
@@ -517,8 +518,11 @@ function updateM4Visuals(dt){
  if(s.mission4.productionDrill&&!m4DthModel){
   m4DthModel=createDthProductionRig();
   const initialZone=s.mission4?.zones?.find(z=>z.id===s.mission4.productionDrill?.assignedZone);
-  const p=patioFleetActive(s)&&s.mission5?.dthParked?FLEET_BAYS.dth:(initialZone?.position||DTH_RESERVE);
+  const transit=dthTravelPose(s,Date.now());
+  const p=patioFleetActive(s)&&s.mission5?.dthParked?FLEET_BAYS.dth:
+   transit?.moving?transit:(initialZone?.position||DTH_RESERVE);
   m4DthModel.position.set(p.x,0,p.z);
+  if(transit?.moving&&transit.heading!==null)m4DthModel.rotation.y=transit.heading;
   world.scene.add(m4DthModel);
   m4DthCollider={x:m4DthModel.position.x,z:m4DthModel.position.z,w:3.2,d:4.5,_dth:true};
   world.colliders.push(m4DthCollider);
@@ -550,9 +554,17 @@ function updateM4Visuals(dt){
    }
   }else{
    m5DthRoute=null;m5DthDepartRoute=null;
-   // Retain M4 worksite-to-worksite animation and consumption.
-   m4DthModel.position.x+=(target.x-m4DthModel.position.x)*Math.min(1,dt*3);
-   m4DthModel.position.z+=(target.z-m4DthModel.position.z)*Math.min(1,dt*3);
+   const transit=dthTravelPose(s,Date.now());
+   if(transit?.moving){
+    // Animate the full persisted 12-second relocation from the saved
+    // origin to the destination, including after reopening mid-transfer.
+    m4DthModel.position.x=transit.x;
+    m4DthModel.position.z=transit.z;
+    if(transit.heading!==null)m4DthModel.rotation.y=transit.heading;
+   }else{
+    m4DthModel.position.x+=(target.x-m4DthModel.position.x)*Math.min(1,dt*3);
+    m4DthModel.position.z+=(target.z-m4DthModel.position.z)*Math.min(1,dt*3);
+   }
   }
   if(m4DthCollider){m4DthCollider.x=m4DthModel.position.x;m4DthCollider.z=m4DthModel.position.z;}
   // Drill animation runs only at the assigned site, never during relocation.
@@ -870,13 +882,13 @@ function showDthDrillCard(){
   <div class="dcHead">${icon('machine')}<div><b>PERFORADORA DTH · PRODUCCIÓN</b><small>PUMA® BY DRILLCO® · Ficha de consumibles</small></div></div>
   <span class="dcState ${report.state==='producing'?'drilling':report.state==='moving'?'moving':'idle'}">${esc(states[report.state]||report.state)}</span>
   <div class="dcGrid">
-    <div class="dcStat"><span>Punto activo</span><b>${esc(report.zoneId||'—')}</b></div>
+    <div class="dcStat"><span>${report.travel?'Punto de destino':'Punto activo'}</span><b>${esc(report.zoneId||'—')}</b></div>
     <div class="dcStat"><span>Ciclos registrados</span><b>${fmtMeters(report.cycleCount)}</b></div>
   </div>
   ${toolRow('BIT DTH',report.bit)}
   ${toolRow('MARTILLO PUMA®',report.hammer)}
   <div class="dthInspectFooter"><b>Avance productivo: ${fmtMeters(report.metersProduced)} m</b>
-   <small>${report.nextSeconds===null?report.state==='paused'?'Producción detenida. Revisa stock y servicio DrillTruck®.':report.state==='moving'?'DTH trasladándose al siguiente punto.':'Esperando próximo ciclo de producción.':'Próximo ciclo: '+clock(report.nextSeconds)}</small>
+   <small>${report.travel?'Traslado '+esc(report.travel.from||'origen')+' → '+esc(report.travel.to||'destino')+' · '+clock(report.travel.remainingSeconds)+' restantes':report.nextSeconds===null?report.state==='paused'?'Producción detenida. Revisa stock y servicio DrillTruck®.':'Esperando próximo ciclo de producción.':'Próximo ciclo: '+clock(report.nextSeconds)}</small>
   </div>`;
  dc.querySelector('#drillCardClose').onclick=e=>{e.stopPropagation();hideDrillCard();};
  dc.hidden=false;dc.scrollTop=previousScroll;drillCardOpen=true;drillCardMode='dth';dthCardLastRender=Date.now();

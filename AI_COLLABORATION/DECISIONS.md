@@ -1,5 +1,18 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+## 2026-11-10 — V48 Desfase traslado DTH y estado visual
+
+Diagnóstico del usuario: la DTH figura «Cambiando de punto» sin
+desplazarse. El reloj lógico dura 12 s pero el visual usa un lerp
+exponencial que llega mucho antes. Reabrir partida durante el viaje
+hace nacer el modelo ya en destino. Reparación acotada M4 en
+`dist/mission4/production.mjs`, `rig-inspection.mjs`,
+`dist/chapter/game.mjs` y nueva función de sólo lectura
+`dist/mission4/dth-travel.mjs`. Solo sincronizar posición visual,
+origen guardado y ETA; no tocar economía, producción, desgaste,
+tiempos ni historial. Ver
+`CHANGES/2026-11-10_v48-dth-transfer-visual-sync.md`.
+
 ## 2026-11-10 — V47 Home refleja la misión activa + HUD M5 compacto
 
 **Solicitud directa del usuario:** realizar la corrección y publicarla
