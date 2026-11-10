@@ -321,3 +321,9 @@ con kits y despachos pagados, acceso contextual y teléfono simplificado
 post M4. Integra V51 animación NPC/Patio y V52 iluminación nocturna/
 conducción. Tests enfocados verdes; 2 regresiones preexistentes
 M4 offline en CI global no resueltas. Biblioteca 3D PR68 sin binarios.
+
+
+## 2026-11-10 — V54 Dirección DrillTruck® 02 + íconos
+Corrige inversión del joystick/teclado, botones de faros (amarillo al encender)
+y freno sin texto, ambos a la derecha. Catálogo oculto durante conducción.
+Sin cambios en lógica M4, M5, economía ni almacén. Ver CHANGES V54.
