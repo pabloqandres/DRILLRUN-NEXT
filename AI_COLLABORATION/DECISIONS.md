@@ -279,3 +279,7 @@ Faro (apagado gris/encendido amarillo) y freno (ícono rojo al presionar) quedan
 
 ## 2026-11-10 — V55 Tránsito y GPU en móvil
 Los pasos pintados nunca actúan como muro. Conservar cercos, edificios, barandas y control HSEC como obstáculos, con una huella vehicular real y la posibilidad de deslizarse por cantos; no eliminar colisionadores. El Catálogo utiliza un contexto WebGL compartido para todas sus imágenes; mundo 3D conserva el contexto prioritario. Una falla de render puede reiniciar la vista solo con guardado preservado; no resetear economía/misiones.
+
+
+## 2026-11-10 — V56 No perder jamás vehículos comprados
+La unidad 02 está identificada por `s.mission5.personalTruck` y no puede desaparecer por falta temporal de GLB ni por cambio de save válido. Su propiedad solo puede reconstruirse de evidencia de compra/comisión M5 y recompensa cobrada; la localización no la teletransporta, pero Recuperar P01 es una acción explícita gratuita sobre la misma instancia. M4 automática permanece independiente.
