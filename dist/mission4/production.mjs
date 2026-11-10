@@ -1,6 +1,7 @@
 // Mission 4 — Production system
 // Automated income generation from converted borehole zones.
 
+import {DTH_TRAVEL_MS} from './dth-travel.mjs';
 export const CYCLE_DURATION=900; // 15 minutes in seconds
 // Moderate passive income relative to one-off contract rewards (M3: 60,000 base).
 export const BASE_INCOME_PER_CYCLE=500; // Legacy M4 before completion
@@ -112,6 +113,9 @@ function processPermanentCycle(s,now){
  if(m.travelUntil){
   if(now<m.travelUntil)return [];
   m.travelUntil=null;
+  m.travelStartedAt=null;
+  m.travelFrom=null;
+  d.position={...current.position};
   if(!dthServiceNeeded(s)){current.status='producing';current.lastCycleAt=now;d.state='producing';}
   else {m.serviceRequested=true;current.status='idle';current.lastCycleAt=null;d.state='paused';}
   return [];
@@ -140,11 +144,20 @@ function processPermanentCycle(s,now){
  current.status='idle';current.lastCycleAt=null;
  if(dthServiceNeeded(s)){m.serviceRequested=true;d.state='paused';return ['incomeGenerated','dthServiceRequired'];}
  const next=chooseNextZone(m,current);
- d.assignedZone=next.id;d.position={...next.position};
+ d.assignedZone=next.id;
  if(next.id!==current.id){
-  m.travelUntil=now+12000;
+  // Keep the actual origin and the full 12-second travel window. The visual
+  // renderer derives the pose from this timestamp (also after restoring).
+  m.travelFrom={...current.position};
+  m.travelStartedAt=now;
+  m.travelUntil=now+DTH_TRAVEL_MS;
+  d.position={...current.position};
   next.status='idle';next.lastCycleAt=null;d.state='moving';
- }else {next.status='producing';next.lastCycleAt=now;d.state='producing';}
+ }else {
+  d.position={...next.position};
+  m.travelFrom=null;m.travelStartedAt=null;m.travelUntil=null;
+  next.status='producing';next.lastCycleAt=now;d.state='producing';
+ }
  return ['incomeGenerated'];
 }
 
