@@ -1,5 +1,6 @@
 import * as T from '../vendor/three.module.js';
 const smooth=t=>t*t*(3-2*t),mix=(a,b,t)=>a+(b-a)*t;
+const reservedPatioL1=(x,z)=>x>-80&&x<-22&&z>-41&&z<7;
 function hash(x,z){const n=Math.sin(x*127.1+z*311.7)*43758.5453;return n-Math.floor(n);}
 export function noise(x,z){const a=Math.floor(x),b=Math.floor(z),u=smooth(x-a),v=smooth(z-b);return mix(mix(hash(a,b),hash(a+1,b),u),mix(hash(a,b+1),hash(a+1,b+1),u),v);}
 function periodicNoise(x,z,period){
@@ -95,7 +96,7 @@ export function createDesert(w){
  group.add(mesas);
  // Non-interactive geological scatter stays outside the usable parcel.
  const rocks=new T.InstancedMesh(new T.IcosahedronGeometry(.12,1),new T.MeshStandardMaterial({color:0x9c8064,roughness:1}),400),dummy=new T.Object3D();let ri=0;
- for(let i=0;ri<400&&i<2000;i++){const x=(hash(i,12)-.5)*75,z=(hash(i,46)-.5)*60;if(x>-14&&x<17&&z>-14&&z<10)continue;dummy.position.set(x,reliefHeight(x,z)+.015,z);dummy.rotation.set(hash(i,4),hash(i,9)*6,hash(i,5));dummy.scale.set(.35+hash(i,6)*2,.25,.35+hash(i,7));dummy.updateMatrix();rocks.setMatrixAt(ri,dummy.matrix);ri++;}rocks.count=ri;rocks.receiveShadow=true;group.add(rocks);
+ for(let i=0;ri<400&&i<2000;i++){const x=(hash(i,12)-.5)*75,z=(hash(i,46)-.5)*60;if((x>-14&&x<17&&z>-14&&z<10)||reservedPatioL1(x,z))continue;dummy.position.set(x,reliefHeight(x,z)+.015,z);dummy.rotation.set(hash(i,4),hash(i,9)*6,hash(i,5));dummy.scale.set(.35+hash(i,6)*2,.25,.35+hash(i,7));dummy.updateMatrix();rocks.setMatrixAt(ri,dummy.matrix);ri++;}rocks.count=ri;rocks.receiveShadow=true;group.add(rocks);
  // V3 sediment dressing: deterministic, low-poly stones and windrows on the
  // outer Atacama rim. Instanced meshes make this cheap; no gameplay colliders.
  const perimeter=new T.InstancedMesh(
@@ -108,7 +109,7 @@ export function createDesert(w){
  let placed=0;
  for(let i=0;i<1800&&placed<260;i++){
   const x=(hash(i,107)-.5)*67,z=(hash(i,139)-.5)*52;
-  if(x>-17.5&&x<20&&z>-16&&z<12)continue;
+  if((x>-17.5&&x<20&&z>-16&&z<12)||reservedPatioL1(x,z))continue;
   const size=.5+hash(i,113)*2,flat=.19+hash(i,117)*.42;
   dummy.position.set(x,reliefHeight(x,z)+.04,z);
   dummy.rotation.set(hash(i,181)*.3,hash(i,191)*6.28,hash(i,199)*.22);
@@ -131,7 +132,7 @@ export function createDesert(w){
  for(let i=0;i<170&&dunes<48;i++){
   const a=hash(i,333)*Math.PI*2,radius=27+hash(i,337)*10;
   const x=Math.cos(a)*radius+2,z=Math.sin(a)*radius*.78-1.5;
-  if(x>-17.5&&x<20&&z>-16&&z<12)continue;
+  if((x>-17.5&&x<20&&z>-16&&z<12)||reservedPatioL1(x,z))continue;
   dummy.position.set(x,reliefHeight(x,z)-.09,z);
   dummy.rotation.set(0,a+.55,0);
   dummy.scale.set(1.6+hash(i,331)*3,.17+hash(i,349)*.16,.7+hash(i,353)*1.25);
