@@ -46,6 +46,8 @@ test('Recovery consumes one kit, waits timer and returns finite worn tool',()=>{
  assert.equal(finishRecoveries(s,job.endsAt+1).length,0);
  assert.equal(s.mission5.recovery.history.length,1);
  assert.ok(workshopRecoverySummary(s).completed===1);
+ assert.equal(canStartRecovery(s,'tool-1'),'toolNotWornEnough');
+ s.toolInventory[0].lifeRemaining=20;
  assert.equal(canStartRecovery(s,'tool-1'),'needsRepairKit');
 });
 test('No free or inappropriate repair: requires qualifying workshop and limits',()=>{
