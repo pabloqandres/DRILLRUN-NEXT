@@ -40,5 +40,8 @@ cargos únicos. No se modifica Cloud Save ni esquema de datos.
 
 ## Publicación y QA
 Implementación en rama propuesta para PR. Sin merge a main ni deploy a producción.
-Pruebas Node nuevas preparadas; no reportar un test como aprobado hasta que
-GitHub Actions o runner lo haya ejecutado. Validación WebGL/Android pendiente.
+GitHub Actions **Mission 5 checklist and commissioning reward** ejecutó y aprobó
+8/8 tests (V43+V46) y sintaxis de cinco módulos (run 42860473836).
+El workflow general **New game regression checks** continúa fallando en 2
+aserciones históricas de M4 offline (run 42860473699), no vinculadas a M5.
+Validación visual WebGL/Android pendiente.
