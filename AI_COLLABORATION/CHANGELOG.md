@@ -328,3 +328,7 @@ M4 offline en CI global no resueltas. Biblioteca 3D PR68 sin binarios.
 
 ## 2026-11-10 — V54 Dirección DrillTruck® 02 + botones icónicos
 Corrección al giro del joystick/teclado; faros OFF neutros, ON amarillo; freno SVG sin texto y Catálogo oculto mientras se conduce. Sin cambios económicos, M4/M5 ni modelos. Aplicado sobre `main` actualizado con la biblioteca de catálogo.
+
+
+## 2026-11-10 — V55 Colisiones y pantalla blanca
+Corregido margen vehicular y movimiento en estrechamientos; unificación de contextos gráficos de miniaturas de Catálogo, limpieza del renderer, recuperación segura por pérdida de contexto y opción desde Configuración. Tests focalizados. Sin cambios en M1–M5 ni saldos.
