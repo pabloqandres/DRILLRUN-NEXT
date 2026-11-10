@@ -1,0 +1,21 @@
+name: V56 Personal DrillTruck ownership and locate recovery
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  v56:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check syntax and UI regressions
+        run: |
+          node --check dist/chapter/game.mjs
+          node --check dist/chapter/faena-center.mjs
+          node --check dist/mission5/personal-drilltruck.mjs
+          node --check tests/v56-personal-drilltruck-recovery.test.mjs
+      - name: Owned truck, vehicle, missions and graphics tests
+        run: node --test tests/v56-personal-drilltruck-recovery.test.mjs tests/v55-vehicle-collision-render-recovery.test.mjs tests/v54-drilltruck-steering-controls.test.mjs tests/v50-personal-drilltruck-driving.test.mjs tests/v53-faena-and-recovery.test.mjs tests/v52-night-patio-driving.test.mjs tests/m5-stepwise-checklist-reward-v46.test.mjs

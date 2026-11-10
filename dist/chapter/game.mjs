@@ -4,7 +4,7 @@ import {tickMission4,restoreMission4} from '../mission4/tick.mjs';
 import {canStartMission4,startMission4,updateMission4Phase,mission4Phase,mission4Objectives} from '../mission4/mission4-state.mjs';
 import {purchaseDthDrill,installDthTool,assignDthDrillToZone,DTH_DRILLS,DTH_HAMMERS,DTH_BITS,dthHammerDefinition,dthBitDefinition} from '../mission4/drills-dth.mjs';
 import {purchaseDrillTruck,drillTruckInfo,DRILLTRUCK_COST} from '../mission4/drilltruck.mjs';
-import {personalTruck,canOrderPersonalTruck,enterPersonalTruck,exitPersonalTruck,exitPositions,drivePersonalTruck,personalTruckVisualSteer,PERSONAL_DRILLTRUCK_PRICE,PERSONAL_DRILLTRUCK_MODEL} from '../mission5/personal-drilltruck.mjs';
+import {personalTruck,canOrderPersonalTruck,enterPersonalTruck,exitPersonalTruck,exitPositions,drivePersonalTruck,personalTruckVisualSteer,restoreMissingPersonalTruck,repairPersonalTruckPose,recoverPersonalTruckToBay,PERSONAL_DRILLTRUCK_PRICE,PERSONAL_DRILLTRUCK_MODEL} from '../mission5/personal-drilltruck.mjs';
 import {convertBoreholeToZone,assignTruckToZone} from '../mission4/zones.mjs';
 import {buildParking} from '../mission4/parking.mjs';
 import {startMaintenance,advanceMaintenancePhase} from '../mission4/maintenance.mjs';
@@ -93,7 +93,7 @@ import {resolveNarrativeText} from './narrative-ui.mjs';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],hidden=(el,v)=>el.classList.toggle('hidden',v);
 let prefs={lang:deviceLanguage(navigator.language),sound:true};try{prefs={...prefs,...JSON.parse(localStorage.getItem('drillrun-preferences')||'{}')};}catch{}
 if(!LANGUAGES.some(([l])=>l===prefs.lang))prefs.lang='es';let t=translator(prefs.lang),s=null,hasSave=false;
-function readSave(){try{const raw=localStorage.getItem(CONFIG.saveKey),data=JSON.parse(raw||'null');if(data&&data.schema!=='modular-1'&&!localStorage.getItem(CONFIG.saveKey+'-before-modular'))localStorage.setItem(CONFIG.saveKey+'-before-modular',raw);const value=restore(data);if(value){restoreHsec(value);restoreMission3(value);reconcileDeliveredMachinery(value);restoreMission4(value);finishPatio(value);}return value;}catch{return null;}}
+function readSave(){try{const raw=localStorage.getItem(CONFIG.saveKey),data=JSON.parse(raw||'null');if(data&&data.schema!=='modular-1'&&!localStorage.getItem(CONFIG.saveKey+'-before-modular'))localStorage.setItem(CONFIG.saveKey+'-before-modular',raw);const value=restore(data);if(value){restoreHsec(value);restoreMission3(value);reconcileDeliveredMachinery(value);restoreMission4(value);finishPatio(value);restoreMissingPersonalTruck(value);repairPersonalTruckPose(value);}return value;}catch{return null;}}
 s=readSave();hasSave=!!s;if(s)prefs.lang=s.lang;t=translator(prefs.lang);
 let hsecWorld=null,hsecUI=null,hsecElapsed=0,hsecLastSignature='',hsecFollow=false,hsecRecorder=null;
 let constructionCallout=null,guidance=null,cinematic=null,cameraDebug=null,cinemaRecorder=null,reviewBackup=null,cinemaReview=false,locomotionReview=null,qaComputerPath=null,qaWalkRoute=null,characterStage=null,avatars=null,builderOpen=false,managingOffice=false,officePanelPreview=null,selectedBuildModule=null,lastPortraitId=null,selectedAvatar='operator01';
@@ -101,7 +101,7 @@ let m3DrillModel=null,m3BoreholeMarkers=[],m3DeliveryVehicle=null,m3DrillingFx=n
 let m4DrillTruckModel=null,m4ParkingSpot=null,m4VisualsReady=false,m4TruckLoading=false,m4TruckCollider=null;
 let m4DthModel=null,m4DthCollider=null,m4Staging=null;
 let m5World=null,patioOverviewUntil=0,m5RcRoute=null,m5DthRoute=null,m5DthDepartRoute=null;
-let m5NpcWorld=null,m5PersonalTruckModel=null,m5PersonalTruckCollider=null,m5TruckLighting=null,truckBrakePressed=false;
+let m5NpcWorld=null,m5PersonalTruckModel=null,m5PersonalTruckCollider=null,m5TruckLighting=null,truckBrakePressed=false,m5PersonalTruckFallback=false,m5LocateCameraTimer=null;
 let catalogBlueprint=null,catalogConstructionCamera=false,catalogPreviewWalk=false;
 let workshopBuildHologram=null,workshopHologramKey=null;
 let siteCinematics=null;
@@ -693,7 +693,7 @@ function syncPersonalTruckVisual(){
  if(!world||!s)return;
  const truck=personalTruck(s);
  if(!truck){
-  m5TruckLighting?.dispose();m5TruckLighting=null;
+  m5TruckLighting?.dispose();m5TruckLighting=null;m5PersonalTruckFallback=false;
   if(m5PersonalTruckModel){m5PersonalTruckModel.removeFromParent();m5PersonalTruckModel=null;}
   if(m5PersonalTruckCollider){
    const i=world.colliders.indexOf(m5PersonalTruckCollider);
@@ -702,16 +702,26 @@ function syncPersonalTruckVisual(){
   }
   return;
  }
- if(!m5PersonalTruckModel){
-  if(!m4DrillTruckModel)return; // async official GLB loader still working
-  m5PersonalTruckModel=m4DrillTruckModel.clone(true);
+ // Never gate a PAID personal unit on the asynchronous automatic-truck
+ // GLB loader. Show a safe temporary vehicle now, then replace it with the
+ // real DRILLCO® model as soon as the original GLB finishes loading.
+ const officialReady=!!m4DrillTruckModel?.children?.length;
+ if(!m5PersonalTruckModel||(m5PersonalTruckFallback&&officialReady)){
+  if(m5PersonalTruckModel){
+   m5TruckLighting?.dispose();m5TruckLighting=null;
+   m5PersonalTruckModel.removeFromParent();
+  }
+  m5PersonalTruckModel=officialReady?m4DrillTruckModel.clone(true):createProceduralTruck();
+  m5PersonalTruckFallback=!officialReady;
   m5PersonalTruckModel.name='drilltruck-personal-02';
-  m5PersonalTruckModel.userData={personal:true};
+  m5PersonalTruckModel.userData={personal:true,temporaryVisual:m5PersonalTruckFallback};
   m5TruckLighting=installPersonalTruckHeadlights(m5PersonalTruckModel);
   world.scene.add(m5PersonalTruckModel);
-  m5PersonalTruckCollider={x:truck.position.x,z:truck.position.z,
-   w:2.55,d:5,angle:truck.heading,_personalTruck:true};
-  world.colliders.push(m5PersonalTruckCollider);
+  if(!m5PersonalTruckCollider){
+   m5PersonalTruckCollider={x:truck.position.x,z:truck.position.z,
+    w:2.55,d:5,angle:truck.heading,_personalTruck:true};
+   world.colliders.push(m5PersonalTruckCollider);
+  }
  }
  m5PersonalTruckModel.visible=true;
  m5PersonalTruckModel.position.set(truck.position.x,.12,truck.position.z);
@@ -745,6 +755,42 @@ function togglePersonalTruck(){
   }
   stop();syncPersonalTruckVisual();save();renderHUD();
  }catch(err){notices.push({title:err.message,symbol:'lock'});}
+}
+// The saved truck's actual position is the source of truth, not the old M4
+// parking slot. Locate is a transient camera flyover, not a teleport or a
+// second vehicle purchase.
+function locatePersonalTruckInWorld(){
+ const truck=personalTruck(s);
+ if(!truck?.position||!Number.isFinite(truck.position.x)||!Number.isFinite(truck.position.z)){
+  notices.push({title:'Unidad no localizada',detail:'Usa Recuperar en plaza P01 desde Patio y flota',symbol:'lock'});
+  return;
+ }
+ syncPersonalTruckVisual();
+ stop();target=null;
+ const view={target:new T.Vector3(truck.position.x,1.3,truck.position.z),
+  offset:new T.Vector3(8.5,7.5,11.5)};
+ if(m5LocateCameraTimer)clearTimeout(m5LocateCameraTimer);
+ world.chapterCamera=view;world.snapCamera=true;
+ notices.push({title:'DrillTruck® 02 localizado',
+  detail:'Mostrando su posición durante 10 segundos · selecciona Recuperar en P01 si quedó lejos',symbol:'machine'});
+ m5LocateCameraTimer=setTimeout(()=>{
+  if(world?.chapterCamera===view){world.chapterCamera=null;world.snapCamera=true;}
+  m5LocateCameraTimer=null;
+ },10000);
+}
+function recoverPersonalTruckFromFaena(){
+ try{
+  restoreMissingPersonalTruck(s);
+  recoverPersonalTruckToBay(s);
+  if(m5LocateCameraTimer){clearTimeout(m5LocateCameraTimer);m5LocateCameraTimer=null;}
+  world.chapterCamera=null;world.snapCamera=true;
+  target=null;stop();
+  syncPersonalTruckVisual();
+  save();renderHUD();
+  notices.push({title:'DrillTruck® 02 recuperado',detail:'Estacionado en P01, junto al acceso del Patio · sin cobro',symbol:'check'});
+ }catch(error){
+  notices.push({title:'No se pudo recuperar la unidad',detail:error.message,symbol:'lock'});
+ }
 }
 function stepPersonalTruck(dt){
  let throttle=-joy.y,steer=joy.x;
@@ -789,7 +835,7 @@ function autoDispatchTruck(s){
  try{assignTruckToZone(s,nextZone.id);startMaintenance(s,nextZone.id);nextZone.lastMaintenanceAt=Date.now();if(nextZone.status!=='maintenance')return;/* Routine automatic rounds do not need repeated toast messages. */}catch(e){console.error('autoDispatch:',e);}
 }
 async function replayCinematic(orbitOnly,record){if(!s)return;if(!orbitOnly&&!reviewBackup)await cameraReviewScene(s.character);closeModal();closePhone();closeBuilder();startCinematic(orbitOnly,true);if(record||orbitOnly){scene.update(s,0,Date.now());world.update(s,0,clock,false);world.renderer.last=0;world.renderer.render(world.scene,world.camera);const a=document.createElement('a');a.id='handoffDownload';a.download='DrillRun_Primer_Frame_3D.png';a.textContent='Descargar primer frame 3D';const data=world.renderer.domElement.toDataURL('image/png').split(',')[1],bytes=Uint8Array.from(atob(data),c=>c.charCodeAt(0));a.href=URL.createObjectURL(new Blob([bytes],{type:'image/png'}));cameraDebug.host.querySelector('#handoffDownload')?.remove();cameraDebug.host.append(a);if(record)cinemaRecorder.start();}}
-function beginPlay(resuming=false){m5NpcWorld?.dispose();m5NpcWorld=null;workshopBuildHologram?.dispose();workshopBuildHologram=null;workshopHologramKey=null;catalogPreviewWalk=false;catalogBlueprint?.hide();hidden($('#endBuildPreviewWalk'),true);phase='play';blueprint=false;world.inspect=false;world.chapterCamera=null;world.zoom=1;resetOrbit(world.orbit);avatars.activate(s.character);world.setCharacter(s.character);motion.yaw=Number.isFinite(s.facing)?s.facing:Math.PI;world.player.rotation.y=motion.yaw;world.worker.reset();hidden($('#startScreen'),true);hidden($('#characterScreen'),true);hidden($('#intro'),true);hidden($('#hud'),false);world.avatarHeight=avatarDefinition(s.character).height;world.orbit.yaw=motion.yaw-Math.PI;world.snapCamera=true;world.cameraRig.finishEntrance();document.body.classList.remove('hudReveal');void $('#hud').offsetWidth;document.body.style.setProperty('--hud-duration',world.cameraRig.settings.transition.hudSeconds+'s');document.body.classList.add('hudReveal');wind.set(prefs.sound);worksiteAudio.set(prefs.sound);s.introSeen=true;stop();scene.update(s,0,Date.now());hsecWorld?.update(s,0,'play');initM3Visuals();initM5Visuals();ensureSafe();world.playerGround=world.sampleGround(s.position.x,s.position.z);save();if(!resuming){hidden($('#chapterBanner'),false);setTimeout(()=>hidden($('#chapterBanner'),true),2600);}else toast('resumeNote');syncUIEvents();renderHUD();}
+function beginPlay(resuming=false){restoreMissingPersonalTruck(s);repairPersonalTruckPose(s);m5NpcWorld?.dispose();m5NpcWorld=null;workshopBuildHologram?.dispose();workshopBuildHologram=null;workshopHologramKey=null;catalogPreviewWalk=false;catalogBlueprint?.hide();hidden($('#endBuildPreviewWalk'),true);phase='play';blueprint=false;world.inspect=false;world.chapterCamera=null;world.zoom=1;resetOrbit(world.orbit);avatars.activate(s.character);world.setCharacter(s.character);motion.yaw=Number.isFinite(s.facing)?s.facing:Math.PI;world.player.rotation.y=motion.yaw;world.worker.reset();hidden($('#startScreen'),true);hidden($('#characterScreen'),true);hidden($('#intro'),true);hidden($('#hud'),false);world.avatarHeight=avatarDefinition(s.character).height;world.orbit.yaw=motion.yaw-Math.PI;world.snapCamera=true;world.cameraRig.finishEntrance();document.body.classList.remove('hudReveal');void $('#hud').offsetWidth;document.body.style.setProperty('--hud-duration',world.cameraRig.settings.transition.hudSeconds+'s');document.body.classList.add('hudReveal');wind.set(prefs.sound);worksiteAudio.set(prefs.sound);s.introSeen=true;stop();scene.update(s,0,Date.now());hsecWorld?.update(s,0,'play');initM3Visuals();initM5Visuals();ensureSafe();world.playerGround=world.sampleGround(s.position.x,s.position.z);save();if(!resuming){hidden($('#chapterBanner'),false);setTimeout(()=>hidden($('#chapterBanner'),true),2600);}else toast('resumeNote');syncUIEvents();renderHUD();}
 $('#skipIntro').onclick=()=>{if(phase!=='intro')return;cinematic.stop();world.cameraRig.reset();beginPlay(cinemaReview);cinemaRecorder?.stop();};$('#menuButton').onclick=showSettings;
 function ensureSafe(){syncOfficeAccess(s);scene.state=s;const r=avatarDefinition(s.character).radius;if(!world.isBlocked(s.position.x,s.position.z,r))return;if(s.inside){for(const z of[-.65,.1,.65])for(const x of[-1.9,-1.1,0,1,2.2])if(!world.isBlocked(-6+x,z,r)){s.position={x:-6+x,z};world.worker.reset();return;}}const cx=s.position.x,cz=s.position.z;for(let d=.5;d<=10;d+=.5)for(let a=0;a<16;a++){const angle=a*Math.PI/8,tx=cx+Math.cos(angle)*d,tz=cz+Math.sin(angle)*d;if(!world.isBlocked(tx,tz,r)){s.position={x:tx,z:tz};s.inside=false;world.worker.reset();return;}}s.position={...CONFIG.officeSlot.access};s.inside=false;world.worker.reset();}
 // ─── Narrative tick & actions ────────────────────────────
@@ -1422,6 +1468,8 @@ faenaCenter=new FaenaCenterUI({
  host:$('#faenaCenter'),state:()=>s,translate:()=>t,format:money,icon,
  onClose:()=>document.body.classList.remove('faenaOpen'),
  onHsec:()=>hsecUI?.open(),
+ onLocatePersonalTruck:locatePersonalTruckInWorld,
+ onRecoverPersonalTruck:recoverPersonalTruckFromFaena,
  onLocate:type=>{const pos=type==='drill'&&m3DrillModel?m3DrillModel.position:
   type==='drillTruck'&&m4DrillTruckModel?m4DrillTruckModel.position:
   type==='dthDrill'&&m4DthModel?m4DthModel.position:null;

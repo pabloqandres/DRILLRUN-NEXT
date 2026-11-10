@@ -121,3 +121,6 @@ _Nothing blocked._
 
 
 - **V55 (2026-11-10) — DriveTruck 02 y GPU:** rama `chatgpt/v55-vehicle-collision-render-recovery`. Corrige colisión invisible a 0,10m, 9 sensores, deslizamiento, retorno desde solapamiento; imágenes del Catálogo comparten un solo WebGLRenderer efímero, recuperación tras pantalla blanca sin borrar save. Registro en `CHANGES/2026-11-10_v55-vehicle-collisions-white-render.md`.
+
+
+- **V56 (2026-11-10) DrillTruck® personal 02:** rama `chatgpt/v56-personal-drilltruck-recovery`; corrige desaparición visual durante carga del GLB automático, restaura solo la propiedad M5 ya pagada/probada y añade Localizar/Recuperar P01 sin costo en Centro de Faena. Ver `CHANGES/2026-11-10_v56-personal-truck-recovery.md`.
