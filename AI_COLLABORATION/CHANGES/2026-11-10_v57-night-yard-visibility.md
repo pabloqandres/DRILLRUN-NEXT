@@ -14,8 +14,8 @@
 - Compatibilidad: M1–M5, HSEC, Casa Matriz, precios, saves, DrillTruck® 01 automática y DrillTruck® 02 personal sin cambios en datos o lógica de movimiento.
 
 ## Limitación de verificación
-- Inspección estática del código y aserciones actualizadas; todavía sin ejecutar `npm test` ni validar imagen WebGL/Android. No llamar corregida a la experiencia hasta probarla visualmente.
-- Rama para PR, no publicar directo a `main`.
+- CI de PR #76 ejecutada: `v52-night-driving`, `v56`, `m5-focused`, `v53`, `v55`, `v49-patio`, `v50-personal-truck`, `v54`, `dth-relocation` pasaron. `test` general falla en dos aserciones de economía offline M4, también fallidas en el commit `main` de partida (problema preexistente ajeno a esta rama). Validación visual WebGL/Android aún pendiente.
+- PR de revisión borrador #76: `https://github.com/pabloqandres/DRILLRUN-NEXT/pull/76`; no publicado a `main`.
 
 ## Dependencia funcional separada — circulación nocturna
 - `dist/scene.mjs` `World.isBlocked` impone cajas de movimiento invisibles cuando la posición está fuera de `M5_PLOT`/`OFFICE_PATIO_LINK`.
