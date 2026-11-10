@@ -116,3 +116,5 @@ _Nothing blocked._
   PR68 biblioteca 3D no integrado: faltan GLB reales en GitHub.
 
 - **ChatGPT — 3D Asset Library Wave 01:** branch `chatgpt/asset-library-wave01`, catalog preview additions rebased after V53. 14 source previews; 8 future cards + existing cone/fence cards. No new purchases, no GLB binaries in GitHub yet. Integration of prices, site holograms and real transactions awaits asset upload + QA.
+
+- **V54 DrillTruck® 02 dirección e íconos (2026-11-10):** rama `chatgpt/v54-drilltruck-controls-main-synced`; joystick y teclas normalizados para girar visualmente a derecha/izquierda, faros iconográficos amarillos cuando están activos y freno iconográfico a borde derecho. Ver `CHANGES/2026-11-10_v54-drilltruck-steering-icons.md`. Preserva catálogo de activos de la actualización concurrente.
