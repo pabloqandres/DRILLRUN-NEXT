@@ -647,6 +647,40 @@ function manageOffice(){
 function previewOfficeUpgrade(next){
  officeQuickCard(next,{upgrade:true});scene.setUpgradePreview(next.level);
 }
+function openPatioPanel(){
+ if(!s||phase!=='play')return;
+ closeBuilder();
+ const status=patioState(s),allowed=patioUnlocked(s),info=patioProgress(s);
+ const time=n=>String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
+ const stateLabel=status==='operational'?'OPERATIVO · HSEC APROBADO':
+  status==='building'?'OBRA EN EJECUCIÓN · '+Math.round(info.progress*100)+'% · '+time(info.remainingSeconds):
+  allowed?'DESBLOQUEADO · M4 COMPLETADA':'BLOQUEADO · COMPLETA M4';
+ const modules=PATIO_L1.modules.map(x=>'<div class="patioModule">'+icon('check')+' '+esc(x)+'</div>').join('');
+ const future=PATIO_FUTURE.map(x=>'<small class="patioFuture">'+icon('lock')+' Patio L'+x.level+' · ampliación bloqueada</small>').join('');
+ const disabled=status!=='locked'||!allowed||s.cash<PATIO_L1.price;
+ modal('<span class="eyebrow">MISIÓN 5 · EXPANSIÓN</span>'+
+  '<h2>PATIO DE MAQUINARIAS L1</h2><p>Gran explanada fija en el noroeste de la faena. Único acceso controlado, vehículos ligeros bajo techo y RC, DTH y futuros CAEX menores a cielo abierto.</p>'+
+  '<b class="patioStatus">'+stateLabel+'</b>'+
+  '<div class="moduleFacts"><span>Inversión<b>🪙 '+money(PATIO_L1.price)+'</b></span><span>Construcción<b>20:00</b></span><span>Terreno<b>'+PATIO_L1.width+' × '+PATIO_L1.depth+'</b></span></div>'+
+  (status==='building'?'<div class="patioModalTrack"><i style="width:'+Math.round(info.progress*100)+'%"></i></div><p>Fase actual: '+esc(info.label||'Preparación')+'</p>':'')+
+  '<div class="patioModalModules">'+modules+'</div>'+
+  '<p>Los módulos, señalización y rutas vienen incluidos. El taller existente se conserva. L2 y L3 quedan reservados.</p>'+
+  '<div class="patioFutureList">'+future+'</div>'+
+  '<div class="modalActions"><button id="m5Overview">'+icon('location')+' Ver terreno</button>'+
+  (status==='locked'?'<button id="m5Confirm" class="primary" '+(disabled?'disabled':'')+'>'+icon('build')+' Construir L1</button>':'')+
+  '<button id="m5Close">'+icon('close')+' Cerrar</button></div>');
+ $('#m5Close').onclick=closeModal;
+ $('#m5Overview').onclick=()=>{patioOverviewUntil=Date.now()+15000;closeModal();};
+ $('#m5Confirm')?.addEventListener('click',()=>{
+  try{
+   startPatio(s,Date.now());
+   save();closeModal();initM5Visuals();
+   patioOverviewUntil=Date.now()+15000;
+   renderHUD();sound('build');
+   notices.push({title:'Patio L1 · Blueprint aprobado',detail:'Comienza obra de 20 minutos',symbol:'build'});
+  }catch(e){notices.push({title:e.message==='noMoney'?'Saldo insuficiente':e.message,symbol:'lock'});}
+ });
+}
 function showMission(){const m4On=s.mission4&&s.mission4.phase!=='inactive';const m3On=s.mission3&&s.mission3.phase!=='inactive';if(m4On){openPhone('m4-operaciones');return;}if(hsecActive(s)&&!(s.hsec.completedAt&&m3On)){hsecUI.open();return;}if(m3On){openPhone('m3-objectives');return;}const obj=objective(s);modal(`<span class="eyebrow">${esc(t('chapter'))}</span><h2>${esc(t(obj))}</h2><p>${esc(t(obj+'Detail'))}</p><div class="modalActions">${button('close','closeMission',true)}</div>`);$('#closeMission').onclick=closeModal;}
 $('#boostButton').onclick=()=>action(()=>accelerate(s));
 function enterOffice(){if(s.office.status!=='built'||pendingConstruction(s))return;transition('entryTransition');stop();world.office.userData.api.opened.entry=true;world.office.userData.api.angles.entry=Math.PI/2;s.position={x:-7.99,z:-.5};s.inside=true;s.hasEntered=true;world.worker.reset();$('#shade').classList.remove('entryFade');void $('#shade').offsetWidth;$('#shade').classList.add('entryFade');resetOrbit(world.orbit);syncUIEvents();save();renderHUD();}
