@@ -380,6 +380,11 @@ function updateM3Visuals(dt){
 function initM5Visuals(now=Date.now()){
  if(!world||!s?.mission4||s.mission4.phase!=='complete')return;
  if(!m5World)m5World=createPatioWorld(world);
+ const gate=PATIO_L1.gate;
+ world.fleetGateInUse=[
+  m5RcRoute?m3DrillModel:null,
+  m5DthRoute||m5DthDepartRoute?m4DthModel:null
+ ].some(model=>model&&Math.hypot(model.position.x-gate.x,model.position.z-gate.z)<12);
  m5World.update(s,now);
 }
 function initM4Visuals(){
@@ -459,7 +464,7 @@ function updateM4Visuals(dt){
  if(s.mission4.productionDrill&&!m4DthModel){
   m4DthModel=createDthProductionRig();
   const initialZone=s.mission4?.zones?.find(z=>z.id===s.mission4.productionDrill?.assignedZone);
-  const p=initialZone?.position||(dthAvailableToPark(s)&&s.mission5?.dthParked?FLEET_BAYS.dth:DTH_RESERVE);
+  const p=patioFleetActive(s)&&s.mission5?.dthParked?FLEET_BAYS.dth:(initialZone?.position||DTH_RESERVE);
   m4DthModel.position.set(p.x,0,p.z);
   world.scene.add(m4DthModel);
   m4DthCollider={x:m4DthModel.position.x,z:m4DthModel.position.z,w:3.2,d:4.5,_dth:true};
