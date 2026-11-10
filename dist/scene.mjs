@@ -383,8 +383,11 @@ for(let x=-3.2;x<3.5;x+=.5){this.box(g,.025,3.6,.02,x,2.2,-2.8,0xb7b7a7);}this.s
  }else{this.construction.visible=true;this.box(this.construction,3.9,.2,4.5,0,.25,0,C.concrete,true);for(const a of[-2,2])for(const b of[-2.35,2.35]){this.cyl(this.construction,.045,3.9,a,2.1,b,C.steel);this.cone(this.construction,a,.1,b);}for(const y of[1.3,2.6,3.9]){for(const z2 of[-2.35,2.35])this.beam(this.construction,[-2,y,z2],[2,y,z2],.035,C.steel);for(const x2 of[-2,2])this.beam(this.construction,[x2,y,-2.35],[x2,y,2.35],.035,C.steel);}this.beam(this.construction,[-2,.3,2.35],[2,3.9,2.35],.025,C.orange);this.box(this.construction,3.6,.1,.65,0,2.7,2.45,0xc3a27a);for(let i=0;i<4;i++)this.box(this.construction,2.7,.12,.8,0,.5+i*.14,0,C.cream);this.sign(this.construction,'EN CONSTRUCCIÓN',2.9,.48,0,1.25,2.41,C.yellow,'#253b49');}
  }
  isBlocked(x,z,r=.32,state=null){
- const yard=!!this.yardL1Open&&x>=-80&&x<=-18&&z>=-41&&z<=8;
- const approach=!!this.yardL1Open&&x>=-25&&x<=-11&&z>=-18&&z<=-10;
+ // The M5 terrain is explorable immediately after M4, including during
+ // blueprint preview. A continuous ~13m-wide ramp reaches the original site.
+ // The fence/portón is still enforced by real boundaries once constructed.
+ const yard=!!this.yardL1Open&&x>=-79&&x<=-22&&z>=-40&&z<=6;
+ const approach=!!this.yardL1Open&&x>=-27&&x<=-6&&z>=-20&&z<=-7;
  if(!yard&&!approach&&(x<-18||x>35||z<-16||z>14))return true;if(this.chapterMode&&!this.hsecActive&&!this._workshopBuilt&&!(yard||approach)&&(x<-13||x>3||z<-6||z>9))return true;if(this.chapterMode&&!this.hsecActive&&this._workshopBuilt&&!(yard||approach)&&(x<-17||x>18||z<-14||z>9))return true;if(this.officeEnabled!==false&&this.office.userData.api.blocked(x-this.office.position.x,z-this.office.position.z,r))return true;if(this.chapterCollision?.(x,z,r))return true;const arr=state?.build?[...this.colliders,{x:state.build.x,z:state.build.z,w:4,d:4.8}]:this.colliders;return arr.some(c=>circleHitsRect(x,z,r,c))||this.physicalBoundaries.some(c=>circleHitsRect(x,z,r,c));}
  pick(clientX,clientY,height=0){const pt=new T.Vector2(clientX/innerWidth*2-1,-clientY/innerHeight*2+1);this.ray.setFromCamera(pt,this.camera);const p=new T.Vector3();return this.ray.ray.intersectPlane(new T.Plane(new T.Vector3(0,1,0),-height),p);}
  project(pos){const p=pos.clone().project(this.camera);return{x:(p.x*.5+.5)*innerWidth,y:(-.5*p.y+.5)*innerHeight,visible:p.z<1};}
