@@ -258,3 +258,12 @@ Se autoriza excepción visual/acotada en el bucle compartido `game.mjs` y
 control de luces y señal de audio. Sin intervención en economía, simulación
 de DTH, HSEC, narrativas, pagos, compras o misión. Véase
 `CHANGES/2026-11-10_v52-night-patio-personal-driving.md`.
+
+
+## 2026-11-10 — V53: Una función, una interfaz
+Centro de Faena pasa a ser puerta común de toda operación: navegación
+por HUD, Catálogo o interacción física debe abrir el mismo módulo.
+Bodega gestiona inventario, solicitudes, auditoría; Taller repara y
+reafila con kits **pagados**, no duplica bodega; Patio administra vehículos,
+plazas y accesos. Teléfono sigue siendo comunicación/Casa Matriz.
+No alterar el progreso M1–M5, los productos reales ni economía de M4.
