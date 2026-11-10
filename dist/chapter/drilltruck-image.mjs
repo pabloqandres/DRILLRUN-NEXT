@@ -65,7 +65,7 @@ async function renderRealTruck(world){
  document.body.append(host);
  let preview;
  try{
-  preview=new ProductPreview(host,world,{transparent:true});
+  preview=new ProductPreview(host,world,{transparent:true,ephemeral:true});
   preview.model=model;
   preview.product={id:'drilltruck'};
   preview.angle=-.69;
