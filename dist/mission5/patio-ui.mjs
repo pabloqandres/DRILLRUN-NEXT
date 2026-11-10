@@ -2,6 +2,7 @@
 // explicit Catalog confirmation, never while rendering an app.
 import {PATIO_L1,PATIO_FUTURE,patioState,patioProgress,patioCapacity,patioUnlocked} from './patio-state.mjs';
 import {fleetOccupancy} from './fleet-base.mjs';
+import {PATIO_STAFF,hiredPatioStaff,mission5Objectives,gateChecked,warehouseChecked} from './patio-staff.mjs';
 const esc=x=>String(x??'').replace(/[&<>"']/g,k=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[k]));
 const clock=secs=>String(Math.floor(secs/60)).padStart(2,'0')+':'+String(secs%60).padStart(2,'0');
 export function renderPatioApp(s,fmt,icon,now=Date.now()){
@@ -32,6 +33,28 @@ export function renderPatioApp(s,fmt,icon,now=Date.now()){
  for(const equipment of rows){
   html+=`<section class="m4OpsNext"><small>PLAZA ${esc(equipment.slot)} · ${esc(equipment.state==='parked'?'OCUPADA':'LIBRE')}</small><h3>${esc(equipment.name)}</h3><p>${esc(labels[equipment.state]||equipment.state)}</p></section>`;
  }
+ // Staff are separate from the building price: hiring is explicit and
+ // costs player funds. Real GLB actors only appear after the hire.
+ const staff=PATIO_STAFF;
+ const objectives=mission5Objectives(s);
+ const accepted=!!s.narrative?.accepted?.includes('m5');
+ html+='<div class="sectionHeading">MISIÓN 5 · PERSONAL Y PUESTA EN SERVICIO</div>';
+ html+='<section class="m4OpsNext"><small>'+objectives.filter(x=>x.done).length+' / '+objectives.length+' OBJETIVOS</small><div class="steps">'+objectives.map(o=>'<div class="'+(o.done?'done':'')+'"><span class="stepNumber">'+(o.done?icon('check'):'•')+'</span><span><b>'+esc(o.label)+'</b></span></div>').join('')+'</div></section>';
+ if(!accepted)html+='<p class="m4OpsHint">Lee el mensaje de Elena Torres y acepta la Misión 5 para contratar personal o iniciar la obra.</p>';
+ for(const def of staff){
+  const hired=hiredPatioStaff(s,def.id),affordable=s.cash>=def.cost,ready=status==='operational'&&accepted;
+  html+='<section class="m4OpsNext"><small>'+esc(def.role==='security'?'ACCESO CONTROLADO':'BODEGA Y LOGÍSTICA')+'</small><b>'+esc(def.label)+'</b><p>'+esc(hired?'Contratado · NPC asignado a su puesto':'Costo de contratación · 🪙 '+fmt(def.cost))+'</p>'+
+   (!hired?'<button class="primary" data-m5-action="hire" data-m5-staff="'+esc(def.id)+'" '+(!ready||!affordable?'disabled':'')+'>'+icon('personnel')+' Contratar</button>':'')+'</section>';
+ }
+ if(accepted&&status==='operational'){
+  const guard=hiredPatioStaff(s,'m5-gate-security');
+  const tech=hiredPatioStaff(s,'m5-warehouse-tech');
+  html+='<section class="m4OpsNext"><small>CONTROL DE SEGURIDAD</small><b>Caseta y barrera de acceso</b><p>'+esc(gateChecked(s)?'Verificación HSEC realizada':'Revisar apertura controlada y segregación')+'</p>'+
+   '<button data-m5-action="gate" '+(!guard||gateChecked(s)?'disabled':'')+'>'+icon('check')+' Verificar portón</button></section>';
+  html+='<section class="m4OpsNext"><small>CONTROL DE INVENTARIO</small><b>Revisión de bodega</b><p>'+esc(warehouseChecked(s)?'Auditoría registrada · '+s.mission5.lastWarehouseAudit?.total+' herramientas':'Contar bits y martillos disponibles en stock')+'</p>'+
+   '<button data-m5-action="warehouse" '+(!tech||warehouseChecked(s)?'disabled':'')+'>'+icon('check')+' Revisar stock</button></section>';
+ }
+ if(s.mission5?.commissionedAt)html+='<section class="m4OpsNext"><b>Operación lista · esperando confirmación de Elena</b><p>Abre el mensaje final de M5 para cerrar la misión.</p></section>';
  html+='<div class="sectionHeading">Ampliaciones futuras</div>';
  for(const d of PATIO_FUTURE)html+=`<section class="m4OpsNext"><small>L${d.level} · BLOQUEADO</small><h3>${esc(d.name)}</h3><p>Terreno reservado. No construible todavía.</p></section>`;
  html+=`<button class="primary" data-app="builder">${icon('build')} ${status==='operational'?'Abrir Catálogo':status==='building'?'Ver obra en Catálogo':'Construir desde Catálogo'}</button>`;
