@@ -114,3 +114,10 @@ _Nothing blocked._
   V51+V52 incluidos. Revisar
   `CHANGES/2026-11-10_v53-centro-faena-taller-logistica.md`.
   PR68 biblioteca 3D no integrado: faltan GLB reales en GitHub.
+
+
+- **V54 DrillTruck® 02 dirección e íconos (2026-11-10)** — rama
+  `chatgpt/v54-drilltruck-steering-controls`. Corrige joystick y
+  teclas A/D en cámara trasera, coloca botón de faros encendido amarillo,
+  botón freno iconográfico a la derecha y oculta Catálogo durante conducción.
+  Ver `CHANGES/2026-11-10_v54-drilltruck-steering-icons.md`.
