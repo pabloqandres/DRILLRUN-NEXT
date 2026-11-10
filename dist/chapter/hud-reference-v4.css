@@ -1391,3 +1391,32 @@ body.interior #hud #objective:not(.hidden).collapsed{
  #modalCard .patioModalModules{grid-template-columns:1fr}
  #patioBuildHud{width:160px}
 }
+
+/* Universal building blueprints — catalogue and third-person roaming. */
+#hud #endBuildPreviewWalk{
+ position:absolute;z-index:60;right:calc(env(safe-area-inset-right,0px) + 13px);
+ top:clamp(49px,14vh,92px);min-width:152px;max-width:230px;
+ display:flex;flex-direction:column;gap:3px;align-items:flex-start;
+ color:#b9eef5;background:#102b3fe9;border:1px solid #4fbed4;
+ border-left:3px solid #e6bb61;box-shadow:0 8px 24px #00101d9c;
+ padding:8px 11px;border-radius:9px;cursor:pointer;pointer-events:auto;
+ backdrop-filter:blur(7px)
+}
+#hud #endBuildPreviewWalk.hidden{display:none!important}
+#hud #endBuildPreviewWalk span{font-size:9px;font-weight:850;letter-spacing:.8px}
+#hud #endBuildPreviewWalk b{font-size:11px;color:#f6e5c1}
+.catalogBlueprintStatus{display:block;color:#83d9ec;font-size:9px;letter-spacing:.45px;line-height:1.2;margin-top:3px}
+.catalogSummaryActions .catalogPreviewControl{
+ border:1px solid #4e879c!important;background:rgba(14,55,76,.75)!important;
+ color:#b7eaf7!important;font-size:10px!important;min-height:27px!important;
+ padding:5px 8px!important;border-radius:7px;white-space:nowrap;
+ display:inline-flex;align-items:center;gap:4px
+}
+.catalogSummaryActions .catalogPreviewControl .uiIcon{width:13px;height:13px}
+.catalogSummaryActions{flex-wrap:wrap;row-gap:5px}
+@media(max-height:530px){
+ #hud #endBuildPreviewWalk{top:42px;padding:6px 9px;min-width:132px}
+ #hud #endBuildPreviewWalk span{font-size:8px}
+ #hud #endBuildPreviewWalk b{font-size:10px}
+ .catalogSummaryActions .catalogPreviewControl{font-size:8px!important;padding:3px 5px!important}
+}
