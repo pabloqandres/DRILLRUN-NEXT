@@ -332,3 +332,7 @@ Corrección al giro del joystick/teclado; faros OFF neutros, ON amarillo; freno 
 
 ## 2026-11-10 — V55 Colisiones y pantalla blanca
 Corregido margen vehicular y movimiento en estrechamientos; unificación de contextos gráficos de miniaturas de Catálogo, limpieza del renderer, recuperación segura por pérdida de contexto y opción desde Configuración. Tests focalizados. Sin cambios en M1–M5 ni saldos.
+
+
+## 2026-11-10 — V56 Recuperación DrillTruck® personal 02
+Modelo visual independiente de carga M4, localizador de flota y recuperación en P01 sin compra extra, reparación de pose inválida en partidas guardadas, CI para propiedad y M5. Sin cambios en ingresos/misiones.
