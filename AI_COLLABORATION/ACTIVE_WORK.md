@@ -100,3 +100,9 @@
 ## Blocked / Waiting
 
 _Nothing blocked._
+
+- **2026-11-10 ChatGPT — V52 Patio y conducción nocturna:** rama
+  `chatgpt/v52-night-patio-drilltruck-audio`. Focos reales Patio,
+  focos delanteros opcionales camioneta personal, motor con RPM, eliminar
+  avatar/pasos durante conducción. Código preparado para PR, sin publicar;
+  QA en navegador Android y CI pendientes. No tocar M5 misión ni M4.
