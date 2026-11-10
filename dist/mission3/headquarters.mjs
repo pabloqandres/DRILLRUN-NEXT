@@ -5,6 +5,7 @@ import {dthHammerDefinition,dthBitDefinition,dthDrillDefinition,purchaseDthDrill
 import {purchaseDrillTruck,DRILLTRUCK_COST} from '../mission4/drilltruck.mjs';
 import {deliverPersonalTruck,canOrderPersonalTruck,PERSONAL_DRILLTRUCK_MODEL,PERSONAL_DRILLTRUCK_PRICE} from '../mission5/personal-drilltruck.mjs';
 import {workshopFree} from './inventory.mjs';
+import {REPAIR_KITS,creditRepairKit} from '../mission5/workshop-recovery.mjs';
 
 const fail=msg=>{throw new Error(msg);};
 const DELIVERY_FEE=200;
@@ -32,21 +33,23 @@ export function canPlaceOrder(s,items){
  }
  // Machinery orders don't require existing drill
  const hasMachinery=items.some(i=>i.category==='machinery');
- if(!hasMachinery&&!s.drill)return 'needsDrill';
+ if(!hasMachinery&&!s.drill&&!items.every(i=>i.type==='repairKit'))return 'needsDrill';
  const total=orderCost(items);
  if(s.cash<total)return 'noMoney';
  // Check workshop capacity (only for tools, not machinery)
- const toolItems=items.filter(i=>!i.category||i.category!=='machinery');
+ const toolItems=items.filter(i=>i.type==='hammer'||i.type==='bit');
  const totalQty=toolItems.reduce((n,i)=>n+i.qty,0);
  const reservedQty=(s.orders||[]).filter(o=>['pending','dispatched'].includes(o.status)&&!o.consumed)
-  .flatMap(o=>(o.items||[]).filter(i=>i.category!=='machinery'))
+  .flatMap(o=>(o.items||[]).filter(i=>i.type==='hammer'||i.type==='bit'))
   .reduce((n,i)=>n+(Number(i.qty)||0),0);
  if(totalQty+reservedQty>workshopFree(s))return 'noCapacity';
  // Validate each item exists in catalog
  for(const item of items){
   if(item.category==='machinery')continue; // machinery validated by caller
   const def=item.type==='hammer'?(hammerDefinition(item.model)||dthHammerDefinition(item.model)):
-            item.type==='bit'?(bitDefinition(item.model)||dthBitDefinition(item.model)):null;
+            item.type==='bit'?(bitDefinition(item.model)||dthBitDefinition(item.model)):
+            item.type==='repairKit'?REPAIR_KITS[item.model]:null;
+  if(item.type==='repairKit'&&(item.category!=='maintenance'||s.mission5?.status!=='operational'||!s.workshop||s.workshop.status==='building'))return 'workshopNotReady';
   if(!def||item.unitPrice!==def.price)return 'invalidItem';
   if(!Number.isInteger(item.qty)||item.qty<1||item.qty>10)return 'invalidQty';
  }
@@ -127,7 +130,7 @@ export function tickDeliveries(s,now=Date.now()){
   const elapsed=(now-order.dispatchedAt)/1000;
   if(elapsed>=order.dispatchDuration){
    // Pending deliveries do not bypass the warehouse's actual free capacity.
-   const incoming=(order.items||[]).filter(i=>i.category!=='machinery').reduce((n,i)=>n+(i.qty||0),0);
+   const incoming=(order.items||[]).filter(i=>i.type==='hammer'||i.type==='bit').reduce((n,i)=>n+(i.qty||0),0);
    if(incoming>workshopFree(s))continue;
    // Complete persistent transactions before recording them as consumed.
    // A missing mission state remains recoverable on the next restore.
@@ -142,6 +145,11 @@ export function tickDeliveries(s,now=Date.now()){
      if(item.category==='machinery'){
       // Machinery: signal to game layer for purchase + spawn
       machineryDelivered.push({type:item.type,model:item.model,orderId:order.id});
+      continue;
+     }
+     // Paid repair kits arrive at Patio logistics, not in tool-capacity slots.
+     if(item.type==='repairKit'){
+      creditRepairKit(s,item.model,item.qty);
       continue;
      }
      // Tools: add to inventory
