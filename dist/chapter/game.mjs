@@ -1100,6 +1100,7 @@ function workshopConfirmDemolish(){
 function hideWorkshopCard(){const wc=$('#workshopCard');if(wc)wc.hidden=true;workshopCardOpen=false;workshopDemolishPending=false;}
 function renderHUD(){if(!s)return;
  const driving=personalTruck(s)?.mode==='driving';
+ document.body.classList.toggle('drilltruckDriving',driving);
  hidden($('#personalTruckBrake'),!driving);
  hidden($('#personalTruckLights'),!driving);
  hidden($('#personalTruckSpeed'),!driving);
