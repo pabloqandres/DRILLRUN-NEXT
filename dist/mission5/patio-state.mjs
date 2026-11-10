@@ -28,6 +28,9 @@ export function patioState(s){
 export function patioUnlocked(s){return s?.mission4?.phase==='complete';}
 export function patioCanStart(s){
  if(!patioUnlocked(s))return 'needsM4';
+ // In real narrative saves M5 begins only after the SMS is accepted;
+ // legacy isolated M4 fixtures remain compatible.
+ if(s?.narrative&&!s.narrative.accepted?.includes('m5'))return 'needsMission5';
  if(patioState(s)==='building')return 'constructionPending';
  if(patioState(s)==='operational')return 'alreadyBuilt';
  if(!Number.isFinite(s?.cash)||s.cash<PATIO_L1.price)return 'noMoney';
