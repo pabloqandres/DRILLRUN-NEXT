@@ -1,0 +1,270 @@
+/* V37 · WORKSHOP STATUS CARD / DRILL RUN NEXT GENERATION
+   Readable landscape mobile, fixed header + footer, one scrollable content
+   zone. Overrides legacy 220px popup and prevents text/CTA collisions. */
+#workshopCard.workshopV37{
+ --ws-line:#4c748477;--ws-muted:#94b4c3;--ws-cream:#f2f4ee;
+ box-sizing:border-box!important;
+ display:flex!important;flex-direction:column!important;gap:0!important;
+ position:fixed!important;z-index:47!important;
+ left:50%!important;right:auto!important;
+ top:clamp(44px,11vh,78px)!important;
+ transform:translateX(-50%)!important;
+ width:min(388px,calc(100vw - 32px))!important;
+ max-width:388px!important;min-width:0!important;
+ height:auto!important;
+ max-height:min(550px,calc(100dvh - 107px))!important;
+ overflow:hidden!important;overscroll-behavior:contain;
+ padding:0!important;margin:0!important;
+ border:1px solid #638a9b!important;border-radius:17px!important;
+ color:var(--ws-cream)!important;
+ background:linear-gradient(155deg,#142e40fb 0%,#0c2235fc 52%,#0b1d2cfd 100%)!important;
+ box-shadow:0 20px 66px #010b18cf,0 0 0 1px #c4edf211,inset 0 1px #a9e0e62d!important;
+ backdrop-filter:blur(16px);
+ font-size:12px;line-height:1.3;pointer-events:auto
+}
+#workshopCard.workshopV37[hidden]{display:none!important}
+#workshopCard.workshopV37 *,#workshopCard.workshopV37 *::before,
+#workshopCard.workshopV37 *::after{box-sizing:border-box}
+#workshopCard.workshopV37 .uiIcon{flex:0 0 auto}
+#workshopCard.workshopV37 .wsHeading{
+ display:grid;grid-template-columns:31px minmax(0,1fr) auto 31px;
+ align-items:center;gap:9px;flex:none;
+ padding:13px 14px 12px;
+ background:linear-gradient(90deg,#264a5a82,#17394c35 80%);
+ border-bottom:1px solid var(--ws-line);
+ border-top:3px solid #bc333f
+}
+#workshopCard.workshopV37 .wsMark{
+ display:grid;place-items:center;width:31px;height:33px;
+ border:1px solid #88c0cf4d;border-radius:9px;
+ color:#b5e9ef;background:#224b5a6a
+}
+#workshopCard.workshopV37 .wsMark .uiIcon{width:18px;height:18px}
+#workshopCard.workshopV37 .wsHeadingText{min-width:0}
+#workshopCard.workshopV37 .wsHeadingText small{
+ font-size:8px;line-height:1.25;color:#83b9c9;font-weight:800;
+ letter-spacing:1.2px;display:block;white-space:nowrap
+}
+#workshopCard.workshopV37 .wsHeadingText h2{
+ font-weight:850;font-size:18px;letter-spacing:.35px;
+ margin:3px 0 0;color:#faf7ef;line-height:1.05
+}
+#workshopCard.workshopV37 .wsLevel{
+ font-size:10px;font-weight:750;color:#e4d39f;
+ background:#77623824;border:1px solid #d4b96b6f;
+ border-radius:7px;padding:5px 7px;white-space:nowrap
+}
+#workshopCard.workshopV37 .wsClose{
+ display:grid;place-items:center;cursor:pointer;
+ background:#d5e5ed0c;border:1px solid #b6d1df4d;border-radius:8px;
+ width:31px;height:31px;min-height:31px;padding:0;color:#d5edf4
+}
+#workshopCard.workshopV37 .wsClose:hover{background:#d5e5ed22}
+#workshopCard.workshopV37 .wsClose .uiIcon{width:17px;height:17px}
+#workshopCard.workshopV37 .wsContent{
+ flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;
+ padding:13px 15px 12px;
+ scrollbar-width:thin;scrollbar-color:#5d8292 #102b3e;
+ overscroll-behavior:contain;touch-action:pan-y
+}
+#workshopCard.workshopV37 .wsSectionTitle{
+ color:#7db6c8;font-size:9px;letter-spacing:1.15px;font-weight:900;
+ margin:0 0 8px;line-height:1.2
+}
+#workshopCard.workshopV37 .wsCapacity{
+ display:flex;align-items:center;justify-content:space-between;
+ gap:10px;margin-bottom:9px
+}
+#workshopCard.workshopV37 .wsCapacityValue{
+ display:flex;align-items:baseline;gap:3px;min-width:0
+}
+#workshopCard.workshopV37 .wsCapacityValue strong{
+ font-size:31px;line-height:1;font-weight:850;letter-spacing:-1px
+}
+#workshopCard.workshopV37 .wsCapacityValue>span{font-size:21px;color:#8eacb6}
+#workshopCard.workshopV37 .wsCapacityValue small{
+ margin-left:8px;font-size:10px;color:#a5bac4;line-height:1.2
+}
+#workshopCard.workshopV37 .wsCapacityFree{
+ display:flex;align-items:baseline;gap:5px;color:#a9e2b3;
+ background:#386f5344;border:1px solid #76c29355;
+ border-radius:8px;padding:6px 10px;white-space:nowrap
+}
+#workshopCard.workshopV37 .wsCapacityFree strong{font-size:20px;line-height:1}
+#workshopCard.workshopV37 .wsCapacityFree small{font-size:9px;color:#bae4c3}
+#workshopCard.workshopV37 .wsOccupancy{
+ display:grid;grid-template-columns:auto minmax(0,1fr) 33px;
+ align-items:center;gap:9px
+}
+#workshopCard.workshopV37 .wsOccupancy>span{
+ font-size:10px;color:#a6c5ce
+}
+#workshopCard.workshopV37 .wsOccupancy b{font-size:11px;text-align:right}
+#workshopCard.workshopV37 .wsTrack{
+ background:#2a4355;width:100%;height:6px;border-radius:99px;overflow:hidden
+}
+#workshopCard.workshopV37 .wsTrack i{
+ height:100%;display:block;border-radius:99px;
+ background:linear-gradient(90deg,#3a9075,#79d8ad)
+}
+#workshopCard.workshopV37 .wsInventoryTitle,
+#workshopCard.workshopV37 .wsRigTitle{
+ margin-top:14px;padding-top:11px;
+ border-top:1px solid #63899638
+}
+#workshopCard.workshopV37 .wsMetricGrid{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px
+}
+#workshopCard.workshopV37 .wsMetric{
+ display:flex;flex-direction:column;justify-content:center;align-items:center;
+ min-width:0;min-height:62px;padding:7px 4px;
+ background:#19374a99;border:1px solid #56869a61;border-radius:10px;
+}
+#workshopCard.workshopV37 .wsMetric small{
+ color:#91b7c4;font-size:9px;font-weight:700;
+ text-align:center;line-height:1.15;min-height:11px
+}
+#workshopCard.workshopV37 .wsMetric strong{
+ font-weight:800;font-size:20px;line-height:1.15;
+ color:#f2f4ef;margin-top:4px
+}
+#workshopCard.workshopV37 .wsMetricDiscard strong{color:#e6bd7f}
+#workshopCard.workshopV37 .wsRigList{
+ border:1px solid #628b9b5b;border-radius:11px;overflow:hidden;
+ background:#102c3d6b
+}
+#workshopCard.workshopV37 .wsMachine{
+ display:grid;grid-template-columns:23px minmax(0,1fr) auto;
+ align-items:center;column-gap:8px;padding:9px 10px;min-height:54px
+}
+#workshopCard.workshopV37 .wsMachine+.wsMachine{border-top:1px solid #66899846}
+#workshopCard.workshopV37 .wsMachineIcon{
+ width:23px;height:23px;display:grid;place-items:center;
+ color:#9ec8d6;background:#2a536365;border-radius:6px
+}
+#workshopCard.workshopV37 .wsMachineIcon .uiIcon{width:15px;height:15px}
+#workshopCard.workshopV37 .wsMachineName{
+ font-size:12px;font-weight:800;min-width:0;color:#faf9f3
+}
+#workshopCard.workshopV37 .wsMachineName small{
+ display:block;font-size:9px;color:#a4bdc6;font-weight:500;
+ margin-top:3px;line-height:1.2;overflow-wrap:anywhere
+}
+#workshopCard.workshopV37 .wsMachineState{
+ font-size:9px;max-width:126px;white-space:normal;text-align:right;
+ font-weight:800;line-height:1.25;border-radius:7px;
+ color:#adc7d2
+}
+#workshopCard.workshopV37 .wsMachineState.ready{color:#9adeb7}
+#workshopCard.workshopV37 .wsMachineState.active{color:#98e1ed}
+#workshopCard.workshopV37 .wsMachineState.warning{color:#fac47c}
+#workshopCard.workshopV37 .wsMachineState.moving{color:#d4c0ff}
+#workshopCard.workshopV37 .wsMachineState.muted{color:#91a5b0}
+#workshopCard.workshopV37 .wsAttention{
+ border:1px solid #dfa15e87;border-radius:10px;
+ padding:9px 10px;margin-top:9px;
+ background:#6c461f2f;display:flex;gap:9px;align-items:center;
+}
+#workshopCard.workshopV37 .wsAttention>div{min-width:0;flex:1}
+#workshopCard.workshopV37 .wsAttention b{
+ display:block;color:#f2ce9e;font-size:10px;line-height:1.25
+}
+#workshopCard.workshopV37 .wsAttention small{
+ display:block;color:#c9ad93;font-size:9px;margin-top:3px;line-height:1.25
+}
+#workshopCard.workshopV37 .wsAttention button{
+ background:#87541d;color:#fff3de;border:1px solid #df9a4c;
+ border-radius:8px;padding:7px 8px;font-size:9px;font-weight:750;
+ max-width:104px;line-height:1.25;min-height:34px;cursor:pointer
+}
+#workshopCard.workshopV37 .wsConstruction{
+ border:1px solid #478fb3a0;background:#11456342;
+ padding:9px 10px;border-radius:10px;margin-top:11px
+}
+#workshopCard.workshopV37 .wsConstructionHeading{
+ display:flex;align-items:center;gap:7px;font-size:10px;
+ color:#bce7f7;margin-bottom:8px
+}
+#workshopCard.workshopV37 .wsConstructionHeading .uiIcon{width:14px;height:14px}
+#workshopCard.workshopV37 .wsConstructionHeading b{margin-left:auto;color:#fff2cc}
+#workshopCard.workshopV37 .wsConstruction button{
+ margin-top:8px;border:1px solid #5986a7;border-radius:8px;
+ padding:7px 9px;background:#234b65;color:#d5ebf4;
+ font-size:10px;cursor:pointer
+}
+#workshopCard.workshopV37 .wsConstruction button:disabled{opacity:.55;cursor:default}
+#workshopCard.workshopV37 .wsFooter{
+ flex:0 0 auto;display:flex;flex-direction:column;gap:7px;
+ border-top:1px solid #60869963;
+ background:linear-gradient(0deg,#0b1a2a,#0f283a);
+ padding:11px 15px 12px
+}
+#workshopCard.workshopV37 .wsPrimaryActions{
+ display:grid;grid-template-columns:1fr 1fr;gap:8px
+}
+#workshopCard.workshopV37 .wsPrimaryActions:has(>button:only-child){
+ grid-template-columns:1fr
+}
+#workshopCard.workshopV37 .wsPrimaryActions button{
+ display:flex;align-items:center;justify-content:center;gap:6px;
+ white-space:normal;min-height:39px;padding:9px 8px;
+ border-radius:9px;font-size:11px;font-weight:800;
+ border:1px solid #6da6ba;background:#173e53;
+ color:#d7edf4;cursor:pointer;text-align:center
+}
+#workshopCard.workshopV37 .wsPrimaryActions button:last-child:not(:first-child){
+ border-color:#d1ad63;background:linear-gradient(140deg,#67532b,#80643a);
+ color:#fff0c9
+}
+#workshopCard.workshopV37 .wsPrimaryActions button .uiIcon{
+ width:15px;height:15px
+}
+#workshopCard.workshopV37 .wsPrimaryActions button:hover{filter:brightness(1.17)}
+#workshopCard.workshopV37 .wsUpgrade{
+ border:1px solid #77c796;background:#2a624e;color:#e2f7e6;
+ display:flex;align-items:center;justify-content:center;gap:6px;
+ width:100%;min-height:32px;border-radius:8px;
+ font-size:10px;font-weight:800;cursor:pointer
+}
+#workshopCard.workshopV37 .wsUpgrade small{color:#c4d6cb;font-size:9px}
+#workshopCard.workshopV37 .wsUpgrade:disabled{opacity:.60;cursor:not-allowed}
+#workshopCard.workshopV37 .wsLimit{
+ display:flex;align-items:center;justify-content:center;gap:6px;
+ color:#8fb9a9;font-size:9px;letter-spacing:.2px;
+}
+#workshopCard.workshopV37 .wsLimit .uiIcon{width:13px;height:13px}
+#workshopCard.workshopV37 .wsDemolish{
+ border:0;background:transparent;color:#90aaba;
+ font-size:9px;cursor:pointer;padding:4px 8px;text-decoration:underline;
+ text-underline-offset:3px
+}
+@media(max-height:520px){
+ #workshopCard.workshopV37{
+  top:40px!important;
+  width:min(355px,calc(100vw - 28px))!important;
+  max-height:calc(100dvh - 115px)!important
+ }
+ #workshopCard.workshopV37 .wsHeading{padding:8px 12px;gap:7px}
+ #workshopCard.workshopV37 .wsHeadingText h2{font-size:15px}
+ #workshopCard.workshopV37 .wsHeadingText small{font-size:7px;letter-spacing:.8px}
+ #workshopCard.workshopV37 .wsMark{width:27px;height:28px}
+ #workshopCard.workshopV37 .wsLevel{font-size:9px}
+ #workshopCard.workshopV37 .wsContent{padding:10px 12px}
+ #workshopCard.workshopV37 .wsCapacityValue strong{font-size:24px}
+ #workshopCard.workshopV37 .wsCapacityValue>span{font-size:16px}
+ #workshopCard.workshopV37 .wsMetric{min-height:52px}
+ #workshopCard.workshopV37 .wsMetric strong{font-size:17px}
+ #workshopCard.workshopV37 .wsFooter{padding:8px 12px;gap:5px}
+ #workshopCard.workshopV37 .wsPrimaryActions button{min-height:34px;padding:6px;font-size:10px}
+}
+@media(max-width:540px){
+ #workshopCard.workshopV37{
+  width:calc(100vw - 20px)!important;max-width:388px!important;
+ }
+ #workshopCard.workshopV37 .wsHeading{padding:10px;gap:6px}
+ #workshopCard.workshopV37 .wsHeadingText small{font-size:7px;letter-spacing:.3px}
+ #workshopCard.workshopV37 .wsLevel{font-size:8px;padding:4px}
+ #workshopCard.workshopV37 .wsContent{padding:11px}
+ #workshopCard.workshopV37 .wsFooter{padding:8px 11px}
+ #workshopCard.workshopV37 .wsCapacityValue small{font-size:9px;margin-left:4px}
+}
