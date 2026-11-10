@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>DRILL RUN · Prueba controlada DTH</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#eef1ee;background:#091925;font-size:14px}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at 75% 0%,#183b46 0%,transparent 42%),linear-gradient(165deg,#091925,#0b1f30)}
+main{max-width:1120px;margin:auto;padding:26px clamp(14px,3vw,32px) 46px}
+header{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;padding-bottom:20px;border-bottom:1px solid #45627377}
+.logo{font-size:20px;font-weight:900;letter-spacing:.08em;color:#f4ca71}.logo span{color:#f6f5ef}
+.eyebrow{color:#8bc5cf;font-size:11px;letter-spacing:.18em;font-weight:850}
+h1{font-size:clamp(26px,4vw,39px);line-height:1.1;margin:14px 0 11px}
+h2{font-size:17px;margin:0 0 15px}
+p{color:#a7bfcb;line-height:1.55;margin:8px 0}
+.safe{border:1px solid #558875;background:#173d37ac;border-radius:12px;padding:13px 15px;margin:20px 0;line-height:1.55}
+.safe b{color:#b1f0c4}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 24px}
+button,a.link{border:1px solid #67818f;border-radius:10px;background:#193548;color:#f5f2e7;padding:10px 16px;min-height:43px;cursor:pointer;text-decoration:none;font-weight:750}
+button:hover,a.link:hover{filter:brightness(1.15)}
+button.primary{background:#edba51;color:#172b34;border-color:#edba51}
+button.active{outline:2px solid #f7d386;outline-offset:2px}
+.card{border:1px solid #385b6b;background:#102a3bde;border-radius:15px;padding:18px;box-shadow:0 12px 30px #0002}
+.summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:20px}
+.summary>div{background:#102c3f;border:1px solid #3e6070;padding:13px;border-radius:12px}
+.summary small{display:block;color:#9cbbc8;font-size:11px;margin-bottom:6px}.summary strong{font-size:clamp(17px,2.8vw,23px);color:#f1cf84}
+.status{font-weight:850;font-size:13px;color:#a7f0b5}
+.status.fail{color:#ffa4a0}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.check{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #284a5a}
+.check:last-child{border-bottom:0}
+.symbol{flex:0 0 22px;text-align:center;color:#9febbc}
+.symbol.fail{color:#ff9f9f}
+.check b{font-size:13px;font-weight:700}.check small{display:block;font-size:11px;color:#9cb4c4;margin-top:3px}
+.timeline{list-style:none;padding:0;margin:0}
+.timeline li{position:relative;padding:0 0 15px 17px;margin-left:7px;border-left:1px solid #56758a}
+.timeline li::before{content:"";position:absolute;width:8px;height:8px;border-radius:50%;background:#edba51;left:-4.5px;top:6px}
+.timeline li:last-child{border-left-color:transparent}
+.timeline b{display:block;font-size:13px}.timeline small{font-size:11px;color:#a2bdc9;display:block;margin-top:4px}
+.foot{font-size:12px;color:#8cadbc;margin:21px 0}
+@media(max-width:720px){main{padding:17px 12px}.summary{grid-template-columns:repeat(2,minmax(0,1fr))}.layout{grid-template-columns:1fr}.card{padding:14px}}
+</style>
+</head>
+<body>
+<main>
+<header><div class="logo">DRILL <span>RUN</span><small style="display:block;font-size:10px;letter-spacing:.13em;font-weight:600;color:#a4c5d0">NEXT GENERATION · QA M4</small></div><a class="link" href="../index.html">Volver al juego</a></header>
+<div class="eyebrow" style="margin-top:23px">LABORATORIO AISLADO · CONSUMIBLES DTH</div>
+<h1>Desgaste y recambio automático del bit</h1>
+<p>Ejecuta el sistema real de producción y mantenimiento con una partida ficticia. Se adelanta el reloj <b>solo dentro del laboratorio</b> para probar el agotamiento y el retorno del DrillTruck® sin esperar tres horas.</p>
+<div class="safe"><b>✓ Tu partida está protegida.</b> Esta página no abre el juego, no inicia sesión en Google y no lee ni modifica el guardado del navegador ni Firebase. Utiliza datos ficticios creados exclusivamente en memoria.</div>
+<div class="actions" role="group" aria-label="Escenarios de prueba">
+<button class="primary active" data-scenario="spare">Prueba completa · con repuesto</button>
+<button data-scenario="empty">Sin repuesto · verificar detención</button>
+<button data-scenario="partial">Bit con solo 12 m · pago proporcional</button>
+</div>
+<div class="summary" id="summary" aria-live="polite"></div>
+<div class="layout">
+<section class="card"><h2 id="checksTitle">Validaciones</h2><div id="checks">Cargando simulación…</div></section>
+<section class="card"><h2>Secuencia ejecutada</h2><ol id="timeline" class="timeline"></ol></section>
+</div>
+<p class="foot">La simulación comprueba el motor económico, el stock, las fases de mantenimiento y el trayecto real calculado para DrillTruck®. La animación 3D dentro de una partida sigue siendo una comprobación independiente.</p>
+</main>
+<script type="module">
+import {runM4BitLab} from './m4-bit-lab.mjs';
+const $=s=>document.querySelector(s);
+const money=n=>'🪙 '+new Intl.NumberFormat('es-CL').format(n);
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+function render(opts,button){
+ for(const b of document.querySelectorAll('[data-scenario]')){
+  b.classList.toggle('active',b===button);
+  b.classList.toggle('primary',b===button);
+ }
+ try{
+  const result=runM4BitLab(opts);
+  const first=result.initial,final=result.final;
+  $('#summary').innerHTML=
+   '<div><small>RESULTADO</small><strong class="status '+(result.passed?'':'fail')+'">'+(result.passed?'APROBADA':'REVISAR FALLAS')+'</strong></div>'+
+   '<div><small>BIT DE PRUEBA</small><strong>'+first.bit+' → 0 m</strong></div>'+
+   '<div><small>INGRESOS DE LA PRUEBA</small><strong>'+money(final.cash-first.cash)+'</strong></div>'+
+   '<div><small>DESCARTES PARA M8</small><strong>'+final.materials.length+'</strong></div>';
+  $('#checksTitle').textContent='Validaciones · '+result.checks.filter(c=>c.passed).length+'/'+result.checks.length;
+  $('#checks').innerHTML=result.checks.map(c=>'<div class="check"><span class="symbol '+(c.passed?'':'fail')+'">'+(c.passed?'✓':'✕')+'</span><div><b>'+esc(c.label)+'</b>'+(c.detail?'<small>'+esc(c.detail)+'</small>':'')+'</div></div>').join('');
+  $('#timeline').innerHTML=result.trace.map(e=>'<li><b>'+esc(e.label)+'</b><small>'+esc(e.detail)+'</small><small>Bit: '+e.bit+' m · Martillo: '+e.hammer+' m · '+money(e.cash)+'</small></li>').join('');
+ }catch(e){
+  $('#summary').innerHTML='<div><small>RESULTADO</small><strong class="status fail">ERROR DE PRUEBA</strong></div>';
+  $('#checks').textContent=String(e.stack||e);$('#timeline').textContent='';
+  console.error('[M4 QA]',e);
+ }
+}
+for(const b of document.querySelectorAll('[data-scenario]'))b.addEventListener('click',()=>{
+ const mode=b.dataset.scenario;
+ render(mode==='empty'?{spare:false}:mode==='partial'?{spare:true,bitMeters:12}:{spare:true},b);
+});
+render({spare:true},document.querySelector('[data-scenario="spare"]'));
+</script>
+</body>
+</html>
