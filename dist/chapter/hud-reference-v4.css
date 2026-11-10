@@ -1421,3 +1421,51 @@ body.interior #hud #objective:not(.hidden).collapsed{
  #hud #endBuildPreviewWalk b{font-size:10px}
  #builderPanel .catalogPreviewActions .catalogPreviewControl{font-size:8px!important;padding:3px 5px!important}
 }
+
+/* V46 · M5 five true objectives: visible on world HUD, compact and scrollable.
+   Scoped to M5; M1–M4 card sizing, collapse and interactions stay intact. */
+#hud #objective[data-mission="m5"]:not(.hidden){max-height:min(73svh,495px)!important}
+#hud #objective[data-mission="m5"] #objectiveDetail:not(.hidden){
+ display:block!important;max-height:min(38svh,265px)!important;
+ overflow-y:auto!important;touch-action:pan-y;overscroll-behavior:contain;
+ padding-right:30px!important;margin-bottom:3px!important;
+ scrollbar-width:thin;scrollbar-color:#5a8491 #0a2435;
+}
+#hud #objective[data-mission="m5"] .m5HudChecklist{display:flex;flex-direction:column;gap:4px}
+#hud #objective[data-mission="m5"] .m5HudStep{
+ display:grid;grid-template-columns:21px minmax(0,1fr);gap:7px;
+ align-items:center;padding:4px 5px;border-radius:7px;
+ color:#b3c6ce;font-size:11px;line-height:1.3;
+}
+#hud #objective[data-mission="m5"] .m5HudNumber{
+ display:grid;place-items:center;height:21px;width:21px;border-radius:50%;
+ font-size:11px;font-weight:850;font-variant-numeric:tabular-nums;
+ color:#a0b4bd;border:1px solid #5a7181;
+}
+#hud #objective[data-mission="m5"] .m5HudStep.current{
+ color:#ffdfaa;background:#c29e4530;box-shadow:inset 2px 0 #e9ba5c;
+ font-weight:750;
+}
+#hud #objective[data-mission="m5"] .m5HudStep.current .m5HudNumber{
+ color:#ffe7b3;border-color:#e9ba5c;background:#9c762c49;
+}
+#hud #objective[data-mission="m5"] .m5HudStep.done{color:#9fdfc0}
+#hud #objective[data-mission="m5"] .m5HudStep.done .m5HudNumber{
+ background:#205d48;border-color:#68cda3;color:#eafff2;
+}
+#hud #objective[data-mission="m5"] .m5HudStep.locked{opacity:.73}
+#hud #objective[data-mission="m5"] .m5HudLabel{min-width:0;overflow-wrap:anywhere}
+#hud #objective[data-mission="m5"] .m5HudReward,
+#hud #objective[data-mission="m5"] .m5HudClosing{
+ display:block;margin:7px 4px 0;font-size:10px;line-height:1.35;
+ color:#f8d496;font-weight:750;
+}
+#hud #objective[data-mission="m5"] .m5HudClosing{color:#b8e1e5}
+@media(max-height:530px),(max-width:680px){
+ #hud #objective[data-mission="m5"]:not(.hidden){max-height:min(69svh,340px)!important}
+ #hud #objective[data-mission="m5"] #objectiveDetail:not(.hidden){
+  max-height:min(31svh,150px)!important;padding-right:16px!important;
+ }
+ #hud #objective[data-mission="m5"] .m5HudStep{font-size:10px;padding:3px;gap:5px}
+ #hud #objective[data-mission="m5"] .m5HudReward{font-size:9px}
+}
