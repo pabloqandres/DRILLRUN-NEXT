@@ -3,6 +3,12 @@ import {CHARACTERS,activeCharacters,characterConversation,characterUnread,narrat
 import {narrativePortrait} from '../assets/narrative-portraits.mjs';
 
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// Same player-name interpolation for inbox previews, toast notifications,
+// mission conversation bubbles and animated text (M1 through M5).
+export function resolveNarrativeText(text,playerName){
+ const name=String(playerName||'').trim()||'Operador';
+ return String(text??'').replace(/\{name\}/g,name);
+}
 
 // ─── Contact list (messages home screen) ────────────────
 
@@ -12,8 +18,8 @@ export function renderContactList(s,t,icon){
  let html=`<div class="sectionHeading">${esc(t('narr_conversations'))}<span>${narrativeUnread(s)||''}</span></div>`;
  for(const ch of chars){
   const unread=characterUnread(s,ch.id);
-  const preview=t(ch.lastBodyKey)||'';
-  const previewShort=preview.replace(/\{name\}/g,'').replace(/\n/g,' ').slice(0,60);
+  const preview=resolveNarrativeText(t(ch.lastBodyKey)||'',s.playerName);
+  const previewShort=preview.replace(/\s+/g,' ').slice(0,60);
   html+=`<button class="narrativeContactCard" data-narrative-char="${ch.id}">
    <span class="narrativeAvatar" style="--char-color:${ch.color};--char-bg:${CHARACTERS[ch.id]?.color||'#888'}55">${narrativePortrait(ch.avatarIcon)}</span>
    <span class="narrativeContactInfo">
@@ -41,7 +47,7 @@ export function renderConversation(s,charId,t,icon,playerName){
  for(let i=0;i<msgs.length;i++){
   const m=msgs[i];
   const body=t(m.bodyKey)||m.bodyKey;
-  const resolved=body.replace(/\{name\}/g,playerName||'Operador');
+  const resolved=resolveNarrativeText(body,playerName);
   const isLast=i===msgs.length-1;
   const isUnread=!m.readAt;
   const needsTyping=isLast&&isUnread;
