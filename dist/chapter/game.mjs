@@ -1417,9 +1417,9 @@ $('#geoDismiss').onclick=e=>{e.stopPropagation();if(s?.geoAnalysis){s.geoAnalysi
 $('#geoCard').onclick=()=>{if(s?.geoAnalysis?.completed){openPhone('m3-geology');if(s.geoAnalysis){s.geoAnalysis.cardDismissed=true;save();}}};
 $('#hsecInline').onclick=e=>{e.stopPropagation();if(hsecUI)hsecUI.open();};
 let geoRefreshTimer=0;
-const builderUI=new BuilderUI({host:$('#builderPanel'),state:()=>s,translate:()=>t,format:money,onClose:closeBuilder,onSelection:m=>{selectedBuildModule=m;blueprint=!!m;},onConfirm:confirmModule,onInspect:inspectModule,onManage:manageOffice,onWorkshopManage:()=>{showWorkshopCard();},
-onPhoneNav:app=>{closeBuilder();openPhone(app);},
-onPatioAction:()=>openPatioPanel(),
+const builderUI=new BuilderUI({host:$('#builderPanel'),state:()=>s,translate:()=>t,format:money,onClose:closeBuilder,onSelection:m=>{selectedBuildModule=m;blueprint=!!m;},onConfirm:confirmModule,onInspect:inspectModule,onManage:manageOffice,onWorkshopManage:()=>{openFaena('workshop');},
+onPhoneNav:app=>{closeBuilder();openFaena(app);},
+onPatioAction:()=>s?.mission5?.status==='operational'?openFaena('patio'):openPatioPanel(),
 getPatioPreviewSource:()=>{
  // Single in-world prefab geometry; no purchase/save or duplicate structures.
  if(!m5World&&s?.mission4?.phase==='complete')initM5Visuals();
