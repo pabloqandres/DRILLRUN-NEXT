@@ -1,5 +1,19 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+## 2026-11-10 — V47 Home refleja la misión activa + HUD M5 compacto
+
+**Solicitud directa del usuario:** realizar la corrección y publicarla
+en el juego, no crear un prompt para otro agente. En la pantalla de
+inicio M4 persistía aunque M5 estaba aceptada; la tarjeta checklist
+interfería con joystick en móvil.
+Se autoriza edición acotada de `dist/chapter/game.mjs` para integrar
+`getCurrentMissionCard(s)` como fuente única de portada y estado
+del jugador, y de CSS/renderer de misión para mostrar solo paso
+actual y siguiente. Vista completa sigue en teléfono.
+No modificar pagos, progreso, compras, producción, HSEC ni save schema.
+Publicar V47 desde rama → PR → main → Vercel producción tras CI M5.
+Detalle: `CHANGES/2026-11-10_v47-live-mission-home-compact-hud.md`.
+
 ## 2026-11-10 — V46 M5 checklist y bono de puesta en servicio
 
 **Aprobación del usuario:** al ver M5 con progreso 0/5 sin objetivos visibles,
