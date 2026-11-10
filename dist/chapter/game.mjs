@@ -403,15 +403,15 @@ function initM4Visuals(){
    // If truck was dispatched/in maintenance, restart route animation
    if(s.mission4?.drillTruck?.maintenancePhase==='dispatch'){
     const zone=s.mission4.drillTruck.maintenanceZone;
-    if(zone)startTruckRoute(m4DrillTruckModel,zone,'out');
+    if(zone)startTruckRoute(m4DrillTruckModel,zone,'out',!!s.mission5?.truckRelocated);
    }else if(s.mission4?.drillTruck?.maintenancePhase==='return'){
     const zone=s.mission4.drillTruck.maintenanceZone;
-    if(zone)startTruckRoute(m4DrillTruckModel,zone,'return');
+    if(zone)startTruckRoute(m4DrillTruckModel,zone,'return',!!s.mission5?.truckRelocated);
    }
    // Dynamic collider for truck
    m4TruckCollider={x:truckPos.x,z:truckPos.z,w:2.5,d:5,_truck:true};
    world.colliders.push(m4TruckCollider);
-  }).catch(e=>{console.error('DrillTruck GLB load failed, using procedural:',e);m4DrillTruckModel=createProceduralTruck();initTruckRouteState(m4DrillTruckModel);const tp=s.mission4?.drillTruck?.position||{x:-13.5,z:-9.3};m4DrillTruckModel.position.set(tp.x,0.12,tp.z);world.scene.add(m4DrillTruckModel);if(s.mission4?.drillTruck?.maintenancePhase==='dispatch'){const z2=s.mission4.drillTruck.maintenanceZone;if(z2)startTruckRoute(m4DrillTruckModel,z2,'out');}else if(s.mission4?.drillTruck?.maintenancePhase==='return'){const z2=s.mission4.drillTruck.maintenanceZone;if(z2)startTruckRoute(m4DrillTruckModel,z2,'return');}m4TruckCollider={x:tp.x,z:tp.z,w:2.5,d:5,_truck:true};world.colliders.push(m4TruckCollider);});
+  }).catch(e=>{console.error('DrillTruck GLB load failed, using procedural:',e);m4DrillTruckModel=createProceduralTruck();initTruckRouteState(m4DrillTruckModel);const tp=s.mission4?.drillTruck?.position||{x:-13.5,z:-9.3};m4DrillTruckModel.position.set(tp.x,0.12,tp.z);world.scene.add(m4DrillTruckModel);if(s.mission4?.drillTruck?.maintenancePhase==='dispatch'){const z2=s.mission4.drillTruck.maintenanceZone;if(z2)startTruckRoute(m4DrillTruckModel,z2,'out',!!s.mission5?.truckRelocated);}else if(s.mission4?.drillTruck?.maintenancePhase==='return'){const z2=s.mission4.drillTruck.maintenanceZone;if(z2)startTruckRoute(m4DrillTruckModel,z2,'return',!!s.mission5?.truckRelocated);}m4TruckCollider={x:tp.x,z:tp.z,w:2.5,d:5,_truck:true};world.colliders.push(m4TruckCollider);});
  }
  m4VisualsReady=true;
 }
@@ -465,25 +465,41 @@ function updateM4Visuals(dt){
   }else if(routeEvent==='returned'){
    advanceMaintenancePhase(s);
    autoDispatchTruck(s);
+  }else if(routeEvent==='yard-arrived'){
+   if(s.mission5){s.mission5.truckRelocated=true;s.mission5.truckRelocatedAt=Date.now();}
+   if(s.mission4?.drillTruck)s.mission4.drillTruck.position={x:PATIO_L1.truckBay.x,z:PATIO_L1.truckBay.z};
+   notices.push({title:'DrillTruck® · Patio L1',detail:'Vehículo resguardado en estacionamiento techado',symbol:'bell'});
+   save();
   }
  }
  // Fix stuck: dispatch/return phase but no visual route → advance past it
  if(m4DrillTruckModel&&s.mission4.drillTruck?.maintenancePhase==='dispatch'&&!truckRouteActive(m4DrillTruckModel)){
   const zone=s.mission4.drillTruck.maintenanceZone;
-  if(zone)startTruckRoute(m4DrillTruckModel,zone,'out');
+  if(zone)startTruckRoute(m4DrillTruckModel,zone,'out',!!s.mission5?.truckRelocated);
  }
  if(m4DrillTruckModel&&s.mission4.drillTruck?.maintenancePhase==='return'&&!truckRouteActive(m4DrillTruckModel)){
   const zone=s.mission4.drillTruck.maintenanceZone;
-  if(zone)startTruckRoute(m4DrillTruckModel,zone,'return');
+  if(zone)startTruckRoute(m4DrillTruckModel,zone,'return',!!s.mission5?.truckRelocated);
+ }
+ // On M5 completion, drive the real DrillTruck from its M4 parking
+ // into the roofed light-vehicle bay through the SINGLE permanent gate.
+ if(s.mission5?.status==='operational'&&!s.mission5.truckRelocated&&
+    s.mission4?.drillTruck?.state==='parked'&&!s.mission4.drillTruck.maintenancePhase&&
+    m4DrillTruckModel&&!truckRouteActive(m4DrillTruckModel)){
+   startTruckRoute(m4DrillTruckModel,null,'relocate');
  }
  // Auto-dispatch idle zones
- if(s.mission4.drillTruck&&!s.mission4.drillTruck.maintenancePhase&&s.mission4.drillTruck.state==='parked'){
+ if(s.mission4.drillTruck&&!s.mission4.drillTruck.maintenancePhase&&s.mission4.drillTruck.state==='parked'&&
+    !(s.mission5?.status==='operational'&&!s.mission5.truckRelocated)){
   autoDispatchTruck(s);
  }
  // Sync truck collider position
  if(m4TruckCollider&&m4DrillTruckModel){
   m4TruckCollider.x=m4DrillTruckModel.position.x;
   m4TruckCollider.z=m4DrillTruckModel.position.z;
+  if(s.mission4?.drillTruck&&truckRouteActive(m4DrillTruckModel)){
+   s.mission4.drillTruck.position={x:m4DrillTruckModel.position.x,z:m4DrillTruckModel.position.z};
+  }
  }
 }
 function autoDispatchTruck(s){
@@ -1113,7 +1129,7 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
   if(phoneOpen&&(phoneApp==='m3-geology'||phoneApp==='m3-contract'||phoneApp==='m3-catalog'||phoneApp==='m3-orders'||phoneApp==='m4-drilltruck'||phoneApp==='m4-zones'||phoneApp==='m4-operaciones'||phoneApp==='m4-workshop'||phoneApp==='m4-dth-catalog')){geoRefreshTimer=(geoRefreshTimer||0)+dt;const deliveryView=phoneApp==='m3-orders'||phoneApp==='m3-catalog';if(geoRefreshTimer>=(deliveryView?1:2)){geoRefreshTimer=0;const c=$('#phoneContent');const scrollTop=c?.scrollTop||0;renderPhone();if(c)c.scrollTop=scrollTop;}}else geoRefreshTimer=0;
   if(drillCardOpen){if(drillCardMode==='dth'){if(wall-dthCardLastRender>=350)showDthDrillCard();}else showDrillCard();}
   // === M4 tick ===
-  initM4Visuals();const m4events=tickMission4(s,dt,wall);if(m4events){for(const e of m4events){if(e==='incomeGenerated'){/* Auto-credit silently. The wallet and production report display actual funds. */}else if(e==='maintenanceComplete'){notices.push({title:'Mantenimiento completado',symbol:'bell'});if(phoneOpen)renderPhone();}else if(e==='truckDispatch'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'out');}else if(e==='truckReturn'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'return');}else if(e==='missionComplete'){
+  initM4Visuals();const m4events=tickMission4(s,dt,wall);if(m4events){for(const e of m4events){if(e==='incomeGenerated'){/* Auto-credit silently. The wallet and production report display actual funds. */}else if(e==='maintenanceComplete'){notices.push({title:'Mantenimiento completado',symbol:'bell'});if(phoneOpen)renderPhone();}else if(e==='truckDispatch'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'out',!!s.mission5?.truckRelocated);}else if(e==='truckReturn'&&m4DrillTruckModel){const zone=s.mission4.drillTruck?.maintenanceZone;if(zone)startTruckRoute(m4DrillTruckModel,zone,'return',!!s.mission5?.truckRelocated);}else if(e==='missionComplete'){
    // The first actual production income completed M4. Keep the DTH running
    // and deliver the benefactor's closing message instead of showing a
    // premature 4-second overlay before narrative confirmation.
