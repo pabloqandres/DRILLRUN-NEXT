@@ -73,6 +73,56 @@ export function soilPixels(size=512){const data=new Uint8Array(size*size*4),norm
  return {size,color:data,normal};
 }
 function tex(data,size,srgb=false){const t=new T.DataTexture(data,size,size,T.RGBAFormat);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(16,16);t.magFilter=T.LinearFilter;t.minFilter=T.LinearMipmapLinearFilter;t.generateMipmaps=true;if(srgb)t.colorSpace=T.SRGBColorSpace;t.needsUpdate=true;return t;}
+// Eroded, stratified Atacama buttes: irregular flanks, benches and worn
+// summits. Unlike a cylinder each silhouette is non-symmetric; vertex colour
+// bands follow the sedimentary layers. Shared geometry keeps one GPU draw call.
+export function erodedMesaGeometry(){
+ const g=new T.BufferGeometry(),pos=[],colors=[],segments=17;
+ const rings=[
+  [0,1.44],[.07,1.41],[.19,1.26],[.27,1.12],
+  [.33,1.09],[.36,1.14],[.40,1.02],
+  [.53,.91],[.62,.85],[.68,.89],[.73,.81],
+  [.82,.75],[.90,.71],[.94,.69],[1.0,.56],[1.04,.18]
+ ];
+ const ring=(y,r,theta,i)=>{
+  const cliff=.082*Math.sin(theta*3.0+.7)+.055*Math.cos(theta*5.0-.45)
+   +.039*Math.sin(theta*9.0+1.4)+.026*Math.cos(theta*13.0+.31);
+  const shift=.065*Math.sin(y*5.0+theta*.5);
+  const wav=.018*Math.sin(theta*4+y*23)+.012*Math.sin(theta*11-y*15);
+  const radial=Math.max(.04,r*(1+cliff)+wav);
+  return [radial*Math.cos(theta)+shift,y+(.017+.016*y)*Math.sin(theta*6+.5*i),
+   radial*Math.sin(theta)+.038*Math.cos(y*6.5)];
+ };
+ const emit=(p,y,theta)=>{
+  pos.push(...p);
+  const band=Math.sin(y*24+.5)*.045+Math.cos(y*12)*.027;
+  const warm=.88+.11*y+band+.022*Math.sin(theta*3);
+  colors.push(warm*1.02,warm*.99,warm*.96);
+ };
+ for(let k=0;k<rings.length-1;k++){
+  const [y1,r1]=rings[k],[y2,r2]=rings[k+1];
+  for(let j=0;j<segments;j++){
+   const a=2*Math.PI*j/segments,b=2*Math.PI*(j+1)/segments;
+   const A=ring(y1,r1,a,k),B=ring(y1,r1,b,k),
+    C=ring(y2,r2,a,k+1),D=ring(y2,r2,b,k+1);
+   for(const [p,y,t]of[[A,y1,a],[B,y1,b],[D,y2,b],[A,y1,a],[D,y2,b],[C,y2,a]])
+    emit(p,y,t);
+  }
+ }
+ const tip=[.02,1.048,-.005],last=rings[rings.length-1];
+ for(let j=0;j<segments;j++){
+  const a=2*Math.PI*j/segments,b=2*Math.PI*(j+1)/segments;
+  for(const [p,y,t]of[
+   [ring(last[0],last[1],a,rings.length-1),last[0],a],
+   [ring(last[0],last[1],b,rings.length-1),last[0],b],
+   [tip,1.04,(a+b)/2]
+  ])emit(p,y,t);
+ }
+ g.setAttribute('position',new T.Float32BufferAttribute(pos,3));
+ g.setAttribute('color',new T.Float32BufferAttribute(colors,3));
+ g.computeVertexNormals();
+ return g;
+}
 export function createDesert(w){
  const group=new T.Group();group.name='Atacama · premium';const pixels=soilPixels(),map=tex(pixels.color,pixels.size,true),normalMap=tex(pixels.normal,pixels.size);
  const geo=new T.PlaneGeometry(240,240,96,96);geo.rotateX(-Math.PI/2);const p=geo.attributes.position,col=[];
@@ -88,27 +138,27 @@ export function createDesert(w){
   for(let i=0;i<pos.count;i+=3){const h=(pos.getY(i)+pos.getY(i+1)+pos.getY(i+2))/3,n=noise(pos.getX(i)*.17,h*.4),base=new T.Color([0xb58c6c,0xb49887,0xaaa0a8,0xa8b4c4][layer]);const strata=Math.sin(h*1.65+pos.getX(i)*.07)*.065;base.multiplyScalar(.68+n*.36+strata+(h>12?.04:0));for(let j=0;j<3;j++)colors.push(base.r,base.g,base.b);}
   flat.setAttribute('color',new T.Float32BufferAttribute(colors,3));const m=new T.MeshLambertMaterial({color:0xffffff,vertexColors:true});const mountain=new T.Mesh(flat,m);mountain.name='ridge-'+layer;mountain.position.set(layer*7-6,-.2,-74-layer*20);group.add(mountain);
  }
- // V18 cinematic relief: faceted high-altitude mesas in the far world.
- // Entirely outside the playable parcel: no colliders, no traversable paths,
- // no mining equipment or false buildings. 30 instances, 1 draw call.
- const mesaGeometry=new T.CylinderGeometry(.74,1.1,1,7,4,false);
- mesaGeometry.translate(0,.5,0);
+ // Desert panorama: eroded sedimentary mesas with irregular scarps,
+ // terrace benches and faceted strata, no black truncated cylinders.
+ // Entirely outside the playable map (including the new north-west patio),
+ // so they never block vehicles, paths, construction or character navigation.
+ const mesaGeometry=erodedMesaGeometry();
  const mesaMaterial=new T.MeshStandardMaterial({
-  color:0xffffff,roughness:1,metalness:0,flatShading:true
+  color:0xffffff,vertexColors:true,roughness:1,metalness:0,flatShading:true
  });
  const mesas=new T.InstancedMesh(mesaGeometry,mesaMaterial,30);
- const mesaColors=[0x987a65,0xae8f77,0x967f72,0xb69b83,0x897f7d];
- mesas.name='Atacama · monumental background mesas';
+ const mesaColors=[0xb89475,0xceb18b,0xac8771,0xc0a18b,0xbaa29b];
+ mesas.name='Atacama · eroded strata and natural mesas';
+ const dummyMesa=new T.Object3D();
  let mesaIndex=0;
- const mesaDummy=new T.Object3D();
- for(let i=0;i<65&&mesaIndex<30;i++){
-  const x=-100+hash(i,371)*200,z=-44-hash(i,373)*44;
-  if(Math.abs(x)<20&&z>-51)continue;
-  const width=3.5+hash(i,379)*8,height=2.8+hash(i,383)*10;
-  mesaDummy.position.set(x,-.7,z);
-  mesaDummy.rotation.set(0,hash(i,389)*6.28,0);
-  mesaDummy.scale.set(width,height,width*(.42+hash(i,397)*.45));
-  mesaDummy.updateMatrix();mesas.setMatrixAt(mesaIndex,mesaDummy.matrix);
+ for(let i=0;i<110&&mesaIndex<30;i++){
+  // Far mountain belt: no overlap with the playable L1 patio footprint.
+  const x=-114+hash(i,371)*228,z=-82-hash(i,373)*33;
+  const width=3.7+hash(i,379)*6.3,height=3.8+hash(i,383)*11.5;
+  dummyMesa.position.set(x,-.65,z);
+  dummyMesa.rotation.set(0,hash(i,389)*6.28,0);
+  dummyMesa.scale.set(width,height,width*(.55+hash(i,397)*.65));
+  dummyMesa.updateMatrix();mesas.setMatrixAt(mesaIndex,dummyMesa.matrix);
   mesas.setColorAt(mesaIndex,new T.Color(mesaColors[Math.floor(hash(i,401)*mesaColors.length)]));
   mesaIndex++;
  }
