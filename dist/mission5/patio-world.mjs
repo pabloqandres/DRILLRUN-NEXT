@@ -249,8 +249,8 @@ export function createPatioWorld(w){
    }
    // Barrier is up for vehicles using its one fixed entrance.
    const truck=s.mission4?.drillTruck;
-   const truckNear=!!truck&&(truck.state!=='parked'||
-     (truck.position&&Math.hypot(truck.position.x-PATIO_L1.gate.x,truck.position.z-PATIO_L1.gate.z)<12));
+   const truckNear=!!truck?.position&&
+    Math.hypot(truck.position.x-PATIO_L1.gate.x,truck.position.z-PATIO_L1.gate.z)<12;
    const desired=truckNear?-Math.PI/2:0;
    access.rotation.x+=(desired-access.rotation.x)*.12;
   },
