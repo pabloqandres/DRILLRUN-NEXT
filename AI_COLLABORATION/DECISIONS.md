@@ -283,3 +283,18 @@ Los pasos pintados nunca actúan como muro. Conservar cercos, edificios, baranda
 
 ## 2026-11-10 — V56 No perder jamás vehículos comprados
 La unidad 02 está identificada por `s.mission5.personalTruck` y no puede desaparecer por falta temporal de GLB ni por cambio de save válido. Su propiedad solo puede reconstruirse de evidencia de compra/comisión M5 y recompensa cobrada; la localización no la teletransporta, pero Recuperar P01 es una acción explícita gratuita sobre la misma instancia. M4 automática permanece independiente.
+
+## 2026-11-10 — V57 / Navegación: eliminar barreras invisibles, conservar colisiones reales (Usuario + ChatGPT; requiere coordinación Claude Code)
+
+**Problema constatado en código:** `World.isBlocked` de `dist/scene.mjs` bloquea zonas no comprendidas por el rectángulo histórico ni las dos regiones M5, aun cuando allí existe terreno visible. `restore()` de `dist/chapter/state.mjs` usa otro conjunto de límites; `personalTruckAtPlayableLocation` / `repairPersonalTruckPose` tienen un tercero. Una ampliación aislada crearía posiciones jugables que desaparecen tras recargar.
+
+**Criterio aprobado por usuario:** extender el terreno transitable de avatar y DrillTruck® personal; no seguir bloqueando áreas despejadas con cajas invisibles. Mantener sólidos de edificios, maquinaria, cercos HSEC, barreras y portones: la seguridad y las colisiones físicas siguen vigentes.
+
+**Implementación coordinada para propietario funcional (Claude Code):**
+1. Establecer un dominio de circulación compartido para el terreno visible de 240×240 m, con 8–12 m de margen antes del borde visual (p.ej. `|x|<=108 && |z|<=108`), sin caja especial tras los edificios; usar **la misma** regla para peatón, conducción y restauración de guardados.
+2. Integrar `World.isBlocked` / `navigation-areas.mjs`, `state.restore` y `personal-drilltruck.mjs` sin mover la propiedad pagada al recuperar un guardado válido. No resetear al spawn un vehículo/operador legítimo dentro del mapa.
+3. No tocar la colisión de paredes, portón dinámico, cercos físicos, rigs, NPC ni los controles, cámara, M4 automatización, economía o misiones.
+4. Añadir pruebas de movimiento por detrás de Oficina/Taller, acceso y salida de Patio, continuidad entre cuadrantes, frenado en obstáculos reales, guardado-recarga en coordenadas ampliadas y bloqueo 10 m antes del borde de malla.
+5. Inspeccionar en WebGL real, incluso de noche. No confundir límite invisible con una huella de colisión existente.
+
+**Ownership/release:** ChatGPT limita V57 a iluminación visual (`patio-world.mjs`). Claude implementa la ampliación funcional como cambio independiente; PR y CI antes de unir a `main`, sin despliegue no autorizado.
