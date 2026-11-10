@@ -218,7 +218,7 @@ export function createPatioWorld(w){
     grading.visible=status==='operational'||(status==='building'&&info.progress>=.10);
     structures.visible=status==='operational'||(status==='building'&&info.progress>=.30);
     final.visible=status==='operational'||(status==='building'&&info.progress>=.80);
-    w.yardL1Open=status==='operational';
+    w.yardL1Open=enabled;
    }
    if(status==='operational'&&!registered){
     registered=true;
