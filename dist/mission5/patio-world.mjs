@@ -112,7 +112,7 @@ function fences(g){
  mesh.name='Patio L1 · malla metálica continua';g.add(mesh);
 }
 function markings(g){
- block(g,53.4,.19,43.4,0,.085,0,C.road);
+ block(g,54.4,.19,43.4,0,.085,0,C.road);
  block(g,52,.02,9.7,0,.20,3,C.road2);
  // Two-way, wide truck turning spine toward fixed east entrance.
  stripes(g,-24,3.2,23,3.2,4.5,C.yellow);
@@ -381,7 +381,7 @@ export function createPatioWorld(w){
     if(grading.visible&&!w._patioGradingWalk){
      w._patioGradingWalk=true;
      w.walkSurfaces??=[];
-     w.walkSurfaces.push({x:PATIO_L1.center.x,z:PATIO_L1.center.z,w:53.4,d:43.4,y:.19,_patioL1:true});
+     w.walkSurfaces.push({x:PATIO_L1.center.x,z:PATIO_L1.center.z,w:54.4,d:43.4,y:.19,_patioL1:true});
     }
    }
    if(status==='operational'&&!registered){
@@ -409,7 +409,7 @@ export function createPatioWorld(w){
     w.walkSurfaces??=[];
     if(!w._patioGradingWalk){
      w._patioGradingWalk=true;
-     w.walkSurfaces.push({x:PATIO_L1.center.x,z:PATIO_L1.center.z,w:53.4,d:43.4,y:.19,_patioL1:true});
+     w.walkSurfaces.push({x:PATIO_L1.center.x,z:PATIO_L1.center.z,w:54.4,d:43.4,y:.19,_patioL1:true});
     }
     // Real fixed road connector, from the single gate to the M4 road spine.
     const connector=new T.Group();connector.name='Patio L1 · conector vial';
