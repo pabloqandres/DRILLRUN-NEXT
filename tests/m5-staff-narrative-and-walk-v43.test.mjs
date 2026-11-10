@@ -2,6 +2,8 @@ import {test,before} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {newGame} from '../dist/chapter/state.mjs';
+import {placeMachineryOrder,tickDeliveries} from '../dist/mission3/headquarters.mjs';
+import {PERSONAL_DRILLTRUCK_MODEL,PERSONAL_DRILLTRUCK_PRICE} from '../dist/mission5/personal-drilltruck.mjs';
 import {PATIO_L1,startPatio,finishPatio,patioCanStart} from '../dist/mission5/patio-state.mjs';
 import {PATIO_STAFF,hirePatioStaff,hiredPatioStaff,inspectPatioGate,inspectPatioWarehouse,mission5Objectives} from '../dist/mission5/patio-staff.mjs';
 import {pendingMessage,deliverMessage,acceptMission,confirmCompletion} from '../dist/chapter/narrative.mjs';
@@ -15,7 +17,7 @@ before(async()=>{
 });
 const at=Date.UTC(2026,10,10,13);
 const fixture=()=>{const s=newGame('es','operator01',at);
- s.cash=120000;s.mission4={phase:'complete'};s.narrative={messages:['m1','m2','m3','m4'].flatMap(mid=>['start','end'].map(part=>({id:'n:'+mid+':'+part,missionId:mid,characterId:'benefactor',deliveredAt:at-5000,readAt:at-3000,actionTaken:part==='start'?'accept':'collect'}))),accepted:['m1','m2','m3','m4'],rewardsCollected:['m1','m2','m3','m4']};return s;};
+ s.cash=120000;s.mission4={phase:'complete',drillTruck:{id:'drilltruck-01',state:'parked'}};s.narrative={messages:['m1','m2','m3','m4'].flatMap(mid=>['start','end'].map(part=>({id:'n:'+mid+':'+part,missionId:mid,characterId:'benefactor',deliveredAt:at-5000,readAt:at-3000,actionTaken:part==='start'?'accept':'collect'}))),accepted:['m1','m2','m3','m4'],rewardsCollected:['m1','m2','m3','m4']};return s;};
 test('M5 opens only after player confirms M4 SMS; no automatic paid building',()=>{
  const s=fixture();const before=s.cash;
  assert.equal(pendingMessage(s)?.id,'n:m5:start');
@@ -25,7 +27,7 @@ test('M5 opens only after player confirms M4 SMS; no automatic paid building',()
  assert(acceptMission(s,'m5'));
  assert.equal(patioCanStart(s),null);
 });
-test('M5 completion demands construction AND both real hires AND inspections',()=>{
+test('M5 completion demands construction, paid staff, inspections and a delivered second truck',()=>{
  const s=fixture();deliverMessage(s,'n:m5:start');acceptMission(s,'m5');
  startPatio(s,at);
  assert.equal(s.cash,120000-PATIO_L1.price);
@@ -43,8 +45,14 @@ test('M5 completion demands construction AND both real hires AND inspections',()
  assert.equal(s.mission5.commissionedAt,undefined);
  const report=inspectPatioWarehouse(s,at+1200004);
  assert.equal(report.total,0,'No fabricated tools');
- assert.equal(s.mission5.commissionedAt,at+1200004);
+ assert.equal(s.mission5.commissionedAt,undefined,'Personal truck must arrive before commissioning');
  assert.equal(mission5Objectives(s).filter(x=>x.done).length,5);
+ assert.equal(pendingMessage(s),null,'Closing SMS waits for second vehicle');
+ placeMachineryOrder(s,'drillTruckPersonal',PERSONAL_DRILLTRUCK_MODEL,PERSONAL_DRILLTRUCK_PRICE,at+1200005);
+ const delivered=tickDeliveries(s,at+1200005+180000);
+ assert.equal(delivered.delivered,1);
+ assert.equal(s.mission5.commissionedAt,at+1200005+180000);
+ assert.equal(mission5Objectives(s).filter(x=>x.done).length,6);
  assert.equal(pendingMessage(s).id,'n:m5:end');
  assert(deliverMessage(s,'n:m5:end'));
  const cash=s.cash,confirmed=confirmCompletion(s,'m5',at+1200005);
