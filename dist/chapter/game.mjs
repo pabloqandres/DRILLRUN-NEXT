@@ -1047,7 +1047,9 @@ function renderHUD(){if(!s)return;
   const detail=$('#objectiveDetail');
   if(detail){
    detail.classList.remove('hidden');
-   detail.innerHTML=renderMission5HudChecklist(checklist);
+   const markup=renderMission5HudChecklist(checklist);
+   // HUD refreshes every 150 ms: do not reset the player's scroll position.
+   if(detail.innerHTML!==markup){const scroll=detail.scrollTop;detail.innerHTML=markup;detail.scrollTop=scroll;}
    detail.title=checklist.pending?.hint||'Objetivos completados. Confirma el mensaje final de Elena.';
   }
   setText($('#objectiveCount'),checklist.done+' / '+checklist.total);
