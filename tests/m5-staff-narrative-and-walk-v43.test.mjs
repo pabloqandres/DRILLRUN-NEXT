@@ -1,4 +1,4 @@
-import {test} from 'node:test';
+import {test,before} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {newGame} from '../dist/chapter/state.mjs';
@@ -6,6 +6,13 @@ import {PATIO_L1,startPatio,finishPatio,patioCanStart} from '../dist/mission5/pa
 import {PATIO_STAFF,hirePatioStaff,hiredPatioStaff,inspectPatioGate,inspectPatioWarehouse,mission5Objectives} from '../dist/mission5/patio-staff.mjs';
 import {pendingMessage,deliverMessage,acceptMission,confirmCompletion} from '../dist/chapter/narrative.mjs';
 import {npcWaypoints} from '../dist/mission5/patio-npc-world.mjs';
+import {probeM5Assets} from '../dist/mission5/assets-ready.mjs';
+// Test fixture models the deployment after both approved binary assets are uploaded.
+before(async()=>{
+ const old=globalThis.fetch;
+ globalThis.fetch=async()=>({ok:true,headers:{get:key=>key==='content-length'?'1006040':'model/gltf-binary'}});
+ try{assert.equal(await probeM5Assets(),true);}finally{globalThis.fetch=old;}
+});
 const at=Date.UTC(2026,10,10,13);
 const fixture=()=>{const s=newGame('es','operator01',at);
  s.cash=120000;s.mission4={phase:'complete'};s.narrative={messages:['m1','m2','m3','m4'].flatMap(mid=>['start','end'].map(part=>({id:'n:'+mid+':'+part,missionId:mid,characterId:'benefactor',deliveredAt:at-5000,readAt:at-3000,actionTaken:part==='start'?'accept':'collect'}))),accepted:['m1','m2','m3','m4'],rewardsCollected:['m1','m2','m3','m4']};return s;};
