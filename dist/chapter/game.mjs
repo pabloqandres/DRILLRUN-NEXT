@@ -691,6 +691,7 @@ function showDthDrillCard(){
   <small>${tool.percent}% disponible · ${fmtMeters(tool.used)} m utilizados</small>
  </section>`;
  const clock=n=>String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
+ const previousScroll=drillCardMode==='dth'?dc.scrollTop:0;
  dc.classList.add('dthInspect');
  dc.innerHTML=`<button class="dcClose" id="drillCardClose" aria-label="Cerrar ficha DTH">${icon('close')}</button>
   <div class="dcHead">${icon('machine')}<div><b>PERFORADORA DTH · PRODUCCIÓN</b><small>PUMA® BY DRILLCO® · Ficha de consumibles</small></div></div>
@@ -705,7 +706,7 @@ function showDthDrillCard(){
    <small>${report.nextSeconds===null?report.state==='paused'?'Producción detenida. Revisa stock y servicio DrillTruck®.':report.state==='moving'?'DTH trasladándose al siguiente punto.':'Esperando próximo ciclo de producción.':'Próximo ciclo: '+clock(report.nextSeconds)}</small>
   </div>`;
  dc.querySelector('#drillCardClose').onclick=e=>{e.stopPropagation();hideDrillCard();};
- dc.hidden=false;drillCardOpen=true;drillCardMode='dth';dthCardLastRender=Date.now();
+ dc.hidden=false;dc.scrollTop=previousScroll;drillCardOpen=true;drillCardMode='dth';dthCardLastRender=Date.now();
 }
 
 /* Workshop status card — shown on tap */
