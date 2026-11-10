@@ -64,6 +64,8 @@ export class BuilderUI{
    onManage:p=>{
     if(p.kind==='module')return s.office.status==='building'?this.onClose():this.onManage();
     if(p.kind==='workshop')return (this.onClose(),this.onWorkshopManage?.());
+    if(p.kind==='patio')return (this.onClose(),this.onPatioAction?.('inspect'));
+    if(p.kind==='patioFuture')return;
     if(p.kind==='drill'||p.kind==='hammer'||p.kind==='bit')return (this.onClose(),this.onPhoneNav?.('m3-catalog'));
     if(p.kind==='dthDrill'||p.kind==='dthHammer'||p.kind==='dthBit')return (this.onClose(),this.onPhoneNav?.('m4-dth-catalog'));
     if(p.kind==='vehicle')return (this.onClose(),this.onPhoneNav?.('m4-drilltruck'));
@@ -73,6 +75,7 @@ export class BuilderUI{
    onPurchase:p=>{
     if(p.kind==='module'){const current=this.state(),m=moduleDefinition('office-l1');if(!moduleAvailability(current,m)&&landReady(current)&&current.cash>=m.price)this.onConfirm(m,this.zone);return;}
     if(p.kind==='workshop')return this.onCatalogAction?.('buildWorkshop');
+    if(p.kind==='patio')return this.onPatioAction?.('confirm');
     if(p.kind==='drill')return this.onCatalogAction?.('buyDrill',p.model.id);
     if(p.kind==='dthDrill')return this.onCatalogAction?.('buyDthDrill',p.model.id);
     if(p.kind==='vehicle')return this.onCatalogAction?.('buyTruck',p.model.id);
