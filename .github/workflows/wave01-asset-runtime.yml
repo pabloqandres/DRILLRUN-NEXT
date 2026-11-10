@@ -1,0 +1,26 @@
+name: Wave 01 GLB Catalog Runtime
+
+on:
+  pull_request:
+    paths:
+      - "dist/chapter/asset-wave01-runtime.mjs"
+      - "dist/chapter/builder-ui.mjs"
+      - "dist/assets3d/drillrun-pack/**"
+      - "tests/asset-wave01-runtime.test.mjs"
+      - ".github/workflows/wave01-asset-runtime.yml"
+  workflow_dispatch:
+
+jobs:
+  asset-wave01:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate asset loader syntax, registry, and any installed GLB files
+        run: node --test tests/asset-wave01-runtime.test.mjs
+      - name: Node syntax checks
+        run: |
+          node --check dist/chapter/asset-wave01-runtime.mjs
+          node --check dist/chapter/builder-ui.mjs
