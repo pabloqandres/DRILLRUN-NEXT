@@ -102,3 +102,26 @@ test('V56 both Fleet and Patio have an explicit locator and P01 retrieval',()=>{
  assert.match(game,/onRecoverPersonalTruck:recoverPersonalTruckFromFaena/);
  assert.match(game,/world\.chapterCamera=view/);
 });
+
+test('V57 Faena Center actually wires Locate and Recover callbacks at construction',()=>{
+ let located=0,recovered=0,rendered=0,closed=0;
+ const host={
+  addEventListener(){},contains(){return true},
+  classList:{contains:()=>false,add:()=>{closed++;}}
+ };
+ const ui=new FaenaCenterUI({
+  host,state:()=>state(),translate:()=>x=>x,format:String,icon:x=>x,
+  onLocatePersonalTruck:()=>{located++;},
+  onRecoverPersonalTruck:()=>{recovered++;}
+ });
+ ui.render=()=>{rendered++;};
+ const event=attr=>({target:{closest:()=>({
+  disabled:false,dataset:{},hasAttribute:name=>name===attr
+ })}});
+ ui.handle(event('data-faena-personal-recover'));
+ assert.equal(recovered,1,'Recovery must execute saved-state movement');
+ assert.equal(rendered,1,'Recovery must refresh visible vehicle location');
+ ui.handle(event('data-faena-personal-locate'));
+ assert.equal(located,1,'Locate must activate camera flyover');
+ assert.equal(closed,1,'Locate must leave the Faena overlay to show the truck');
+});
