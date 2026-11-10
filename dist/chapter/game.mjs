@@ -247,7 +247,22 @@ async function ensureWorld(forSelection=false){
   const pan=cameraRelativeIntent(-dx*panScale,dy*panScale,world.cameraRig.heading);
   world.cameraRig.panBuilder(pan.x,pan.z);
   return;
- }if(!world.orbit.manual)world.orbit.yaw=world.cameraRig.heading;rotateOrbit(world.orbit,dx*world.cameraRig.settings.controls.touchSensitivity,dy*world.cameraRig.settings.controls.touchSensitivity);},onZoom:delta=>{if(phase==='play')world.cameraRig.zoomBy(delta);},onEnd:persistCamera,onTap:(x,y)=>{if(phase==='character'){const id=avatars?.pickSelector(x,y);if(id)selectAvatar(id);return;}if(phase==='play'&&hsecUI?.drawing&&!modalOpen&&!phoneOpen){const p=world.pick(x,y,0);if(p)hsecUI.pick(p);return;}if(phase!=='play'||builderOpen||modalOpen||phoneOpen||busy)return;const p=world.pick(x,y,placement?.42:0);if(!s.inside&&s.office.status==='built'&&world.office.visible&&world.ray.intersectObject(world.office,true).some(h=>{for(let o=h.object;o;o=o.parent)if(!o.visible)return false;return true;})){manageOffice();return;}// Touch/click on the actual 3D DTH model opens its tool card.
+ }if(!world.orbit.manual)world.orbit.yaw=world.cameraRig.heading;rotateOrbit(world.orbit,dx*world.cameraRig.settings.controls.touchSensitivity,dy*world.cameraRig.settings.controls.touchSensitivity);},onZoom:delta=>{if(phase==='play')world.cameraRig.zoomBy(delta);},onEnd:persistCamera,onTap:(x,y)=>{if(phase==='character'){const id=avatars?.pickSelector(x,y);if(id)selectAvatar(id);return;}if(phase==='play'&&hsecUI?.drawing&&!modalOpen&&!phoneOpen){const p=world.pick(x,y,0);if(p)hsecUI.pick(p);return;}if(phase!=='play'||builderOpen||modalOpen||phoneOpen||busy)return;const p=world.pick(x,y,placement?.42:0);if(!s.inside&&s.office.status==='built'&&world.office.visible&&world.ray.intersectObject(world.office,true).some(h=>{for(let o=h.object;o;o=o.parent)if(!o.visible)return false;return true;})){manageOffice();return;}// Touch/click on DrillTruck® 02 opens an explicit Enter prompt. A direct
+ // tap or a hand action never takes over the M4 automatic DrillTruck.
+ const personal=personalTruck(s);
+ if(!s.inside&&personal&&m5PersonalTruckModel&&
+  (world.ray.intersectObject(m5PersonalTruckModel,true).length>0||
+   (p&&Math.hypot(p.x-personal.position.x,p.z-personal.position.z)<2.4))){
+  const distance=Math.hypot(s.position.x-personal.position.x,s.position.z-personal.position.z);
+  modal('<span class="eyebrow">DRILLTRUCK® PERSONAL · 02</span><h2>Ingresar al vehículo</h2>'+
+   '<p>Joystick vertical para acelerar o dar marcha atrás; lateral para girar. Mantén FRENO para detenerte. Cámara exterior elevada.</p>'+
+   (distance>3.7?'<p>Acércate a menos de 4 metros para subir.</p>':'')+
+   '<div class="modalActions"><button id="personalTruckEnter" class="primary" '+(distance>3.7?'disabled':'')+'>Ingresar</button><button id="personalTruckCancel">Cancelar</button></div>');
+  $('#personalTruckEnter')?.addEventListener('click',()=>{closeModal();togglePersonalTruck();});
+  $('#personalTruckCancel').onclick=closeModal;
+  return;
+ }
+ // Touch/click on the actual 3D DTH model opens its tool card.
  // Test the mesh ray first, then a narrow ground footprint for small screens.
  if(!s.inside&&m4DthModel&&s.mission4?.productionDrill&&
     (world.ray.intersectObject(m4DthModel,true).length>0||
@@ -1381,6 +1396,11 @@ function cancelPlacement(){placement=null;scene?.cancelPlacement();document.body
 function renderPlacement(){} // No manual placement in prefab construction mode.
 function joyMove(e){const r=$('#joystick').getBoundingClientRect(),max=r.width*.30;let x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2,l=Math.hypot(x,y);if(l>max){x*=max/l;y*=max/l;}joy={x:x/max,y:y/max};$('#joyKnob').style.transform=`translate(${x}px,${y}px)`;}
 $('#joystick').onpointerdown=e=>{pointer=e.pointerId;e.currentTarget.setPointerCapture(pointer);target=null;joyMove(e);};$('#joystick').onpointermove=e=>{if(pointer===e.pointerId)joyMove(e);};$('#joystick').onpointerup=$('#joystick').onpointercancel=$('#joystick').onlostpointercapture=resetJoy;
+const brakeButton=$('#personalTruckBrake');
+brakeButton.onpointerdown=e=>{e.preventDefault();truckBrakePressed=true;
+ brakeButton.classList.add('pressed');brakeButton.setPointerCapture?.(e.pointerId);};
+const releaseTruckBrake=()=>{truckBrakePressed=false;brakeButton.classList.remove('pressed');};
+brakeButton.onpointerup=brakeButton.onpointercancel=brakeButton.onlostpointercapture=releaseTruckBrake;
 $('#cameraHome').onclick=()=>{world.zoom=1;resetOrbit(world.orbit);world.cameraRig.reset();persistCamera();};
 $('#endBuildPreviewWalk').onclick=()=>{
  catalogPreviewWalk=false;catalogBlueprint?.hide();
@@ -1420,6 +1440,13 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
   if(m.type==='drill'){try{purchaseDrill(s,m.model,true);spawnM3Drill(m.model);notices.push({title:'Perforadora entregada',detail:'Localizar en faena',symbol:'bell',action:()=>{if(m3DrillModel){target={x:m3DrillModel.position.x-2.5,z:m3DrillModel.position.z+3.8};closePhone();closeBuilder();}}});updateMission3Phase(s);}catch(err){console.error('drill delivery:',err);}}
   else if(m.type==='dthDrill'){try{purchaseDthDrill(s,m.model,true);notices.push({title:'Perforadora DTH entregada',detail:'En resguardo junto al taller · Equípala en Taller',symbol:'bell'});updateMission4Phase(s);}catch(err){console.error('dth delivery:',err);}}
   else if(m.type==='drillTruck'){try{purchaseDrillTruck(s,true);m4VisualsReady=false;initM4Visuals();notices.push({title:'DrillTruck entregado',detail:'Ubicar en faena',symbol:'bell',action:'locateTruck'});updateMission4Phase(s);}catch(err){console.error('truck delivery:',err);}}
+   else if(m.type==='drillTruckPersonal'){
+    // Already persisted by tickDeliveries/materializeMachinery; simply
+    // instantiate the independent second GLB and refresh M5 narrative.
+    syncPersonalTruckVisual();
+    notices.push({title:'DrillTruck® 02 entregado',detail:'Disponible en Patio L1 · estacionamiento personal P01',symbol:'bell'});
+    narrativeTick(1.5);
+   }
   if(m3DeliveryVehicle)startDelivery(m3DeliveryVehicle,'in');
  }else if(e==='deliveryArrived'){notices.push({title:'Pedido entregado',symbol:'bell'});if(m3DeliveryVehicle)startDelivery(m3DeliveryVehicle,'in');}else if(e==='analysisComplete'){notices.push({title:'Informe geológico disponible',symbol:'bell'});if(phoneOpen)renderPhone();}else if(e==='bitExhausted')notices.push({title:'Bit agotado — requiere recambio',symbol:'lock'});else if(e==='hammerExhausted')notices.push({title:'Martillo agotado — requiere recambio',symbol:'lock'});else if(e==='contractReady')notices.push({title:'Contrato completado — entrega disponible',symbol:'bell'});}save();}updateM3Visuals(dt);
   /* Refresh phone geo/contract every ~2s while open */
