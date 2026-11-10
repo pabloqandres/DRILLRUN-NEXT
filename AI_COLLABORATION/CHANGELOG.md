@@ -1,5 +1,16 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-10 — V48 Traslado DTH: animación real sincronizada
+
+- DTH recorre el trayecto completo durante los 12 segundos definidos
+  en el sistema productivo, mostrando origen/destino y cuenta atrás
+  en la ficha de consumibles.
+- Al recargar la partida en mitad de un traslado, el modelo continúa
+  desde la posición intermedia en lugar de aparecer en destino.
+- Se mantienen 15 min/ciclo, ingresos, bit/martillo, DrillTruck y M5.
+- Pruebas V48 aisladas y workflow M4 para detectar regresiones.
+- Detalle: `CHANGES/2026-11-10_v48-dth-transfer-visual-sync.md`.
+
 ## 2026-11-10 — V47 misión activa en portada y dos pasos HUD M5
 
 - La portada y el perfil HUD comparten un lector de misión narrativa
