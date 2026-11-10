@@ -1,0 +1,175 @@
+{
+  "lote": "DRILL RUN Asset Library 01",
+  "fecha": "2026-11-10",
+  "estado": "metadatos_para_revision_sin_recursos_binarios_subidos",
+  "formato": "GLB, coordenadas Y-up, metros",
+  "advertencias": [
+    "Esta rama NO contiene todavía los 14 GLB, que se entregaron como ZIP de revisión en la conversación.",
+    "No importar las rutas de modelos a producción hasta subir y probar los binarios.",
+    "No tocar misiones, compras, guardado ni economía sin coordinar con Claude Code.",
+    "No vender pallets/cajones como muebles sueltos.",
+    "Solo mostrar elementos en revision cuando estén aprobados."
+  ],
+  "elementos": [
+    {
+      "id": "cono_seguridad",
+      "nombre": "Cono de tránsito",
+      "categoria": "Objetos",
+      "rol": "compra",
+      "area": "HSEC",
+      "triangulos": 212,
+      "archivo_esperado": "dist/assets3d/drillrun-pack/cono_seguridad.glb",
+      "precio": null,
+      "habilitado_en_tienda": false
+    },
+    {
+      "id": "cerco_perimetral",
+      "nombre": "Cerco modular",
+      "categoria": "Objetos",
+      "rol": "compra",
+      "area": "HSEC",
+      "triangulos": 1248,
+      "archivo_esperado": "dist/assets3d/drillrun-pack/cerco_perimetral.glb",
+      "precio": null,
+      "habilitado_en_tienda": false
+    },
+    {
+      "id": "contenedor_azul_reciclaje",
+      "nombre": "Contenedor reciclaje azul",
+      "categoria": "Objetos",
+      "rol": "compra",
+      "area": "Circularidad",
+      "triangulos": 8156,
+      "archivo_esperado": "dist/assets3d/drillrun-pack/contenedor_azul_reciclaje.glb",
+      "precio": null,
+      "habilitado_en_tienda": false
+    },
+    {
+      "id": "contenedor_verde_reciclaje",
+      "nombre": "Contenedor orgánicos",
+      "categoria": "Objetos",
+      "rol": "compra",
+      "area": "Circularidad",
+      "triangulos": 9508,
+      "archivo_esperado": "dist/assets3d/drillrun-pack/contenedor_verde_reciclaje.glb",
+      "precio": null,
+      "habilitado_en_tienda": false
+    },
+    {
+      "id": "contenedor_oscuro_residuos",
+      "nombre": "Contenedor residuos generales",
+      "categoria": "Objetos",
+      "rol": "compra",
+      "area": "Circularidad",
+      "triangulos": 7184,
+      "archivo_esperado": "dist/assets3d/drillrun-pack/contenedor_oscuro_residuos.glb",
+      "precio": null,
+      "habilitado_en_tienda": false
+    },
+    {
+      "id": "pallet_bodega",
+      "nombre": "Pallet de bodega",
+      "categoria": "Escenografía",
+      "rol": "pack",
+      "area": "Logística",
+      "triangulos": 240,
+      "archivo_esperado": "dist/assets3d/drillrun-pack/pallet_bodega.glb",
+      "precio": null,
+      "habilitado_en_tienda": false
+    },
+    {
+      "id": "cajon_bodega",
+      "nombre": "Cajón de almacenamiento",
+      "categoria": "Escenografía",
+      "rol": "pack",
+      "area": "Logística",
+      "triangulos": 138,
+      "archivo_esperado": "dist/assets3d/drillrun-pack/cajon_bodega.glb",
+      "precio": null,
+      "habilitado_en_tienda": false
+    },
+    {
+      "id": "montacargas_bodega",
+      "nombre": "Montacargas de bodega",
+      "categoria": "Equipos y maquinaria",
+      "rol": "compra_propuesta",
+      "area": "Logística",
+      "triangulos": 11782,
+      "archivo_esperado": "dist/assets3d/drillrun-pack/montacargas_bodega.glb",
+      "precio": null,
+      "habilitado_en_tienda": false
+    },
+    {
+      "id": "cargador_frontal_a",
+      "nombre": "Cargador frontal A",
+      "categoria": "Equipos y maquinaria",
+      "rol": "compra_propuesta",
+      "area": "Obras",
+      "triangulos": 51073,
+      "archivo_esperado": "dist/assets3d/drillrun-pack/cargador_frontal_a.glb",
+      "precio": null,
+      "habilitado_en_tienda": false
+    },
+    {
+      "id": "cargador_frontal_b",
+      "nombre": "Cargador frontal B",
+      "categoria": "Equipos y maquinaria",
+      "rol": "compra_propuesta",
+      "area": "Obras",
+      "triangulos": 87468,
+      "archivo_esperado": "dist/assets3d/drillrun-pack/cargador_frontal_b.glb",
+      "precio": null,
+      "habilitado_en_tienda": false
+    },
+    {
+      "id": "galpon_bodega",
+      "nombre": "Galpón logístico",
+      "categoria": "Edificios",
+      "rol": "compra_propuesta",
+      "area": "Infraestructura",
+      "triangulos": 43744,
+      "archivo_esperado": "dist/assets3d/drillrun-pack/galpon_bodega.glb",
+      "precio": null,
+      "habilitado_en_tienda": false
+    },
+    {
+      "id": "edificio_industrial_49",
+      "nombre": "Edificio industrial auxiliar",
+      "categoria": "Edificios",
+      "rol": "compra_propuesta",
+      "area": "Infraestructura",
+      "triangulos": 26385,
+      "archivo_esperado": "dist/assets3d/drillrun-pack/edificio_industrial_49.glb",
+      "precio": null,
+      "habilitado_en_tienda": false
+    },
+    {
+      "id": "estructura_auxiliar",
+      "nombre": "Estructura auxiliar sin identificar",
+      "categoria": "Escenografía",
+      "rol": "revision",
+      "area": "Por identificar",
+      "triangulos": 4583,
+      "archivo_esperado": "dist/assets3d/drillrun-pack/estructura_auxiliar.glb",
+      "precio": null,
+      "habilitado_en_tienda": false
+    },
+    {
+      "id": "maquinaria_obra_auxiliar",
+      "nombre": "Maquinaria auxiliar sin identificar",
+      "categoria": "Equipos y maquinaria",
+      "rol": "revision",
+      "area": "Por identificar",
+      "triangulos": 19320,
+      "archivo_esperado": "dist/assets3d/drillrun-pack/maquinaria_obra_auxiliar.glb",
+      "precio": null,
+      "habilitado_en_tienda": false
+    }
+  ],
+  "pendiente": [
+    {
+      "archivo": "Digger.c4d",
+      "motivo": "requiere conversión externa a GLB/FBX"
+    }
+  ]
+}
