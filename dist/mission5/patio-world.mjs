@@ -67,6 +67,28 @@ function roof(g,x,z,w,d,h){
  block(g,w,.12,.20,x,h+.13,z+d/2,trim);
  block(g,.10,h-1,.11,x-w/2+1,(h+1)/2,z+d/2,C.steel);
 }
+// A single soft-pool texture gives every fixture a visible lit surface,
+ // including distant lights disabled by the mobile dynamic-light budget.
+let patioLightPoolTexture=null;
+function patioLightPool(x,z,diameter=20){
+ if(!patioLightPoolTexture){
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=96;
+  const ctx=canvas.getContext('2d');
+  const glow=ctx.createRadialGradient(48,48,2,48,48,47);
+  glow.addColorStop(0,'rgba(255,243,206,.83)');
+  glow.addColorStop(.20,'rgba(255,228,163,.44)');
+  glow.addColorStop(.55,'rgba(255,214,153,.15)');
+  glow.addColorStop(1,'rgba(255,214,153,0)');
+  ctx.fillStyle=glow;ctx.fillRect(0,0,96,96);
+  patioLightPoolTexture=new T.CanvasTexture(canvas);
+ }
+ const pool=new T.Mesh(new T.PlaneGeometry(diameter,diameter),
+  new T.MeshBasicMaterial({map:patioLightPoolTexture,color:0xffebc6,
+   transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending,
+   side:T.DoubleSide}));
+ pool.rotation.x=-Math.PI/2;pool.position.set(x,.16,z);pool.renderOrder=5;
+ pool.name='Patio L1 · luz difusa sobre terreno';return pool;
+}
 function spotlight(g,x,z,h=6){
  block(g,.17,h,.17,x,h/2+.1,z,C.steel);
  block(g,1.3,.17,.32,x+.55,h+.14,z,C.steel);
@@ -76,7 +98,8 @@ function spotlight(g,x,z,h=6){
  const light=new T.PointLight(0xffe6b2,0,26,2);
  light.name='Patio L1 · luminaria real';light.castShadow=false;
  light.position.set(x+.62,h-.06,z);g.add(light);
- return {x,z,lens,light};
+ const pool=patioLightPool(x+.62,z,22);g.add(pool);
+ return {x,z,lens,light,pool};
 }
 function fences(g){
  // Perimeter link-fence on slim wine-red poles with galvanized chain-link.
@@ -334,7 +357,8 @@ export function createPatioWorld(w){
   const light=new T.PointLight(0xffe9c6,0,15,2);
   light.name='Patio L1 · luz de trabajo';light.castShadow=false;
   light.position.set(x,3.65,z);final.add(light);
-  return {x,z,light};
+  const pool=patioLightPool(x,z,12);final.add(pool);
+  return {x,z,light,pool};
  });
  const future=futurePlots(w);
  // The structural source is an exact clone of the final prefab modules,
@@ -394,10 +418,12 @@ export function createPatioWorld(w){
    const budget=w.quality==='low'?3:w.quality==='high'?6:4;
    const nearest=night?new Set([...yardLamps].sort((a,b)=>distance(a)-distance(b)).slice(0,budget)):new Set();
    for(const lamp of yardLamps){lamp.light.intensity=nearest.has(lamp)?23:0;
-    lamp.lens.material.color.setHex(night?0xffebba:0x77746b);}
+    lamp.lens.material.color.setHex(night?0xffebba:0x77746b);
+    lamp.pool.material.opacity=night?.42:0;}
    const taskBudget=w.quality==='low'?1:2;
    const closestTasks=night?new Set([...taskLights].sort((a,b)=>distance(a)-distance(b)).slice(0,taskBudget)):new Set();
-   for(const lamp of taskLights)lamp.light.intensity=closestTasks.has(lamp)?13:0;
+   for(const lamp of taskLights){lamp.light.intensity=closestTasks.has(lamp)?13:0;
+    lamp.pool.material.opacity=night?.36:0;}
    const stateKey=status+':'+info.phase;
    if(stateKey!==previousState){
     previousState=stateKey;
