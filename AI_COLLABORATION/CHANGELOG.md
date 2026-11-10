@@ -1,5 +1,18 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-10 — V47 misión activa en portada y dos pasos HUD M5
+
+- La portada y el perfil HUD comparten un lector de misión narrativa
+  aceptada; M5 aceptada desplaza a M4 aun sin Patio construido.
+- Actualización al volver al menú, al aceptar/cerrar, y tras carga local
+  o Google Cloud Save sin guardar snapshots del menú.
+- El HUD de M5 muestra **actual + siguiente** (máximo dos);
+  el teléfono conserva el detalle completo de cinco.
+- Medidas y altura limitadas a viewport en landscape para dejar libre
+  el joystick. Sin cambios de lógica, precios, producción ni reward.
+- Tests V47 dedicados + ampliación de workflow M5. Ver
+  `CHANGES/2026-11-10_v47-live-mission-home-compact-hud.md`.
+
 ## 2026-11-10 — V46 checklist M5 y bono de cierre (PR)
 
 - Sincroniza cinco objetivos reales de M5 entre tarjeta HUD y app del Patio;
