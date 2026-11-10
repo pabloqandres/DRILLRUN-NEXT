@@ -324,6 +324,19 @@ export function createPatioWorld(w){
  structuralSource.name='M5 · Fuente real para holograma arquitectónico';
  for(const part of [grading,structures,final])structuralSource.add(part.clone(true));
  let constructionHologram=null,previousState='',registered=false;
+ const patioSolids=[];
+ const barrier={x:PATIO_L1.gate.x,z:PATIO_L1.gate.z,w:.34,d:9.2,
+  maxY:1.35,_patio:true,_patioBarrier:true};
+ let barrierOpen=false;
+ function setBarrierBlocking(blocked){
+  const i=w.colliders.indexOf(barrier);
+  if(blocked&&i<0)w.colliders.push(barrier);
+  else if(!blocked&&i>=0)w.colliders.splice(i,1);
+ }
+ function addPatioSolid(x,z,wid,dep,tag){
+  const solid={x,z,w:wid,d:dep,_patio:true,_patioPart:tag};
+  patioSolids.push(solid);w.colliders.push(solid);
+ }
  const updateHologram=(s,now,info)=>{
   if(s.mission5?.status!=='building'){
    if(constructionHologram){constructionHologram.finish(now/1000);
@@ -379,11 +392,20 @@ export function createPatioWorld(w){
      [-27,-22,27,-22],[-27,22,27,22],[-27,-22,-27,22],
      [27,-22,27,-2],[27,8,27,22]
     ])w.registerBoundary(root,ax,az,bx,bz,.20,'patio-fence');
-    for(const item of[
-     {x:-70,z:-28.2,w:13.2,d:13.5},
-     {x:-27,z:-3.1,w:4.2,d:4.6},
-     {x:-49.5,z:-2.7,w:6.4,d:10}
-    ])w.colliders.push({...item,_patio:true});
+    for(const [x,z,wid,dep,tag] of[
+     [-70,-28.2,13.2,13.5,'galpon'],
+     [-27,-3.1,4.2,4.6,'caseta'],
+     [-49.5,-2.7,6.4,10,'combustible']
+    ])addPatioSolid(x,z,wid,dep,tag);
+    // Canopy posts are separate collision footprints; structural walls
+    // and roof solids never block the gate's 10 m road clearance.
+    for(const [cx,cz,wide,deep] of[
+     [-14.4,14.1,22.7,11.8],[-19,-11.2,14.6,14.3],[1.5,14.3,6.4,10.4]
+    ])for(const px of[cx-wide/2+1,cx+wide/2-1])
+       for(const pz of[cz-deep/2+1,cz+deep/2-1]){
+        addPatioSolid(PATIO_L1.center.x+px,PATIO_L1.center.z+pz,.38,.38,'canopy-post');
+       }
+    setBarrierBlocking(true);
     w.walkSurfaces??=[];
     if(!w._patioGradingWalk){
      w._patioGradingWalk=true;
@@ -405,13 +427,23 @@ export function createPatioWorld(w){
     for(const part of structures.children)part.visible=true;
    }
    updateHologram(s,now,info);
-   // Barrier is up for vehicles using its one fixed entrance.
+   // Vehicle route triggers remain unchanged, but the player's symmetric
+   // sensor opens the boom on approach from either side and closes on exit.
    const truck=s.mission4?.drillTruck;
    const truckNear=!!truck?.position&&
     Math.hypot(truck.position.x-PATIO_L1.gate.x,truck.position.z-PATIO_L1.gate.z)<12;
-   const desired=truckNear||w.fleetGateInUse?-Math.PI/2:0;
-   access.rotation.x+=(desired-access.rotation.x)*.12;
+   barrierOpen=gateShouldOpen({
+    position:status==='operational'&&!s.inside?s.position:null,
+    wasOpen:barrierOpen,vehicleNear:truckNear,routeInUse:!!w.fleetGateInUse
+   })&&status==='operational';
+   const desired=barrierOpen?-Math.PI/2:0;
+   access.rotation.x+=(desired-access.rotation.x)*.18;
+   if(registered)setBarrierBlocking(barrierBlocksPlayer(access.rotation.x));
   },
-  dispose(){constructionHologram?.dispose();root.removeFromParent();future.removeFromParent();}
+  dispose(){
+   constructionHologram?.dispose();setBarrierBlocking(false);
+   for(const solid of patioSolids){const i=w.colliders.indexOf(solid);if(i>=0)w.colliders.splice(i,1);}
+   root.removeFromParent();future.removeFromParent();
+  }
  };
 }
