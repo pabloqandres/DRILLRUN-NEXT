@@ -32,7 +32,7 @@ test('Workshop L2 displays 8 / 14 occupancy, 6 free and real UNINSTALLED stock',
  assert.equal(m.discarded,1);
  assert.equal(m.maxLevel,true);
  const html=render(s);
- assert.match(html,/HERRAMIENTAS EN BODEGA/);
+ assert.match(html,/INVENTARIO DISPONIBLE/);
  assert.match(html,/Máximo habilitado actualmente · Nv\.2/);
  assert.match(html,/id="workshopStock"/);
  assert.match(html,/id="workshopDthManage"/);
