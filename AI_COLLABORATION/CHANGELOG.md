@@ -1,5 +1,11 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-10 — Wave 01 runtime V55 (feature branch, not deployed)
+
+- New Three.js GLB loader for 14 optimized static assets: canonical whitelist, bounds/mesh validation, optional toon conversion, interactive 3D catalog detail, real cyan construction hologram factory. Missing files retain genuine atlas thumbnails.
+- Binary GLBs/previews have not been transferred to GitHub; purchases and game-world placement remain intentionally unchanged. See `CHANGES/2026-11-10_wave01-glb-runtime-v55.md`.
+
+
 ## 2026-11-10 — V50 DrillTruck® 02 personal (PR)
 
 - Nueva unidad personal adicional comprada en Casa Matriz con despacho
