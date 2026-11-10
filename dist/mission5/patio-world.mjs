@@ -4,8 +4,10 @@
 import * as T from '../vendor/three.module.js';
 import {ConstructionHologram} from '../chapter/construction-hologram.mjs';
 import {PATIO_L1,patioProgress,patioState} from './patio-state.mjs';
+import {gateShouldOpen,barrierBlocksPlayer} from './gate-control.mjs';
 
-const C={red:0xb92832,redBright:0xe04542,ink:0x172e40,dark:0x243b4a,
+// PUMA wine-red: shared with existing DRILLCO corporate structures, no neon red.
+const C={red:0x701e30,redBright:0x96364a,ink:0x172e40,dark:0x243b4a,
  steel:0x657a86,aluminium:0x8296a1,white:0xf4eee3,concrete:0x85918f,
  road:0x3c474a,road2:0x4a5556,blue:0x56dcf8,yellow:0xebc45b,
  fence:0x8ba9aa,glass:0x89c9d4,light:0xffdda0,earth:0xb29a7c};
@@ -37,17 +39,33 @@ function stripes(g,ax,az,bx,bz,step=2,color=C.white){
  }
 }
 function roof(g,x,z,w,d,h){
+ const edge=C.red,trim=C.dark;
  for(const px of[x-w/2+1,x+w/2-1])for(const pz of[z-d/2+1,z+d/2-1]){
-  block(g,.22,h,.22,px,h/2+.15,pz,C.steel,true);
-  block(g,.38,.22,.38,px,h+.1,pz,C.red);
+  // Slim I-beam legs with footings, not monolithic blocks.
+  block(g,.48,.20,.48,px,.29,pz,C.concrete);
+  block(g,.23,h,.23,px,h/2+.20,pz,C.steel,true);
+  block(g,.35,.09,.35,px,h+.17,pz,edge);
  }
- block(g,w,.28,d,x,h+.2,z,C.aluminium,true);
- for(let rx=x-w/2+1;rx<x+w/2-1;rx+=1.6)
-  block(g,.065,.055,d,rx,h+.36,z,C.white);
- for(const pz of[z-d/2,z+d/2])block(g,w,.12,.21,x,h+.38,pz,C.red,true);
-}
-function sign(w,g,label,size,x,y,z){
- w.sign(g,label,size,.42,x,y,z,C.ink,'#f7f0e2');
+ // Raised roof with corrugated seams and a complete perimeter fascia.
+ block(g,w,.22,d,x,h+.20,z,C.aluminium,true);
+ for(let rx=x-w/2+.6;rx<x+w/2-.4;rx+=1.22)
+  block(g,.045,.052,d-.35,rx,h+.35,z,0xa5b1b5);
+ for(const pz of[z-d/2,z+d/2]){
+  block(g,w,.19,.22,x,h+.35,pz,edge,true);
+  block(g,w,.045,.25,x,h+.21,pz,trim);
+ }
+ for(const px of[x-w/2,x+w/2])block(g,.18,.19,d,px,h+.32,z,edge);
+ // Purlins and diagonal side-braces give the canopies structural depth.
+ for(const pz of[z-d/2+1,z+d/2-1]){
+  block(g,w-1.6,.11,.16,x,h-.12,pz,C.steel);
+  for(const sx of[-1,1]){
+   const b=block(g,.09,1.2,.12,x+sx*(w/2-1.35),h-.52,pz,C.dark);
+   b.rotation.z=sx*.42;
+  }
+ }
+ // Downpipe and gutter: stylised but structurally legible.
+ block(g,w,.12,.20,x,h+.13,z+d/2,trim);
+ block(g,.10,h-1,.11,x-w/2+1,(h+1)/2,z+d/2,C.steel);
 }
 function spotlight(g,x,z,h=6){
  block(g,.17,h,.17,x,h/2+.1,z,C.steel);
@@ -55,29 +73,46 @@ function spotlight(g,x,z,h=6){
  block(g,1,.08,.26,x+.62,h+.06,z,C.light);
 }
 function fences(g){
- // The ONLY gate is at the east wall of L1: local x=+27, z=+3.
- const X=27,Z=22;
- const segment=(ax,az,bx,bz)=>{
-  const length=Math.hypot(bx-ax,bz-az),count=Math.ceil(length/3.1);
+ // Perimeter link-fence on slim wine-red poles with galvanized chain-link.
+ // A single continuous gateway remains clear at east x=+27, z=-2..8.
+ const X=27,Z=22,segments=[
+  [-X,-Z,X,-Z],[-X,Z,X,Z],[-X,-Z,-X,Z],
+  [X,-Z,X,-2],[X,8,X,Z]
+ ];
+ const wirePoints=[];
+ for(const [ax,az,bx,bz] of segments){
+  const dx=bx-ax,dz=bz-az,length=Math.hypot(dx,dz);
+  const ux=dx/length,uz=dz/length;
+  const count=Math.ceil(length/3.15);
   for(let i=0;i<=count;i++){
-   const u=i/count,x=ax+(bx-ax)*u,z=az+(bz-az)*u;
-   block(g,.20,2.5,.20,x,1.35,z,C.red);
+   const u=i/count,px=ax+dx*u,pz=az+dz*u;
+   block(g,.14,2.42,.14,px,1.40,pz,C.red,true);
+   block(g,.26,.10,.26,px,.28,pz,C.concrete);
+   block(g,.20,.10,.20,px,2.66,pz,C.dark);
   }
-  const beam=(y)=>{
-   const o=block(g,.10,.12,length,(ax+bx)/2,y,(az+bz)/2,C.steel);
-   o.rotation.y=Math.atan2(bx-ax,bz-az);
+  for(const y of[.48,2.55]){
+   const beam=block(g,.065,.08,length,(ax+bx)/2,y,(az+bz)/2,C.steel);
+   beam.rotation.y=Math.atan2(dx,dz);
+  }
+  // Wire diamonds are drawn as one single line segment mesh, economical on mobile.
+  const push=(u1,y1,u2,y2)=>{
+   if(u1<0||u2>length||y1<.40||y2>2.46)return;
+   wirePoints.push(ax+ux*u1,y1,az+uz*u1,ax+ux*u2,y2,az+uz*u2);
   };
-  beam(.75);beam(2.45);
-  for(let i=0;i<count;i++){
-   const u=(i+.5)/count,x=ax+(bx-ax)*u,z=az+(bz-az)*u;
-   block(g,.035,1.4,.035,x,1.52,z,C.fence);
+  for(let u=0;u<length;u+=.46)for(let y=.48;y<2.1;y+=.46){
+   push(u,y,u+.46,y+.46);
+   push(u,y+.46,u+.46,y);
   }
- };
- segment(-X,-Z,X,-Z);segment(-X,Z,X,Z);segment(-X,-Z,-X,Z);
- segment(X,-Z,X,-2);segment(X,8,X,Z);
+ }
+ const geometry=new T.BufferGeometry();
+ geometry.setAttribute('position',new T.Float32BufferAttribute(wirePoints,3));
+ const mesh=new T.LineSegments(geometry,new T.LineBasicMaterial({
+  color:C.fence,transparent:true,opacity:.66,depthWrite:false
+ }));
+ mesh.name='Patio L1 · malla metálica continua';g.add(mesh);
 }
 function markings(g){
- block(g,53.4,.19,43.4,0,.085,0,C.road);
+ block(g,54.4,.19,43.4,0,.085,0,C.road);
  block(g,52,.02,9.7,0,.20,3,C.road2);
  // Two-way, wide truck turning spine toward fixed east entrance.
  stripes(g,-24,3.2,23,3.2,4.5,C.yellow);
@@ -98,22 +133,37 @@ function markings(g){
 function buildAccess(w,g){
  const q=new T.Group();q.name='M5 · caseta de acceso y control';g.add(q);
  // Guardhouse kept to the side of a 10m unobstructed portal.
+ // Prefabricated insulated panels, recessed glazing and fitted entrance.
  block(q,4.2,3.1,4.6,24.0,1.75,13.9,C.ink,true);
- block(q,4.6,.26,5.0,24,3.5,13.9,C.red,true);
- for(const z of[12.3,14.9])block(q,.08,1.3,1.2,26.15,2.2,z,C.glass);
- sign(w,q,'CONTROL HSEC',3.6,24,3.5,16.29);
+ block(q,4.45,.12,4.85,24,3.43,13.9,C.dark);
+ block(q,4.6,.26,5.0,24,3.61,13.9,C.red,true);
+ for(const z of[12.3,14.9]){
+  block(q,.075,1.38,1.55,26.16,2.15,z,C.steel);
+  block(q,.085,1.18,1.38,26.23,2.18,z,C.glass);
+  block(q,.11,.07,1.57,26.25,2.88,z,C.aluminium);
+  block(q,.11,.07,1.57,26.25,1.49,z,C.aluminium);
+  block(q,.08,.10,1.48,26.27,2.22,z,C.ink);
+ }
+ // Door on outward-facing wall, metal frame, handle, threshold and drip edge.
+ block(q,1.12,2.18,.09,22.5,1.37,16.22,C.aluminium);
+ block(q,.95,1.93,.10,22.5,1.39,16.28,C.dark);
+ block(q,.075,.14,.08,22.83,1.25,16.38,C.steel);
+ block(q,1.25,.08,.22,22.5,.30,16.31,C.concrete);
+ block(q,1.75,.08,.22,22.5,2.57,16.35,C.red);
+ // Vent slots and service housing; relief materials retain toon shading.
+ for(let i=0;i<5;i++)block(q,1.28,.04,.07,24.6,2.72-i*.14,16.25,C.steel);
+ block(q,1.4,.4,1.1,24.2,3.92,13.2,C.steel);
+ for(let i=0;i<5;i++)block(q,1.18,.035,.82,24.2,4.15,12.84+i*.15,C.dark);
  block(q,1.2,.7,.95,25.9,.60,-1.2,C.red);
  const arm=new T.Group();arm.position.set(25.9,1.25,-1.2);q.add(arm);
  block(arm,.19,.16,8.7,0,0,4.35,C.white);
  for(let z=.65;z<8.7;z+=1.5)block(arm,.21,.18,.65,0,0,z,C.red);
  block(q,.6,.7,.45,25.9,.45,8.9,C.steel);
- sign(w,q,'PATIO DE MAQUINARIAS L1',9.6,12.8,4.15,20.5);
  return arm;
 }
 function buildCoveredFleet(w,g){
  const q=new T.Group();q.name='M5 · Techumbre solo camionetas y DrillTruck';g.add(q);
  roof(q,-14.4,14.1,22.7,11.8,4.65);
- sign(w,q,'DRILLTRUCK Y CAMIONETAS',11,-14.4,5.32,20.05);
  return q;
 }
 function buildLogistics(w,g){
@@ -123,7 +173,26 @@ function buildLogistics(w,g){
  for(const x of[-25.6,-12.4])block(q,.25,4.7,13.5,x,2.7,-11.2,C.white,true);
  roof(q,-19,-11.2,14.6,14.3,5.0);
  block(q,13.2,.55,.22,-19,4.28,-4.3,C.red,true);
- sign(w,q,'GALPÓN DE APOYO',8.0,-19,4.4,-4.16);
+ // Corrugation, foundations, roller door, side door and high windows.
+ for(const x of[-25.35,-12.65])for(let z=-17.15;z<-5.1;z+=.72)
+  block(q,.11,4.0,.035,x,2.90,z,C.aluminium);
+ for(let x=-24.9;x<-13;x+=1.2)
+  block(q,.045,3.2,.07,x,2.65,-18.18,C.aluminium);
+ // Front loading door: side rails, lintel and raised grille, central opening clear.
+ for(const x of[-22.9,-15.1])block(q,.17,4.15,.16,x,2.40,-4.20,C.steel);
+ block(q,8.1,.19,.17,-19,4.52,-4.20,C.dark);
+ for(let y=3.66;y<4.32;y+=.14)block(q,7.6,.05,.10,-19,y,-4.15,C.aluminium);
+ block(q,2.1,2.8,.13,-24.2,1.75,-4.15,C.dark);
+ block(q,.11,.16,.11,-23.45,1.35,-4.02,C.steel);
+ for(const x of[-22.6,-16.1]){
+  block(q,1.2,.9,.10,x,3.78,-18.14,C.ink);
+  block(q,1.05,.70,.11,x,3.80,-18.06,C.glass);
+  block(q,1.25,.08,.19,x,3.29,-17.98,C.steel);
+ }
+ // Workshop-level rainwater details and realistic pallet stops.
+ block(q,14.2,.10,.23,-19,4.91,-4.20,C.dark);
+ block(q,.11,4.0,.11,-25.3,2.85,-4.2,C.steel);
+ for(const x of[-23.2,-19,-14.8])block(q,3.5,.16,.4,x,.41,-9.1,C.yellow);
  // Real physical racks and stacks: cosmetic, no free inventory.
  for(const x of[-23.2,-19,-14.8]){
   for(const y of[.9,1.95])block(q,3.4,.17,1.5,x,y,-13.6,C.steel);
@@ -140,23 +209,69 @@ function buildFuel(w,g){
   block(q,.7,.62,.07,x,1.88,15.6,C.ink);
   block(q,.12,1.1,.11,x+.43,1.01,15.6,C.ink);
  }
- // Bunded fuel vessel, safely isolated inside the fuel module.
+ // Isolated fuel island with raised bund wall and checkered platform.
+ for(const x of[-1.62,4.62])block(q,.17,.49,10.25,x,.63,14.3,C.concrete);
+ for(const z of[9.22,19.38])block(q,6.45,.49,.15,1.5,.63,z,C.concrete);
  block(q,5.8,.55,2.5,1.5,.55,10.65,C.steel);
  const tank=new T.Mesh(new T.CylinderGeometry(1,1,5.8,14),mat(C.white));
  tank.rotation.z=Math.PI/2;tank.position.set(1.5,1.52,10.65);q.add(tank);
  block(q,5.8,.12,.15,1.5,2.2,10.65,C.red);
- sign(w,q,'COMBUSTIBLE · HSEC',6.4,1.5,5.32,20.08);
+ // Tank saddles, meter shields, hose runs and rail barriers.
+ for(const x of[-.35,3.35]){
+  block(q,.38,.75,2.85,x,.95,10.65,C.dark);
+  block(q,.43,.20,2.96,x,1.38,10.65,C.steel);
+ }
+ for(const x of[-1.25,4.25]){
+  for(const z of[11.9,13.65,16.1,18.1])block(q,.08,1.15,.08,x,1.08,z,C.steel);
+  block(q,.08,.10,6.2,x,1.55,15.0,C.steel);
+  block(q,.08,.10,6.2,x,.90,15.0,C.steel);
+ }
+ for(const x of[.5,2.5]){
+  block(q,.07,.37,.05,x+.26,1.24,15.67,C.steel);
+  const hose=new T.Mesh(new T.TorusGeometry(.23,.035,5,10,Math.PI*1.4),mat(C.dark));
+  hose.position.set(x+.45,1.38,15.6);q.add(hose);
+ }
  return q;
+}
+// Physical detail without text-based signs: doors, gutters, frames and rails.
+function yardDetail(g){
+ // Low protective sidewalk handrail with deliberately clear pedestrian crossing.
+ const fence=(z,from,to)=>{
+  for(let x=from;x<to+.01;x+=2.5){
+   block(g,.11,1.0,.11,x,.75,z,C.steel);
+   block(g,.20,.08,.20,x,1.30,z,C.red);
+  }
+  block(g,to-from,.07,.08,(from+to)/2,1.22,z,C.steel);
+  block(g,to-from,.07,.08,(from+to)/2,.70,z,C.steel);
+ };
+ fence(18.75,-24,18);
+ // Safer rounded bollards at corners, offset from the truck turning spine.
+ for(const [x,z] of [[-24,18],[-22,18],[-13,18],[-11,18],[8,18],[10,18],[23,10]]){
+  block(g,.22,.80,.22,x,.66,z,C.yellow);
+  block(g,.30,.12,.30,x,1.08,z,C.dark);
+  block(g,.40,.10,.40,x,.26,z,C.concrete);
+ }
+ // Drainage grates and a realistic equipment turning apron.
+ for(let x=-22;x<22;x+=3.1){
+  block(g,1.55,.020,.11,x,.24,-3,C.steel);
+  for(let k=-.60;k<=.60;k+=.30)block(g,.055,.025,.11,x+k,.255,-3,C.ink);
+ }
+ for(const z of[-19.5,19.5])for(const x of[-22,0,22]){
+  block(g,1.25,.055,.22,x,.26,z,C.steel);
+  for(let k=-.48;k<=.48;k+=.24)block(g,.05,.065,.21,x+k,.27,z,C.ink);
+ }
+ // Little corner protection rails and maintenance platforms.
+ for(const x of[-25.3,-12.6]){
+  block(g,.15,1.3,.15,x,.90,-4.15,C.red);
+  block(g,.12,.10,2.4,x,1.55,-5.35,C.steel);
+ }
 }
 function operationalDetails(w,g){
  fences(g);
+ yardDetail(g);
  for(const [x,z]of [[-24,-19],[-6,-19],[11,-19],[25,-19],[-24,19],[-7,19],[8,19],[25,19]])
   spotlight(g,x,z,6.4);
  for(let z=-17;z<-6;z+=2.3)block(g,.18,.65,.18,25,.48,z,C.yellow);
- const hsec=new T.Group();g.add(hsec);hsec.name='M5 · Señalética seguridad HSEC';
- sign(w,hsec,'SEGURIDAD Y ORDEN',8.2,-4,3.75,19.89);
- sign(w,hsec,'EQUIPOS PESADOS · ABIERTO',10,5,3.9,-20.1);
- sign(w,hsec,'PERFORADORAS · ABIERTO',11,15,3.9,20.06);
  for(const x of[-22,22])for(const z of[-17,17]){
   block(g,.38,1.15,.38,x,.70,z,C.red);
   block(g,.56,.1,.56,x,1.31,z,C.white);
@@ -176,7 +291,6 @@ function blueprint(w,root){
    [-7,-13,11.2,15.7],[5,-13,11.2,15.7],[17,-13,11.2,15.7],[15,15.25,21,10.3]])makeOutline(x,z,ww,dd);
  for(const x of[-27,27])for(const z of[-22,22])
   block(g,.32,.38,.32,x,.45,z,C.blue);
- sign(w,g,'BLUEPRINT · PATIO L1',10,0,1.2,22);
  return g;
 }
 function futurePlots(w){
@@ -210,6 +324,19 @@ export function createPatioWorld(w){
  structuralSource.name='M5 · Fuente real para holograma arquitectónico';
  for(const part of [grading,structures,final])structuralSource.add(part.clone(true));
  let constructionHologram=null,previousState='',registered=false;
+ const patioSolids=[];
+ const barrier={x:PATIO_L1.gate.x,z:PATIO_L1.gate.z,w:.34,d:9.2,
+  maxY:1.35,_patio:true,_patioBarrier:true};
+ let barrierOpen=false;
+ function setBarrierBlocking(blocked){
+  const i=w.colliders.indexOf(barrier);
+  if(blocked&&i<0)w.colliders.push(barrier);
+  else if(!blocked&&i>=0)w.colliders.splice(i,1);
+ }
+ function addPatioSolid(x,z,wid,dep,tag){
+  const solid={x,z,w:wid,d:dep,_patio:true,_patioPart:tag};
+  patioSolids.push(solid);w.colliders.push(solid);
+ }
  const updateHologram=(s,now,info)=>{
   if(s.mission5?.status!=='building'){
    if(constructionHologram){constructionHologram.finish(now/1000);
@@ -254,7 +381,7 @@ export function createPatioWorld(w){
     if(grading.visible&&!w._patioGradingWalk){
      w._patioGradingWalk=true;
      w.walkSurfaces??=[];
-     w.walkSurfaces.push({x:PATIO_L1.center.x,z:PATIO_L1.center.z,w:53.4,d:43.4,y:.19,_patioL1:true});
+     w.walkSurfaces.push({x:PATIO_L1.center.x,z:PATIO_L1.center.z,w:54.4,d:43.4,y:.19,_patioL1:true});
     }
    }
    if(status==='operational'&&!registered){
@@ -265,15 +392,24 @@ export function createPatioWorld(w){
      [-27,-22,27,-22],[-27,22,27,22],[-27,-22,-27,22],
      [27,-22,27,-2],[27,8,27,22]
     ])w.registerBoundary(root,ax,az,bx,bz,.20,'patio-fence');
-    for(const item of[
-     {x:-70,z:-28.2,w:13.2,d:13.5},
-     {x:-27,z:-3.1,w:4.2,d:4.6},
-     {x:-49.5,z:-2.7,w:6.4,d:10}
-    ])w.colliders.push({...item,_patio:true});
+    for(const [x,z,wid,dep,tag] of[
+     [-70,-28.2,13.2,13.5,'galpon'],
+     [-27,-3.1,4.2,4.6,'caseta'],
+     [-49.5,-2.7,6.4,10,'combustible']
+    ])addPatioSolid(x,z,wid,dep,tag);
+    // Canopy posts are separate collision footprints; structural walls
+    // and roof solids never block the gate's 10 m road clearance.
+    for(const [cx,cz,wide,deep] of[
+     [-14.4,14.1,22.7,11.8],[-19,-11.2,14.6,14.3],[1.5,14.3,6.4,10.4]
+    ])for(const px of[cx-wide/2+1,cx+wide/2-1])
+       for(const pz of[cz-deep/2+1,cz+deep/2-1]){
+        addPatioSolid(PATIO_L1.center.x+px,PATIO_L1.center.z+pz,.38,.38,'canopy-post');
+       }
+    setBarrierBlocking(true);
     w.walkSurfaces??=[];
     if(!w._patioGradingWalk){
      w._patioGradingWalk=true;
-     w.walkSurfaces.push({x:PATIO_L1.center.x,z:PATIO_L1.center.z,w:53.4,d:43.4,y:.19,_patioL1:true});
+     w.walkSurfaces.push({x:PATIO_L1.center.x,z:PATIO_L1.center.z,w:54.4,d:43.4,y:.19,_patioL1:true});
     }
     // Real fixed road connector, from the single gate to the M4 road spine.
     const connector=new T.Group();connector.name='Patio L1 · conector vial';
@@ -291,13 +427,23 @@ export function createPatioWorld(w){
     for(const part of structures.children)part.visible=true;
    }
    updateHologram(s,now,info);
-   // Barrier is up for vehicles using its one fixed entrance.
+   // Vehicle route triggers remain unchanged, but the player's symmetric
+   // sensor opens the boom on approach from either side and closes on exit.
    const truck=s.mission4?.drillTruck;
    const truckNear=!!truck?.position&&
     Math.hypot(truck.position.x-PATIO_L1.gate.x,truck.position.z-PATIO_L1.gate.z)<12;
-   const desired=truckNear||w.fleetGateInUse?-Math.PI/2:0;
-   access.rotation.x+=(desired-access.rotation.x)*.12;
+   barrierOpen=gateShouldOpen({
+    position:status==='operational'&&!s.inside?s.position:null,
+    wasOpen:barrierOpen,vehicleNear:truckNear,routeInUse:!!w.fleetGateInUse
+   })&&status==='operational';
+   const desired=barrierOpen?-Math.PI/2:0;
+   access.rotation.x+=(desired-access.rotation.x)*.18;
+   if(registered)setBarrierBlocking(barrierBlocksPlayer(access.rotation.x));
   },
-  dispose(){constructionHologram?.dispose();root.removeFromParent();future.removeFromParent();}
+  dispose(){
+   constructionHologram?.dispose();setBarrierBlocking(false);
+   for(const solid of patioSolids){const i=w.colliders.indexOf(solid);if(i>=0)w.colliders.splice(i,1);}
+   root.removeFromParent();future.removeFromParent();
+  }
  };
 }

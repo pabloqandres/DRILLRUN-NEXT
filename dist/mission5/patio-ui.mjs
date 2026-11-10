@@ -2,7 +2,7 @@
 // explicit Catalog confirmation, never while rendering an app.
 import {PATIO_L1,PATIO_FUTURE,patioState,patioProgress,patioCapacity,patioUnlocked} from './patio-state.mjs';
 import {fleetOccupancy} from './fleet-base.mjs';
-import {PATIO_STAFF,hiredPatioStaff,canHirePatioStaff,gateChecked,warehouseChecked} from './patio-staff.mjs';
+import {hiredPatioStaff,gateChecked,warehouseChecked} from './patio-staff.mjs';
 import {mission5Readout} from './mission-readout.mjs';
 const esc=x=>String(x??'').replace(/[&<>"']/g,k=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[k]));
 const clock=secs=>String(Math.floor(secs/60)).padStart(2,'0')+':'+String(secs%60).padStart(2,'0');
@@ -26,9 +26,7 @@ export function renderPatioApp(s,fmt,icon,now=Date.now()){
  for(const equipment of rows){
   html+=`<section class="m4OpsNext"><small>PLAZA ${esc(equipment.slot)} · ${esc(equipment.state==='parked'?'OCUPADA':'LIBRE')}</small><h3>${esc(equipment.name)}</h3><p>${esc(labels[equipment.state]||equipment.state)}</p></section>`;
  }
- // Staff are separate from the building price: hiring is explicit and
- // costs player funds. Real GLB actors only appear after the hire.
- const staff=PATIO_STAFF;
+ // Infrastructure app is read-only for personnel: all hiring lives in Personal.
  const accepted=!!s.narrative?.accepted?.includes('m5');
  const rewarded=!!s.narrative?.rewardsCollected?.includes('m5');
  html+='<div class="sectionHeading">MISIÓN 5 · 5 OBJETIVOS EN ORDEN</div>';
@@ -36,12 +34,10 @@ export function renderPatioApp(s,fmt,icon,now=Date.now()){
   '<div class="'+(o.done?'done':o.status)+'"><span class="stepNumber">'+(o.done?icon('check'):o.number)+'</span><span><b>'+esc(o.label)+'</b><small>'+esc(o.status==='current'?o.remainingSeconds!==null?clock(o.remainingSeconds)+' restantes · '+o.hint:o.hint:o.status==='locked'?'Se desbloquea al completar el paso anterior':'Completado')+'</small></span></div>'
  ).join('')+'</div><p><b>Siguiente paso:</b> '+esc(readout.pending?.label||'Confirmar cierre con Elena Torres')+'</p></section>';
  html+='<section class="m4OpsNext"><small>BONO ÚNICO DE CASA MATRIZ</small><b>🪙 '+fmt(readout.rewardCash)+'</b><p>'+esc(rewarded?'Bonificación acreditada':'Se acredita una sola vez al confirmar el mensaje final de Elena, después de completar los cinco pasos.')+'</p></section>';
- if(!accepted)html+='<p class="m4OpsHint">Lee el mensaje de Elena Torres y acepta la Misión 5 para contratar personal o iniciar la obra.</p>';
- for(const def of staff){
-  const hired=hiredPatioStaff(s,def.id),blocked=canHirePatioStaff(s,def.id),ready=!blocked;
-  html+='<section class="m4OpsNext"><small>'+esc(def.role==='security'?'ACCESO CONTROLADO':'BODEGA Y LOGÍSTICA')+'</small><b>'+esc(def.label)+'</b><p>'+esc(hired?'Contratado · NPC asignado a su puesto':'Costo de contratación · 🪙 '+fmt(def.cost))+'</p>'+
-   (!hired?'<button class="primary" data-m5-action="hire" data-m5-staff="'+esc(def.id)+'" '+(!ready?'disabled':'')+'>'+icon('personnel')+' Contratar</button>':'')+'</section>';
- }
+ if(!accepted)html+='<p class="m4OpsHint">Acepta primero el mensaje de Elena Torres para habilitar la misión.</p>';
+ const guardHired=hiredPatioStaff(s,'m5-gate-security');
+ const techHired=hiredPatioStaff(s,'m5-warehouse-tech');
+ html+='<div class="sectionHeading">Personal de la operación</div><section class="m4OpsNext"><small>CONTRATACIÓN EXCLUSIVA EN PERSONAL</small><p>Guardia de acceso: '+(guardHired?'Contratado':'Pendiente')+' · Técnica de bodega: '+(techHired?'Contratada':'Pendiente')+'</p><button class="primary" data-app="m3-personnel">'+icon('personnel')+' Abrir Personal</button></section>';
  if(accepted&&status==='operational'){
   const guard=hiredPatioStaff(s,'m5-gate-security');
   const tech=hiredPatioStaff(s,'m5-warehouse-tech');
