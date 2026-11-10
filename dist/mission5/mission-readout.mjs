@@ -8,8 +8,8 @@ const pad=n=>String(n).padStart(2,'0');
 const clock=seconds=>pad(Math.floor(seconds/60))+':'+pad(seconds%60);
 const hints={
  build:'Catálogo → Edificios → Patio L1. Confirma la obra y espera 20 minutos.',
- guard:'Teléfono → Patio de Maquinarias → Contratar guardia de acceso.',
- technician:'Teléfono → Patio de Maquinarias → Contratar técnica de bodega.',
+ guard:'Personal → Logística del Patio → Contratar guardia de acceso.',
+ technician:'Personal → Logística del Patio → Contratar técnica de bodega.',
  gate:'Teléfono → Patio de Maquinarias → Verificar portón HSEC.',
  inventory:'Teléfono → Patio de Maquinarias → Revisar stock de bits y martillos.'
 };
