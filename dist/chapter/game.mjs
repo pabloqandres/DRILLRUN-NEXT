@@ -872,6 +872,9 @@ function showWorkshopCard(){
  // The status card is read-only; all economic and technical operations stay
  // behind the existing inventory / DTH / upgrade confirmation controllers.
  wc.classList.add('workshopV37');
+ wc.setAttribute('role','dialog');
+ wc.setAttribute('aria-modal','false');
+ wc.setAttribute('aria-labelledby','workshopCardHeading');
  wc.innerHTML=renderWorkshopCard(s,{
   icon,money,now:Date.now(),demolitionAllowed:canDemolishWorkshop(s)===null
  });
