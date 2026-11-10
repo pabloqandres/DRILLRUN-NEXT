@@ -780,10 +780,10 @@ function openPatioPanel(){
  const time=n=>String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
  const stateLabel=status==='operational'?'OPERATIVO · HSEC APROBADO':
   status==='building'?'OBRA EN EJECUCIÓN · '+Math.round(info.progress*100)+'% · '+time(info.remainingSeconds):
-  allowed?'DESBLOQUEADO · M4 COMPLETADA':'BLOQUEADO · COMPLETA M4';
+  allowed?(isMissionAccepted(s,'m5')?'DESBLOQUEADO · M5 ACEPTADA':'TERRENO DISPONIBLE · ESPERA MENSAJE M5'):'BLOQUEADO · COMPLETA M4';
  const modules=PATIO_L1.modules.map(x=>'<div class="patioModule">'+icon('check')+' '+esc(x)+'</div>').join('');
  const future=PATIO_FUTURE.map(x=>'<small class="patioFuture">'+icon('lock')+' Patio L'+x.level+' · ampliación bloqueada</small>').join('');
- const disabled=status!=='locked'||!allowed||s.cash<PATIO_L1.price;
+ const disabled=status!=='locked'||!allowed||!isMissionAccepted(s,'m5')||s.cash<PATIO_L1.price;
  modal('<span class="eyebrow">MISIÓN 5 · EXPANSIÓN</span>'+
   '<h2>PATIO DE MAQUINARIAS L1</h2><p>Gran explanada fija en el noroeste de la faena. Único acceso controlado, vehículos ligeros bajo techo y RC, DTH y futuros CAEX menores a cielo abierto.</p>'+
   '<b class="patioStatus">'+stateLabel+'</b>'+
