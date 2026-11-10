@@ -1572,3 +1572,23 @@ body.phoneOpen #personalTruckBrake{pointer-events:none;opacity:.4}
  #hud #personalTruckSpeed strong{font-size:17px}
  #hud #personalTruckSpeed small{font-size:8px}
 }
+
+/* V52 · Personal DrillTruck headlights, touch-friendly and separate from brake. */
+#hud #personalTruckLights{
+ position:fixed;right:max(135px,env(safe-area-inset-right));bottom:207px;
+ z-index:96;min-width:80px;height:45px;padding:0 10px;
+ font:800 11px/1 system-ui,sans-serif;letter-spacing:.06em;
+ color:#dcecf4;background:linear-gradient(145deg,#18384c,#0e2431);
+ border:1px solid #658da0;border-radius:13px;
+ box-shadow:0 4px 16px #0009;user-select:none;touch-action:manipulation;
+}
+#hud #personalTruckLights.lightsOn{
+ color:#ffe9b2;border-color:#f2c66c;
+ background:linear-gradient(145deg,#645022,#2a322e);
+ box-shadow:0 0 14px #f4ca6a66,0 4px 16px #0009;
+}
+#hud #personalTruckLights.hidden{display:none!important}
+body.phoneOpen #personalTruckLights{pointer-events:none;opacity:.4}
+@media(max-height:550px),(max-width:760px){
+ #hud #personalTruckLights{right:108px;bottom:162px;min-width:69px;height:39px;font-size:10px}
+}
