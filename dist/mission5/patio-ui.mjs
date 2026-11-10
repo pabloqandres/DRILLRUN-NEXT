@@ -1,6 +1,7 @@
 // M5 · Read-only mission presentation. Buying happens only in the
 // explicit Catalog confirmation, never while rendering an app.
 import {PATIO_L1,PATIO_FUTURE,patioState,patioProgress,patioCapacity,patioUnlocked} from './patio-state.mjs';
+import {fleetOccupancy} from './fleet-base.mjs';
 const esc=x=>String(x??'').replace(/[&<>"']/g,k=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[k]));
 const clock=secs=>String(Math.floor(secs/60)).padStart(2,'0')+':'+String(secs%60).padStart(2,'0');
 export function renderPatioApp(s,fmt,icon,now=Date.now()){
@@ -21,8 +22,16 @@ export function renderPatioApp(s,fmt,icon,now=Date.now()){
  for(const [num,name,description,done] of stages)html+=`<div class="${done?'done':''}"><span class="stepNumber">${done?icon('check'):num}</span><span><b>${esc(name)}</b><small>${esc(description)}</small></span></div>`;
  html+='</div><div class="sectionHeading">Paquete modular incluido</div>';
  for(const id of PATIO_L1.modules)html+=`<section class="m4OpsNext"><small>MÓDULO PREDEFINIDO</small><b>${esc(id)}</b></section>`;
- const capacity=patioCapacity(s);
- html+=`<div class="sectionHeading">Capacidad funcional</div><div class="m4OpsEquipment"><b>Vehículos techados</b><span>${capacity.covered} / ${PATIO_L1.coveredCapacity}</span><b>Perforadoras abiertas</b><span>${capacity.drill} / ${PATIO_L1.openDrillCapacity}</span><b>Equipos pesados</b><span>${capacity.heavy} / ${PATIO_L1.heavyCapacity}</span><b>Acceso fijo</b><span>${capacity.gate?'Habilitado':'Pendiente'}</span></div>`;
+ const capacity=patioCapacity(s),fleet=fleetOccupancy(s);
+ const occupied=items=>items.filter(e=>e.state==='parked').length;
+ html+=`<div class="sectionHeading">Plazas y flota real</div><div class="m4OpsEquipment"><b>Vehículos ligeros techados</b><span>${occupied(fleet.covered)} / ${capacity.covered||PATIO_L1.coveredCapacity} plazas ocupadas</span><b>Perforadoras a cielo abierto</b><span>${occupied(fleet.openDrill)} / ${capacity.drill||PATIO_L1.openDrillCapacity} plazas ocupadas</span><b>Equipos pesados a cielo abierto</b><span>${occupied(fleet.openHeavy)} / ${capacity.heavy||PATIO_L1.heavyCapacity} plazas ocupadas</span><b>Portón fijo HSEC</b><span>${capacity.gate?'Habilitado':'Pendiente'}</span></div>`;
+ const labels={parked:'Estacionado en su plaza',working:'Operando en faena', 'in-transit':'En transferencia / no estacionado'};
+ html+='<div class="sectionHeading">Equipos de tu faena</div>';
+ const rows=[...fleet.covered,...fleet.openDrill,...fleet.openHeavy];
+ if(!rows.length)html+='<p class="m4OpsHint">Sin maquinaria asignada. Las plazas permanecen libres; el patio no genera equipos automáticamente.</p>';
+ for(const equipment of rows){
+  html+=`<section class="m4OpsNext"><small>PLAZA ${esc(equipment.slot)} · ${esc(equipment.state==='parked'?'OCUPADA':'LIBRE')}</small><h3>${esc(equipment.name)}</h3><p>${esc(labels[equipment.state]||equipment.state)}</p></section>`;
+ }
  html+='<div class="sectionHeading">Ampliaciones futuras</div>';
  for(const d of PATIO_FUTURE)html+=`<section class="m4OpsNext"><small>L${d.level} · BLOQUEADO</small><h3>${esc(d.name)}</h3><p>Terreno reservado. No construible todavía.</p></section>`;
  html+=`<button class="primary" data-app="builder">${icon('build')} ${status==='operational'?'Abrir Catálogo':status==='building'?'Ver obra en Catálogo':'Construir desde Catálogo'}</button>`;
