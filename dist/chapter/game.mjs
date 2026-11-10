@@ -66,6 +66,7 @@ import {LocomotionReview} from './review-locomotion.mjs';
 import {AvatarRoster} from './avatar-roster.mjs';
 import {avatarDefinition} from './avatars.mjs';
 import {BuilderUI} from './builder-ui.mjs';
+import {BuildingBlueprint} from './building-blueprint.mjs';
 import {MODULES,moduleDefinition,pendingConstruction,moduleAvailability} from './module-catalog.mjs';
 import {ProductPreview,officeThumbnail} from './product-preview.mjs';
 import {CharacterStage} from './selector-stage.mjs';
@@ -87,6 +88,7 @@ let m3DrillModel=null,m3BoreholeMarkers=[],m3DeliveryVehicle=null,m3DrillingFx=n
 let m4DrillTruckModel=null,m4ParkingSpot=null,m4VisualsReady=false,m4TruckLoading=false,m4TruckCollider=null;
 let m4DthModel=null,m4DthCollider=null,m4Staging=null;
 let m5World=null,patioOverviewUntil=0,m5RcRoute=null,m5DthRoute=null,m5DthDepartRoute=null;
+let catalogBlueprint=null;
 let siteCinematics=null;
 let world,scene,phase='start',phoneApp=null,phoneOpen=false,category='desks',modalOpen=false,blueprint=false,placement=null,busy=null,keys={},joy={x:0,y:0},pointer=null,target=null,auth={configured:false},account=null,audioContext=null,last=performance.now(),clock=0,lastSave=0,lastHud=0,introAt=0,lastObjective='',qaRoute=false;
 let cloudSyncing=true,cloudLocked=false,cloudStatus='Verificando Google…',cloudEpoch=0;
@@ -1126,6 +1128,11 @@ let geoRefreshTimer=0;
 const builderUI=new BuilderUI({host:$('#builderPanel'),state:()=>s,translate:()=>t,format:money,onClose:closeBuilder,onSelection:m=>{selectedBuildModule=m;blueprint=!!m;},onConfirm:confirmModule,onInspect:inspectModule,onManage:manageOffice,onWorkshopManage:()=>{showWorkshopCard();},
 onPhoneNav:app=>{closeBuilder();openPhone(app);},
 onPatioAction:()=>openPatioPanel(),
+onBuildingPreview:product=>{
+ if(!world||phase!=='play')return;
+ if(!catalogBlueprint)catalogBlueprint=new BuildingBlueprint(world,()=>m5World);
+ catalogBlueprint.show(product);
+},
 onCatalogAction:(type,data)=>{try{
  if(type==='buildWorkshop'){buildWorkshop(s);notices.push({title:'Construcción del taller L1 iniciada · 30 s',symbol:'build'});}
  else if(type==='buyDrill'){const d=drillDefinition(data);if(!d)throw new Error('invalid');placeMachineryOrder(s,'drill',data,d.price);notices.push({title:'Perforadora solicitada · en camino',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}
@@ -1197,6 +1204,14 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
   }
  avatars?.updateSelector(phase==='character',selectedAvatar,s,dt,clock);characterStage?.update(phase==='character',clock,selectedAvatar);
  if(phase==='character'){world.chapterCamera={target:new T.Vector3(-4.55+Math.max(0,Math.min(.5,(730-innerWidth)/324)),1.0,5.35),offset:new T.Vector3(0,.55,6.1)};}
+ else if(phase==='play'&&builderOpen&&catalogBlueprint?.spec&&!modalOpen&&
+  !hsecUI?.drawing&&!hsecUI?.coneZone){
+  const view=catalogBlueprint.camera();
+  world.chapterCamera=view?{
+   target:new T.Vector3(view.target.x,view.target.y,view.target.z),
+   offset:new T.Vector3(view.offset.x,view.offset.y,view.offset.z)
+  }:null;
+ }
  else if(phase==='play'&&patioOverviewUntil>wall){
   // The overview is visual only. Moving the joystick or using WASD
   // immediately returns the camera to the playable avatar.
