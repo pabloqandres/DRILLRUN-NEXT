@@ -219,6 +219,13 @@ export function createPatioWorld(w){
     structures.visible=status==='operational'||(status==='building'&&info.progress>=.30);
     final.visible=status==='operational'||(status==='building'&&info.progress>=.80);
     w.yardL1Open=enabled;
+    // Once grading is visible (from 10% of the build), support the player's
+    // feet on the actual 19cm-high yard surface, not on the buried sand.
+    if(grading.visible&&!w._patioGradingWalk){
+     w._patioGradingWalk=true;
+     w.walkSurfaces??=[];
+     w.walkSurfaces.push({x:PATIO_L1.center.x,z:PATIO_L1.center.z,w:53.4,d:43.4,y:.19,_patioL1:true});
+    }
    }
    if(status==='operational'&&!registered){
     registered=true;
@@ -234,7 +241,10 @@ export function createPatioWorld(w){
      {x:-49.5,z:-2.7,w:6.4,d:10}
     ])w.colliders.push({...item,_patio:true});
     w.walkSurfaces??=[];
-    w.walkSurfaces.push({x:-51,z:-17,w:53.4,d:43.4,y:.19});
+    if(!w._patioGradingWalk){
+     w._patioGradingWalk=true;
+     w.walkSurfaces.push({x:PATIO_L1.center.x,z:PATIO_L1.center.z,w:53.4,d:43.4,y:.19,_patioL1:true});
+    }
     // Real fixed road connector, from the single gate to the M4 road spine.
     const connector=new T.Group();connector.name='Patio L1 · conector vial';
     w.scene.add(connector);
