@@ -820,7 +820,11 @@ function action(fn){const oldBuilt=s.office.status==='built',oldLevel=s.office.l
 function onBuilt(){scene.builtAt=Date.now();scene.burst(-6,0);sound('finish');}
 function transition(key){setText($('#transitionText'),t(key));hidden($('#entryTransition'),false);clearTimeout(transition.timer);transition.timer=setTimeout(()=>hidden($('#entryTransition'),true),550);}
 function nearInteraction(){if(!s)return null;
- if(!isMissionAccepted(s,'m1')&&!isMissionCollected(s,'m1'))return null;const nearest=CLEARABLES.filter(o=>!s.cleared.includes(o.id)).map(o=>({...o,distance:Math.hypot(o.x-s.position.x,o.z-s.position.z)})).filter(o=>o.distance<1.6).sort((a,b)=>a.distance-b.distance)[0];if(nearest)return {kind:'clear',object:nearest,label:'clearAction',blocked:s.energy<CONFIG.clearCost};
+ if(!isMissionAccepted(s,'m1')&&!isMissionCollected(s,'m1'))return null;
+ const ride=personalTruck(s);
+ if(!s.inside&&ride&&(ride.mode==='driving'||Math.hypot(s.position.x-ride.position.x,s.position.z-ride.position.z)<3.7))
+  return {kind:'personalTruck',label:ride.mode==='driving'?'Salir de DrillTruck®':'Ingresar a DrillTruck®'};
+ const nearest=CLEARABLES.filter(o=>!s.cleared.includes(o.id)).map(o=>({...o,distance:Math.hypot(o.x-s.position.x,o.z-s.position.z)})).filter(o=>o.distance<1.6).sort((a,b)=>a.distance-b.distance)[0];if(nearest)return {kind:'clear',object:nearest,label:'clearAction',blocked:s.energy<CONFIG.clearCost};
  if(!s.inside&&Math.hypot(s.position.x+7.99,s.position.z-2.9)<1.55)return pendingConstruction(s)?{kind:'boost',label:'accelerate'}:{kind:s.office.status==='built'?'enter':'build',label:s.office.status==='built'?'enter':'buildAction'};
  if(!s.inside&&s.workshop?.status!=='building'&&s.workshop&&Math.hypot(s.position.x+6.8,s.position.z+5.4)<2.5)return {kind:'workshop',label:'TALLER'};
  if(s.inside){if(Math.hypot(s.position.x+7.99,s.position.z-.8)<1.0)return {kind:'exit',label:'exit'};const computer=s.furniture.find(f=>s.inventory.find(v=>v.id===f.id)?.product==='computer');if(computer&&Math.hypot(s.position.x+6-computer.x,s.position.z-computer.z)<1.5)return {kind:'computer',label:'useComputer'};}
@@ -831,7 +835,7 @@ function nearInteraction(){if(!s)return null;
  if(hsecActive(s)&&!s.inside){const h=ensureHsec(s);const a=h.assets.filter(a=>!['vehicle','pedestrian','marking'].includes(a.type)&&Math.hypot(a.x-s.position.x,a.z-s.position.z)<2.8).sort((a,b)=>Math.hypot(a.x-s.position.x,a.z-s.position.z)-Math.hypot(b.x-s.position.x,b.z-s.position.z))[0];if(a)return {kind:'hsecAsset',label:'Inspeccionar activo',object:{...a,r:.6},category:'main'};}
  return null;
 }
-$('#handButton').onclick=()=>{if(busy||modalOpen||phoneOpen||builderOpen||placement)return;const a=phase==='play'?nearInteraction():null;if(!a)return;if(a.kind==='m5Staff'){openPhone('m3-personnel');return;}if(a.kind==='hsecAsset'){hsecUI.open('assets');return;}if(a.kind==='clear'){if(s.energy<CONFIG.clearCost)return toast('noEnergy');busy={object:a.object,elapsed:0};stop();sound('clear');}else if(a.kind==='build')showBuild();else if(a.kind==='boost')action(()=>accelerate(s));else if(a.kind==='workshop'){showWorkshopCard();return;}else if(a.kind==='enter')enterOffice();else if(a.kind==='exit'){transition('exitTransition');s.inside=false;s.position={...CONFIG.officeSlot.access};world.worker.reset();stop();save();}else if(a.kind==='computer'){if(!s.chapterCompletedAt){action(()=>useOfficeComputer(s));sound('finish');/* reward modal deferred to narrative confirmCompletion */return;}hsecUI.open();return;modal(`<span class="eyebrow">${esc(t('computer'))}</span><h2>${esc(t('next'))}</h2><p>${esc(t('nextDetail'))}</p><div class="modalActions">${button('close','closeComputer',true)}</div>`);$('#closeComputer').onclick=closeModal;}};
+$('#handButton').onclick=()=>{if(busy||modalOpen||phoneOpen||builderOpen||placement)return;const a=phase==='play'?nearInteraction():null;if(!a)return;if(a.kind==='personalTruck'){togglePersonalTruck();return;}if(a.kind==='m5Staff'){openPhone('m3-personnel');return;}if(a.kind==='hsecAsset'){hsecUI.open('assets');return;}if(a.kind==='clear'){if(s.energy<CONFIG.clearCost)return toast('noEnergy');busy={object:a.object,elapsed:0};stop();sound('clear');}else if(a.kind==='build')showBuild();else if(a.kind==='boost')action(()=>accelerate(s));else if(a.kind==='workshop'){showWorkshopCard();return;}else if(a.kind==='enter')enterOffice();else if(a.kind==='exit'){transition('exitTransition');s.inside=false;s.position={...CONFIG.officeSlot.access};world.worker.reset();stop();save();}else if(a.kind==='computer'){if(!s.chapterCompletedAt){action(()=>useOfficeComputer(s));sound('finish');/* reward modal deferred to narrative confirmCompletion */return;}hsecUI.open();return;modal(`<span class="eyebrow">${esc(t('computer'))}</span><h2>${esc(t('next'))}</h2><p>${esc(t('nextDetail'))}</p><div class="modalActions">${button('close','closeComputer',true)}</div>`);$('#closeComputer').onclick=closeModal;}};
 function openBuilder(){if(phase!=='play'||placement||busy)return;
  catalogPreviewWalk=false;hidden($('#endBuildPreviewWalk'),true);
  if(!isMissionAccepted(s,'m1')&&!isMissionCollected(s,'m1')){
@@ -1065,6 +1069,10 @@ function workshopConfirmDemolish(){
 }
 function hideWorkshopCard(){const wc=$('#workshopCard');if(wc)wc.hidden=true;workshopCardOpen=false;workshopDemolishPending=false;}
 function renderHUD(){if(!s)return;
+ const driving=personalTruck(s)?.mode==='driving';
+ hidden($('#personalTruckBrake'),!driving);
+ hidden($('#personalTruckSpeed'),!driving);
+ if(driving)setText($('#personalTruckSpeedValue'),Math.round(Math.abs(personalTruck(s).speed)*3.6));
  // The last mission remains visible until its narrative closing message is confirmed.
  // Once confirmed, retire the objective card; keep production, saves and HSEC data intact.
  const narrativeMission=activeNarrativeMission(s);
@@ -1290,6 +1298,13 @@ onM4Action:(type,data)=>{try{
  else if(type==='convertZone'){convertBoreholeToZone(s,data);notices.push({title:data+' convertido a zona',symbol:'bell'});}
  else if(type==='assignDthDrill'){assignDthDrillToZone(s,data);notices.push({title:'DTH desplegada en zona',detail:'El DrillTruck debe realizar mantenimiento antes de iniciar producción',symbol:'bell'});}
  else if(type==='buyTruck'){placeMachineryOrder(s,'drillTruck','drilltruck',DRILLTRUCK_COST);notices.push({title:'DrillTruck solicitado · en camino',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}
+ else if(type==='buyPersonalTruck'){
+  const reason=canOrderPersonalTruck(s);
+  if(reason)throw new Error(reason);
+  placeMachineryOrder(s,'drillTruckPersonal',PERSONAL_DRILLTRUCK_MODEL,PERSONAL_DRILLTRUCK_PRICE);
+  notices.push({title:'Segundo DrillTruck® solicitado a Casa Matriz',detail:'Despacho en 3 minutos · plaza P01 · uso personal',symbol:'bell'});
+  if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);
+ }
  else if(type==='linkTruck'){assignTruckToZone(s,data);startMaintenance(s,data);notices.push({title:'DrillTruck vinculado a '+data,symbol:'bell'});}
  else if(type==='buildParking'){buildParking(s);notices.push({title:'Estacionamiento construido',symbol:'bell'});m4VisualsReady=false;initM4Visuals();}
  else if(type==='upgradeWorkshop'){upgradeWorkshop(s);notices.push({title:'Ampliación del taller iniciada',symbol:'bell'});}
@@ -1349,6 +1364,13 @@ onCatalogAction:(type,data)=>{try{
  else if(type==='buyDrill'){const d=drillDefinition(data);if(!d)throw new Error('invalid');placeMachineryOrder(s,'drill',data,d.price);notices.push({title:'Perforadora solicitada · en camino',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}
  else if(type==='buyDthDrill'){const id=data||'rig_dth_production';placeMachineryOrder(s,'dthDrill',id,DTH_DRILLS[0]?.price||28000);notices.push({title:'Perforadora DTH solicitada · 3 min de entrega',detail:'Llegará a resguardo junto al taller',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}
  else if(type==='buyTruck'){placeMachineryOrder(s,'drillTruck','drilltruck',DRILLTRUCK_COST);notices.push({title:'DrillTruck solicitado · en camino',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}
+ else if(type==='buyPersonalTruck'){
+  const reason=canOrderPersonalTruck(s);
+  if(reason)throw new Error(reason);
+  placeMachineryOrder(s,'drillTruckPersonal',PERSONAL_DRILLTRUCK_MODEL,PERSONAL_DRILLTRUCK_PRICE);
+  notices.push({title:'Segundo DrillTruck® solicitado a Casa Matriz',detail:'Despacho en 3 minutos · plaza P01 · uso personal',symbol:'bell'});
+  if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);
+ }
  else if(type==='hire'){if(data==='tecnicoDrillco'){hirePersonnel(s,'tecnicoDrillco','tecnico-01');updateMission4Phase(s);}else{hirePersonnel(s,data,data+'-01');updateMission3Phase(s);}notices.push({title:'Personal contratado',symbol:'bell'});}
  save();renderHUD();builderUI.render();
 }catch(e){const msg=e.message==='noMoney'?'Fondos insuficientes':e.message==='noCapacity'?'Sin espacio en el taller':e.message;notices.push({title:msg,symbol:'lock'});}}
@@ -1378,7 +1400,7 @@ addEventListener('blur',()=>{stop();save();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
 document.addEventListener('pointercancel',()=>{if(pointer!==null)resetJoy();});
 addEventListener('pagehide',()=>{stop();save();void cloudFlushNow(CONFIG.saveKey);});
-function move(dt){let x=joy.x,y=joy.y;if(keys.w||keys.arrowup)y--;if(keys.s||keys.arrowdown)y++;if(keys.a||keys.arrowleft)x--;if(keys.d||keys.arrowright)x++;const len=Math.hypot(x,y);x/=Math.max(1,len);y/=Math.max(1,len);let intent=cameraRelativeIntent(x,y,world.cameraRig.heading);
+function move(dt){if(personalTruck(s)?.mode==='driving')return stepPersonalTruck(dt);let x=joy.x,y=joy.y;if(keys.w||keys.arrowup)y--;if(keys.s||keys.arrowdown)y++;if(keys.a||keys.arrowleft)x--;if(keys.d||keys.arrowright)x++;const len=Math.hypot(x,y);x/=Math.max(1,len);y/=Math.max(1,len);let intent=cameraRelativeIntent(x,y,world.cameraRig.heading);
  if(len>.025)target=null;else if(target){const dx=target.x-s.position.x,dz=target.z-s.position.z,d=Math.hypot(dx,dz);if(d<.08)target=null;else intent={x:dx/d*Math.min(1,d/.3),z:dz/d*Math.min(1,d/.3)};}
  return applyMovement(intent,dt);
 }
@@ -1413,13 +1435,20 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
    narrativeTick(1.5);
   }}save();}
   updateM4Visuals(dt);
+  syncPersonalTruckVisual();
   initM5Visuals(wall);
   m5NpcWorld?.update(s,dt,wall);
   // Auto-start M4 when M3 completes
   if(s.mission3?.phase==='complete'&&s.contract?.status==='delivered'&&isMissionAccepted(s,'m4')&&canStartMission4(s)&&(!s.mission4||s.mission4.phase==='inactive')){startMission4(s);notices.push({title:'Misión 4 desbloqueada — Automatiza tu operación',symbol:'bell'});save();}
   }
  avatars?.updateSelector(phase==='character',selectedAvatar,s,dt,clock);characterStage?.update(phase==='character',clock,selectedAvatar);
- if(phase==='character'){world.chapterCamera={target:new T.Vector3(-4.55+Math.max(0,Math.min(.5,(730-innerWidth)/324)),1.0,5.35),offset:new T.Vector3(0,.55,6.1)};}
+ if(phase==='play'&&personalTruck(s)?.mode==='driving'){
+   // Third-person raised chase camera, no cab/interior.
+   const pt=personalTruck(s),yaw=pt.heading;
+   world.chapterCamera={target:new T.Vector3(pt.position.x,1.8,pt.position.z),
+    offset:new T.Vector3(-Math.sin(yaw)*10.7,7.2,-Math.cos(yaw)*10.7)};
+  }
+  else if(phase==='character'){world.chapterCamera={target:new T.Vector3(-4.55+Math.max(0,Math.min(.5,(730-innerWidth)/324)),1.0,5.35),offset:new T.Vector3(0,.55,6.1)};}
  else if(phase==='play'&&builderOpen&&catalogConstructionCamera&&catalogBlueprint?.spec&&!modalOpen&&
   !hsecUI?.drawing&&!hsecUI?.coneZone){
   const view=catalogBlueprint.camera();
@@ -1472,7 +1501,7 @@ world.cameraFocus=inWorldConstruction?hsecUI.focus():managingOffice?{x:-6,z:0}:n
  }
  if(world.worker)world.worker.clearing=busy?1:0;
  catalogBlueprint?.update(wall/1000);
- scene.update(s,dt,wall,{blueprint,interactive:phase==='play'});hsecWorld?.update(s,dt,phase);if(phase==='play'&&world.isBlocked(s.position.x,s.position.z,avatarDefinition(s.character).radius))ensureSafe();world.update(s,dt,clock,walking,false,false);
+ scene.update(s,dt,wall,{blueprint,interactive:phase==='play'});hsecWorld?.update(s,dt,phase);if(phase==='play'&&personalTruck(s)?.mode!=='driving'&&world.isBlocked(s.position.x,s.position.z,avatarDefinition(s.character).radius))ensureSafe();world.update(s,dt,clock,walking,false,false);
  // Environmental spectacle + sound read the actual saved/world state only.
  // They never write mission, contract, economy or placement data.
  const activeRC=!!s.drill&&s.drill.state==='drilling';
@@ -1486,7 +1515,7 @@ world.cameraFocus=inWorldConstruction?hsecUI.focus():managingOffice?{x:-6,z:0}:n
   position:s.position,moving:walking&&!builderOpen&&!phoneOpen&&!modalOpen,
   walkSurfaces:world.walkSurfaces||[]
  });
- constructionCallout?.update(s,phase==='play'&&!builderOpen&&!modalOpen&&!phoneOpen,t);world.player.visible=phase!=='start'&&(phase!=='character'||!!CONFIG.protagonists.find(p=>p.id===selectedAvatar)?.available);
+ constructionCallout?.update(s,phase==='play'&&!builderOpen&&!modalOpen&&!phoneOpen,t);world.player.visible=phase!=='start'&&personalTruck(s)?.mode!=='driving'&&(phase!=='character'||!!CONFIG.protagonists.find(p=>p.id===selectedAvatar)?.available);
  guidance?.update(s,phase==='play'&&!builderOpen&&!modalOpen&&!phoneOpen&&!placement);if(phase==='play')showNextReward();
  if(now-lastHud>150){renderHUD();cameraDebug?.update();lastHud=now;}if(now-lastSave>2000){save();lastSave=now;}
  if(qaComputerPath&&phase==='play'&&!phoneOpen&&!modalOpen){while(qaComputerPath.length&&Math.hypot(qaComputerPath[0].x-s.position.x,qaComputerPath[0].z-s.position.z)<.12)qaComputerPath.shift();if(qaComputerPath.length)target={...qaComputerPath[0]};else qaComputerPath=null;}
