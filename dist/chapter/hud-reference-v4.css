@@ -1406,17 +1406,18 @@ body.interior #hud #objective:not(.hidden).collapsed{
 #hud #endBuildPreviewWalk span{font-size:9px;font-weight:850;letter-spacing:.8px}
 #hud #endBuildPreviewWalk b{font-size:11px;color:#f6e5c1}
 .catalogBlueprintStatus{display:block;color:#83d9ec;font-size:9px;letter-spacing:.45px;line-height:1.2;margin-top:3px}
-.catalogSummaryActions .catalogPreviewControl{
+#builderPanel .catalogPreviewActions .catalogPreviewControl{
  border:1px solid #4e879c!important;background:rgba(14,55,76,.75)!important;
  color:#b7eaf7!important;font-size:10px!important;min-height:27px!important;
  padding:5px 8px!important;border-radius:7px;white-space:nowrap;
  display:inline-flex;align-items:center;gap:4px
 }
-.catalogSummaryActions .catalogPreviewControl .uiIcon{width:13px;height:13px}
-.catalogSummaryActions{flex-wrap:wrap;row-gap:5px}
+#builderPanel .catalogPreviewActions .catalogPreviewControl .uiIcon{width:13px;height:13px}
+#builderPanel .catalogPreviewActions{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 0;align-items:center}
+.catalogSummaryActions{flex-wrap:nowrap;row-gap:5px}
 @media(max-height:530px){
  #hud #endBuildPreviewWalk{top:42px;padding:6px 9px;min-width:132px}
  #hud #endBuildPreviewWalk span{font-size:8px}
  #hud #endBuildPreviewWalk b{font-size:10px}
- .catalogSummaryActions .catalogPreviewControl{font-size:8px!important;padding:3px 5px!important}
+ #builderPanel .catalogPreviewActions .catalogPreviewControl{font-size:8px!important;padding:3px 5px!important}
 }
