@@ -63,7 +63,9 @@ export const mission5Objectives=s=>{
   {id:'guard',label:'Contratar guardia de acceso',done:hiredPatioStaff(s,'m5-gate-security')},
   {id:'technician',label:'Contratar técnica de bodega',done:hiredPatioStaff(s,'m5-warehouse-tech')},
   {id:'gate',label:'Verificar acceso y barrera HSEC',done:gateChecked(s)},
-  {id:'inventory',label:'Realizar control inicial de bodega',done:warehouseChecked(s)}
+  {id:'inventory',label:'Realizar control inicial de bodega',done:warehouseChecked(s)},
+  {id:'personalTruck',label:'Recibir segundo DrillTruck® personal',done:!!p?.personalTruck?.deliveredAt||
+   (!!p?.commissionedAt&&!!s?.narrative?.rewardsCollected?.includes('m5'))}
  ];
 };
 export function commissionPatio(s,now=Date.now()){
