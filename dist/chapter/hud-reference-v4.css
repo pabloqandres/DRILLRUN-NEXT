@@ -1469,3 +1469,76 @@ body.interior #hud #objective:not(.hidden).collapsed{
  #hud #objective[data-mission="m5"] .m5HudStep{font-size:10px;padding:3px;gap:5px}
  #hud #objective[data-mission="m5"] .m5HudReward{font-size:9px}
 }
+
+/* V47 — M5 heads-up display has two steps only.
+   Leave a touch-safe gap above the left joystick in landscape.
+   The detailed five-step list remains in the Patio phone screen. */
+#hud #objective[data-mission="m5"]:not(.hidden),
+body.interior #hud #objective[data-mission="m5"]:not(.hidden){
+ --mission-inset:12px;
+ box-sizing:border-box!important;
+ width:clamp(245px,29vw,350px)!important;
+ max-height:min(52svh,310px)!important;
+}
+#hud #objective[data-mission="m5"] .missionCardHead{
+ padding:9px 12px 2px 15px!important;
+}
+#hud #objective[data-mission="m5"] .missionCardTitle{
+ padding:5px 37px 4px 15px!important;
+ gap:8px!important;
+}
+#hud #objective[data-mission="m5"] .missionCardGlyph{
+ width:34px!important;height:34px!important;flex-basis:34px!important;
+ border-radius:10px!important;
+}
+#hud #objective[data-mission="m5"] .missionCardGlyph .uiIcon{
+ width:21px!important;height:21px!important;
+}
+#hud #objective[data-mission="m5"] .missionCardTitle h3{
+ font-size:clamp(14px,1.25vw,18px)!important;
+ line-height:1.2!important;
+}
+#hud #objective[data-mission="m5"] #objectiveDetail:not(.hidden){
+ flex:0 1 auto!important;
+ max-height:min(23svh,100px)!important;
+ overflow-y:auto!important;
+ padding:0 28px 0 0!important;
+ margin:3px 10px 4px 15px!important;
+ width:calc(100% - 25px)!important;
+ touch-action:pan-y!important;
+}
+#hud #objective[data-mission="m5"] .m5HudChecklist{gap:3px!important}
+#hud #objective[data-mission="m5"] .m5HudStep{
+ font-size:10px!important;line-height:1.22!important;
+ padding:3px 5px!important;min-height:25px;
+ grid-template-columns:19px minmax(0,1fr)!important;
+}
+#hud #objective[data-mission="m5"] .m5HudNumber{width:19px!important;height:19px!important;font-size:10px!important}
+#hud #objective[data-mission="m5"] .m5HudReward,
+#hud #objective[data-mission="m5"] .m5HudClosing{
+ margin:4px 4px 0!important;font-size:9px!important;
+}
+#hud #objective[data-mission="m5"] .missionCardProgress{
+ padding:4px 36px 7px 15px!important;
+}
+#hud #objective[data-mission="m5"] .missionCardFooter{
+ min-height:29px!important;
+ padding:5px 15px!important;
+}
+@media(max-height:530px),(max-width:680px){
+ #hud #objective[data-mission="m5"]:not(.hidden),
+ body.interior #hud #objective[data-mission="m5"]:not(.hidden){
+  width:clamp(218px,34vw,260px)!important;
+  max-height:min(52svh,218px)!important;
+ }
+ #hud #objective[data-mission="m5"] .missionCardHead{padding-top:6px!important}
+ #hud #objective[data-mission="m5"] .missionStage{min-height:22px!important;padding:3px 6px!important}
+ #hud #objective[data-mission="m5"] .missionCardTitle{padding-top:4px!important;padding-bottom:3px!important}
+ #hud #objective[data-mission="m5"] #objectiveDetail:not(.hidden){
+  max-height:min(20svh,83px)!important;
+  padding-right:21px!important;margin-top:1px!important;margin-bottom:1px!important;
+ }
+ #hud #objective[data-mission="m5"] .m5HudStep{font-size:9px!important;padding:2px 3px!important}
+ #hud #objective[data-mission="m5"] .missionCardProgress{padding-top:3px!important;padding-bottom:4px!important}
+ #hud #objective[data-mission="m5"] .missionCardFooter{min-height:27px!important;padding-top:4px!important;padding-bottom:4px!important}
+}
