@@ -69,6 +69,29 @@ export function rcDrillThumbnail(world,drillId){
  }
 }
 
+// Mission 5 Patio L1 uses the SAME fully assembled geometry as the in-world
+// construction and hologram. A single transparent snapshot is reused in the
+// catalog card and technical sheet; no placeholder, fake asset or paid build.
+// The structuralSource is never attached to the preview scene directly:
+// ProductPreview.setBuilding() deep-copies geometry before disposing it.
+export function patioThumbnail(world,structuralSource){
+ if(!world||!structuralSource?.children?.length)return null;
+ const host=document.createElement('div');
+ host.style.cssText='position:fixed;left:-1500px;top:-1500px;width:480px;height:320px;pointer-events:none;visibility:hidden';
+ document.body.append(host);
+ let preview=null;
+ try{
+  preview=new ProductPreview(host,world,{transparent:true});
+  preview.angle=-.76;
+  preview.setBuilding(structuralSource);
+  preview.draw();
+  return cutoutPNG(preview.renderer.domElement);
+ }finally{
+  preview?.dispose();
+  host.remove();
+ }
+}
+
 // The workshop thumbnail is rendered from precisely the same makeWorkshop()
 // geometry used in the real world; level 2 adds the live extension when present.
 // It creates no new colliders, buildings, economic changes or saved state.
