@@ -96,16 +96,50 @@ export function drivePersonalTruck(s,{throttle=0,steer=0,brake=false}={},dt=0,bl
  heading+=steer*wheel*dt*Math.sign(v||1);
  const dx=Math.sin(heading)*v*dt,dz=Math.cos(heading)*v*dt;
  const nx=truck.position.x+dx,nz=truck.position.z+dz;
- // Five-point swept footprint: no pass-through on fences, buildings, props.
+ // Real 2.16 × 4.70 m footprint, not the avatar's radius. Road paint,
+ // sidewalk markings and normal grade transitions are traversable, while the
+ // caller still tests true structural footprints and the HSEC gate.
  const front={x:Math.sin(heading)*PERSONAL_TRUCK_FOOTPRINT.halfLength,
   z:Math.cos(heading)*PERSONAL_TRUCK_FOOTPRINT.halfLength};
  const side={x:Math.cos(heading)*PERSONAL_TRUCK_FOOTPRINT.halfWidth,
   z:-Math.sin(heading)*PERSONAL_TRUCK_FOOTPRINT.halfWidth};
  const probes=[[0,0],[front.x,front.z],[-front.x,-front.z],
-  [side.x,side.z],[-side.x,-side.z]];
- const collision=probes.some(([x,z])=>blocked(nx+x,nz+z,.38));
- if(!collision){truck.position.x=nx;truck.position.z=nz;truck.heading=heading;}
- else v=0; // Explicitly stop at solid obstacles instead of teleporting through
+  [side.x,side.z],[-side.x,-side.z],
+  [front.x+side.x,front.z+side.z],[front.x-side.x,front.z-side.z],
+  [-front.x+side.x,-front.z+side.z],[-front.x-side.x,-front.z-side.z]];
+ // Gentle body tolerance (0.10 m). The old 0.38 m footprint margin
+ // artificially widened the truck by 76 cm on narrow gate approaches.
+ const occupied=(x,z)=>probes.reduce((n,[ox,oz])=>n+Number(!!blocked(x+ox,z+oz,.10)),0);
+ const oldX=truck.position.x,oldZ=truck.position.z;
+ const initial=occupied(oldX,oldZ);
+ const full=occupied(nx,nz);
+ let collision=full>0;
+ let nextX=oldX,nextZ=oldZ;
+ if(full===0||initial>0&&full<initial){ // Move free, or ESCAPE a pre-existing overlap.
+  nextX=nx;nextZ=nz;
+ }else if(Math.abs(v)>.05){
+  // Slide parallel to walls/curbs instead of freezing when the bumper clips
+  // the corner of a crosswalk fence. Never drive THROUGH physical barriers.
+  const xHit=occupied(nx,oldZ),zHit=occupied(oldX,nz);
+  const xOkay=xHit===0||(initial>0&&xHit<initial);
+  const zOkay=zHit===0||(initial>0&&zHit<initial);
+  if(xOkay&&(!zOkay||Math.abs(dx)>=Math.abs(dz)))nextX=nx;
+  else if(zOkay)nextZ=nz;
+  else if(xOkay)nextX=nx;
+  else v=0;
+ }
+ if(nextX!==oldX||nextZ!==oldZ){
+  truck.position.x=nextX;truck.position.z=nextZ;
+  truck.heading=heading;
+  if(collision)v*=.65; // Friction on the obstacle face, not an instant full brake.
+ }else{
+  // A stopped vehicle can reorient slightly to reverse out, but never rotate
+  // into a WORSE footprint collision from the current saved location.
+  const oldHeading=truck.heading;
+  if(initial>0&&Math.abs(steer)>.12&&Math.abs(v)<.50)truck.heading=heading;
+  else truck.heading=oldHeading;
+  v=0;
+ }
  truck.speed=v;
  s.position={...truck.position}; // Keep mission/POI distances tied to actual vehicle
  return {moving:Math.abs(v)>.05,blocked:collision,speed:v,heading:truck.heading,
