@@ -66,6 +66,7 @@ import {LocomotionReview} from './review-locomotion.mjs';
 import {AvatarRoster} from './avatar-roster.mjs';
 import {avatarDefinition} from './avatars.mjs';
 import {BuilderUI} from './builder-ui.mjs';
+import {renderWorkshopCard} from './workshop-card-view.mjs';
 import {BuildingBlueprint} from './building-blueprint.mjs';
 import {ConstructionHologram} from './construction-hologram.mjs';
 import {MODULES,moduleDefinition,pendingConstruction,moduleAvailability} from './module-catalog.mjs';
@@ -865,40 +866,40 @@ function showDthDrillCard(){
 /* Workshop status card — shown on tap */
 let workshopCardOpen=false,workshopDemolishPending=false;
 function showWorkshopCard(){
- const wc=$('#workshopCard');if(!wc||!s)return;
- const lvl=workshopLevel(s),cap=workshopCapacity(s),used=workshopUsed(s),free=workshopFree(s);
- const lvlDef=WORKSHOP_LEVELS.find(w=>w.level===lvl);
- const nextDef=WORKSHOP_LEVELS.find(w=>w.level===lvl+1);
- const pct=cap>0?Math.round(used/cap*100):0;
- const barColor=pct>85?'#ef5350':pct>60?'#ffb74d':'#4caf50';
- const bits=(s.toolInventory||[]).filter(t=>t.type==='bit'&&t.status!=='spent').length;
- const hammers=(s.toolInventory||[]).filter(t=>t.type==='hammer'&&t.status!=='spent').length;
- const spent=(s.spentMaterials||[]).length;
- const job=workshopUpgradeJob(s);
- const buildPct=job?Math.round((workshopUpgradeProgress(s)||0)*100):0;
- const buildTime=v=>{const m=Math.floor(v/60),ss=v%60;return String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');};
- const canDemolish=canDemolishWorkshop(s)===null;
- const canUpgrade=!job&&nextDef&&s.cash>=nextDef.upgradeCost;
- wc.innerHTML=`<button class="dcClose" id="workshopCardClose">${icon('close')}</button>`
-  +`<div class="dcHead">${icon('wrench')}<div><b>TALLER</b><small>Nv.${lvl} · ${lvlDef?.label||'Básico'}</small></div><span class="dcLevel">Nv.${lvl}</span></div>`
-  +`<div class="dcGrid"><div class="dcStat"><span>Capacidad</span><b>${used}/${cap}</b></div><div class="dcStat"><span>Libres</span><b>${free}</b></div><div class="dcStat"><span>Bits</span><b>${bits}</b></div><div class="dcStat"><span>Martillos</span><b>${hammers}</b></div></div>`
-  +`<div class="dcTool">${icon('store')}<span>Ocupación</span><div class="dcTrack"><div class="dcFill" style="width:${pct}%;background:${barColor}"></div></div><b>${pct}%</b></div>`
-  +(spent?`<div style="font-size:9px;color:#9ec5dd;margin-top:4px;text-align:center">${spent} material${spent>1?'es':''} usado${spent>1?'s':''}</div>`:'')
-  +(job?`<div class="dcConstruction"><div class="dcConstructLabel">${icon('time')} Ampliación a Nv.${job.targetLevel} en curso</div><div class="dcTrack"><div class="dcFill" style="width:${buildPct}%;background:#64b5f6"></div></div><b>${buildPct}%</b><small>Restante: ${buildTime(Math.max(0,Math.ceil((job.ends-Date.now())/1000)))}</small><button class="dcBoost" id="workshopBoost" ${(s.boosters||0)<1||Date.now()>=job.ends?'disabled':''} title="Consume 1 acelerador y reduce hasta 60 segundos">${icon('boost')} Acelerar 1 min · ${s.boosters||0} disponible${s.boosters===1?'':'s'}</button></div>`:'')
-  +(s.mission4?.phase&&s.mission4.phase!=='inactive'?`<div class="dcTool" style="margin-top:9px"><b>MAQUINARIA Y HERRAMIENTAS</b><small>RC: ${s.drill?'En resguardo':'Sin máquina'} · DTH: ${s.mission4.productionDrill?(s.mission4.productionDrill.assignedZone?'En zona '+s.mission4.productionDrill.assignedZone:'En resguardo'):'Sin recibir'}</small><button id="workshopDthManage" class="dcBoost">${icon('inventory')} Ver stock · Instalar herramientas en DTH</button></div>`:'' )
-  +`<div class="dcActions">`
-  +(canUpgrade&&!job?`<button class="dcUpgrade" id="workshopUpgradeBtn">${icon('boost')} Ampliar a Nv.${nextDef.level}<small>${money(nextDef.upgradeCost)} · ${buildTime(nextDef.constructionSeconds)}</small></button>`:'')
-  +(!nextDef&&!job?`<small class="dcMaxLevel">${icon('check')} Nivel máximo alcanzado</small>`:'')
-  +(job?'':(canDemolish?`<button class="dcDemolish" id="workshopDemolishBtn">${icon('close')} Demoler</button>`:''))
-  +`</div>`;
- wc.querySelector('#workshopCardClose').onclick=e=>{e.stopPropagation();hideWorkshopCard();};
- wc.querySelector('#workshopDthManage')?.addEventListener('click',()=>{hideWorkshopCard();openPhone('m4-workshop');});
- wc.querySelector('#workshopUpgradeBtn')?.addEventListener('click',()=>{workshopStartUpgrade();});
+ const wc=$('#workshopCard');
+ if(!wc||!s)return;
+ const scroll=wc.hidden?0:wc.scrollTop;
+ // The status card is read-only; all economic and technical operations stay
+ // behind the existing inventory / DTH / upgrade confirmation controllers.
+ wc.classList.add('workshopV37');
+ wc.innerHTML=renderWorkshopCard(s,{
+  icon,money,now:Date.now(),demolitionAllowed:canDemolishWorkshop(s)===null
+ });
+ wc.querySelector('#workshopCardClose')?.addEventListener('click',e=>{
+  e.stopPropagation();hideWorkshopCard();
+ });
+ wc.querySelector('#workshopStock')?.addEventListener('click',()=>{
+  hideWorkshopCard();openPhone('m3-inventory');
+ });
+ wc.querySelector('#workshopDthManage')?.addEventListener('click',()=>{
+  hideWorkshopCard();openPhone('m4-workshop');
+ });
+ wc.querySelector('#workshopContextAction')?.addEventListener('click',e=>{
+  const app=e.currentTarget.dataset.app;
+  if(app!=='m4-workshop'&&app!=='m4-dth-catalog')return;
+  hideWorkshopCard();openPhone(app);
+ });
+ wc.querySelector('#workshopUpgradeBtn')?.addEventListener('click',()=>{
+  workshopStartUpgrade();
+ });
  wc.querySelector('#workshopBoost')?.addEventListener('click',()=>{
   try{
    const boost=accelerateWorkshop(s,60);
    save();renderHUD();showWorkshopCard();
-   notices.push({title:'Taller acelerado · -'+Math.ceil(boost.secondsReduced)+' s',detail:boost.boostersLeft+' acelerador(es) disponibles',symbol:'boost'});
+   notices.push({
+    title:'Taller acelerado · -'+Math.ceil(boost.secondsReduced)+' s',
+    detail:boost.boostersLeft+' acelerador(es) disponibles',symbol:'boost'
+   });
    if(boost.remainingSeconds<=0){
     finishWorkshopUpgrade(s);
     save();renderHUD();showWorkshopCard();
@@ -909,11 +910,13 @@ function showWorkshopCard(){
    }
   }catch(e){
    showWorkshopCard();
-   notices.push({title:e.message==='noBoosters'?'Sin aceleradores disponibles':e.message==='constructionFinished'?'La ampliación ya terminó':'No se pudo acelerar la construcción',symbol:'lock'});
+   notices.push({title:e.message==='noBoosters'?'Sin aceleradores disponibles':
+    e.message==='constructionFinished'?'La ampliación ya terminó':
+    'No se pudo acelerar la construcción',symbol:'lock'});
   }
  });
- wc.querySelector('#workshopDemolishBtn')?.addEventListener('click',()=>{workshopConfirmDemolish();});
- wc.hidden=false;workshopCardOpen=true;
+ wc.querySelector('#workshopDemolishBtn')?.addEventListener('click',()=>workshopConfirmDemolish());
+ wc.hidden=false;workshopCardOpen=true;wc.scrollTop=scroll;
 }
 function detectWorkshopObstacles(){
  // Only actual SAVED, BUILT HSEC installations can be reported. Walking over
