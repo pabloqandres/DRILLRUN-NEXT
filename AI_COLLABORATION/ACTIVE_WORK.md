@@ -114,3 +114,5 @@ _Nothing blocked._
   V51+V52 incluidos. Revisar
   `CHANGES/2026-11-10_v53-centro-faena-taller-logistica.md`.
   PR68 biblioteca 3D no integrado: faltan GLB reales en GitHub.
+
+- **ChatGPT — 3D Asset Library Wave 01:** branch `chatgpt/asset-library-wave01`, catalog preview additions rebased after V53. 14 source previews; 8 future cards + existing cone/fence cards. No new purchases, no GLB binaries in GitHub yet. Integration of prices, site holograms and real transactions awaits asset upload + QA.
