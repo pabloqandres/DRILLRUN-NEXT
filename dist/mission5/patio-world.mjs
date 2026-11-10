@@ -133,9 +133,27 @@ function markings(g){
 function buildAccess(w,g){
  const q=new T.Group();q.name='M5 · caseta de acceso y control';g.add(q);
  // Guardhouse kept to the side of a 10m unobstructed portal.
+ // Prefabricated insulated panels, recessed glazing and fitted entrance.
  block(q,4.2,3.1,4.6,24.0,1.75,13.9,C.ink,true);
- block(q,4.6,.26,5.0,24,3.5,13.9,C.red,true);
- for(const z of[12.3,14.9])block(q,.08,1.3,1.2,26.15,2.2,z,C.glass);
+ block(q,4.45,.12,4.85,24,3.43,13.9,C.dark);
+ block(q,4.6,.26,5.0,24,3.61,13.9,C.red,true);
+ for(const z of[12.3,14.9]){
+  block(q,.075,1.38,1.55,26.16,2.15,z,C.steel);
+  block(q,.085,1.18,1.38,26.23,2.18,z,C.glass);
+  block(q,.11,.07,1.57,26.25,2.88,z,C.aluminium);
+  block(q,.11,.07,1.57,26.25,1.49,z,C.aluminium);
+  block(q,.08,.10,1.48,26.27,2.22,z,C.ink);
+ }
+ // Door on outward-facing wall, metal frame, handle, threshold and drip edge.
+ block(q,1.12,2.18,.09,22.5,1.37,16.22,C.aluminium);
+ block(q,.95,1.93,.10,22.5,1.39,16.28,C.dark);
+ block(q,.075,.14,.08,22.83,1.25,16.38,C.steel);
+ block(q,1.25,.08,.22,22.5,.30,16.31,C.concrete);
+ block(q,1.75,.08,.22,22.5,2.57,16.35,C.red);
+ // Vent slots and service housing; relief materials retain toon shading.
+ for(let i=0;i<5;i++)block(q,1.28,.04,.07,24.6,2.72-i*.14,16.25,C.steel);
+ block(q,1.4,.4,1.1,24.2,3.92,13.2,C.steel);
+ for(let i=0;i<5;i++)block(q,1.18,.035,.82,24.2,4.15,12.84+i*.15,C.dark);
  block(q,1.2,.7,.95,25.9,.60,-1.2,C.red);
  const arm=new T.Group();arm.position.set(25.9,1.25,-1.2);q.add(arm);
  block(arm,.19,.16,8.7,0,0,4.35,C.white);
@@ -155,6 +173,26 @@ function buildLogistics(w,g){
  for(const x of[-25.6,-12.4])block(q,.25,4.7,13.5,x,2.7,-11.2,C.white,true);
  roof(q,-19,-11.2,14.6,14.3,5.0);
  block(q,13.2,.55,.22,-19,4.28,-4.3,C.red,true);
+ // Corrugation, foundations, roller door, side door and high windows.
+ for(const x of[-25.35,-12.65])for(let z=-17.15;z<-5.1;z+=.72)
+  block(q,.11,4.0,.035,x,2.90,z,C.aluminium);
+ for(let x=-24.9;x<-13;x+=1.2)
+  block(q,.045,3.2,.07,x,2.65,-18.18,C.aluminium);
+ // Front loading door: side rails, lintel and raised grille, central opening clear.
+ for(const x of[-22.9,-15.1])block(q,.17,4.15,.16,x,2.40,-4.20,C.steel);
+ block(q,8.1,.19,.17,-19,4.52,-4.20,C.dark);
+ for(let y=3.66;y<4.32;y+=.14)block(q,7.6,.05,.10,-19,y,-4.15,C.aluminium);
+ block(q,2.1,2.8,.13,-24.2,1.75,-4.15,C.dark);
+ block(q,.11,.16,.11,-23.45,1.35,-4.02,C.steel);
+ for(const x of[-22.6,-16.1]){
+  block(q,1.2,.9,.10,x,3.78,-18.14,C.ink);
+  block(q,1.05,.70,.11,x,3.80,-18.06,C.glass);
+  block(q,1.25,.08,.19,x,3.29,-17.98,C.steel);
+ }
+ // Workshop-level rainwater details and realistic pallet stops.
+ block(q,14.2,.10,.23,-19,4.91,-4.20,C.dark);
+ block(q,.11,4.0,.11,-25.3,2.85,-4.2,C.steel);
+ for(const x of[-23.2,-19,-14.8])block(q,3.5,.16,.4,x,.41,-9.1,C.yellow);
  // Real physical racks and stacks: cosmetic, no free inventory.
  for(const x of[-23.2,-19,-14.8]){
   for(const y of[.9,1.95])block(q,3.4,.17,1.5,x,y,-13.6,C.steel);
@@ -171,11 +209,28 @@ function buildFuel(w,g){
   block(q,.7,.62,.07,x,1.88,15.6,C.ink);
   block(q,.12,1.1,.11,x+.43,1.01,15.6,C.ink);
  }
- // Bunded fuel vessel, safely isolated inside the fuel module.
+ // Isolated fuel island with raised bund wall and checkered platform.
+ for(const x of[-1.62,4.62])block(q,.17,.49,10.25,x,.63,14.3,C.concrete);
+ for(const z of[9.22,19.38])block(q,6.45,.49,.15,1.5,.63,z,C.concrete);
  block(q,5.8,.55,2.5,1.5,.55,10.65,C.steel);
  const tank=new T.Mesh(new T.CylinderGeometry(1,1,5.8,14),mat(C.white));
  tank.rotation.z=Math.PI/2;tank.position.set(1.5,1.52,10.65);q.add(tank);
  block(q,5.8,.12,.15,1.5,2.2,10.65,C.red);
+ // Tank saddles, meter shields, hose runs and rail barriers.
+ for(const x of[-.35,3.35]){
+  block(q,.38,.75,2.85,x,.95,10.65,C.dark);
+  block(q,.43,.20,2.96,x,1.38,10.65,C.steel);
+ }
+ for(const x of[-1.25,4.25]){
+  for(const z of[11.9,13.65,16.1,18.1])block(q,.08,1.15,.08,x,1.08,z,C.steel);
+  block(q,.08,.10,6.2,x,1.55,15.0,C.steel);
+  block(q,.08,.10,6.2,x,.90,15.0,C.steel);
+ }
+ for(const x of[.5,2.5]){
+  block(q,.07,.37,.05,x+.26,1.24,15.67,C.steel);
+  const hose=new T.Mesh(new T.TorusGeometry(.23,.035,5,10,Math.PI*1.4),mat(C.dark));
+  hose.position.set(x+.45,1.38,15.6);q.add(hose);
+ }
  return q;
 }
 // Physical detail without text-based signs: doors, gutters, frames and rails.
