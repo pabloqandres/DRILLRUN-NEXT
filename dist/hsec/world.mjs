@@ -373,7 +373,7 @@ export class HsecWorld{
   document.body.append(host);
   let preview=null;
   try{
-   preview=new ProductPreview(host,this.w,{transparent:true});
+   preview=new ProductPreview(host,this.w,{transparent:true,ephemeral:true});
    const a={type,level:1,x:0,z:0};
    if(assetDefinition(type).route)a.points=[{x:0,z:-2},{x:0,z:2}];
    preview.model=assetModel(a);preview.scene.add(preview.model);preview.draw();
