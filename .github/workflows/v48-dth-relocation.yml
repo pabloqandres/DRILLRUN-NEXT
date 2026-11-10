@@ -1,0 +1,23 @@
+name: DTH relocation V48
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  dth-relocation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Check updated DTH module syntax
+        run: |
+          node --check dist/mission4/dth-travel.mjs
+          node --check dist/mission4/production.mjs
+          node --check dist/mission4/rig-inspection.mjs
+          node --check dist/chapter/game.mjs
+      - name: Targeted permanent production and relocation regressions
+        run: node --test tests/v48-dth-relocation.test.mjs tests/m4-permanent-production-v26.test.mjs tests/m4-visual-status-v25.test.mjs tests/m4-dth-touch-inspection-v30.test.mjs
