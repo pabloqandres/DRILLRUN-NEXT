@@ -105,6 +105,8 @@ function renderCompletedOperations(s,fmt,icon){
  }
  html+=`<div class="sectionHeading">DrillTruck® y consumibles</div><div class="m4OpsEquipment"><b>DrillTruck®</b><span>${esc(truck.maintenancePhase?'Atendiendo · '+truck.maintenancePhase:truck.state||'No disponible')}</span><b>Bits DTH en bodega</b><span>${unused('bit')}</span><b>Martillos DTH en bodega</b><span>${unused('hammer')}</span><b>Herramientas descartadas</b><span>${discarded} registradas en inventario</span></div>`;
  html+='<p class="m4OpsHint">Los consumibles agotados quedan registrados para M8. El DrillTruck® requiere repuestos DTH compatibles disponibles en bodega; sin stock, la perforadora permanece detenida.</p>';
+ html+=`<div class="sectionHeading">Misión 5 · Desarrollo de la faena</div><section class="m4OpsNext"><small>PATIO L1 · ${s.mission5?.status==='operational'?'OPERATIVO':s.mission5?.status==='building'?'EN CONSTRUCCIÓN':'DISPONIBLE'}</small><h3>Patio de Maquinarias</h3><p>Nuevo centro logístico fijo, con acceso HSEC, estacionamiento cubierto liviano y explanadas abiertas para equipos pesados y perforadoras.</p><button class="primary" data-app="m5-patio">Ver Misión 5 y Patio L1</button></section>`;
+
  html+=`<div class="m4OpsLinks"><button data-app="m4-zones">${icon('geology')}<span><b>Ver zonas</b><small>Estado y asignación</small></span></button><button data-app="m4-workshop">${icon('inventory')}<span><b>Taller y stock</b><small>Herramientas y perforadora</small></span></button><button data-app="m4-drilltruck">${icon('machine')}<span><b>DrillTruck®</b><small>Servicio y logística</small></span></button><button data-app="m3-catalog">${icon('store')}<span><b>Casa Matriz</b><small>Pedidos de consumibles</small></span></button></div>`;
  return html;
 }
