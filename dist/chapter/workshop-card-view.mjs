@@ -97,7 +97,7 @@ export function renderWorkshopCard(s,{icon,money,now=Date.now(),demolitionAllowe
   <span class="wsMachineState ${data.tone}">${value(data.label)}</span>
  </div>`;
  let html=`<div class="wsHeading"><span class="wsMark">${icon('wrench')}</span>
- <div class="wsHeadingText"><small>INSTALACIONES / MANTENIMIENTO</small><h2 id="workshopCardHeading">TALLER</h2></div>
+ <div class="wsHeadingText"><small>MANTENIMIENTO / STOCK</small><h2 id="workshopCardHeading">TALLER</h2></div>
  <span class="wsLevel">Nv.${v.lvl} · ${value(v.lvlName)}</span>
  <button type="button" class="wsClose" id="workshopCardClose" aria-label="Cerrar ficha del taller">${icon('close')}</button></div>`;
  html+='<div class="wsContent">';
