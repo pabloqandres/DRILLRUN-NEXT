@@ -183,7 +183,7 @@ function futurePlots(w){
  // Reserved land: visible outlines, never functional or billed.
  const m=new T.LineDashedMaterial({color:0x8798a0,transparent:true,opacity:.56,dashSize:1,gapSize:1});
  for(const p of[{x:-105,z:-17,w:44,d:42,label:'PATIO L2 · BLOQUEADO'},
-                 {x:-153,z:-17,w:44,d:42,label:'PATIO L3 · BLOQUEADO'}]){
+                 {x:-104,z:-65,w:44,d:42,label:'PATIO L3 · BLOQUEADO'}]){
   const pts=[new T.Vector3(p.x-p.w/2,.5,p.z-p.d/2),new T.Vector3(p.x+p.w/2,.5,p.z-p.d/2),
     new T.Vector3(p.x+p.w/2,.5,p.z+p.d/2),new T.Vector3(p.x-p.w/2,.5,p.z+p.d/2),
     new T.Vector3(p.x-p.w/2,.5,p.z-p.d/2)];
@@ -203,7 +203,7 @@ export function createPatioWorld(w){
  const access=buildAccess(w,structures);
  const final=new T.Group();root.add(final);operationalDetails(w,final);
  const future=futurePlots(w);
- let previousState='',previousPhase='',lastTime=-1;
+ let previousState='',registered=false;
  return {
   root,access,future,
   update(s,now=Date.now()){
@@ -218,7 +218,29 @@ export function createPatioWorld(w){
     grading.visible=status==='operational'||(status==='building'&&info.progress>=.10);
     structures.visible=status==='operational'||(status==='building'&&info.progress>=.30);
     final.visible=status==='operational'||(status==='building'&&info.progress>=.80);
-    w.yardL1Open=status==='operational';
+    w.yardL1Open=enabled;
+   }
+   if(status==='operational'&&!registered){
+    registered=true;
+    // Static walls are actual collision boundaries with a single 10m-wide
+    // east gate. Clear the gate route, work areas and all pedestrian lanes.
+    for(const [ax,az,bx,bz]of[
+     [-27,-22,27,-22],[-27,22,27,22],[-27,-22,-27,22],
+     [27,-22,27,-2],[27,8,27,22]
+    ])w.registerBoundary(root,ax,az,bx,bz,.20,'patio-fence');
+    for(const item of[
+     {x:-70,z:-28.2,w:13.2,d:13.5},
+     {x:-29,z:-3.1,w:4.8,d:4.6},
+     {x:-52,z:-2.7,w:9.3,d:10}
+    ])w.colliders.push({...item,_patio:true});
+    w.walkSurfaces??=[];
+    w.walkSurfaces.push({x:-51,z:-17,w:53.4,d:43.4,y:.19});
+    // Real fixed road connector, from the single gate to the M4 road spine.
+    const connector=new T.Group();connector.name='Patio L1 · conector vial';
+    w.scene.add(connector);
+    block(connector,11.4,.13,8.5,-18.6,.07,-14,C.road);
+    for(const z of[-18.05,-9.95])block(connector,11.4,.016,.10,-18.6,.16,z,C.yellow);
+    w.walkSurfaces.push({x:-18.6,z:-14,w:11.4,d:8.5,y:.17});
    }
    if(status==='building'){
     // The hologram pulses while real time (including offline time) advances.
