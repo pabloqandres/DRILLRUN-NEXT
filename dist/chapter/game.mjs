@@ -82,6 +82,7 @@ import {NotificationSystem} from './notifications.mjs';
 import {icon,workerAvatar} from './icons.mjs';
 import {unreadMessages,collectUIEvents} from './ui-state.mjs';
 import {pendingMessage,deliverMessage,acceptMission,confirmCompletion,isMissionAccepted,isMissionCollected,activeNarrativeMission,ensureNarrative,narrativeUnread,MISSION_NARRATIVES} from './narrative.mjs';
+import {resolveNarrativeText} from './narrative-ui.mjs';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],hidden=(el,v)=>el.classList.toggle('hidden',v);
 let prefs={lang:deviceLanguage(navigator.language),sound:true};try{prefs={...prefs,...JSON.parse(localStorage.getItem('drillrun-preferences')||'{}')};}catch{}
 if(!LANGUAGES.some(([l])=>l===prefs.lang))prefs.lang='es';let t=translator(prefs.lang),s=null,hasSave=false;
@@ -635,12 +636,14 @@ $('#skipIntro').onclick=()=>{if(phase!=='intro')return;cinematic.stop();world.ca
 function ensureSafe(){syncOfficeAccess(s);scene.state=s;const r=avatarDefinition(s.character).radius;if(!world.isBlocked(s.position.x,s.position.z,r))return;if(s.inside){for(const z of[-.65,.1,.65])for(const x of[-1.9,-1.1,0,1,2.2])if(!world.isBlocked(-6+x,z,r)){s.position={x:-6+x,z};world.worker.reset();return;}}const cx=s.position.x,cz=s.position.z;for(let d=.5;d<=10;d+=.5)for(let a=0;a<16;a++){const angle=a*Math.PI/8,tx=cx+Math.cos(angle)*d,tz=cz+Math.sin(angle)*d;if(!world.isBlocked(tx,tz,r)){s.position={x:tx,z:tz};s.inside=false;world.worker.reset();return;}}s.position={...CONFIG.officeSlot.access};s.inside=false;world.worker.reset();}
 // ─── Narrative tick & actions ────────────────────────────
 function pendingMissionReply(){
- return s?.narrative?.messages?.find(m=>!m.actionTaken&&
+ // Prefer the most recent pending SMS, not an old unanswered briefing
+ // from the same narrator. Applies to all five missions.
+ return s?.narrative?.messages?.findLast(m=>!m.actionTaken&&
   m.actions?.some(a=>a.type==='accept'||a.type==='collect'))||null;
 }
 function showPendingMissionMessage(){
  const m=pendingMissionReply();if(!m)return false;
- phoneUI.narrativeCharacter=m.characterId;phoneUI.conversation=true;
+ phoneUI.focusNarrativeMessage(m);
  openPhone('messages');return true;
 }
 let narrativeTimer=0;
@@ -649,13 +652,11 @@ function narrativeTick(dt){
  if(!s||phase!=='play'||document.querySelector('.missionCompleteOverlay'))return;
  narrativeTimer+=dt;if(narrativeTimer<1.5)return;narrativeTimer=0;
  ensureNarrative(s);
- // Repair already-paid saves from previous versions: the end SMS may have
- // arrived silently while the Contract app was open. Show it exactly once
- // while unread; PhoneUI marks it read when Camila's thread is opened.
- const missedM3End=s.narrative.messages.find(m=>['n:m3:end','n:m4:end'].includes(m.id)&&!m.readAt&&!m.actionTaken);
- if(missedM3End&&!modalOpen&&!builderOpen&&!busy){
-  phoneUI.narrativeCharacter=missedM3End.characterId;
-  phoneUI.conversation=true;
+ // Recover a previously delivered, unread closing SMS (M1–M5), including
+ // one delivered while its phone app was open. Go to THAT latest bubble.
+ const missedClosing=[...s.narrative.messages].reverse().find(m=>/^n:m[1-5]:end$/.test(m.id)&&!m.readAt&&!m.actionTaken);
+ if(missedClosing&&!modalOpen&&!builderOpen&&!busy){
+  phoneUI.focusNarrativeMessage(missedClosing);
   openPhone('messages');
   return;
  }
@@ -663,17 +664,20 @@ function narrativeTick(dt){
  if(msg&&deliverMessage(s,msg.id)){
   const char=MISSION_NARRATIVES[msg.missionId]?.character;
   const charName=char?t(MISSION_NARRATIVES[msg.missionId].character==='benefactor'?'char_benefactor':char==='safetySpecialist'?'char_safety':'char_contract'):'';
-  notices.push({title:charName||'Nuevo mensaje',detail:t(msg.bodyKey)?.slice(0,60)+'…',symbol:'messages',action:()=>{phoneUI.narrativeCharacter=msg.characterId;phoneUI.conversation=true;openPhone('messages');}});
+  const smsPreview=resolveNarrativeText(t(msg.bodyKey)||msg.bodyKey,s.playerName).replace(/\s+/g,' ').trim();
+  notices.push({title:charName||'Nuevo mensaje',detail:smsPreview.slice(0,60)+(smsPreview.length>60?'…':''),symbol:'messages',action:()=>{phoneUI.focusNarrativeMessage(msg);openPhone('messages');}});
   sound('ring');save();
   renderHUD();
-  // M3 has already paid in completeContract(); its closing Camila message
-  // must open by itself even if the player is still viewing the Contract app.
-  // This only switches the phone view and never collects/pays a reward.
-  const isM3Closing=msg.id==='n:m3:end'||msg.id==='n:m4:end';
-  if((isM3Closing||msg.id.endsWith(':start'))&&!modalOpen&&!builderOpen&&!busy&&(!phoneOpen||isM3Closing)){
-   phoneUI.narrativeCharacter=msg.characterId;
-   phoneUI.conversation=true;
+  // The latest start/end briefing for ANY of M1–M5 opens its own bubble.
+  // Closings may interrupt a management app; acceptance/collection remains
+  // strictly manual, with no extra cash and no automatic mission progress.
+  const isClosing=msg.id.endsWith(':end');
+  if((isClosing||msg.id.endsWith(':start'))&&!modalOpen&&!builderOpen&&!busy&&(!phoneOpen||isClosing)){
+   phoneUI.focusNarrativeMessage(msg);
    openPhone('messages');
+  }else if(phoneOpen&&phoneApp==='messages'&&phoneUI.conversation&&phoneUI.narrativeCharacter===msg.characterId){
+   phoneUI.focusNarrativeMessage(msg);
+   renderPhone();
   }else if(phoneOpen&&phoneApp==='messages'&&!phoneUI.conversation)renderPhone();
  }
 }
