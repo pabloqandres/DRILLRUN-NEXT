@@ -5,6 +5,7 @@ on:
     paths:
       - "dist/chapter/asset-wave01-runtime.mjs"
       - "dist/chapter/builder-ui.mjs"
+      - "dist/asset-lab-wave01.html"
       - "dist/assets3d/drillrun-pack/**"
       - "tests/asset-wave01-runtime.test.mjs"
       - ".github/workflows/wave01-asset-runtime.yml"
