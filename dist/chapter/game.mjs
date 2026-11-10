@@ -27,6 +27,8 @@ import {mission2Readout} from '../hsec/mission-readout.mjs';
 import {createDrillModel,animateDrill} from '../mission3/drill-models.mjs';
 import {createDthProductionRig,animateDthRig,createMachineryStaging,RC_RESERVE,DTH_RESERVE} from '../graphics/production-dth-rig.mjs';
 import {mission4Readout} from '../mission4/operations-guide.mjs';
+import {PATIO_L1,PATIO_FUTURE,patioState,patioUnlocked,patioProgress,startPatio,finishPatio} from '../mission5/patio-state.mjs';
+import {createPatioWorld} from '../mission5/patio-world.mjs';
 import {createBoreholeMarker,updateMarkerProgress} from '../mission3/borehole-marker.mjs';
 import {createDeliveryVehicle,startDelivery,updateDelivery,departDelivery} from '../mission3/delivery-vehicle.mjs';
 import {createDrillingEffects,updateDrillingEffects} from '../mission3/drilling-effects.mjs';
@@ -75,13 +77,14 @@ import {pendingMessage,deliverMessage,acceptMission,confirmCompletion,isMissionA
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],hidden=(el,v)=>el.classList.toggle('hidden',v);
 let prefs={lang:deviceLanguage(navigator.language),sound:true};try{prefs={...prefs,...JSON.parse(localStorage.getItem('drillrun-preferences')||'{}')};}catch{}
 if(!LANGUAGES.some(([l])=>l===prefs.lang))prefs.lang='es';let t=translator(prefs.lang),s=null,hasSave=false;
-function readSave(){try{const raw=localStorage.getItem(CONFIG.saveKey),data=JSON.parse(raw||'null');if(data&&data.schema!=='modular-1'&&!localStorage.getItem(CONFIG.saveKey+'-before-modular'))localStorage.setItem(CONFIG.saveKey+'-before-modular',raw);const value=restore(data);if(value){restoreHsec(value);restoreMission3(value);reconcileDeliveredMachinery(value);restoreMission4(value);}return value;}catch{return null;}}
+function readSave(){try{const raw=localStorage.getItem(CONFIG.saveKey),data=JSON.parse(raw||'null');if(data&&data.schema!=='modular-1'&&!localStorage.getItem(CONFIG.saveKey+'-before-modular'))localStorage.setItem(CONFIG.saveKey+'-before-modular',raw);const value=restore(data);if(value){restoreHsec(value);restoreMission3(value);reconcileDeliveredMachinery(value);restoreMission4(value);finishPatio(value);}return value;}catch{return null;}}
 s=readSave();hasSave=!!s;if(s)prefs.lang=s.lang;t=translator(prefs.lang);
 let hsecWorld=null,hsecUI=null,hsecElapsed=0,hsecLastSignature='',hsecFollow=false,hsecRecorder=null;
 let constructionCallout=null,guidance=null,cinematic=null,cameraDebug=null,cinemaRecorder=null,reviewBackup=null,cinemaReview=false,locomotionReview=null,qaComputerPath=null,qaWalkRoute=null,characterStage=null,avatars=null,builderOpen=false,managingOffice=false,officePanelPreview=null,selectedBuildModule=null,lastPortraitId=null,selectedAvatar='operator01';
 let m3DrillModel=null,m3BoreholeMarkers=[],m3DeliveryVehicle=null,m3DrillingFx=null,m3VisualsReady=false;
 let m4DrillTruckModel=null,m4ParkingSpot=null,m4VisualsReady=false,m4TruckLoading=false,m4TruckCollider=null;
 let m4DthModel=null,m4DthCollider=null,m4Staging=null;
+let m5World=null,patioOverviewUntil=0;
 let siteCinematics=null;
 let world,scene,phase='start',phoneApp=null,phoneOpen=false,category='desks',modalOpen=false,blueprint=false,placement=null,busy=null,keys={},joy={x:0,y:0},pointer=null,target=null,auth={configured:false},account=null,audioContext=null,last=performance.now(),clock=0,lastSave=0,lastHud=0,introAt=0,lastObjective='',qaRoute=false;
 let cloudSyncing=true,cloudLocked=false,cloudStatus='Verificando Google…',cloudEpoch=0;
@@ -355,6 +358,11 @@ function updateM3Visuals(dt){
  updateDrillingEffects(m3DrillingFx,dt,drilling);
  // Delivery vehicle animation
  updateDelivery(m3DeliveryVehicle,dt);
+}
+function initM5Visuals(now=Date.now()){
+ if(!world||!s?.mission4||s.mission4.phase!=='complete')return;
+ if(!m5World)m5World=createPatioWorld(world);
+ m5World.update(s,now);
 }
 function initM4Visuals(){
  if(m4VisualsReady||!world||!s?.mission4||s.mission4.phase==='inactive')return;
