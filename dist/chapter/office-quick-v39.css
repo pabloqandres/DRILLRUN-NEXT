@@ -1,0 +1,162 @@
+/* V39 · Oficina: compact interactive 3D detail card, game-camera overlay.
+   Scope exclusively to .officeQuick so it cannot disturb M1–M5 sheets.
+   Fixed preview + readable content + visible actions in landscape mobile. */
+#modal.officeQuick{
+ background:#08192670;backdrop-filter:blur(2px);
+ padding:0!important
+}
+#modal.officeQuick #modalCard{
+ box-sizing:border-box!important;
+ position:absolute!important;left:auto!important;
+ right:max(12px,env(safe-area-inset-right,12px))!important;
+ top:50%!important;transform:translateY(-50%)!important;
+ width:min(610px,calc(100vw - 30px))!important;
+ min-width:0!important;max-width:none!important;
+ height:auto!important;max-height:calc(100dvh - 20px)!important;
+ padding:12px!important;overflow:hidden!important;
+ border:1px solid #78b8c7aa!important;
+ border-top:3px solid #bf3d43!important;
+ border-radius:16px!important;
+ background:linear-gradient(145deg,#142f43f9,#0a2133fa)!important;
+ box-shadow:0 20px 60px #010b18c9,0 0 0 1px #c3e9f711!important
+}
+#modal.officeQuick #modalCard .modalDismiss{
+ top:12px!important;right:12px!important;z-index:5!important;
+ height:32px!important;width:32px!important;min-height:32px!important
+}
+#modal.officeQuick #modalCard .officeQuickLayout{
+ display:grid!important;
+ grid-template-columns:minmax(150px,.92fr) minmax(0,1fr)!important;
+ align-items:stretch!important;gap:15px!important;
+ height:100%;min-height:205px!important;max-height:calc(100dvh - 52px)!important;
+ min-width:0!important
+}
+#modal.officeQuick #modalCard .officePanelPreview,
+#modal.officeQuick.upgradeSheet #modalCard .officePanelPreview{
+ display:block!important;
+ align-self:stretch!important;
+ width:100%!important;height:100%!important;
+ min-height:205px!important;max-height:none!important;
+ margin:0!important;border:1px solid #60a7c67f!important;
+ border-radius:12px!important;
+ background:radial-gradient(circle at 50% 25%,#325569,#0c2439 77%)!important;
+ overflow:hidden!important;touch-action:none!important;
+ box-shadow:inset 0 1px #aadbed30
+}
+#modal.officeQuick #modalCard .officePanelPreview>canvas{
+ display:block;width:100%!important;height:100%!important
+}
+#modal.officeQuick #modalCard .officeQuickDetails{
+ display:flex!important;flex-direction:column!important;
+ min-width:0!important;min-height:0!important;
+ gap:9px!important;padding:7px 3px 2px 0!important
+}
+#modal.officeQuick #modalCard .officeQuickInfo{
+ flex:1 1 auto!important;min-height:0!important;
+ overflow-y:auto!important;overflow-x:hidden!important;
+ padding:0 35px 0 0!important;
+ overscroll-behavior:contain;scrollbar-width:thin
+}
+#modal.officeQuick #modalCard .officeQuickInfo>.eyebrow{
+ display:block!important;color:#8bc5d4!important;
+ font-size:9px!important;line-height:1.4!important;
+ letter-spacing:1.15px!important;font-weight:850!important;
+ margin:1px 0 8px!important
+}
+#modal.officeQuick #modalCard .officeQuickInfo>h2{
+ font-size:clamp(17px,2.3vw,24px)!important;
+ line-height:1.16!important;letter-spacing:-.3px!important;
+ margin:0 0 9px!important;
+ padding:0!important;color:#fff9ef!important;
+ font-weight:820!important;overflow-wrap:break-word!important
+}
+#modal.officeQuick #modalCard .officeQuickInfo>p{
+ color:#b4cbd4!important;font-size:11px!important;line-height:1.5!important;
+ margin:0 0 9px!important;max-width:45ch!important
+}
+#modal.officeQuick #modalCard .officeQuickInfo .officeQuickNotice{
+ display:flex;align-items:center;gap:5px;
+ font-size:10px!important;line-height:1.35!important;
+ color:#94d0ad!important;margin-top:6px!important
+}
+#modal.officeQuick #modalCard .officeQuickInfo .officeQuickNotice .uiIcon{
+ width:13px;height:13px;flex:0 0 auto
+}
+#modal.officeQuick #modalCard .officeQuickInfo .buildCost,
+#modal.officeQuick #modalCard .officeQuickInfo .buildDuration{
+ display:inline-flex;align-items:center;gap:5px;
+ margin:2px 9px 5px 0!important;font-size:12px!important;
+ vertical-align:middle
+}
+#modal.officeQuick #modalCard .officeQuickInfo .buildCost b{color:#edc775}
+#modal.officeQuick #modalCard .officeQuickActions{
+ flex:0 0 auto!important;display:flex!important;
+ gap:7px!important;flex-wrap:wrap!important;
+ align-items:stretch!important;
+ padding:9px 0 1px!important;border-top:1px solid #6397ad49!important
+}
+#modal.officeQuick #modalCard .officeQuickActions>button{
+ flex:1 1 auto!important;min-width:0!important;
+ display:inline-flex!important;justify-content:center!important;align-items:center!important;
+ gap:7px!important;min-height:40px!important;
+ padding:8px 11px!important;white-space:normal!important;
+ font-size:11px!important;line-height:1.25!important;
+ border-radius:10px!important;font-weight:800!important
+}
+#modal.officeQuick #modalCard .officeQuickActions>button .uiIcon{
+ height:16px!important;width:16px!important;flex:0 0 auto!important
+}
+#modal.officeQuick #modalCard .officeQuickActions .officeQuickEnter{
+ color:#e9f5f3!important;background:#245066!important;
+ border:1px solid #79b7c9!important
+}
+#modal.officeQuick #modalCard .officeQuickActions>small{
+ flex:1 0 100%;margin:0!important;color:#f6c18c!important;font-size:10px!important
+}
+/* Keep the 3D model and a button simultaneously visible on 832×384 screens. */
+@media(max-height:520px) and (min-width:590px){
+ #modal.officeQuick #modalCard{
+  right:12px!important;width:min(535px,calc(100vw - 24px))!important;
+  max-height:calc(100dvh - 16px)!important;padding:9px!important
+ }
+ #modal.officeQuick #modalCard .officeQuickLayout{
+  grid-template-columns:minmax(145px,.9fr) minmax(0,1fr)!important;
+  gap:12px!important;min-height:184px!important;
+  max-height:calc(100dvh - 38px)!important
+ }
+ #modal.officeQuick #modalCard .officePanelPreview,
+ #modal.officeQuick.upgradeSheet #modalCard .officePanelPreview{
+  min-height:184px!important
+ }
+ #modal.officeQuick #modalCard .officeQuickDetails{gap:6px!important;padding:4px 0 0!important}
+ #modal.officeQuick #modalCard .officeQuickInfo>.eyebrow{
+  font-size:8px!important;margin:0 0 5px!important
+ }
+ #modal.officeQuick #modalCard .officeQuickInfo>h2{
+  font-size:18px!important;line-height:1.12!important;margin-bottom:6px!important
+ }
+ #modal.officeQuick #modalCard .officeQuickInfo>p{
+  font-size:10px!important;line-height:1.35!important;margin-bottom:5px!important
+ }
+ #modal.officeQuick #modalCard .officeQuickActions{padding-top:6px!important;gap:5px!important}
+ #modal.officeQuick #modalCard .officeQuickActions>button{
+  min-height:34px!important;font-size:10px!important;padding:6px 7px!important
+ }
+}
+@media(max-width:589px){
+ #modal.officeQuick #modalCard{
+  right:8px!important;width:calc(100vw - 16px)!important;
+  max-height:calc(100dvh - 12px)!important;padding:9px!important
+ }
+ #modal.officeQuick #modalCard .officeQuickLayout{
+  grid-template-columns:minmax(120px,.9fr) minmax(0,1fr)!important;
+  gap:9px!important;min-height:160px!important;max-height:calc(100dvh - 30px)!important
+ }
+ #modal.officeQuick #modalCard .officePanelPreview,
+ #modal.officeQuick.upgradeSheet #modalCard .officePanelPreview{min-height:160px!important}
+ #modal.officeQuick #modalCard .officeQuickDetails{padding-top:3px!important;gap:4px!important}
+ #modal.officeQuick #modalCard .officeQuickInfo>h2{font-size:16px!important;margin-bottom:5px!important}
+ #modal.officeQuick #modalCard .officeQuickInfo>p{font-size:10px!important;line-height:1.25!important}
+ #modal.officeQuick #modalCard .officeQuickInfo>.eyebrow{font-size:8px!important;margin:0 0 4px!important}
+ #modal.officeQuick #modalCard .officeQuickActions>button{font-size:9px!important;min-height:31px!important;padding:5px!important}
+}
