@@ -39,7 +39,7 @@ test('player support height matches desert mesh on plot and access, not buried a
 });
 test('M5 grading floor can lift player to finished asphalt during the 20-minute build',()=>{
  const w=world(true);
- w.walkSurfaces.push({x:-51,z:-17,w:53.4,d:43.4,y:.19});
+ w.walkSurfaces.push({x:-51,z:-17,w:54.4,d:43.4,y:.19});
  assert(w.sampleGround(-51,-17)>=.19);
  assert(w.sampleGround(-24,-14)>=.19);
 });
