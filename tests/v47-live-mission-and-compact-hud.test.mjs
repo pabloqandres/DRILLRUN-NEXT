@@ -66,7 +66,7 @@ test('V47 world HUD shows current + next only, and progresses with the actual mi
  assert.deepEqual(visible.map(x=>x.status),['current','locked']);
  let html=renderMission5HudChecklist(readout,{compact:true});
  assert.equal((html.match(/class="m5HudStep/g)||[]).length,2);
- assert.match(html,/0\/5|12\.000/);
+ assert.match(html,/0\/6|12\.000/);
  assert.doesNotMatch(html,/Realizar control inicial de bodega/);
  // Completed construction advances the active window to staff.
  s.mission5={status:'operational',hsecApproved:true};
@@ -81,9 +81,13 @@ test('V47 world HUD shows current + next only, and progresses with the actual mi
  s.mission5.gateCheckedAt=date;s.mission5.warehouseCheckedAt=date;
  readout=mission5Readout(s,date);
  assert.equal(readout.done,5);
- assert.deepEqual(mission5HudVisibleSteps(readout).map(x=>x.id),['inventory']);
+ assert.deepEqual(mission5HudVisibleSteps(readout).map(x=>x.id),['personalTruck']);
+ s.mission5.personalTruck={id:'drilltruck-personal-02',deliveredAt:date,mode:'parked'};
+ readout=mission5Readout(s,date);
+ assert.equal(readout.done,6);
+ assert.deepEqual(mission5HudVisibleSteps(readout).map(x=>x.id),['personalTruck']);
  const full=renderMission5HudChecklist(readout);
- assert.equal((full.match(/class="m5HudStep/g)||[]).length,5,'full details remain available');
+ assert.equal((full.match(/class="m5HudStep/g)||[]).length,6,'full details remain available');
 });
 test('V47 game reads shared mission source for title and HUD, and invokes compact mode',()=>{
  const game=read('dist/chapter/game.mjs');
