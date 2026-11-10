@@ -1,5 +1,17 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-10 — V46 checklist M5 y bono de cierre (PR)
+
+- Sincroniza cinco objetivos reales de M5 entre tarjeta HUD y app del Patio;
+  resalta el paso actual, bloquea futuros y mantiene scroll en móvil.
+- En el flujo nuevo, la técnica requiere guardia; revisión de portón requiere
+  ambas contrataciones; inventario requiere portón verificado.
+- Bono único de 🪙 12.000 al confirmar SMS final de Elena, con registro
+  persistente en ledger; sin pago anticipado ni duplicado.
+- Precio total previo de 🪙 49.000, obra de 20 minutos y M4 conservados.
+- Pruebas de regresión nuevas y actualización V43. PR pendiente; sin despliegue.
+- Detalle: `CHANGES/2026-11-10_m5-live-checklist-reward-v46.md`.
+
 ## 2026-11-09 — V25 M4 countdown, actual zone count, RC safe staging and DrillTruck UI
 
 - Add compact first DTH cycle countdown to right HUD, anchored to real 15-minute production timestamps; M4 closing benefactor message auto-opens after first income and DTH continues producing after confirmation. Fix 3/6 fixed zone denominator to real sites, clip DrillTruck catalog/sheet image, move RC/DTH reserve pads to flat playable terrain, guard notification actions and repair drill localization. Rename $/hora as projected DTH income. See CHANGES/2026-11-09_m4-visual-cycle-v25.md.
