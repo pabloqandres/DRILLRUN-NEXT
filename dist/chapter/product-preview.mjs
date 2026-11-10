@@ -10,8 +10,8 @@ export class ProductPreview{
  constructor(host,world,{transparent=false}={}){
   this.host=host;this.world=world;this.transparent=transparent;this.scene=new T.Scene();this.scene.background=transparent?null:new T.Color(0x152c40);this.camera=new T.PerspectiveCamera(36,1,.01,60);this.angle=-.65;
   this.scene.add(new T.HemisphereLight(0xfff5e5,0x79746d,2.5));const sun=new T.DirectionalLight(0xfff0d7,2.8);sun.position.set(-3,5,4);this.scene.add(sun);
-  if(world.renderer.isSoftwareRenderer)this.renderer=new SoftwareRenderer({alpha:transparent});else try{this.renderer=new T.WebGLRenderer({antialias:true,alpha:transparent,preserveDrawingBuffer:transparent,powerPreference:'low-power'});if(transparent)this.renderer.setClearColor(0,0);}catch{this.renderer=new SoftwareRenderer({alpha:transparent});}
-  this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));this.renderer.outputColorSpace=T.SRGBColorSpace;this.renderer.toneMapping=T.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.1;host.prepend(this.renderer.domElement);
+  if(world.renderer.isSoftwareRenderer)this.renderer=new SoftwareRenderer({alpha:transparent});else try{this.renderer=new T.WebGLRenderer({antialias:false,alpha:transparent,preserveDrawingBuffer:transparent,powerPreference:'low-power'});if(transparent)this.renderer.setClearColor(0,0);}catch{this.renderer=new SoftwareRenderer({alpha:transparent});}
+  this.renderer.setPixelRatio(Math.min(devicePixelRatio,1));this.renderer.outputColorSpace=T.SRGBColorSpace;this.renderer.toneMapping=T.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.1;host.prepend(this.renderer.domElement);
   this.renderer.domElement.setAttribute('aria-label',host.dataset.previewLabel||'3D');this.renderer.domElement.setAttribute('role','img');
   if(!transparent){const ground=new T.Mesh(new T.PlaneGeometry(30,30),world.mat(0x183044));ground.rotation.x=-Math.PI/2;ground.position.y=-.015;this.scene.add(ground);}
   this.observer=new ResizeObserver(()=>this.draw());this.observer.observe(host);let x=0,pointer=null;
@@ -45,7 +45,21 @@ export class ProductPreview{
  rotate(delta){this.angle+=delta;this.draw();}
  draw(){if(!this.model)return;if(this.interior){this.model.traverse(o=>{if(o.isGroup&&o.name.startsWith('03 ·'))o.visible=false;if(o.isGroup&&o.name.startsWith('04 ·'))o.visible=Math.cos(this.angle)<0;if(o.isGroup&&o.name.startsWith('05 ·'))o.visible=Math.cos(this.angle)>=0;if(o.isGroup&&o.name.startsWith('06 ·'))o.visible=Math.sin(this.angle)>=0;if(o.isGroup&&o.name.startsWith('07 ·'))o.visible=Math.sin(this.angle)<0;});}const width=this.host.clientWidth,height=this.host.clientHeight;if(width<2||height<2)return;this.renderer.setSize(width,height);fitPreviewCamera(this.camera,new T.Box3().setFromObject(this.model),width/height,this.angle);this.renderer.staticFrame=null;this.renderer.last=0;this.renderer.render(this.scene,this.camera);}
  releaseModel(){if(!this.model)return;this.model.traverse(o=>{o.geometry?.dispose();if(o.isLineSegments)o.material.dispose();});this.model.removeFromParent();this.model=null;}
- dispose(){this.observer.disconnect();this.releaseModel();this.scene.traverse(o=>o.geometry?.dispose());this.renderer.dispose?.();this.renderer.domElement.remove();this.host.onpointerdown=this.host.onpointermove=this.host.onpointerup=this.host.onpointercancel=null;}
+ dispose(){
+  this.observer.disconnect();
+  this.releaseModel();
+  this.scene.traverse(o=>o.geometry?.dispose());
+  // A WebGLRenderer.dispose() frees textures/buffers but DOES NOT necessarily
+  // release the browser's WebGL context. The Catalog can make dozens of
+  // transparent thumbnails, exhausting Android's context budget and causing
+  // the separate GAME renderer to display only white.
+  // Each ProductPreview owns its renderer: losing THIS context never touches
+  // the gameplay canvas. Free it explicitly before removing the snapshot.
+  this.renderer.dispose?.();
+  if(!this.renderer.isSoftwareRenderer)this.renderer.forceContextLoss?.();
+  this.renderer.domElement.remove();
+  this.host.onpointerdown=this.host.onpointermove=this.host.onpointerup=this.host.onpointercancel=null;
+ }
 }
 
 // The M3 equipment panel uses the very same physical rig model as the world.
