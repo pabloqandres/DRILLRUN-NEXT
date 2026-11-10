@@ -57,6 +57,18 @@ export function startTruckRoute(model,zoneId,direction='out',usePatio=false){
  const d=model.userData._truckRoute;
  d.active=true;
  d.route=buildRoute(zoneId,direction,usePatio);
+ // A browser reload may interrupt relocation: continue from the truck's
+ // persisted world position instead of teleporting to its obsolete home.
+ if(direction==='relocate'&&model.position){
+  const current=model.position.clone();
+  let nearest=0,distance=Infinity;
+  for(let i=0;i<d.route.length;i++){
+   const score=current.distanceTo(d.route[i]);
+   if(score<distance){distance=score;nearest=i;}
+  }
+  if(nearest>0&&nearest<d.route.length-1)
+   d.route=[current,...d.route.slice(nearest+1)];
+ }
  d.index=0;
  d.t=0;
  d.phase=direction;
@@ -83,10 +95,13 @@ export function updateTruckRoute(model,dt){
   if(d.phase==='out'){
    d.phase='onsite';
    return 'arrived';
-  }else{
-   d.phase='parked';
-   return 'returned';
   }
+  if(d.phase==='relocate'){
+   d.phase='parked';
+   return 'yard-arrived';
+  }
+  d.phase='parked';
+  return 'returned';
  }
 
  const segLen=from.distanceTo(to);
