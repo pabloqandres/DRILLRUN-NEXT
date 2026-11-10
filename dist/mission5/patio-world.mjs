@@ -84,7 +84,7 @@ function markings(g){
  // Heavy-equipment bays: open air, turning clearances 12–13m.
  for(const x of[-7,5,17])mark(g,x,-13,11.2,15.7,C.yellow);
  // RC and DTH open bays, no overhead canopies or fake static rigs.
- for(const x of[8,15.5,23])mark(g,x,15.25,6.6,10.3,C.yellow);
+ for(const x of[8,15.5])mark(g,x,15.25,6.6,10.3,C.yellow);
  // Roofed light fleet: six narrow slots only for pickups and DrillTruck.
  for(const x of[-23,-19.4,-15.8,-12.2,-8.6,-5]){
   mark(g,x,14.1,3.4,7.4,C.yellow);
@@ -218,7 +218,7 @@ export function createPatioWorld(w){
     grading.visible=status==='operational'||(status==='building'&&info.progress>=.10);
     structures.visible=status==='operational'||(status==='building'&&info.progress>=.30);
     final.visible=status==='operational'||(status==='building'&&info.progress>=.80);
-    w.yardL1Open=enabled;
+    w.yardL1Open=status==='operational';
    }
    if(status==='operational'&&!registered){
     registered=true;
@@ -251,7 +251,7 @@ export function createPatioWorld(w){
    const truck=s.mission4?.drillTruck;
    const truckNear=!!truck?.position&&
     Math.hypot(truck.position.x-PATIO_L1.gate.x,truck.position.z-PATIO_L1.gate.z)<12;
-   const desired=truckNear?-Math.PI/2:0;
+   const desired=truckNear||w.fleetGateInUse?-Math.PI/2:0;
    access.rotation.x+=(desired-access.rotation.x)*.12;
   },
   dispose(){root.removeFromParent();future.removeFromParent();}
