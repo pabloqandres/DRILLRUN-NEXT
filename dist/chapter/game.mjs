@@ -866,7 +866,7 @@ function nearInteraction(){if(!s)return null;
  return null;
 }
 $('#handButton').onclick=()=>{if(busy||modalOpen||phoneOpen||builderOpen||placement)return;const a=phase==='play'?nearInteraction():null;if(!a)return;if(a.kind==='personalTruck'){togglePersonalTruck();return;}if(a.kind==='m5Staff'){openFaena('personnel');return;}if(a.kind==='hsecAsset'){hsecUI.open('assets');return;}if(a.kind==='clear'){if(s.energy<CONFIG.clearCost)return toast('noEnergy');busy={object:a.object,elapsed:0};stop();sound('clear');}else if(a.kind==='build')showBuild();else if(a.kind==='boost')action(()=>accelerate(s));else if(a.kind==='workshop'){openFaena('workshop');return;}else if(a.kind==='warehouse'){openFaena('logistics');return;}else if(a.kind==='enter')enterOffice();else if(a.kind==='exit'){transition('exitTransition');s.inside=false;s.position={...CONFIG.officeSlot.access};world.worker.reset();stop();save();}else if(a.kind==='computer'){if(!s.chapterCompletedAt){action(()=>useOfficeComputer(s));sound('finish');/* reward modal deferred to narrative confirmCompletion */return;}hsecUI.open();return;modal(`<span class="eyebrow">${esc(t('computer'))}</span><h2>${esc(t('next'))}</h2><p>${esc(t('nextDetail'))}</p><div class="modalActions">${button('close','closeComputer',true)}</div>`);$('#closeComputer').onclick=closeModal;}};
-function openBuilder(){if(phase!=='play'||placement||busy)return;
+function openBuilder(){if(phase!=='play'||placement||busy)return;closeFaena();
  catalogPreviewWalk=false;hidden($('#endBuildPreviewWalk'),true);
  if(!isMissionAccepted(s,'m1')&&!isMissionCollected(s,'m1')){
   showPendingMissionMessage();return;
@@ -1350,18 +1350,65 @@ onM4Action:(type,data)=>{try{
 }catch(e){const msg=e.message==='noMoney'?'Fondos insuficientes':e.message;notices.push({title:msg,symbol:'lock'});}},
 onNarrativeAction:handleNarrativeAction,
 });
+// V53: One operational controller, multiple entry points; existing phone action
+// handlers remain authoritative, so there is no duplicate mission/economy state.
+function closeFaena(){if(faenaCenter?.visible)faenaCenter.close();document.body.classList.remove('faenaOpen');}
+function openFaena(route='overview'){
+ if(phase!=='play'||placement||busy||modalOpen)return;
+ stop();closePhone();closeBuilder();hideDrillCard();hideWorkshopCard();
+ hsecWorld?.showAssetCard(null);
+ document.body.classList.add('faenaOpen');
+ faenaCenter.open(route);
+ if(route==='production'&&s.mission3?.reportRead){updateMission3Phase(s);save();renderHUD();}
+}
+faenaCenter=new FaenaCenterUI({
+ host:$('#faenaCenter'),state:()=>s,translate:()=>t,format:money,icon,
+ onClose:()=>document.body.classList.remove('faenaOpen'),
+ onHsec:()=>hsecUI?.open(),
+ onLocate:type=>{const pos=type==='drill'&&m3DrillModel?m3DrillModel.position:
+  type==='drillTruck'&&m4DrillTruckModel?m4DrillTruckModel.position:
+  type==='dthDrill'&&m4DthModel?m4DthModel.position:null;
+  if(pos)target={x:pos.x,z:pos.z};},
+ onAppAction:(group,type,value)=>{
+  if(group==='navigatePhone'){openPhone(type);return;}
+  if(group==='m5')phoneUI.onM5Action?.(type,value);
+  else if(group==='m3')phoneUI.onM3Action?.(type,value);
+  else if(group==='m4')phoneUI.onM4Action?.(type,value);
+ },
+ onKitOrder:kitId=>{
+  try{
+   const kit=REPAIR_KITS[kitId];
+   if(!kit)throw new Error('invalidKit');
+   const order=placeOrder(s,[{type:'repairKit',category:'maintenance',model:kit.id,qty:1,unitPrice:kit.price}]);
+   notices.push({title:'Kit solicitado a Casa Matriz',detail:kit.label+' · pedido '+order.id,symbol:'bell'});
+   if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);
+   save();renderHUD();
+  }catch(error){
+   notices.push({title:error.message==='noMoney'?'Fondos insuficientes':error.message==='workshopNotReady'?'Requiere Taller construido y Patio operativo':error.message,symbol:'lock'});
+  }
+ },
+ onRecovery:toolId=>{
+  try{
+   const job=startRecovery(s,toolId);
+   notices.push({title:'Recuperación iniciada',detail:'Taller técnico · '+Math.ceil((job.endsAt-job.startedAt)/60_000)+' min',symbol:'wrench'});
+   save();renderHUD();
+  }catch(error){notices.push({title:error.message,symbol:'lock'});}
+ }
+});
+$('#faenaCenter').addEventListener('click',e=>{if(e.target.id==='faenaCenter')closeFaena();});
+
 $('#builderButton').onclick=openBuilder;
 $('#patioBuildHud')?.addEventListener('click',()=>{if(phase==='play')openPatioPanel();});
 $('#patioBuildHud')?.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(phase==='play')openPatioPanel();}});
  $$('#bottomNav [data-nav]').forEach(b=>b.onclick=()=>{
   const nav=b.dataset.nav;
   if(nav==='builder'){openBuilder();return;}
-  if(nav==='hsec'){if(!isMissionAccepted(s,'m2')&&!isMissionCollected(s,'m2')){if(!showPendingMissionMessage())openPhone('objectives');return;}if(hsecUI&&s?.hsec)hsecUI.open();else openPhone('objectives');return;}
-  if(nav==='m4-operations'){if(s?.mission4&&s.mission4.phase!=='inactive')openPhone('m4-operaciones');return;}
-  if(nav==='m4-zones'){openPhone(s?.mission4?.phase&&s.mission4.phase!=='inactive'?'m4-zones':'objectives');return;}
-  if(nav==='m3-contract'){openPhone(s?.mission3?.phase&&s.mission3.phase!=='inactive'?'m3-contract':'objectives');return;}
-  if(nav==='m3-inventory'){openPhone(s?.mission4?.phase&&s.mission4.phase!=='inactive'?'m4-workshop':s?.mission3?.phase&&s.mission3.phase!=='inactive'?'m3-inventory':'inventory');return;}
-  if(nav==='m3-personnel'){openPhone(s?.mission3?.phase&&s.mission3.phase!=='inactive'?'m3-personnel':'home');return;}
+  if(nav==='hsec'){if(!isMissionAccepted(s,'m2')&&!isMissionCollected(s,'m2')){if(!showPendingMissionMessage())openPhone('objectives');return;}openFaena('safety');return;}
+  if(nav==='m4-operations'){openFaena('overview');return;}
+  if(nav==='m4-zones'){openFaena('production');return;}
+  if(nav==='m3-contract'){openFaena('contracts');return;}
+  if(nav==='m3-inventory'){openFaena('fleet');return;}
+  if(nav==='m3-personnel'){openFaena('personnel');return;}
   openPhone(nav);
  });$('#phoneButton').onclick=()=>{if(phoneOpen)closePhone();else if(!showPendingMissionMessage())openPhone();};$('#closePhone').onclick=$('#phoneShade').onclick=closePhone;$('#phoneBack').onclick=()=>phoneUI.backApp();$('#money').onclick=()=>notices.push({title:t('cash'),detail:money(s.cash),symbol:'wallet'});
 $('#objective').onclick=e=>{if(e.target.closest('#objToggle'))return;showMission();};$('#objective').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showMission();}};
@@ -1438,7 +1485,7 @@ $('#endBuildPreviewWalk').onclick=()=>{
 // Input focus belongs to foreground UI: do not steal arrow keys, scrolling
 // or movement keys when the player is reading or purchasing from the phone.
 addEventListener('keydown',e=>{
- if(e.key==='Escape'){closeModal();closePhone();closeBuilder();if(placement)cancelPlacement();stop();return;}
+ if(e.key==='Escape'){closeFaena();closeModal();closePhone();closeBuilder();if(placement)cancelPlacement();stop();return;}
  if(phoneOpen||modalOpen||e.target.closest?.('#phone,#modal,input,select,textarea,[contenteditable]'))return;
  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();
  keys[e.key.toLowerCase()]=true;
@@ -1579,6 +1626,7 @@ world.update(s,dt,clock,walking,false,personalTruck(s)?.mode==='driving');
  });
  constructionCallout?.update(s,phase==='play'&&!builderOpen&&!modalOpen&&!phoneOpen,t);world.player.visible=phase!=='start'&&personalTruck(s)?.mode!=='driving'&&(phase!=='character'||!!CONFIG.protagonists.find(p=>p.id===selectedAvatar)?.available);
  guidance?.update(s,phase==='play'&&!builderOpen&&!modalOpen&&!phoneOpen&&!placement);if(phase==='play')showNextReward();
+ if(faenaCenter?.visible&&now-faenaRefreshAt>1500){faenaRefreshAt=now;faenaCenter.render();}
  if(now-lastHud>150){renderHUD();cameraDebug?.update();lastHud=now;}if(now-lastSave>2000){save();lastSave=now;}
  if(qaComputerPath&&phase==='play'&&!phoneOpen&&!modalOpen){while(qaComputerPath.length&&Math.hypot(qaComputerPath[0].x-s.position.x,qaComputerPath[0].z-s.position.z)<.12)qaComputerPath.shift();if(qaComputerPath.length)target={...qaComputerPath[0]};else qaComputerPath=null;}
  if(qaRoute&&phase==='play'&&!busy&&!phoneOpen&&!modalOpen){
