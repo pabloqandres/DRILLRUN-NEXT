@@ -76,7 +76,7 @@ test('V49 world retains vehicle gate routes, colliders and mobile-friendly mater
  assert.match(w,/w\.fleetGateInUse/);
  assert.match(w,/canopy-post/);
  assert.match(phone,/\[data-hire-patio\]/);
- assert.match(game,/openPhone\('m3-personnel'\);return;/);
+ assert.match(game,/if\(a.kind==='m5Staff'\)\{(?:openFaena\('personnel'\)|openPhone\('m3-personnel'\));return;\}/);
  assert.match(readout,/guard:'Personal → Logística del Patio/);
  assert.match(readout,/technician:'Personal → Logística del Patio/);
 });
