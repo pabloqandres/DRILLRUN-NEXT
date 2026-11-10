@@ -89,7 +89,7 @@ export class BuilderUI{
   const request=++this.wavePreviewRequest;
   this.waveDetailPreview?.dispose();this.waveDetailPreview=null;
   if(!product?.assetWavePath||this.store.detailId!==product.id||!this.world)return;
-  const id=product.assetWavePath.replace(/\\.glb$/i,'');
+  const id=product.assetWavePath.endsWith('.glb')?product.assetWavePath.slice(0,-4):product.assetWavePath;
   if(!wave01Definition(id))return;
   const host=this.host.querySelector('.catalogDetailVisual');
   if(!host)return;
