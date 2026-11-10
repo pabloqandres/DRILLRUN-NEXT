@@ -6,7 +6,7 @@ import {renderPatioApp} from '../mission5/patio-ui.mjs';
 import {mission5Readout} from '../mission5/mission-readout.mjs';
 import {hiredPatioStaff,gateChecked,warehouseChecked} from '../mission5/patio-staff.mjs';
 import {REPAIR_KITS,workshopRecoverySummary} from '../mission5/workshop-recovery.mjs';
-import {workshopLevel} from '../mission3/inventory.mjs';
+import {workshopLevel,workshopUpgradeJob,WORKSHOP_LEVELS} from '../mission3/inventory.mjs';
 import {fleetOccupancy} from '../mission5/fleet-base.mjs';
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -96,9 +96,15 @@ export class FaenaCenterUI{
     const jobs=info.jobs.map(j=>'<div class="faenaStockRow"><span><b>'+esc(j.toolId)+'</b><small>Recuperación técnica en curso</small></span><b>'+Math.floor(j.remainingSeconds/60).toString().padStart(2,'0')+':'+(j.remainingSeconds%60).toString().padStart(2,'0')+'</b></div>').join('');
     const stock=info.candidates.map(tool=>'<div class="faenaOrderRow"><span><b>'+esc(tool.model)+'</b><small>'+esc(tool.type==='bit'?'Reafilado de bit':'Reparación de martillo')+' · '+Math.round((tool.lifeRemaining||0)/Math.max(1,tool.lifeTotal||1)*100)+'% vida · '+(tool.recoveryCount||0)+' recuperaciones</small></span><button data-faena-recover="'+esc(tool.id)+'" '+(tool.blocked?'disabled':'')+'>'+esc(tool.blocked?states[tool.blocked]||tool.blocked:'Recuperar')+'</button></div>').join('');
     const active=lvl>0;
+    const upgrade=workshopUpgradeJob(s),nextLevel=WORKSHOP_LEVELS.find(x=>x.level===lvl+1);
+    const upgradePanel=upgrade?
+     section('Ampliación técnica','<p>Ampliando a nivel '+upgrade.targetLevel+' · termina en '+stamp(upgrade.ends)+'</p>'):
+     nextLevel?section('Ampliación técnica','<p>Más capacidad de herramientas y equipos para mantenimiento.</p>'+
+      '<button data-faena-workshop-upgrade '+(s.cash<nextLevel.upgradeCost?'disabled':'')+'>Ampliar a nivel '+nextLevel.level+' · '+money(nextLevel.upgradeCost)+'</button>'):'';
     return '<p class="faenaLead">El Taller ya no es otra bodega. Reafila bits, repara martillos con kits y devuelve herramientas recuperadas a la operación.</p>'+
      '<div class="faenaMetrics">'+small('Nivel técnico',lvl)+small('Trabajos pendientes',info.jobs.length)+small('Recuperaciones realizadas',info.completed)+'</div>'+
      (!active?'<p class="faenaHint">Construye el Taller desde Catálogo para habilitarlo.</p>':
+     upgradePanel+
      section('Trabajos de recuperación',jobs||'<p class="faenaHint">No hay trabajos en proceso.</p>')+
      section('Herramientas para recuperar',stock||'<p class="faenaHint">No hay piezas desgastadas para recuperar. El material agotado que vuelva de perforación aparecerá aquí.</p>')+
      section('Kits en el Taller',Object.values(REPAIR_KITS).map(k=>small(k.label,info.kits[k.id]||0)).join('')+button('logistics','Solicitar kits en Bodega'))+
@@ -178,6 +184,7 @@ export class FaenaCenterUI{
   if(b.dataset.faenaRoute){this.open(b.dataset.faenaRoute);return;}
   if(b.dataset.faenaView){this.open(b.dataset.faenaView);return;}
   if(b.hasAttribute('data-faena-hsec')){this.close();this.onHsec?.();return;}
+  if(b.hasAttribute('data-faena-workshop-upgrade')){this.onAppAction?.('m3','upgradeWorkshop',null);this.render();return;}
   if(b.dataset.faenaKit){this.onKitOrder?.(b.dataset.faenaKit);this.render();return;}
   if(b.dataset.faenaRecover){this.onRecovery?.(b.dataset.faenaRecover);this.render();return;}
   if(b.dataset.app){this.navigate(b.dataset.app);return;}
