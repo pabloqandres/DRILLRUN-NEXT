@@ -248,3 +248,13 @@ The user explicitly directed ChatGPT to rebuild **everything visible in the game
 **Overrides the earlier equipment naming and research proposal:** Never introduce outside manufacturer names, product names, logos, photos, distinctive machine livery or outside product references in DRILL RUN gameplay, user-facing UI, visual mockups, technical sheets, design briefs or assets. Only explicitly user-approved DRILLCO®-associated brand assets may appear. The previously proposed fictional rig nicknames were not approved and are withdrawn. Use neutral descriptive labels for generic unbranded machinery until the user approves names and original appearance. DRILLCO® does not sell the drilling machines, only its authorized drill tools.
 
 **Scope:** Retain a two-type Equipment catalog and the Vehicles identity-rail CSS fix; replace invented nicknames with «Perforadora RC · Sondaje», legacy «Perforadora RC · Alta capacidad» and «Perforadora DTH · Producción». Remove outside-branded modeling references, preserving IDs, orders, economy, missions and state. Production release still requires approval.
+
+## 2026-11-10 — V52 Iluminación real, focos, avatar y sonido de conducción
+La misión M5 ya funciona y no debe cambiar. El usuario pidió postes de Patio
+que iluminen el terreno realmente de noche y focos delanteros con botón en
+DrillTruck® 02; detectó avatar visible y pasos durante conducción.
+Se autoriza excepción visual/acotada en el bucle compartido `game.mjs` y
+`worksite-audio.mjs`, solo para render correcto antes de `World.update()`,
+control de luces y señal de audio. Sin intervención en economía, simulación
+de DTH, HSEC, narrativas, pagos, compras o misión. Véase
+`CHANGES/2026-11-10_v52-night-patio-personal-driving.md`.
