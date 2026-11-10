@@ -1,8 +1,8 @@
-// Future unique NPC IDs. These do not reference GLB files until approved
-// and are not imported by the running game. No auto spawn or hiring.
+// Unique NPC IDs; M5 models are approved but will not spawn until purchased.
+// Binary GLBs must exist at the filenames below before M5 SMS unlocks.
 export const NPC_LIBRARY_RESERVATIONS=Object.freeze([
- Object.freeze({id:'m5-gate-security',role:'guardia-acceso',asset:null,mission:'m5'}),
- Object.freeze({id:'m5-warehouse-tech',role:'tecnico-bodega',asset:null,mission:'m5'}),
+ Object.freeze({id:'m5-gate-security',role:'guardia-acceso',asset:'npc-m5-gate-security.glb',mission:'m5'}),
+ Object.freeze({id:'m5-warehouse-tech',role:'tecnico-bodega',asset:'npc-m5-warehouse-tech.glb',mission:'m5'}),
  Object.freeze({id:'future-heavy-operator',role:'operador-maquinaria',asset:null,mission:'future'}),
  Object.freeze({id:'future-maintenance-mechanic',role:'mecanico',asset:null,mission:'future'}),
  Object.freeze({id:'future-fuel-operator',role:'operador-combustible',asset:null,mission:'future'}),
