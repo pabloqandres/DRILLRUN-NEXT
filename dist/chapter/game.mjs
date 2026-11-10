@@ -620,6 +620,75 @@ function updateM4Visuals(dt){
   }
  }
 }
+// Separate, player-controlled DrillTruck® 02. Always clone the official
+// optimized GLB used by M4; no new competitor model or duplicated M4 entity.
+function syncPersonalTruckVisual(){
+ if(!world||!s)return;
+ const truck=personalTruck(s);
+ if(!truck){
+  if(m5PersonalTruckModel){m5PersonalTruckModel.removeFromParent();m5PersonalTruckModel=null;}
+  if(m5PersonalTruckCollider){
+   const i=world.colliders.indexOf(m5PersonalTruckCollider);
+   if(i>=0)world.colliders.splice(i,1);
+   m5PersonalTruckCollider=null;
+  }
+  return;
+ }
+ if(!m5PersonalTruckModel){
+  if(!m4DrillTruckModel)return; // async official GLB loader still working
+  m5PersonalTruckModel=m4DrillTruckModel.clone(true);
+  m5PersonalTruckModel.name='drilltruck-personal-02';
+  m5PersonalTruckModel.userData={personal:true};
+  world.scene.add(m5PersonalTruckModel);
+  m5PersonalTruckCollider={x:truck.position.x,z:truck.position.z,
+   w:2.55,d:5,angle:truck.heading,_personalTruck:true};
+  world.colliders.push(m5PersonalTruckCollider);
+ }
+ m5PersonalTruckModel.visible=true;
+ m5PersonalTruckModel.position.set(truck.position.x,.12,truck.position.z);
+ m5PersonalTruckModel.rotation.y=truck.heading;
+ if(m5PersonalTruckCollider){
+  m5PersonalTruckCollider.x=truck.position.x;
+  m5PersonalTruckCollider.z=truck.position.z;
+  m5PersonalTruckCollider.angle=truck.heading;
+ }
+}
+function togglePersonalTruck(){
+ const truck=personalTruck(s);if(!truck)return;
+ try{
+  if(truck.mode==='driving'){
+   if(Math.abs(truck.speed)>.42)throw new Error('Frena para bajar del vehículo');
+   const location=exitPositions(truck).find(pos=>!world.isBlocked(pos.x,pos.z,avatarDefinition(s.character).radius+.05));
+   if(!location)throw new Error('No hay espacio libre para bajar');
+   exitPersonalTruck(s,location);
+   world.chapterCamera=null;world.snapCamera=true;
+   notices.push({title:'Saliste del DrillTruck® personal',symbol:'personnel'});
+  }else{
+   enterPersonalTruck(s);
+   target=null;world.snapCamera=true;
+   notices.push({title:'Conducción habilitada',detail:'Joystick arriba: acelerar · izquierda/derecha: girar · FRENO para detenerte',symbol:'machine'});
+  }
+  stop();syncPersonalTruckVisual();save();renderHUD();
+ }catch(err){notices.push({title:err.message,symbol:'lock'});}
+}
+function stepPersonalTruck(dt){
+ let throttle=-joy.y,steer=joy.x;
+ if(keys.w||keys.arrowup)throttle+=1;
+ if(keys.s||keys.arrowdown)throttle-=1;
+ if(keys.a||keys.arrowleft)steer-=1;
+ if(keys.d||keys.arrowright)steer+=1;
+ const i=world.colliders.indexOf(m5PersonalTruckCollider);
+ if(i>=0)world.colliders.splice(i,1); // the car cannot collide with itself
+ try{
+  const result=drivePersonalTruck(s,{throttle,steer,brake:truckBrakePressed||!!keys[' ']},dt,
+   (x,z,r)=>world.isBlocked(x,z,r));
+  syncPersonalTruckVisual();
+  return !!result?.moving;
+ }finally{
+  if(i>=0&&m5PersonalTruckCollider&&!world.colliders.includes(m5PersonalTruckCollider))
+   world.colliders.push(m5PersonalTruckCollider);
+ }
+}
 function autoDispatchTruck(s){
  if(!s.mission4?.drillTruck||s.mission4.drillTruck.state!=='parked')return;
  // Permanent automation dispatches only when a tool has exhausted and stock exists.
