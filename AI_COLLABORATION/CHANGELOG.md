@@ -5,7 +5,7 @@
 - Corrige halos enterrados bajo pavimento y pintura (y=0.16 → y=0.295), amplía alcance e intensidad de iluminación existente y permite ver piscinas de luz aunque el presupuesto móvil desactive PointLights distantes.
 - Añade cobertura ligera sin colisiones a plazas de maquinaria y P01. Repara los botones inertes Localizar y Recuperar de Centro de Faena: faltaba pasar sus callbacks por el constructor. Mantiene HSEC, M1–M5, economía, controles y guardados.
 - La ampliación del límite transitable requiere cambio de lógica coordinado (`scene.mjs`, `state.mjs`, `personal-drilltruck.mjs`) y permanece pendiente.
-- Tests V52 actualizados y test funcional de callbacks V56 añadido; QA real WebGL/Android y revisión de PR pendientes. Ver `CHANGES/2026-11-10_v57-night-yard-visibility.md`.
+- PR #76 en borrador. CI específica V52/V56/M5 y relacionadas aprobada; test genérico M4 offline falla también en `main` (preexistente). QA Android/WebGL y publicación pendientes. Ver `CHANGES/2026-11-10_v57-night-yard-visibility.md`.
 
 
 ## 2026-11-10 — V50 DrillTruck® 02 personal (PR)
