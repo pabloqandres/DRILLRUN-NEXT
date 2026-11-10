@@ -6,8 +6,8 @@ const fail=msg=>{throw new Error(msg);};
 // Workshop capacity by level
 export const WORKSHOP_LEVELS=[
  {level:1,capacity:8,upgradeCost:0,label:'Básico',constructionSeconds:0},
- {level:2,capacity:14,upgradeCost:8000,label:'Ampliado',constructionSeconds:300},
- {level:3,capacity:22,upgradeCost:6000,label:'Industrial',constructionSeconds:480}
+ {level:2,capacity:14,upgradeCost:8000,label:'Ampliado',constructionSeconds:300}
+ // L3 is intentionally unavailable until a future mission unlocks it.
 ];
 
 export const WORKSHOP_L1_COST=2500;
@@ -36,7 +36,7 @@ export function finishWorkshopConstruction(s,now=Date.now()){
 }
 export function workshopCapacity(s){
  const lvl=workshopLevel(s);
- return lvl?(WORKSHOP_LEVELS.find(w=>w.level===lvl)||WORKSHOP_LEVELS[0]).capacity:0;
+ return lvl?(WORKSHOP_LEVELS.find(w=>w.level===lvl)||WORKSHOP_LEVELS[WORKSHOP_LEVELS.length-1]).capacity:0;
 }
 export function workshopUsed(s){
  return (s.toolInventory||[]).filter(t=>t.status!=='spent').length;
