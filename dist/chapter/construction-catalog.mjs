@@ -7,6 +7,7 @@ import {ROLES,personnelByRole,canHire} from '../mission3/personnel.mjs';
 import {DTH_DRILLS,canPurchaseDthDrill} from '../mission4/drills-dth.mjs';
 import {DRILLTRUCK_COST,canPurchaseDrillTruck,drillTruckState} from '../mission4/drilltruck.mjs';
 import {pendingOrders} from '../mission3/headquarters.mjs';
+import {PATIO_L1,PATIO_FUTURE,patioState,patioUnlocked} from '../mission5/patio-state.mjs';
 
 const ES={catalog:'Catálogo',infrastructure:'Edificios',equipment:'Equipos',vehicles:'Vehículos',furniture:'Mobiliario',mobility:'Caminos',boundaries:'Delimitación',lighting:'Iluminación',emergencies:'Seguridad',management:'Personal',available:'Disponible',locked:'Bloqueado',future:'Próximamente',installed:'Instalado',ordered:'En pedido',building:'En construcción',insufficient:'Saldo insuficiente',level:'Nivel',price:'Costo',time:'Tiempo',area:'Superficie',height:'Altura',width:'Ancho',capacity:'Capacidad',units:'unidades',benefit:'Función principal',requirements:'Requisitos',details:'Ficha técnica',preview:'Previsualizar en terreno',manage:'Gestionar',viewWork:'Ver construcción',back:'Volver al catálogo',close:'Cerrar catálogo',previous:'Productos anteriores',next:'Más productos',noCharge:'Sin cobro hasta confirmar en el terreno',chapter:'Completa el capítulo 1',later:'Disponible en una etapa posterior',free:'Sin costo · kit',staff:'Ver candidatos',staffHint:'Contratación y estado del prevencionista',empty:'Sin elementos disponibles en esta categoría',zone:'Zona asignada',cancel:'Cancelar',build:'Construir',perMeter:'/m',costHint:'Precio por metro · total según trazado',ready:'Ubicación asignada válida',included:'Incluido en el módulo',constructionPending:'Termina la obra en curso',clearPlot:'Despeja el terreno primero',owned:'Adquirido',hired:'Contratado',depth:'Profundidad máx.',diameter:'Diámetro',life:'Vida útil',needsAdmin:'Requiere administrador',needsDrill:'Requiere perforadora',needsOffice:'Requiere oficina Nv.2',needsWorkshop:'Requiere galpón',needsWorkshopNv2:'Requiere taller Nv.2',needsBoreholes:'Requiere sondajes completados',roleFull:'Cupo completo',drillOwned:'Ya tienes una perforadora RC',dthOwned:'Ya tienes una perforadora DTH',truckOwned:'Ya tienes un DrillTruck',needsParking:'Requiere estacionamiento (taller Nv.2)',needsTecnico:'Requiere Técnico DRILLCO® contratado',requiresOffice:'Requiere oficina construida',meters:'m'};
 const EN={catalog:'Catalog',infrastructure:'Buildings',equipment:'Equipment',vehicles:'Vehicles',furniture:'Furniture',mobility:'Paths',boundaries:'Boundaries',lighting:'Lighting',emergencies:'Safety',management:'Staff',available:'Available',locked:'Locked',future:'Coming later',installed:'Installed',building:'Under construction',insufficient:'Insufficient funds',level:'Level',price:'Cost',time:'Time',area:'Floor area',height:'Height',width:'Width',capacity:'Capacity',units:'units',benefit:'Main function',requirements:'Requirements',details:'Technical sheet',preview:'Preview on site',manage:'Manage',viewWork:'View construction',back:'Back to catalog',close:'Close catalog',previous:'Previous products',next:'More products',noCharge:'No charge until you confirm on site',chapter:'Complete chapter 1',later:'Available in a later stage',free:'Free · kit',staff:'View candidates',staffHint:'Safety professional recruitment and status',empty:'No items in this category',zone:'Assigned zone',cancel:'Cancel',build:'Build',perMeter:'/m',costHint:'Price per meter · total follows the route',ready:'Assigned location is valid',included:'Included in this module',constructionPending:'Finish the current construction',clearPlot:'Clear the plot first',owned:'Owned',hired:'Hired',depth:'Max depth',diameter:'Diameter',life:'Tool life',needsAdmin:'Requires administrator',needsDrill:'Requires drill',needsOffice:'Requires office Lv.2',needsWorkshop:'Requires maintenance shed',needsWorkshopNv2:'Requires workshop Lv.2',needsBoreholes:'Requires completed boreholes',roleFull:'Position filled',drillOwned:'You already own an RC drill',dthOwned:'You already own a DTH drill',truckOwned:'You already own a DrillTruck',requiresOffice:'Requires built office',meters:'m'};
@@ -40,6 +41,32 @@ export function catalogProducts(s,t){
  const wsStatus=wsBuilding||wsJob?'building':wsLvl?'installed':canBuildWorkshop(s)===null?'available':'locked';
  const wsDescs={1:'Almacenamiento de herramientas y mantenimiento básico',2:'Mayor capacidad + estacionamiento DrillTruck',3:'Capacidad industrial para operaciones a gran escala'};
  products.push({id:'workshop',kind:'workshop',category:'infrastructure',title:'Taller',level:wsLvl,description:wsDescs[wsLvl]||'',benefit:`Capacidad: ${wsDef?.capacity||8} herramientas`,price:wsLvl?(wsNext?wsNext.upgradeCost:null):WORKSHOP_L1_COST,seconds:wsLvl?(wsNext?wsNext.constructionSeconds:null):WORKSHOP_L1_SECONDS,w:7.2,d:5.4,h:4.5,capacity:(wsDef?.capacity||8)+' herramientas',status:wsStatus,reason:wsBuilding||wsJob?c.constructionPending:!wsLvl&&canBuildWorkshop(s)?c.later:'',model:{id:'workshop-l'+(wsLvl||1),level:wsLvl||1,nameKey:'workshop'},canStart:wsStatus==='available',action:wsLvl||wsBuilding?'manage':'buy',insufficient:!wsLvl?s.cash<WORKSHOP_L1_COST:wsNext?s.cash<wsNext.upgradeCost:false});
+ // M5 · Fixed large yard unlocked as soon as M4 is complete.
+ // Browsing is read-only; the explicit construction confirmation pays once.
+ const m5Status=patioState(s);
+ const patioStatus=!patioUnlocked(s)?'locked':m5Status==='operational'?'installed':
+  m5Status==='building'?'building':'available';
+ products.push({
+  id:PATIO_L1.id,kind:'patio',category:'infrastructure',title:PATIO_L1.name,
+  level:1,description:'Gran explanada industrial · acceso único fijo · galpón logístico · combustible protegido · estacionamiento techado ligero · zonas abiertas para RC, DTH y CAEX menores',
+  benefit:'Patio modular real, seguridad HSEC y circulación para flota pesada',
+  price:m5Status==='building'||m5Status==='operational'?null:PATIO_L1.price,
+  seconds:patioStatus==='available'?PATIO_L1.constructionSeconds:null,
+  w:PATIO_L1.width,d:PATIO_L1.depth,h:5.5,capacity:'6 vehículos ligeros · 3 perforadoras · 4 equipos pesados',
+  status:patioStatus,
+  reason:!patioUnlocked(s)?'Completa Misión 4':patioStatus==='building'?'Obra en ejecución · 20 minutos':'',
+  model:PATIO_L1,canStart:patioStatus==='available',action:patioStatus==='available'?'buy':'manage',
+  insufficient:patioStatus==='available'&&s.cash<PATIO_L1.price
+ });
+ for(const plan of PATIO_FUTURE){
+  products.push({
+   id:plan.id,kind:'patioFuture',category:'infrastructure',title:'Patio de Maquinarias · L'+plan.level,
+   level:plan.level,description:'Reserva territorial predefinida · ampliación de flota futura',
+   benefit:'Reservado para próximas misiones',price:null,seconds:null,
+   w:54,d:44,h:0,capacity:'Expansión bloqueada',status:'locked',
+   reason:'Se desbloqueará en una misión futura',model:plan,canStart:false,action:'manage',insufficient:false
+  });
+ }
  // HSEC assets
  for(const d of HSEC_ASSETS){
   const existing=d.id==='shed'?s.hsec?.assets?.find(a=>a.type===d.id):null;
