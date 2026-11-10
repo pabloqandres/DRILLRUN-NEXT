@@ -1,11 +1,12 @@
 import {moduleDefinition,moduleAvailability} from './module-catalog.mjs';
 import {landReady} from './state.mjs';
 import {CatalogView} from './catalog-view.mjs';
-import {officeThumbnail,workshopThumbnail,patioThumbnail} from './product-preview.mjs';
+import {officeThumbnail,workshopThumbnail,patioThumbnail,ProductPreview} from './product-preview.mjs';
+import {wave01Instance,wave01Definition} from './asset-wave01-runtime.mjs';
 import {drillTruckImage} from './drilltruck-image.mjs';
 import {catalogProducts,catalogCategories} from './construction-catalog.mjs';
 export class BuilderUI{
- constructor(options){Object.assign(this,options);this.category='infrastructure';this.selected='office';this.zone='office01';this.store=new CatalogView(this.host);this.buildingThumbnails=new Map();this.vehicleThumbnails=new Map();this.vehicleImageLoading=false;}
+ constructor(options){Object.assign(this,options);this.category='infrastructure';this.selected='office';this.zone='office01';this.store=new CatalogView(this.host);this.buildingThumbnails=new Map();this.vehicleThumbnails=new Map();this.vehicleImageLoading=false;this.waveDetailPreview=null;this.wavePreviewRequest=0;}
  open(){
   this.store.close();
   const state=this.state();
@@ -17,7 +18,7 @@ export class BuilderUI{
   if(this.hsec?.mode){this.hsec.category='infrastructure';this.hsec.selected=this.selected;}
   this.render();
  }
- close(){this.store.close();this.onSelection(null);this.onBuildingPreview?.(null);}
+ close(){this.wavePreviewRequest++;this.waveDetailPreview?.dispose();this.waveDetailPreview=null;this.store.close();this.onSelection(null);this.onBuildingPreview?.(null);}
  render(){
   this.host.classList.remove('hsecTray','hsecDraftMode');
   if(this.hsec?.mode){if(this.hsec.drawing||this.hsec.coneZone)this.onBuildingPreview?.(null);this.hsec.renderBuilder(this);return;}
@@ -82,6 +83,30 @@ export class BuilderUI{
   });
   return null;
  }
+ // Lazy, on-demand 3D detail, always from the ORIGINAL GLB. The static atlas
+ // stays as a fallback if a file is absent. No model downloads while browsing tiles.
+ async showWaveDetail(product){
+  const request=++this.wavePreviewRequest;
+  this.waveDetailPreview?.dispose();this.waveDetailPreview=null;
+  if(!product?.assetWavePath||this.store.detailId!==product.id||!this.world)return;
+  const id=product.assetWavePath.replace(/\\.glb$/i,'');
+  if(!wave01Definition(id))return;
+  const host=this.host.querySelector('.catalogDetailVisual');
+  if(!host)return;
+  try{
+   const model=await wave01Instance(id,{toon:false,normalize:true});
+   if(request!==this.wavePreviewRequest||this.store.detailId!==product.id||!host.isConnected)return;
+   const preview=new ProductPreview(host,this.world,{transparent:true});
+   preview.setBuilding(model);
+   this.waveDetailPreview=preview;
+   host.classList.add('wave01LivePreview');
+   host.title='Modelo GLB real · arrastra horizontalmente para girar';
+  }catch(error){
+   // A missing binary must NEVER appear as a fake render or unlock purchases.
+   // Preserve the previously rendered genuine GLB atlas thumbnail.
+   if(request===this.wavePreviewRequest)console.warn('[Wave01] GLB preview unavailable:',id,error);
+  }
+ }
  renderStore(category,selected,onCategory,onSelect){
   const s=this.state(),t=this.translate();this.onSelection(null);
   let products;try{products=catalogProducts(s,t);}catch(e){console.error('catalogProducts error:',e);products=[];}
@@ -119,5 +144,6 @@ export class BuilderUI{
    },
    onPlace:p=>this.hsec?.beginDraft(p.id)
   });
+  void this.showWaveDetail(picked);
  }
 }
