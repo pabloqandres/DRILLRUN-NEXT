@@ -2,6 +2,7 @@
 // 7-phase animated maintenance cycle when DrillTruck services a zone.
 
 import {serviceDthFromStock} from './production.mjs';
+import {FLEET_BAYS,patioFleetActive} from '../mission5/fleet-base.mjs';
 
 export const MAINTENANCE_PHASES=[
  {id:'detection',duration:3,label:'Detección de zona'},
@@ -69,7 +70,9 @@ export function completeMaintenance(s,now=Date.now()){
  truck.maintenanceZone=null;
  truck.maintenancePhaseStartedAt=null;
  truck.state='parked';
- truck.position={x:-13.5,z:-9.3};
+ truck.position=patioFleetActive(s)&&s.mission5?.truckRelocated
+  ?{x:FLEET_BAYS.drillTruck.x,z:FLEET_BAYS.drillTruck.z}
+  :{x:-13.5,z:-9.3};
  truck.assignedZone=null;
  // Permanent automation: service stock before restoring any production.
  const zone=s.mission4.zones.find(z=>z.id===zoneId);
