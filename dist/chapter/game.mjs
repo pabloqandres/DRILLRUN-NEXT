@@ -1197,7 +1197,14 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
   }
  avatars?.updateSelector(phase==='character',selectedAvatar,s,dt,clock);characterStage?.update(phase==='character',clock,selectedAvatar);
  if(phase==='character'){world.chapterCamera={target:new T.Vector3(-4.55+Math.max(0,Math.min(.5,(730-innerWidth)/324)),1.0,5.35),offset:new T.Vector3(0,.55,6.1)};}
- else if(phase==='play'&&patioOverviewUntil>wall)world.chapterCamera={target:new T.Vector3(PATIO_L1.center.x,1,PATIO_L1.center.z),offset:new T.Vector3(39,42,44)};
+ else if(phase==='play'&&patioOverviewUntil>wall){
+  // The overview is visual only. Moving the joystick or using WASD
+  // immediately returns the camera to the playable avatar.
+  const movingInput=Math.hypot(joy.x,joy.y)>.06||
+   keys.w||keys.a||keys.s||keys.d||keys.arrowup||keys.arrowdown||keys.arrowleft||keys.arrowright;
+  if(movingInput){patioOverviewUntil=0;world.chapterCamera=null;world.snapCamera=true;}
+  else world.chapterCamera={target:new T.Vector3(PATIO_L1.center.x,1,PATIO_L1.center.z),offset:new T.Vector3(39,42,44)};
+ }
  else world.chapterCamera=null;
  world.avatarHeight=avatarDefinition(s.character).height;
 // Catalog browsing (including collapsing) is UI-only: do not force a builder camera.
