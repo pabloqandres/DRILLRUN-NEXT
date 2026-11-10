@@ -1,5 +1,8 @@
 # Active Work — DRILL RUN NEXT GENERATION
 
+**2026-11-10 — ChatGPT Wave 01 GLB runtime V55:** `chatgpt/asset-wave01-runtime-v55` modifies the visual-only `dist/chapter/builder-ui.mjs`, adds `dist/chapter/asset-wave01-runtime.mjs` and tests. No missions, economy or saved-state files changed. Binary GLBs remain pending transfer from the chat ZIP. Do not merge/deploy until that transfer and QA.
+
+
 **Last updated:** 2026-11-06
 
 ## Currently Active
