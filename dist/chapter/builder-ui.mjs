@@ -6,7 +6,17 @@ import {drillTruckImage} from './drilltruck-image.mjs';
 import {catalogProducts,catalogCategories} from './construction-catalog.mjs';
 export class BuilderUI{
  constructor(options){Object.assign(this,options);this.category='infrastructure';this.selected='office';this.zone='office01';this.store=new CatalogView(this.host);this.buildingThumbnails=new Map();this.vehicleThumbnails=new Map();this.vehicleImageLoading=false;}
- open(){this.store.close();this.selected='office';this.category='infrastructure';this.render();}
+ open(){
+  this.store.close();
+  const state=this.state();
+  const patioOffer=state?.mission4?.phase==='complete'&&state?.mission5?.status!=='operational';
+  this.selected=patioOffer?'patio-maquinarias-l1':'office';
+  this.category='infrastructure';
+  // HSEC reuses the same CatalogView. Its selection must match the current
+  // catalog target or it silently opens the old construction item instead.
+  if(this.hsec?.mode){this.hsec.category='infrastructure';this.hsec.selected=this.selected;}
+  this.render();
+ }
  close(){this.store.close();this.onSelection(null);}
  render(){
   this.host.classList.remove('hsecTray','hsecDraftMode');
