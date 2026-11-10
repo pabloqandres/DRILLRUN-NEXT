@@ -1,5 +1,13 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-10 — V57 Patio L1: cobertura de luz nocturna (rama para revisión)
+
+- Corrige halos enterrados bajo pavimento y pintura (y=0.16 → y=0.295), amplía alcance e intensidad de iluminación existente y permite ver piscinas de luz aunque el presupuesto móvil desactive PointLights distantes.
+- Añade cobertura ligera sin colisiones a plazas de maquinaria y P01. Mantiene HSEC, M1–M5, economía, controles y guardados.
+- La ampliación del límite transitable requiere cambio de lógica coordinado (`scene.mjs`, `state.mjs`, `personal-drilltruck.mjs`) y permanece pendiente.
+- Tests V52 actualizados; QA real WebGL/Android y PR pendientes. Ver `CHANGES/2026-11-10_v57-night-yard-visibility.md`.
+
+
 ## 2026-11-10 — V50 DrillTruck® 02 personal (PR)
 
 - Nueva unidad personal adicional comprada en Casa Matriz con despacho
