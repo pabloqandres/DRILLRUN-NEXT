@@ -86,3 +86,35 @@ test('Center renders overview and logistics without mutating wallet',()=>{
  assert.match(logistics,/Galpón|inventario/i);
  assert.equal(s.cash,cash);
 });
+
+test('Worksite routes open sensible content at each progression stage',()=>{
+ const s=fixture(),cash=s.cash;
+ const view=Object.create(FaenaCenterUI.prototype);
+ view.route='workshop';view.view='';
+ const t=k=>k,fmt=n=>String(n),icon=k=>'<svg data-test="'+k+'"></svg>';
+ const workshop=view.pageHtml(s,t,fmt,icon);
+ assert.match(workshop,/Taller/);
+ assert.match(workshop,/Herramientas para recuperar/);
+ assert.match(workshop,/data-faena-recover="tool-1"/);
+ view.route='fleet';
+ assert.match(view.pageHtml(s,t,fmt,icon),/DrillTruck/);
+ view.route='safety';
+ assert.match(view.pageHtml(s,t,fmt,icon),/control de acceso/);
+ view.route='production';
+ assert.match(view.pageHtml(s,t,fmt,icon),/se desbloquea en Misión 3/);
+ view.route='contracts';
+ assert.match(view.pageHtml(s,t,fmt,icon),/se habilitan en Misión 3/);
+ view.route='headquarters';
+ assert.match(view.pageHtml(s,t,fmt,icon),/Casa Matriz se habilita/);
+ assert.equal(s.cash,cash);
+});
+test('Physical building and catalog open the same controller, never new balances',()=>{
+ const game=source('dist/chapter/game.mjs');
+ assert.match(game,/onWorkshopManage:\(\)=>\{openFaena\('workshop'\);\}/);
+ assert.match(game,/onPhoneNav:app=>\{closeBuilder\(\);openFaena\(app\);\}/);
+ assert.match(game,/Math\.hypot\(p\.x\+69\.5,p\.z\+20\)<4\.2/);
+ assert.match(game,/onPatioAction:\(\)=>s\?\.mission5\?\.status==='operational'/);
+ const phone=source('dist/chapter/phone-ui.mjs');
+ assert.match(phone,/const consolidated=/);
+ assert.match(phone,/data-app="faena-center"/);
+});
