@@ -1,0 +1,25 @@
+name: Asset Library Wave 01 · Catalog Preview QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'dist/chapter/asset-library-wave01.mjs'
+      - 'dist/chapter/construction-catalog.mjs'
+      - 'dist/chapter/catalog-view.mjs'
+      - 'tests/asset-library-wave01.test.mjs'
+  workflow_dispatch:
+jobs:
+  wave01-visual-catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify affected ES modules parse
+        run: |
+          node --check dist/chapter/asset-library-wave01.mjs
+          node --check dist/chapter/construction-catalog.mjs
+          node --check dist/chapter/catalog-view.mjs
+      - name: Read-only catalog regression test
+        run: node --test tests/asset-library-wave01.test.mjs

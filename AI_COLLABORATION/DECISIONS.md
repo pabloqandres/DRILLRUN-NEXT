@@ -267,3 +267,8 @@ Bodega gestiona inventario, solicitudes, auditoría; Taller repara y
 reafila con kits **pagados**, no duplica bodega; Patio administra vehículos,
 plazas y accesos. Teléfono sigue siendo comunicación/Casa Matriz.
 No alterar el progreso M1–M5, los productos reales ni economía de M4.
+
+## 2026-11-10 — Catalog asset Wave 01, read-only staged integration
+- Reuse HSEC cone/fence products at existing prices, no duplicates. New objects are locked until actual GLBs, physical placement, ledger and save compatibility are implemented.
+- Do not create a misleading construction hologram for an undefined site; real GLB hologram using existing cyan ConstructionHologram is mandatory when building becomes constructible.
+- M6+ content must reuse V53 unified Operations and recovered-tool workshop; no parallel operation screens. Change set remains independent of M1–M5.
