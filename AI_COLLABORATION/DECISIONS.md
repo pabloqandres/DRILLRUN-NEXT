@@ -267,3 +267,10 @@ Bodega gestiona inventario, solicitudes, auditoría; Taller repara y
 reafila con kits **pagados**, no duplica bodega; Patio administra vehículos,
 plazas y accesos. Teléfono sigue siendo comunicación/Casa Matriz.
 No alterar el progreso M1–M5, los productos reales ni economía de M4.
+
+
+## 2026-11-10 — V54 HUD de conducción sin texto
+Faro (apagado gris / encendido amarillo) y freno (ícono rojo al presionar)
+quedan al borde derecho. Corregir joystick y teclado únicamente en camioneta
+personal usando una normalización de dirección antes de la simulación.
+Conservar semántica aria y función de motor, focos y frenado.
