@@ -13,7 +13,7 @@ body.faenaOpen #personalTruckBrake,body.faenaOpen #personalTruckLights{pointer-e
  border:1px solid #72b9d6;border-radius:19px;
  background:linear-gradient(142deg,#173951f9,#0b2438fa 65%,#102638f9);
  color:#f0f6f5;box-shadow:0 20px 95px #000d,inset 0 1px #e2f8ff4d;}
-.faenaHeader{position:relative;display:flex;justify-content:space-between;align-items:center;
+.faenaHeader{position:relative;left:auto;right:auto;top:auto;bottom:auto;display:flex;justify-content:space-between;align-items:center;
  padding:10px 19px;background:linear-gradient(90deg,#1f4055,#112f45);
  border-bottom:1px solid #6eb9ce63;min-height:61px;gap:12px;}
 .faenaHeader small{letter-spacing:.17em;color:#8ecedf;font-weight:800;font-size:9px}
