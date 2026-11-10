@@ -111,6 +111,7 @@ export class PhoneUI{
   c.querySelectorAll('[data-app]').forEach(b=>b.onclick=()=>{if(b.dataset.app==='messages')this.conversation=false;this.onNavigate(b.dataset.app);});
   // M3 action bindings
   c.querySelectorAll('[data-hire]').forEach(b=>b.onclick=()=>{if(this.onM3Action)this.onM3Action('hire',b.dataset.hire);});
+  c.querySelectorAll('[data-hire-patio]').forEach(b=>b.onclick=()=>{if(this.onM5Action)this.onM5Action('hire',b.dataset.hirePatio);});
   c.querySelectorAll('[data-buy-drill]').forEach(b=>b.onclick=()=>{if(this.onM3Action)this.onM3Action('buyDrill',b.dataset.buyDrill);});
   c.querySelectorAll('[data-accept-contract]').forEach(b=>b.onclick=()=>{if(this.onM3Action)this.onM3Action('acceptContract',b.dataset.acceptContract);});
   c.querySelectorAll('[data-complete-contract]').forEach(b=>b.onclick=()=>{if(this.onM3Action)this.onM3Action('completeContract');});
