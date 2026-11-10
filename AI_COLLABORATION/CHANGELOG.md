@@ -325,3 +325,6 @@ M4 offline en CI global no resueltas. Biblioteca 3D PR68 sin binarios.
 ## 2026-11-10 — Wave 01 3D visual catalog (PR #68)
 - Source-model miniatures for 14 optimised user assets embedded as compact WebP atlas; 8 additional future catalog cards, 3 in new Circularity tab; current HSEC cone/fence prices unchanged.
 - Zero economy, mission, save, purchase or World changes. Visual assets full GLBs remain in the user's ZIP; C4D needs export. V53 Workshop and Operations controllers preserved.
+
+## 2026-11-10 — V54 Dirección DrillTruck® 02 + botones icónicos
+Corrección al giro del joystick/teclado; faros OFF neutros, ON amarillo; freno SVG sin texto y Catálogo oculto mientras se conduce. Sin cambios económicos, M4/M5 ni modelos. Aplicado sobre `main` actualizado con la biblioteca de catálogo.
