@@ -1,0 +1,110 @@
+/* V53 · Centro de Faena responsive landscape operations console.
+   Separate from the phone; same M3/M4/M5 functions and persisted game state. */
+#faenaCenter{position:fixed;inset:0;z-index:65;display:grid;place-items:center;
+ padding:max(6px,env(safe-area-inset-top)) max(7px,env(safe-area-inset-right))
+ max(6px,env(safe-area-inset-bottom)) max(7px,env(safe-area-inset-left));
+ background:#061421db;backdrop-filter:blur(7px);pointer-events:auto;}
+#faenaCenter[hidden],#faenaCenter.hidden{display:none!important}
+body.faenaOpen #hud,body.faenaOpen #bottomNav{pointer-events:none!important}
+body.faenaOpen #joystick,body.faenaOpen #handButton,body.faenaOpen #bottomNav,
+body.faenaOpen #personalTruckBrake,body.faenaOpen #personalTruckLights{pointer-events:none!important}
+.faenaDialog{width:min(1100px,96vw);height:min(670px,96dvh);min-height:210px;
+ overflow:hidden;display:grid;grid-template-rows:auto minmax(0,1fr) auto;
+ border:1px solid #72b9d6;border-radius:19px;
+ background:linear-gradient(142deg,#173951f9,#0b2438fa 65%,#102638f9);
+ color:#f0f6f5;box-shadow:0 20px 95px #000d,inset 0 1px #e2f8ff4d;}
+.faenaHeader{position:relative;display:flex;justify-content:space-between;align-items:center;
+ padding:10px 19px;background:linear-gradient(90deg,#1f4055,#112f45);
+ border-bottom:1px solid #6eb9ce63;min-height:61px;gap:12px;}
+.faenaHeader small{letter-spacing:.17em;color:#8ecedf;font-weight:800;font-size:9px}
+.faenaHeader h2{font-size:clamp(16px,2vw,24px);line-height:1.15;margin:2px 0 0;font-weight:850}
+.faenaHeaderActions{display:flex;align-items:center;gap:9px}
+.faenaHeader button{min-height:35px;padding:7px 13px;border-radius:9px;
+ background:#244e65;border:1px solid #79bcce87;font-size:11px;font-weight:800}
+.faenaHeader button[data-faena-close]{width:39px;padding:6px;font-size:20px}
+.faenaBody{overflow:auto;min-height:0;touch-action:pan-y;overscroll-behavior:contain;
+ scrollbar-color:#658ca1 #142e40;}
+.faenaContent{padding:17px 20px 25px;min-height:100%;font-size:12px}
+.faenaContent p{color:#bed5e1;font-size:12px;line-height:1.56}
+.faenaLead{font-size:13px!important;max-width:910px;color:#d4e7ec!important;margin:0 0 14px!important}
+.faenaGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin:16px 0}
+.faenaTile{display:flex;flex-direction:column;align-items:flex-start;position:relative;
+ gap:5px;min-width:0;min-height:130px;padding:15px 14px;text-align:left;
+ border:1px solid #6697b075;border-radius:13px;
+ background:linear-gradient(150deg,#284b62dd,#142e43ee);box-shadow:inset 0 1px #caecf034;}
+.faenaTile:hover{border-color:#e9b962;background:#294d62}
+.faenaTileIcon{display:grid;place-items:center;width:35px;height:35px;border-radius:10px;
+ color:#ffd076;background:#885e244b;border:1px solid #dca95f75}
+.faenaTileIcon svg{width:23px;height:23px}
+.faenaTile b{font-size:13px;line-height:1.2;color:#f3f8f9}
+.faenaTile small{font-size:10px;line-height:1.3;color:#b9d1da}
+.faenaTileArrow{position:absolute;right:13px;top:12px;font-size:21px;color:#aad5e4}
+.faenaMetrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:11px 0 17px}
+.faenaMetric{min-width:0;display:flex;flex-direction:column;gap:4px;padding:10px 11px;
+ border-radius:10px;background:#0c2639;border:1px solid #628da568}
+.faenaMetric span{font-size:10px;color:#adcede}
+.faenaMetric strong{color:#ffdb94;font-size:17px;line-height:1.15;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.faenaQuickLinks{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}
+.faenaQuickLinks button,.faenaJump{display:flex;align-items:center;justify-content:space-between;gap:8px;
+ min-height:39px;padding:8px 12px;border:1px solid #70bad0a6;background:#153b52;
+ color:#d9f3fc;border-radius:10px;font-size:11px;font-weight:800}
+.faenaSection{margin:16px 0 10px;min-width:0;padding:15px 16px 16px;
+ border:1px solid #6597ac70;background:#102c40a6;border-radius:13px}
+.faenaSection h3{font-size:13px;letter-spacing:.025em;margin:0 0 10px;color:#ffdfaa}
+.faenaSection .m3Header{margin-top:8px}
+.faenaSection button{margin-top:5px}
+.faenaPrimary{border:1px solid #e3ba74;background:linear-gradient(135deg,#9e7339,#574224);
+ color:#fff3d7;font-weight:800;border-radius:10px;min-height:41px}
+.faenaStockRow,.faenaOrderRow{display:flex;align-items:center;justify-content:space-between;
+ gap:12px;min-width:0;padding:10px 0;border-bottom:1px solid #aac3d12b}
+.faenaStockRow:last-child,.faenaOrderRow:last-child{border:0}
+.faenaStockRow>span,.faenaOrderRow>span{min-width:0;display:flex;flex-direction:column;gap:3px}
+.faenaStockRow b,.faenaOrderRow b{font-size:12px;overflow-wrap:anywhere}
+.faenaStockRow small,.faenaOrderRow small{color:#9fc5d4;font-size:10px}
+.faenaStockRow>b{color:#f5d6a5;font-size:11px;white-space:nowrap}
+.faenaOrderRow button{white-space:nowrap;min-height:34px;border:1px solid #a9bfc6;color:#f0ead9;background:#26465a;font-size:10px;padding:6px 9px}
+.faenaHint{margin:10px 0!important;padding:8px 10px;border-left:2px solid #eac16d;
+ color:#b9ced8!important;background:#263c4a70;border-radius:4px}
+.faenaFooter{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;
+ padding:8px 12px;background:#0a2335;border-top:1px solid #64869e90}
+.faenaFooter button{display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 4px;
+ min-height:38px;font-size:10px;font-weight:800;background:#17384e;border:1px solid #6b98aa75;border-radius:10px}
+.faenaFooter .uiIcon{width:17px;height:17px;color:#f4c66e}
+/* Reused M3/M4 controls live inside a wide scroll pane, never a 310px phone. */
+#faenaCenter .inventoryCard,#faenaCenter .m4OpsNext,#faenaCenter .m4OpsSummary{
+ max-width:100%;box-sizing:border-box}
+#faenaCenter .appContent{max-width:100%}
+#faenaCenter .m3Header{max-width:100%}
+#faenaCenter .sectionHeading{color:#dbe9ee}
+#faenaCenter button[data-m4-action],#faenaCenter button[data-app],
+#faenaCenter button[data-m5-action]{max-width:100%;white-space:normal}
+@media(max-width:760px),(max-height:420px){
+ .faenaDialog{height:98dvh;width:98vw;border-radius:12px}
+ .faenaHeader{padding:7px 12px;min-height:50px}
+ .faenaHeader h2{font-size:16px}
+ .faenaHeader small{font-size:7px}
+ .faenaHeader button{min-height:31px;padding:4px 9px;font-size:10px}
+ .faenaContent{padding:9px 12px 15px}
+ .faenaGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0}
+ .faenaTile{min-height:105px;padding:9px;gap:3px;border-radius:9px}
+ .faenaTileIcon{width:27px;height:27px}
+ .faenaTileIcon svg{width:18px;height:18px}
+ .faenaTile b{font-size:10px}
+ .faenaTile small{font-size:8px}
+ .faenaTileArrow{right:8px;top:5px;font-size:16px}
+ .faenaMetrics{gap:5px;margin:7px 0 9px}
+ .faenaMetric{padding:7px}
+ .faenaMetric span{font-size:8px}
+ .faenaMetric strong{font-size:12px}
+ .faenaLead{font-size:10px!important;margin-bottom:6px!important}
+ .faenaSection{padding:9px;margin:8px 0}
+ .faenaFooter{gap:5px;padding:5px}
+ .faenaFooter button{font-size:9px;min-height:32px}
+ .faenaFooter .uiIcon{width:13px;height:13px}
+ .faenaOrderRow button{white-space:normal}
+}
+@media(max-width:480px){
+ .faenaGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .faenaTile{min-height:92px}
+ .faenaFooter button{font-size:8px}
+}
