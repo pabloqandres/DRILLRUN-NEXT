@@ -29,6 +29,8 @@ import {createDthProductionRig,animateDthRig,createMachineryStaging,RC_RESERVE,D
 import {mission4Readout} from '../mission4/operations-guide.mjs';
 import {PATIO_L1,PATIO_FUTURE,patioState,patioUnlocked,patioProgress,startPatio,finishPatio} from '../mission5/patio-state.mjs';
 import {createPatioWorld} from '../mission5/patio-world.mjs';
+import {FLEET_BAYS,patioFleetActive,rcAvailableToPark,dthAvailableToPark} from '../mission5/fleet-base.mjs';
+import {rigRouteToPatio,rigRouteFromPatio,advanceRigRoute} from '../mission5/fleet-routes.mjs';
 import {createBoreholeMarker,updateMarkerProgress} from '../mission3/borehole-marker.mjs';
 import {createDeliveryVehicle,startDelivery,updateDelivery,departDelivery} from '../mission3/delivery-vehicle.mjs';
 import {createDrillingEffects,updateDrillingEffects} from '../mission3/drilling-effects.mjs';
@@ -84,7 +86,7 @@ let constructionCallout=null,guidance=null,cinematic=null,cameraDebug=null,cinem
 let m3DrillModel=null,m3BoreholeMarkers=[],m3DeliveryVehicle=null,m3DrillingFx=null,m3VisualsReady=false;
 let m4DrillTruckModel=null,m4ParkingSpot=null,m4VisualsReady=false,m4TruckLoading=false,m4TruckCollider=null;
 let m4DthModel=null,m4DthCollider=null,m4Staging=null;
-let m5World=null,patioOverviewUntil=0;
+let m5World=null,patioOverviewUntil=0,m5RcRoute=null,m5DthRoute=null,m5DthDepartRoute=null;
 let siteCinematics=null;
 let world,scene,phase='start',phoneApp=null,phoneOpen=false,category='desks',modalOpen=false,blueprint=false,placement=null,busy=null,keys={},joy={x:0,y:0},pointer=null,target=null,auth={configured:false},account=null,audioContext=null,last=performance.now(),clock=0,lastSave=0,lastHud=0,introAt=0,lastObjective='',qaRoute=false;
 let cloudSyncing=true,cloudLocked=false,cloudStatus='Verificando Google…',cloudEpoch=0;
@@ -300,7 +302,8 @@ function spawnM3Drill(drillId){
  if(m3DrillModel){world.scene.remove(m3DrillModel);m3DrillModel=null;}
  m3DrillModel=createDrillModel(drillId);
  const activeBH=s.contract?.activeBoreholeIndex!=null?BOREHOLE_SITES[s.contract.activeBoreholeIndex]:null;
- const dx=activeBH?.x||22,dz=activeBH?.z||0;
+ const located=rcAvailableToPark(s)&&s.mission5?.rcParked?FLEET_BAYS.rc:activeBH;
+ const dx=located?.x||22,dz=located?.z||0;
  m3DrillModel.position.set(dx,0,dz);
  world.scene.add(m3DrillModel);
  // Dynamic collider for drill rig
@@ -314,11 +317,26 @@ function updateM3Visuals(dt){
  // After the exploration contract is delivered, RC returns to an actual
  // visible reserve bay; M4 production uses a separate physical DTH rig.
  if(m3DrillModel){
-  const parked=s.contract?.status==='delivered'&&s.mission4?.phase&&s.mission4.phase!=='inactive';
-  const site=parked?RC_RESERVE:s.contract?.activeBoreholeIndex!=null?BOREHOLE_SITES[s.contract.activeBoreholeIndex]:null;
-  if(site){
-   m3DrillModel.position.x+=(site.x-m3DrillModel.position.x)*Math.min(1,dt*2);
-   m3DrillModel.position.z+=(site.z-m3DrillModel.position.z)*Math.min(1,dt*2);
+  if(rcAvailableToPark(s)){
+   if(!s.mission5.rcParked){
+    m5RcRoute??=rigRouteToPatio(m3DrillModel.position,'rc');
+    if(advanceRigRoute(m3DrillModel,m5RcRoute,dt)){
+     m5RcRoute=null;s.mission5.rcParked=true;
+     s.drill.position={x:FLEET_BAYS.rc.x,z:FLEET_BAYS.rc.z};save();
+    }
+   }else{
+    m5RcRoute=null;
+    m3DrillModel.position.x=FLEET_BAYS.rc.x;
+    m3DrillModel.position.z=FLEET_BAYS.rc.z;
+   }
+  }else{
+   m5RcRoute=null;
+   const parked=s.contract?.status==='delivered'&&s.mission4?.phase&&s.mission4.phase!=='inactive';
+   const site=parked?RC_RESERVE:s.contract?.activeBoreholeIndex!=null?BOREHOLE_SITES[s.contract.activeBoreholeIndex]:null;
+   if(site){
+    m3DrillModel.position.x+=(site.x-m3DrillModel.position.x)*Math.min(1,dt*2);
+    m3DrillModel.position.z+=(site.z-m3DrillModel.position.z)*Math.min(1,dt*2);
+   }
   }
  }
  // Sync drill collider position
@@ -367,7 +385,7 @@ function initM5Visuals(now=Date.now()){
 function initM4Visuals(){
  if(m4VisualsReady||!world||!s?.mission4||s.mission4.phase==='inactive')return;
  // Parking spot — exterior left side of workshop
- if(!m4ParkingSpot&&s.mission4.parkingBuilt){
+ if(!m4ParkingSpot&&s.mission4.parkingBuilt&&!patioFleetActive(s)){
   const g=new T.Group();g.name='parking-spot';
   const ground=new T.Mesh(new T.BoxGeometry(4,0.02,5),new T.MeshToonMaterial({color:0x3a3a3a}));
   ground.position.set(-13.5,0.12,-9.3);ground.receiveShadow=true;g.add(ground);
@@ -431,11 +449,17 @@ function updateM4Visuals(dt){
  if(!m4VisualsReady||!s?.mission4)return;
  // Staging is visual only. The real protected machinery yard is a separate
  // proposed M5 build; never grant its safety score before construction.
- if(!m4Staging){m4Staging=createMachineryStaging();world.scene.add(m4Staging);}
+ if(patioFleetActive(s)){
+  // Remove obsolete M4 temporary asphalt; preserve original mission flags.
+  if(m4Staging){m4Staging.removeFromParent();m4Staging=null;}
+  if(m4ParkingSpot){m4ParkingSpot.removeFromParent();m4ParkingSpot=null;}
+  world.walkSurfaces=(world.walkSurfaces||[]).filter(v=>
+   !(Math.abs(v.x+13.5)<.01&&Math.abs(v.z+9.3)<.01&&v.w===4&&v.d===5));
+ }else if(!m4Staging){m4Staging=createMachineryStaging();world.scene.add(m4Staging);}
  if(s.mission4.productionDrill&&!m4DthModel){
   m4DthModel=createDthProductionRig();
   const initialZone=s.mission4?.zones?.find(z=>z.id===s.mission4.productionDrill?.assignedZone);
-  const p=initialZone?.position||DTH_RESERVE;
+  const p=initialZone?.position||(dthAvailableToPark(s)&&s.mission5?.dthParked?FLEET_BAYS.dth:DTH_RESERVE);
   m4DthModel.position.set(p.x,0,p.z);
   world.scene.add(m4DthModel);
   m4DthCollider={x:m4DthModel.position.x,z:m4DthModel.position.z,w:3.2,d:4.5,_dth:true};
@@ -446,16 +470,39 @@ function updateM4Visuals(dt){
   const assigned=drill?.assignedZone;
   const zone=assigned?s.mission4.zones.find(z=>z.id===assigned):null;
   const target=zone?.position||DTH_RESERVE;
-  // On reload and delivery, never leave the model at origin or invisible.
-  m4DthModel.position.x+=(target.x-m4DthModel.position.x)*Math.min(1,dt*3);
-  m4DthModel.position.z+=(target.z-m4DthModel.position.z)*Math.min(1,dt*3);
+  if(dthAvailableToPark(s)){
+   m5DthDepartRoute=null;
+   if(!s.mission5.dthParked){
+    m5DthRoute??=rigRouteToPatio(m4DthModel.position,'dth');
+    if(advanceRigRoute(m4DthModel,m5DthRoute,dt)){
+     s.mission5.dthParked=true;m5DthRoute=null;
+     drill.position={x:FLEET_BAYS.dth.x,z:FLEET_BAYS.dth.z};save();
+    }
+   }else{
+    m5DthRoute=null;
+    m4DthModel.position.x=FLEET_BAYS.dth.x;
+    m4DthModel.position.z=FLEET_BAYS.dth.z;
+   }
+  }else if(zone&&patioFleetActive(s)&&s.mission5.dthParked){
+   // Depart from assigned open-air pad via fixed gate.
+   m5DthRoute=null;
+   m5DthDepartRoute??=rigRouteFromPatio(m4DthModel.position,target);
+   if(advanceRigRoute(m4DthModel,m5DthDepartRoute,dt)){
+    s.mission5.dthParked=false;m5DthDepartRoute=null;save();
+   }
+  }else{
+   m5DthRoute=null;m5DthDepartRoute=null;
+   // Retain M4 worksite-to-worksite animation and consumption.
+   m4DthModel.position.x+=(target.x-m4DthModel.position.x)*Math.min(1,dt*3);
+   m4DthModel.position.z+=(target.z-m4DthModel.position.z)*Math.min(1,dt*3);
+  }
   if(m4DthCollider){m4DthCollider.x=m4DthModel.position.x;m4DthCollider.z=m4DthModel.position.z;}
   // Drill animation runs only at the assigned site, never during relocation.
   const atSite=Math.hypot(target.x-m4DthModel.position.x,target.z-m4DthModel.position.z)<0.25;
   animateDthRig(m4DthModel,dt,atSite&&drill?.state==='producing');
  }
  // Ensure parking and truck are initialized on state change
- if(s.mission4.parkingBuilt&&!m4ParkingSpot)initM4Visuals();
+ if(s.mission4.parkingBuilt&&!m4ParkingSpot&&!patioFleetActive(s))initM4Visuals();
  if(s.mission4.drillTruck&&!m4DrillTruckModel){m4VisualsReady=false;initM4Visuals();}
  // Animate truck route
  if(m4DrillTruckModel&&truckRouteActive(m4DrillTruckModel)){
