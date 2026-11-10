@@ -18,12 +18,14 @@ test('wave01 catalog provides eight new assets with read-only states, never a pa
  }
  assert.equal(ASSET_WAVE_VISUAL_ONLY,true);
 });
-test('real model sprite atlas covers all proposed products and original HSEC cone/fence',()=>{
+test('real model sprite atlas covers Wave 01 new-product previews without overriding existing HSEC world previews',()=>{
  assert.ok(waveAtlasUrl.startsWith('data:image/webp;base64,'));
  assert.ok(waveAtlasUrl.length>400);
  const cells=ASSET_LIBRARY_WAVE01.map(i=>i.cell);
  assert.equal(new Set(cells).size,cells.length);
- assert.deepEqual([waveCellForProduct({kind:'hsec',id:'cone'}),waveCellForProduct({kind:'hsec',id:'fence'})],[0,1]);
+ assert.equal(waveCellForProduct({kind:'hsec',id:'cone'}),undefined);
+ assert.equal(waveCellForProduct({kind:'hsec',id:'fence'}),undefined);
+ assert.equal(waveAtlasArtwork({kind:'hsec',id:'cone'}),'');
  for(const product of waveProducts({}))assert.match(waveAtlasArtwork(product),/background-position:/);
 });
 test('original HSEC prices remain exactly as defined (no duplicate SKU)',()=>{
