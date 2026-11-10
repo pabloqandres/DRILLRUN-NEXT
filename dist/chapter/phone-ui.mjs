@@ -7,11 +7,29 @@ import {icon,workerAvatar} from './icons.mjs';
 import {isM3App,m3HomeApps,renderM3App} from '../mission3/phone-apps.mjs';
 import {isM4App,m4HomeApps,renderM4App} from '../mission4/phone-apps.mjs';
 import {renderPatioApp} from '../mission5/patio-ui.mjs';
-import {renderContactList,renderConversation,NarrativeTyping} from './narrative-ui.mjs';
+import {renderContactList,renderConversation,NarrativeTyping,resolveNarrativeText} from './narrative-ui.mjs';
 import {markCharacterRead,narrativeUnread} from './narrative.mjs';
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export class PhoneUI{
- constructor(options){Object.assign(this,options);this.conversation=false;this.narrativeCharacter=null;this._typing=null;this.rigArtCache=new Map();}
+ constructor(options){Object.assign(this,options);this.conversation=false;this.narrativeCharacter=null;this._typing=null;this.rigArtCache=new Map();this._renderedThreadMessages=new Map();this._focusNarrativeMessageId=null;}
+ // A freshly delivered SMS should open its OWN bubble, not the first
+ // historical message from that sender (Elena appears in M1, M4 and M5).
+ focusNarrativeMessage(message){
+  if(!message)return;
+  this.narrativeCharacter=message.characterId;
+  this.conversation=true;
+  this._focusNarrativeMessageId=message.id;
+ }
+ _scrollToNarrativeMessage(messageId){
+  if(!messageId)return false;
+  const c=this.content;
+  const bubble=[...c.querySelectorAll('.narrativeBubble')].find(el=>el.dataset.msgId===messageId);
+  if(!bubble)return false;
+  // Align TOP of new message, so long texts can be read from the beginning.
+  const position=c.scrollTop+bubble.getBoundingClientRect().top-c.getBoundingClientRect().top-8;
+  c.scrollTop=Math.max(0,position);
+  return true;
+ }
  release(){if(this.preview)this.previewAngle=this.preview.angle;this.preview?.dispose();this.preview=null;this._disposeTyping();}
  render(app){
   // Live mission/stock updates re-render this screen. Preserve the user's
@@ -22,6 +40,15 @@ export class PhoneUI{
   const keepScroll=this._lastViewKey===viewKey;
   const previousScroll=keepScroll?this.content.scrollTop:0;
   this.release();const s=this.state(),t=this.translate(),c=this.content,fmt=this.format;this.app=app;
+  const lastThreadMessage=app==='messages'&&this.conversation&&this.narrativeCharacter
+   ?s.narrative?.messages?.filter(m=>m.characterId===this.narrativeCharacter).at(-1)
+   :null;
+  const lastThreadId=lastThreadMessage?.id||null;
+  // A new message in an ALREADY open conversation also overrides the saved
+  // scroll position. Ordinary HUD re-renders preserve user's manual reading.
+  const focusMessageId=this._focusNarrativeMessageId||
+   (lastThreadId&&(!keepScroll||this._renderedThreadMessages.get(viewKey)!==lastThreadId)
+    ?lastThreadId:null);
   this.shell.classList.remove('storeMode');this.shell.dataset.app=app;
   this.title.textContent=app==='home'?'FIELD / 01':t(app);this.back.style.visibility=app==='home'?'hidden':'visible';
   c.className='appContent';
@@ -98,7 +125,10 @@ export class PhoneUI{
   c.querySelectorAll('[data-m4-action]').forEach(b=>b.onclick=()=>{if(this.onM4Action)this.onM4Action(b.dataset.m4Action,b.dataset.zone||b.dataset.bh||b.dataset.drill||b.dataset.tool||b.dataset.model||null);});
   c.querySelector('#understoodMessage')?.addEventListener('click',this.onClose);
   this._lastViewKey=viewKey;
+  if(lastThreadId)this._renderedThreadMessages.set(viewKey,lastThreadId);
   c.scrollTop=keepScroll?previousScroll:0;
+  if(focusMessageId)this._scrollToNarrativeMessage(focusMessageId);
+  this._focusNarrativeMessageId=null;
   this.onHUD();
  }
  renderMessages(s,t){
@@ -130,7 +160,7 @@ export class PhoneUI{
     const msg=s.narrative?.messages?.find(m=>m.id===msgId);
     if(msg){
      const body=t(msg.bodyKey)||msg.bodyKey;
-     const resolved=body.replace(/\{name\}/g,s.playerName||'Operador');
+     const resolved=resolveNarrativeText(body,s.playerName);
      this._typing=new NarrativeTyping(typingTarget,resolved,()=>{});
 
     }
