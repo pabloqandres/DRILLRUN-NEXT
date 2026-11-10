@@ -284,7 +284,13 @@ async function ensureWorld(forSelection=false){
  hsecWorld.onUpgrade=(assetId)=>{try{upgradeAsset(s,assetId);save();renderHUD();notices.push({title:'Superficie mejorada',symbol:'⬆'});}catch(e){notices.push({title:e.message,symbol:'⚠️'});}};
  hsecWorld.onRemove=(assetId)=>{try{retireAsset(s,assetId);save();renderHUD();notices.push({title:'Activo retirado',symbol:'🗑'});}catch(e){notices.push({title:e.message,symbol:'⚠️'});};};hsecUI=new HsecUI({state:()=>s,world:hsecWorld,format:money,onSave:()=>{scene.update(s,0,Date.now());hsecWorld.update(s,0,'play');ensureSafe();save();renderHUD();},onStop:stop,notify:text=>notices.push({title:text,symbol:'bell'}),showModal:modal,hideModal:closeModal,openBuilder,closeBuilder,manageOffice,onGoto:p=>{target={x:p.x,z:p.z};}});builderUI.hsec=hsecUI;guidance=new ObjectiveGuide(world,$('#hud'),()=>t);constructionCallout=new ConstructionCallout(world,$('#buildHud'));characterStage=new CharacterStage(world);await world.characterReady;avatars=new AvatarRoster(world);loadingProgress(1,forSelection?4:2);
  if(forSelection)await avatars.loadAll((done,total)=>{loadingProgress(done,total);});else await avatars.load(s?.character||'operator01');
- avatars.activate(s?.character||'operator01');builderUI.world=world;builderUI.thumbnail=officeThumbnail(world);world.inspect=false;motion.turnBeforeMove=true;world.player.userData.validationCanvas=world.renderer.domElement;
+ avatars.activate(s?.character||'operator01');builderUI.world=world;
+ try{builderUI.thumbnail=officeThumbnail(world);}catch(error){
+  // The world's WebGL context is always more important than a catalog image.
+  console.warn('[Catalog] Initial office thumbnail skipped:',error);
+  builderUI.thumbnail=null;
+ }
+ world.inspect=false;motion.turnBeforeMove=true;world.player.userData.validationCanvas=world.renderer.domElement;
  installWorldGestures(world.renderer.domElement,{canLook:()=>phase==='character'||phase==='play'&&!locomotionReview?.active&&(!modalOpen||managingOffice)&&!phoneOpen&&!faenaCenter?.visible&&!busy,dragAnywhere:()=>builderOpen||managingOffice,onLook:(dx,dy)=>{if(phase!=='play')return;target=null;if(builderOpen&&(hsecUI?.drawing||hsecUI?.coneZone)){
   // Move the aerial camera independently; do not move the placement asset.
   const zoom=world.cameraRig.builderZoom||22,panScale=zoom*.0018;
@@ -906,7 +912,13 @@ function nearInteraction(){if(!s)return null;
  return null;
 }
 $('#handButton').onclick=()=>{if(busy||modalOpen||phoneOpen||builderOpen||placement)return;const a=phase==='play'?nearInteraction():null;if(!a)return;if(a.kind==='personalTruck'){togglePersonalTruck();return;}if(a.kind==='m5Staff'){openFaena('personnel');return;}if(a.kind==='hsecAsset'){hsecUI.open('assets');return;}if(a.kind==='clear'){if(s.energy<CONFIG.clearCost)return toast('noEnergy');busy={object:a.object,elapsed:0};stop();sound('clear');}else if(a.kind==='build')showBuild();else if(a.kind==='boost')action(()=>accelerate(s));else if(a.kind==='workshop'){openFaena('workshop');return;}else if(a.kind==='warehouse'){openFaena('logistics');return;}else if(a.kind==='enter')enterOffice();else if(a.kind==='exit'){transition('exitTransition');s.inside=false;s.position={...CONFIG.officeSlot.access};world.worker.reset();stop();save();}else if(a.kind==='computer'){if(!s.chapterCompletedAt){action(()=>useOfficeComputer(s));sound('finish');/* reward modal deferred to narrative confirmCompletion */return;}hsecUI.open();return;modal(`<span class="eyebrow">${esc(t('computer'))}</span><h2>${esc(t('next'))}</h2><p>${esc(t('nextDetail'))}</p><div class="modalActions">${button('close','closeComputer',true)}</div>`);$('#closeComputer').onclick=closeModal;}};
-function openBuilder(){if(phase!=='play'||placement||busy)return;closeFaena();
+function openBuilder(){
+ if(phase!=='play'||placement||busy)return;
+ if(personalTruck(s)?.mode==='driving'){
+  notices.push({title:'Detén y estaciona el DrillTruck® antes de abrir Catálogo',detail:'Usa la mano para salir del vehículo',symbol:'lock'});
+  return;
+ }
+ closeFaena();
  catalogPreviewWalk=false;hidden($('#endBuildPreviewWalk'),true);
  if(!isMissionAccepted(s,'m1')&&!isMissionCollected(s,'m1')){
   showPendingMissionMessage();return;
@@ -1140,6 +1152,8 @@ function workshopConfirmDemolish(){
 function hideWorkshopCard(){const wc=$('#workshopCard');if(wc)wc.hidden=true;workshopCardOpen=false;workshopDemolishPending=false;}
 function renderHUD(){if(!s)return;
  const driving=personalTruck(s)?.mode==='driving';
+ const catalogNav=$('#bottomNav [data-nav="builder"]');
+ if(catalogNav){catalogNav.disabled=driving;catalogNav.setAttribute('aria-disabled',String(driving));}
  document.body.classList.toggle('drilltruckDriving',driving);
  hidden($('#personalTruckBrake'),!driving);
  hidden($('#personalTruckLights'),!driving);
