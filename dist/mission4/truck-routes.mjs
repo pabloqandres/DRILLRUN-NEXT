@@ -5,6 +5,15 @@ import * as T from '../vendor/three.module.js';
 
 // Parking position — exterior left of workshop
 const PARKING=new T.Vector3(-13.5,0,-9.3);
+const PATIO_PARKING=new T.Vector3(-65,0,-4);
+// New M5 L1 fixed gate at (-24,-14), with adequate truck turning clearance.
+const PATIO_SPINE=[
+ new T.Vector3(-65,0,-14),new T.Vector3(-42,0,-14),
+ new T.Vector3(-31,0,-14),new T.Vector3(-24,0,-14),
+ new T.Vector3(-13.5,0,-14)
+];
+const RELOCATE_TO_PATIO=[PARKING,new T.Vector3(-13.5,0,-14),
+ ...[...PATIO_SPINE].reverse(),PATIO_PARKING];
 
 // Route: go south to clear workshop, then east along southern edge
 const ROAD_SPINE=[
@@ -28,9 +37,12 @@ const ZONE_APPROACH={
  'BH-06':[new T.Vector3(SERVICE_LANE_X,0,-8)]
 };
 
-function buildRoute(zoneId,direction){
+function buildRoute(zoneId,direction,usePatio=false){
+ if(direction==='relocate')return RELOCATE_TO_PATIO;
  const approach=ZONE_APPROACH[zoneId]||ZONE_APPROACH['BH-01'];
- const outbound=[PARKING,...ROAD_SPINE,...approach];
+ const outbound=usePatio
+  ?[PATIO_PARKING,...PATIO_SPINE,...ROAD_SPINE.slice(1),...approach]
+  :[PARKING,...ROAD_SPINE,...approach];
  if(direction==='out')return outbound;
  return [...outbound].reverse();
 }
@@ -40,11 +52,11 @@ export function initTruckRouteState(model){
  model.userData._truckRoute={active:false,route:null,index:0,t:0,phase:'idle',speed:5};
 }
 
-export function startTruckRoute(model,zoneId,direction='out'){
+export function startTruckRoute(model,zoneId,direction='out',usePatio=false){
  if(!model)return;
  const d=model.userData._truckRoute;
  d.active=true;
- d.route=buildRoute(zoneId,direction);
+ d.route=buildRoute(zoneId,direction,usePatio);
  d.index=0;
  d.t=0;
  d.phase=direction;
