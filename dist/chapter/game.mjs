@@ -88,7 +88,7 @@ let m3DrillModel=null,m3BoreholeMarkers=[],m3DeliveryVehicle=null,m3DrillingFx=n
 let m4DrillTruckModel=null,m4ParkingSpot=null,m4VisualsReady=false,m4TruckLoading=false,m4TruckCollider=null;
 let m4DthModel=null,m4DthCollider=null,m4Staging=null;
 let m5World=null,patioOverviewUntil=0,m5RcRoute=null,m5DthRoute=null,m5DthDepartRoute=null;
-let catalogBlueprint=null;
+let catalogBlueprint=null,catalogConstructionCamera=false;
 let siteCinematics=null;
 let world,scene,phase='start',phoneApp=null,phoneOpen=false,category='desks',modalOpen=false,blueprint=false,placement=null,busy=null,keys={},joy={x:0,y:0},pointer=null,target=null,auth={configured:false},account=null,audioContext=null,last=performance.now(),clock=0,lastSave=0,lastHud=0,introAt=0,lastObjective='',qaRoute=false;
 let cloudSyncing=true,cloudLocked=false,cloudStatus='Verificando Google…',cloudEpoch=0;
@@ -693,8 +693,8 @@ $('#handButton').onclick=()=>{if(busy||modalOpen||phoneOpen||builderOpen||placem
 function openBuilder(){if(phase!=='play'||placement||busy)return;
  if(!isMissionAccepted(s,'m1')&&!isMissionCollected(s,'m1')){
   showPendingMissionMessage();return;
- }stop();closePhone();hsecWorld?.showAssetCard(null);builderOpen=true;hidden($('#builderPanel'),false);document.body.classList.add('builderOpen');if(hsecUI)hsecUI.mode=hsecActive(s);builderUI.open();}
-function closeBuilder(){builderUI.close();if(hsecUI?.drawing)hsecUI.cancelDraft();builderUI.close();builderOpen=false;blueprint=false;hidden($('#builderPanel'),true);document.body.classList.remove('builderOpen');if(world)world.chapterCamera=null;}
+ }stop();closePhone();hsecWorld?.showAssetCard(null);catalogConstructionCamera=false;builderOpen=true;hidden($('#builderPanel'),false);document.body.classList.add('builderOpen');if(hsecUI)hsecUI.mode=hsecActive(s);builderUI.open();}
+function closeBuilder(){builderUI.close();if(hsecUI?.drawing)hsecUI.cancelDraft();catalogConstructionCamera=false;builderOpen=false;blueprint=false;hidden($('#builderPanel'),true);document.body.classList.remove('builderOpen');if(world)world.chapterCamera=null;}
 function showBuild(){openBuilder();}
 function buildTime(seconds){return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');}
 function confirmModule(m,zone){if(m.locked)return;if(action(()=>startModule(s,m.id,zone))){closeBuilder();sound('build');}}
@@ -1133,6 +1133,12 @@ onBuildingPreview:product=>{
  if(!catalogBlueprint)catalogBlueprint=new BuildingBlueprint(world,()=>m5World);
  catalogBlueprint.show(product);
 },
+onCatalogPreviewCamera:()=>catalogConstructionCamera,
+onToggleCatalogPreviewCamera:()=>{
+ catalogConstructionCamera=!catalogConstructionCamera;
+ if(!catalogConstructionCamera){world.chapterCamera=null;world.snapCamera=true;}
+ builderUI.render();
+},
 onCatalogAction:(type,data)=>{try{
  if(type==='buildWorkshop'){buildWorkshop(s);notices.push({title:'Construcción del taller L1 iniciada · 30 s',symbol:'build'});}
  else if(type==='buyDrill'){const d=drillDefinition(data);if(!d)throw new Error('invalid');placeMachineryOrder(s,'drill',data,d.price);notices.push({title:'Perforadora solicitada · en camino',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}
@@ -1204,7 +1210,7 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
   }
  avatars?.updateSelector(phase==='character',selectedAvatar,s,dt,clock);characterStage?.update(phase==='character',clock,selectedAvatar);
  if(phase==='character'){world.chapterCamera={target:new T.Vector3(-4.55+Math.max(0,Math.min(.5,(730-innerWidth)/324)),1.0,5.35),offset:new T.Vector3(0,.55,6.1)};}
- else if(phase==='play'&&builderOpen&&catalogBlueprint?.spec&&!modalOpen&&
+ else if(phase==='play'&&builderOpen&&catalogConstructionCamera&&catalogBlueprint?.spec&&!modalOpen&&
   !hsecUI?.drawing&&!hsecUI?.coneZone){
   const view=catalogBlueprint.camera();
   world.chapterCamera=view?{
