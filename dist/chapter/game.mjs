@@ -1053,6 +1053,7 @@ onNarrativeAction:handleNarrativeAction,
 });
 $('#builderButton').onclick=openBuilder;
 $('#patioBuildHud')?.addEventListener('click',()=>{if(phase==='play')openPatioPanel();});
+$('#patioBuildHud')?.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(phase==='play')openPatioPanel();}});
  $$('#bottomNav [data-nav]').forEach(b=>b.onclick=()=>{
   const nav=b.dataset.nav;
   if(nav==='builder'){openBuilder();return;}
