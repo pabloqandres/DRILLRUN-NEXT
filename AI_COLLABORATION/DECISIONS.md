@@ -1,5 +1,17 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+## 2026-11-10 — V50 Segundo DrillTruck® conducible y M5 de seis objetivos
+
+El usuario pidió una segunda unidad para manejo personal con joystick,
+freno, cámara exterior elevada, ingreso por mano o tocando el modelo y
+estacionamiento propio cerca de entrada; el DrillTruck® M4 seguirá
+automático atendiendo la DTH. Compra pagada mediante Casa Matriz
+(🪙 12.000 + 🪙 200 despacho), entrega 3 minutos y sexto objetivo
+M5, sin recompensas extra y manteniendo bono único 🪙 12.000.
+Se modifica solo M5, Casa Matriz, HUD y conducción; no alterar
+automatización, desgaste ni ingresos M4.
+Ver `CHANGES/2026-11-10_v50-personal-drilltruck-driving.md`.
+
 ## 2026-11-10 — V48 Desfase traslado DTH y estado visual
 
 Diagnóstico del usuario: la DTH figura «Cambiando de punto» sin
