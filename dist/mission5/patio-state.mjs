@@ -6,7 +6,7 @@ export const PATIO_L1={
  price:45000,constructionSeconds:1200,
  width:54,depth:44,center:{x:-51,z:-17},
  gate:{x:-24,z:-14},truckBay:{x:-65,z:-4},
- coveredCapacity:6,openDrillCapacity:3,heavyCapacity:4,
+ coveredCapacity:6,openDrillCapacity:2,heavyCapacity:3,
  modules:['Control de acceso','Estacionamiento techado liviano','Galpón logístico',
   'Combustible protegido','Explanada de perforadoras','Patio de equipos pesados','Urbanización y HSEC']
 };
