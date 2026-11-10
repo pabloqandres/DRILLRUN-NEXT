@@ -84,7 +84,7 @@ function markings(g){
  // Heavy-equipment bays: open air, turning clearances 12–13m.
  for(const x of[-7,5,17])mark(g,x,-13,11.2,15.7,C.yellow);
  // RC and DTH open bays, no overhead canopies or fake static rigs.
- for(const x of[8,15.5])mark(g,x,15.25,6.6,10.3,C.yellow);
+ for(const x of[9.4,17.2])mark(g,x,15.25,6.6,10.3,C.yellow);
  // Roofed light fleet: six narrow slots only for pickups and DrillTruck.
  for(const x of[-23,-19.4,-15.8,-12.2,-8.6,-5]){
   mark(g,x,14.1,3.4,7.4,C.yellow);
@@ -97,10 +97,10 @@ function markings(g){
 function buildAccess(w,g){
  const q=new T.Group();q.name='M5 · caseta de acceso y control';g.add(q);
  // Guardhouse kept to the side of a 10m unobstructed portal.
- block(q,4.8,3.1,4.6,22.0,1.75,13.9,C.ink,true);
- block(q,5.2,.26,5.0,22,3.5,13.9,C.red,true);
- for(const z of[12.3,14.9])block(q,.08,1.3,1.2,24.46,2.2,z,C.glass);
- sign(w,q,'CONTROL HSEC',3.6,21.8,3.5,16.29);
+ block(q,4.2,3.1,4.6,24.0,1.75,13.9,C.ink,true);
+ block(q,4.6,.26,5.0,24,3.5,13.9,C.red,true);
+ for(const z of[12.3,14.9])block(q,.08,1.3,1.2,26.15,2.2,z,C.glass);
+ sign(w,q,'CONTROL HSEC',3.6,24,3.5,16.29);
  block(q,1.2,.7,.95,25.9,.60,-1.2,C.red);
  const arm=new T.Group();arm.position.set(25.9,1.25,-1.2);q.add(arm);
  block(arm,.19,.16,8.7,0,0,4.35,C.white);
@@ -132,19 +132,19 @@ function buildLogistics(w,g){
 }
 function buildFuel(w,g){
  const q=new T.Group();q.name='M5 · Combustible aislado HSEC';g.add(q);
- block(q,9.3,.22,10,-1,.37,14.3,C.concrete);
- roof(q,-1,14.3,10,10.4,4.6);
- for(const x of[-3,1]){
+ block(q,6.4,.22,10,1.5,.37,14.3,C.concrete);
+ roof(q,1.5,14.3,6.4,10.4,4.6);
+ for(const x of[.5,2.5]){
   block(q,1.05,2.0,1.1,x,1.40,15.0,C.red,true);
   block(q,.7,.62,.07,x,1.88,15.6,C.ink);
   block(q,.12,1.1,.11,x+.43,1.01,15.6,C.ink);
  }
  // Bunded fuel vessel, safely isolated inside the fuel module.
- block(q,7,.55,2.5,-1,.55,10.65,C.steel);
+ block(q,5.8,.55,2.5,1.5,.55,10.65,C.steel);
  const tank=new T.Mesh(new T.CylinderGeometry(1,1,5.8,14),mat(C.white));
- tank.rotation.z=Math.PI/2;tank.position.set(-1,1.52,10.65);q.add(tank);
- block(q,6.8,.12,.15,-1,2.2,10.65,C.red);
- sign(w,q,'COMBUSTIBLE · HSEC',8,-1,5.32,20.08);
+ tank.rotation.z=Math.PI/2;tank.position.set(1.5,1.52,10.65);q.add(tank);
+ block(q,5.8,.12,.15,1.5,2.2,10.65,C.red);
+ sign(w,q,'COMBUSTIBLE · HSEC',6.4,1.5,5.32,20.08);
  return q;
 }
 function operationalDetails(w,g){
@@ -171,7 +171,7 @@ function blueprint(w,root){
   g.add(new T.Line(new T.BufferGeometry().setFromPoints(pts),m));
  };
  makeOutline(0,0,54,44);
- for(const [x,z,ww,dd]of[[-14.4,14.1,22.7,11.8],[-19,-11.2,14.6,14.3],[-1,14.3,10,10.4],
+ for(const [x,z,ww,dd]of[[-14.4,14.1,22.7,11.8],[-19,-11.2,14.6,14.3],[1.5,14.3,6.4,10.4],
    [-7,-13,11.2,15.7],[5,-13,11.2,15.7],[17,-13,11.2,15.7],[15,15.25,21,10.3]])makeOutline(x,z,ww,dd);
  for(const x of[-27,27])for(const z of[-22,22])
   block(g,.32,.38,.32,x,.45,z,C.blue);
@@ -230,8 +230,8 @@ export function createPatioWorld(w){
     ])w.registerBoundary(root,ax,az,bx,bz,.20,'patio-fence');
     for(const item of[
      {x:-70,z:-28.2,w:13.2,d:13.5},
-     {x:-29,z:-3.1,w:4.8,d:4.6},
-     {x:-52,z:-2.7,w:9.3,d:10}
+     {x:-27,z:-3.1,w:4.2,d:4.6},
+     {x:-49.5,z:-2.7,w:6.4,d:10}
     ])w.colliders.push({...item,_patio:true});
     w.walkSurfaces??=[];
     w.walkSurfaces.push({x:-51,z:-17,w:53.4,d:43.4,y:.19});
