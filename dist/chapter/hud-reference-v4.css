@@ -1349,3 +1349,45 @@ body.interior #hud #objective:not(.hidden).collapsed{
  #drillCard .dthInspectTool{padding:6px 8px;margin:4px 0}
  #drillCard .dthInspectTool strong{font-size:10px}
 }
+
+/* V32: compact M5 worksite countdown; independent of office/M1 build HUD. */
+#patioBuildHud{
+ position:absolute;right:calc(env(safe-area-inset-right, 0px) + 18px);top:72px;
+ width:clamp(180px,24vw,292px);z-index:24;cursor:pointer;
+ padding:11px 13px 9px;background:linear-gradient(150deg,#112b3dee,#173547ef);
+ border:1px solid #8cc6d1a6;border-left:3px solid #bf3334;border-radius:12px;
+ color:#f2efe6;box-shadow:0 10px 28px #0007;pointer-events:auto;
+ font-size:11px;backdrop-filter:blur(8px)
+}
+#patioBuildHud.hidden{display:none!important}
+#patioBuildHud .patioHudHead{display:flex;align-items:center;justify-content:space-between;gap:6px}
+#patioBuildHud .patioHudHead span{font-size:10px;letter-spacing:.7px;font-weight:800;color:#a6d3df;line-height:1.25}
+#patioBuildHud .patioHudHead b{font-size:17px;font-weight:900;color:#f3d185;font-variant-numeric:tabular-nums;white-space:nowrap}
+#patioBuildHud .patioHudTrack,#modalCard .patioModalTrack{
+ display:block;height:6px;width:100%;overflow:hidden;border-radius:7px;
+ background:#223e49;margin:8px 0 6px;box-shadow:inset 0 0 2px #0009
+}
+#patioBuildHud .patioHudTrack i,#modalCard .patioModalTrack i{
+ display:block;height:100%;width:0;max-width:100%;
+ background:linear-gradient(90deg,#bf3437,#f3bd61);border-radius:7px
+}
+#patioBuildHud small{color:#b0cbd2;font-size:10px}
+#modalCard .patioStatus{display:block;color:#9ce0c1;margin:12px 0;font-size:12px}
+#modalCard .patioModalModules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:12px 0}
+#modalCard .patioModule{
+ border:1px solid #527382;border-radius:8px;background:#173343;
+ display:flex;gap:7px;align-items:center;padding:8px;color:#dbe7e6;font-size:11px
+}
+#modalCard .patioModule .uiIcon{flex:0 0 auto;width:17px;height:17px;color:#d6b76a}
+#modalCard .patioFutureList{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+#modalCard .patioFuture{padding:6px 9px;border:1px solid #60717c;border-radius:7px;color:#a3b6c0}
+@media(max-height:530px){
+ #patioBuildHud{top:46px;right:12px;padding:7px 9px;width:190px}
+ #patioBuildHud .patioHudHead b{font-size:14px}
+ #patioBuildHud .patioHudHead span{font-size:8px}
+ #patioBuildHud small{font-size:8px}
+}
+@media(max-width:680px){
+ #modalCard .patioModalModules{grid-template-columns:1fr}
+ #patioBuildHud{width:160px}
+}
