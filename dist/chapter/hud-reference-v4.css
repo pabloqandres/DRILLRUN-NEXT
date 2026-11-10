@@ -1302,3 +1302,50 @@ body.interior #hud #objective:not(.hidden).collapsed{
  #hud #bottomNav button{padding-left:1px!important;padding-right:1px!important}
  #hud #bottomNav button span:last-child{font-size:clamp(5.5px,1.4vw,8px)!important}
 }
+
+/* V30 · Read-only DTH rig tool inspection card. RC styling stays intact.
+   Respect mobile landscape height and avoid joystick/hand HUD. */
+#drillCard.dthInspect{
+ width:min(310px,calc(100vw - 36px))!important;
+ max-height:calc(100dvh - 92px)!important;
+ overflow-x:hidden!important;
+ overflow-y:auto!important;
+ overscroll-behavior:contain;
+ scrollbar-width:thin;
+ padding:12px 14px 11px!important;
+}
+#drillCard.dthInspect .dcHead{padding-right:23px}
+#drillCard.dthInspect .dcState{margin-bottom:7px}
+#drillCard.dthInspect .dcGrid{margin-bottom:7px}
+#drillCard .dthInspectTool{
+ display:grid;gap:3px;
+ padding:8px 9px;
+ margin:7px 0;
+ background:rgba(9,36,54,.78);
+ border:1px solid rgba(137,188,209,.32);
+ border-radius:9px;
+}
+#drillCard .dthInspectToolHeader,
+#drillCard .dthInspectLife{display:flex;justify-content:space-between;align-items:center;gap:8px}
+#drillCard .dthInspectToolHeader b{font-size:10px;color:#82d4e5;letter-spacing:.7px}
+#drillCard .dthInspectToolHeader span{font-size:8px;font-weight:800;letter-spacing:.6px;color:#9beac1}
+#drillCard .dthInspectToolHeader .dthInspectEmpty{color:#ef8e75}
+#drillCard .dthInspectTool strong{font-size:11px;color:#f5e8d0;overflow-wrap:anywhere}
+#drillCard .dthInspectLife span{font-size:9px;color:#a5c4d3}
+#drillCard .dthInspectLife b{font-size:11px;color:#f6c16a;font-variant-numeric:tabular-nums;white-space:nowrap}
+#drillCard .dthInspectTrack{height:7px;background:#112d41;border:1px solid #ffffff22;border-radius:5px;overflow:hidden}
+#drillCard .dthInspectTrack>.dcFill{height:100%;border-radius:4px}
+#drillCard .dthInspectTool small{font-size:9px;color:#99bacc}
+#drillCard .dthInspectFooter{border-top:1px solid #ffffff26;padding-top:7px;display:grid;gap:3px}
+#drillCard .dthInspectFooter b{font-size:11px;color:#ebebdf}
+#drillCard .dthInspectFooter small{font-size:9px;color:#a4becd;line-height:1.35}
+@media(max-height:530px){
+ #drillCard.dthInspect{
+  top:calc(var(--safe-t,8px) + 47px)!important;
+  max-height:calc(100dvh - 61px)!important;
+  width:min(285px,calc(100vw - 34px))!important;
+  padding:9px 10px!important;
+ }
+ #drillCard .dthInspectTool{padding:6px 8px;margin:4px 0}
+ #drillCard .dthInspectTool strong{font-size:10px}
+}
