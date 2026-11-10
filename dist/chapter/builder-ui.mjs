@@ -1,7 +1,7 @@
 import {moduleDefinition,moduleAvailability} from './module-catalog.mjs';
 import {landReady} from './state.mjs';
 import {CatalogView} from './catalog-view.mjs';
-import {officeThumbnail,workshopThumbnail} from './product-preview.mjs';
+import {officeThumbnail,workshopThumbnail,patioThumbnail} from './product-preview.mjs';
 import {drillTruckImage} from './drilltruck-image.mjs';
 import {catalogProducts,catalogCategories} from './construction-catalog.mjs';
 export class BuilderUI{
@@ -43,6 +43,23 @@ export class BuilderUI{
   }
   return this.buildingThumbnails.get(key);
  }
+ // Render once from the REAL M5 yard model, not a generic icon or
+ // hypothetical illustration. Same cached image serves cards and details.
+ getPatioThumbnail(){
+  const key='patio-maquinarias-l1';
+  const cached=this.buildingThumbnails.get(key);
+  if(cached)return cached;
+  if(!this.world)return null;
+  const source=this.getPatioPreviewSource?.();
+  if(!source?.children?.length)return null;
+  try{
+   const image=patioThumbnail(this.world,source);
+   if(image){this.buildingThumbnails.set(key,image);return image;}
+  }catch(error){
+   console.warn('[Catalog] patio L1 model snapshot unavailable',error);
+  }
+  return null;
+ }
  getDrillTruckThumbnail(){
   const existing=this.vehicleThumbnails.get('drilltruck');
   if(existing)return existing;
@@ -74,7 +91,7 @@ export class BuilderUI{
   // Selecting or collapsing a catalog card can never start an order.
   this.onBuildingPreview?.(picked);
   this.store.render({lang:s.lang,products,categories:catalogCategories(s.lang),category,selected,format:this.format,
-   thumbnail:p=>p.kind==='module'?this.getOfficeThumbnail(p.level):p.kind==='workshop'?this.getWorkshopThumbnail(p.level):p.kind==='vehicle'&&p.id==='drilltruck'?this.getDrillTruckThumbnail():p.kind==='hsec'&&p.status!=='future'&&this.hsec?.world?this.hsec.world.thumbnail(p.id):null,
+   thumbnail:p=>p.kind==='module'?this.getOfficeThumbnail(p.level):p.kind==='workshop'?this.getWorkshopThumbnail(p.level):p.kind==='patio'?this.getPatioThumbnail():p.kind==='vehicle'&&p.id==='drilltruck'?this.getDrillTruckThumbnail():p.kind==='hsec'&&p.status!=='future'&&this.hsec?.world?this.hsec.world.thumbnail(p.id):null,
    onCategory,onSelect,onClose:this.onClose,onStaff:()=>this.hsec?.open('staff'),
    onWalkPreview:()=>this.onWalkBuildingPreview?.(),
    onTogglePreviewCamera:()=>this.onToggleCatalogPreviewCamera?.(),
