@@ -14,6 +14,9 @@ const paths={
  "dock-personnel":"<circle cx=\"9\" cy=\"7\" r=\"3\"/><path d=\"M2.5 20v-2.5c0-3.5 2.7-5.5 6.5-5.5s6.5 2 6.5 5.5V20H2.5Z\"/><circle cx=\"18\" cy=\"8\" r=\"2.5\"/><path d=\"M18 13c2.4.3 3.5 1.8 3.5 4V20h-4\"/>",
  "dock-hsec":"<path d=\"M4 13.5h16M6 13.5v-2.2a6 6 0 0 1 12 0v2.2M3 14.5h18v2H3zM9 5.3V3.5M15 5.3V3.5M7 20h10\"/><path d=\"M12 6v7\"/>",
  "dock-zones":"<path d=\"M12 22s7.5-7.8 7.5-13a7.5 7.5 0 1 0-15 0C4.5 14.2 12 22 12 22Z\"/><circle cx=\"12\" cy=\"9\" r=\"2.7\"/>",
+ // Dedicated intuitive driver pictograms, not status words or external fonts.
+ "truck-headlamp":'<path d="M14 5.1c4.2 0 7 2.7 7 6.9s-2.8 6.9-7 6.9h-2.2V5.1H14Z"/><path d="M9 7H3m6 5H2m7 5H3"/>',
+ "truck-brake":'<circle cx="12" cy="12" r="5.7"/><path d="M12 8.7v4.7m0 2v.1M4.5 5.8a9.5 9.5 0 0 0 0 12.4m15-12.4a9.5 9.5 0 0 1 0 12.4"/>',
 
  time:"<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 6.5V12l3.5 2\"/>",
  wrench:"<path d=\"M20.2 7.5a6.5 6.5 0 0 1-8.7 7.8l-6.2 6.1a2.1 2.1 0 0 1-3-3l6.1-6.2A6.5 6.5 0 0 1 16.2 3l-4.3 4.3 3.1 3.1 5.2-2.9Z\"/>",
