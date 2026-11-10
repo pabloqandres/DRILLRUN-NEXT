@@ -1,3 +1,4 @@
+import {m5AssetsReady} from '../mission5/assets-ready.mjs';
 // Narrative Mission Flow System
 // Manages character-driven mission start/end messages, acceptance, and reward confirmation.
 // Reusable: each mission declares its narrative script; the engine handles state transitions.
@@ -116,7 +117,7 @@ export function pendingMessage(s){
 
  // M5 starts only after the player confirms M4's final SMS.
  // Already-built M5 yards from older saves don't need to be re-purchased.
- if(isCollected(s,'m4')&&s.mission4?.phase==='complete'&&!hasMessage(s,'n:m5:start'))
+ if(m5AssetsReady&&isCollected(s,'m4')&&s.mission4?.phase==='complete'&&!hasMessage(s,'n:m5:start'))
   return mkMsg('n:m5:start','m5',MISSION_NARRATIVES.m5);
  // End SMS is tied to operational patio + two hires + guard/warehouse checks,
  // never to the construction timer alone.
