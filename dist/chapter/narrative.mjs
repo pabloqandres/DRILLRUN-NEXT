@@ -1,4 +1,5 @@
 import {m5AssetsReady} from '../mission5/assets-ready.mjs';
+import {M5_REWARD_CASH} from '../mission5/mission-readout.mjs';
 // Narrative Mission Flow System
 // Manages character-driven mission start/end messages, acceptance, and reward confirmation.
 // Reusable: each mission declares its narrative script; the engine handles state transitions.
@@ -54,7 +55,8 @@ export const MISSION_NARRATIVES={
   missionNameKey:'narr_m5_name',
   missionNumber:5,
   start:{id:'n:m5:start',bodyKey:'narr_m5_start',actions:[{type:'accept',labelKey:'narr_acceptMission'}]},
-  end:{id:'n:m5:end',bodyKey:'narr_m5_end',actions:[{type:'collect',labelKey:'narr_completeMission'}],reward:null}
+  end:{id:'n:m5:end',bodyKey:'narr_m5_end',actions:[{type:'collect',labelKey:'narr_completeMission'}],
+   reward:{cash:M5_REWARD_CASH,boosters:0,ledgerKey:'m5CommissioningReward',label:'Recompensa · Misión 5'}}
  },
 };
 
@@ -189,14 +191,16 @@ export function confirmCompletion(s,missionId,now=Date.now()){
  // Deliver reward if defined
  const narr=MISSION_NARRATIVES[missionId];
  const rewardDef=narr?.end?.reward;
+ let creditedCash=0;
  if(rewardDef&&rewardDef.cash>0&&!(s.ledger||[]).some(l=>l.key===rewardDef.ledgerKey)){
   s.cash+=rewardDef.cash;
+  creditedCash=rewardDef.cash;
   s.ledger.push({id:s.nextId++,key:rewardDef.ledgerKey,label:rewardDef.label,amount:rewardDef.cash,at:now});
   if(rewardDef.boosters)s.boosters=(s.boosters||0)+rewardDef.boosters;
   // Set mission-specific flags
   if(missionId==='m2'&&s.hsec)s.hsec.rewarded=true;
  }
- return{missionId,cash:rewardDef?.cash||0,boosters:rewardDef?.boosters||0,name:narr.missionNameKey,number:narr.missionNumber};
+ return{missionId,cash:creditedCash,boosters:creditedCash?(rewardDef?.boosters||0):0,name:narr.missionNameKey,number:narr.missionNumber};
 }
 
 // The right-side mission card represents accepted, uncollected narrative missions only.

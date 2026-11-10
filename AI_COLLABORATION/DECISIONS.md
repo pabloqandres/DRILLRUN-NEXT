@@ -1,5 +1,20 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+## 2026-11-10 — V46 M5 checklist y bono de puesta en servicio
+
+**Aprobación del usuario:** al ver M5 con progreso 0/5 sin objetivos visibles,
+pidió pasos secuenciales y aprobó bono único de 🪙 12.000.
+Excepción de propiedad acotada: ChatGPT realiza solo la UI de M5 en
+`dist/chapter/game.mjs`, la declaración de recompensa en
+`dist/chapter/narrative.mjs` y las guardas de orden en
+`dist/mission5/patio-staff.mjs`; M1–M4 quedan intactas.
+HUD y teléfono leerán `mission5Readout` como fuente única.
+Inversión Patio y pagos actuales, M4, HSEC y guardado se conservan.
+Bono exclusivo al confirmar cierre narrativo, con ledger único.
+Implementación en `chatgpt/m5-checklist-reward-v46` y PR, no main
+ni producción sin aprobación de publicación.
+Ver `CHANGES/2026-11-10_m5-live-checklist-reward-v46.md`.
+
 ## 2026-11-09 — V25 first-cycle timer and persistent M4 machinery
 
 **User reported:** M4 first cycle had no visible countdown, uncertain fate of DTH after completion, RC parked under raised terrain, cropped DrillTruck image, notification TypeError, and 3/6 zones despite three sites. The right-side counter now reads persisted zone.lastCycleAt/actual 900-second production period, never a fabricated countdown. On first income, M4 mission can be confirmed while DTH remains assigned and production/income cycles continue. Existing RC/DTH staging moved entirely into flat parcel; no M5 yard invented. Cross-owner targeted UI and production read-only helpers by ChatGPT under user's direct-build request. See CHANGES/2026-11-09_m4-visual-cycle-v25.md.

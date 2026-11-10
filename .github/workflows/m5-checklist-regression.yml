@@ -1,0 +1,24 @@
+name: Mission 5 checklist and commissioning reward
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  m5-focused:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Check M5 module syntax
+        run: |
+          node --check dist/mission5/mission-readout.mjs
+          node --check dist/mission5/patio-staff.mjs
+          node --check dist/mission5/patio-ui.mjs
+          node --check dist/chapter/narrative.mjs
+          node --check dist/chapter/game.mjs
+      - name: Focused M5 and narrative regression
+        run: node --test tests/m5-stepwise-checklist-reward-v46.test.mjs tests/m5-staff-narrative-and-walk-v43.test.mjs

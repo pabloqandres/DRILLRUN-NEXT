@@ -31,7 +31,8 @@ import {PATIO_L1,PATIO_FUTURE,patioState,patioUnlocked,patioProgress,startPatio,
 import {createPatioWorld} from '../mission5/patio-world.mjs';
 import {PatioNPCWorld} from '../mission5/patio-npc-world.mjs';
 import {probeM5Assets} from '../mission5/assets-ready.mjs';
-import {hirePatioStaff,inspectPatioGate,inspectPatioWarehouse,mission5Objectives} from '../mission5/patio-staff.mjs';
+import {hirePatioStaff,inspectPatioGate,inspectPatioWarehouse} from '../mission5/patio-staff.mjs';
+import {mission5Readout,renderMission5HudChecklist} from '../mission5/mission-readout.mjs';
 import {FLEET_BAYS,patioFleetActive,rcAvailableToPark,dthAvailableToPark} from '../mission5/fleet-base.mjs';
 import {rigRouteToPatio,rigRouteFromPatio,advanceRigRoute} from '../mission5/fleet-routes.mjs';
 import {createBoreholeMarker,updateMarkerProgress} from '../mission3/borehole-marker.mjs';
@@ -987,12 +988,13 @@ function renderHUD(){if(!s)return;
  const narrativeMission=activeNarrativeMission(s);
  // Mission objectives appear only after the opening message is accepted.
  hidden($('#objective'),!narrativeMission);
+ $('#objective').dataset.mission=narrativeMission||'';
  $('#phoneButton').classList.toggle('missionAwaiting',!!pendingMissionReply());
  setText($('#cashValue'),money(s.cash));setText($('#energyValue'),Math.floor(s.energy)+' / '+CONFIG.maxEnergy);setText($('#boostValue'),s.boosters);const unread=unreadMessages(s).length;hidden($('#phoneBadge'),!unread);setText($('#phoneBadge'),unread);if(avatars&&lastPortraitId!==s.character){lastPortraitId=s.character;$('#playerAvatar').innerHTML=avatars.portrait(s.character);}$('#hud').dataset.avatar=s.character;setText($('#playerName'),s.playerName||t('operatorName'));const lvl=playerLevel(s);setText($('#levelValue'),lvl);const m3On=s.mission3&&s.mission3.phase!=='inactive';const m4HudOn=s.mission4&&s.mission4.phase!=='inactive';const missionSub=s.mission5?(s.mission5.commissionedAt?'Misión 5 · Patio habilitado':s.mission5.status==='operational'?'Misión 5 · Contratar personal':'Misión 5 · Patio en construcción'):m4HudOn?(s.mission4.phase==='complete'?'Misión 4 · Completada':'Misión 4 · Automatiza tu operación'):m3On?(s.mission3.phase==='complete'?'Misión 3 · Completada':'Misión 3 · Tu primer contrato'):s.hsec?.completedAt?'Misión 2 · Completada':s.chapterCompletedAt?'Misión 1 · Completada':'Misión 1 · '+t('firstSteps');setText($('#playerMission'),
  !isMissionAccepted(s,'m1')&&!isMissionCollected(s,'m1')?'Esperando mensaje de bienvenida':
  !narrativeMission?'Esperando nueva misión':missionSub);$('#playerProgress').style.width=(s.chapterCompletedAt?100:s.office.status==='built'?66:s.cleared.length===16?33:Math.round(s.cleared.length/16*33))+'%';
  /* Geo analysis floating card */
- const geo=s.geoAnalysis;const geoCard=$('#geoCard');if(geoCard){const geoActive=!!(geo&&geo.requested&&!geo.completed);const geoDone=!!(geo&&geo.completed);const m3DrillingOrLater=s.mission3&&['drilling','delivery','complete'].includes(s.mission3.phase);const geoDismissed=!!(geo&&geo.cardDismissed)||!!(s.mission3?.reportRead)||m3DrillingOrLater;const showCard=(geoActive||(geoDone&&!s.mission3?.reportRead))&&!geoDismissed;if(geoCard._shown!==showCard){geoCard._shown=showCard;hidden(geoCard,!showCard);}if(showCard){hidden($('#geoDismiss'),!geoDone);if(geoActive){const elapsed=(Date.now()-(geo.analysisStartedAt||Date.now()))/1000;const dur=geo.analysisDuration||75;const pct=Math.min(1,elapsed/dur);setText($('#geoTitle'),'Análisis geológico');setText($('#geoDetail'),Math.round(pct*100)+'% completado');$('#geoProgressBar').style.width=(pct*100)+'%';geoCard.classList.remove('complete');}else if(geoDone){setText($('#geoTitle'),'Informe disponible');setText($('#geoDetail'),'Toca para revisar');$('#geoProgressBar').style.width='100%';geoCard.classList.add('complete');}}}const obj=objective(s);const objectiveEyebrow=$('#objective .eyebrow');if(objectiveEyebrow)objectiveEyebrow.textContent=narrativeMission==='m1'?'MISIÓN 1':'MISIÓN ACTUAL';setText($('#objectiveTitle'),t(obj));setText($('#objectiveDetail'),t(obj+'Detail'));let value=0,count='';if(obj==='clear'){value=s.cleared.length/CLEARABLES.length;count=s.cleared.length+' / '+CLEARABLES.length;}else if(obj==='admin'){value=s.chapterCompletedAt?1:s.hasEntered?.75:0;count='';}else value=obj==='next'?1:progress(s);$('#objectiveProgress').style.width=(value*100)+'%';setText($('#objectiveCount'),count);
+ const geo=s.geoAnalysis;const geoCard=$('#geoCard');if(geoCard){const geoActive=!!(geo&&geo.requested&&!geo.completed);const geoDone=!!(geo&&geo.completed);const m3DrillingOrLater=s.mission3&&['drilling','delivery','complete'].includes(s.mission3.phase);const geoDismissed=!!(geo&&geo.cardDismissed)||!!(s.mission3?.reportRead)||m3DrillingOrLater;const showCard=(geoActive||(geoDone&&!s.mission3?.reportRead))&&!geoDismissed;if(geoCard._shown!==showCard){geoCard._shown=showCard;hidden(geoCard,!showCard);}if(showCard){hidden($('#geoDismiss'),!geoDone);if(geoActive){const elapsed=(Date.now()-(geo.analysisStartedAt||Date.now()))/1000;const dur=geo.analysisDuration||75;const pct=Math.min(1,elapsed/dur);setText($('#geoTitle'),'Análisis geológico');setText($('#geoDetail'),Math.round(pct*100)+'% completado');$('#geoProgressBar').style.width=(pct*100)+'%';geoCard.classList.remove('complete');}else if(geoDone){setText($('#geoTitle'),'Informe disponible');setText($('#geoDetail'),'Toca para revisar');$('#geoProgressBar').style.width='100%';geoCard.classList.add('complete');}}}const obj=objective(s);const objectiveEyebrow=$('#objective .eyebrow');if(objectiveEyebrow)objectiveEyebrow.textContent=narrativeMission==='m1'?'MISIÓN 1':'MISIÓN ACTUAL';setText($('#objectiveTitle'),t(obj));if(narrativeMission!=='m5')setText($('#objectiveDetail'),t(obj+'Detail'));let value=0,count='';if(obj==='clear'){value=s.cleared.length/CLEARABLES.length;count=s.cleared.length+' / '+CLEARABLES.length;}else if(obj==='admin'){value=s.chapterCompletedAt?1:s.hasEntered?.75:0;count='';}else value=obj==='next'?1:progress(s);$('#objectiveProgress').style.width=(value*100)+'%';setText($('#objectiveCount'),count);
  // M1 presentation only: show live removal totals; no mutation of mission state.
  if(narrativeMission==='m1'){
   const detail=$('#objectiveDetail');
@@ -1039,13 +1041,19 @@ function renderHUD(){if(!s)return;
   setText($('#objectiveCount'),s.mission3.phase==='complete'?'✓':checklist.done+'/'+checklist.total);
 }
  if(narrativeMission==='m5'){
-  const items=mission5Objectives(s),done=items.filter(x=>x.done).length;
-  const next=items.find(x=>!x.done);
+  const checklist=mission5Readout(s);
   setText($('#objective .eyebrow'),'MISIÓN 5');
   setText($('#objectiveTitle'),'Una base para crecer');
-  setText($('#objectiveDetail'),next?next.label:'Objetivos listos · confirma el mensaje de Elena');
-  setText($('#objectiveCount'),done+' / '+items.length);
-  $('#objectiveProgress').style.width=(done/items.length*100)+'%';
+  const detail=$('#objectiveDetail');
+  if(detail){
+   detail.classList.remove('hidden');
+   const markup=renderMission5HudChecklist(checklist);
+   // HUD refreshes every 150 ms: do not reset the player's scroll position.
+   if(detail.innerHTML!==markup){const scroll=detail.scrollTop;detail.innerHTML=markup;detail.scrollTop=scroll;}
+   detail.title=checklist.pending?.hint||'Objetivos completados. Confirma el mensaje final de Elena.';
+  }
+  setText($('#objectiveCount'),checklist.done+' / '+checklist.total);
+  $('#objectiveProgress').style.width=(checklist.progress*100)+'%';
  }
  /* Mission 3 contract timer: freeze upon physical drilling completion.
     A previously completed 90/90 contract must not display a misleading
