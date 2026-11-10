@@ -756,6 +756,42 @@ function togglePersonalTruck(){
   stop();syncPersonalTruckVisual();save();renderHUD();
  }catch(err){notices.push({title:err.message,symbol:'lock'});}
 }
+// The saved truck's actual position is the source of truth, not the old M4
+// parking slot. Locate is a transient camera flyover, not a teleport or a
+// second vehicle purchase.
+function locatePersonalTruckInWorld(){
+ const truck=personalTruck(s);
+ if(!truck?.position||!Number.isFinite(truck.position.x)||!Number.isFinite(truck.position.z)){
+  notices.push({title:'Unidad no localizada',detail:'Usa Recuperar en plaza P01 desde Patio y flota',symbol:'lock'});
+  return;
+ }
+ syncPersonalTruckVisual();
+ stop();target=null;
+ const view={target:new T.Vector3(truck.position.x,1.3,truck.position.z),
+  offset:new T.Vector3(8.5,7.5,11.5)};
+ if(m5LocateCameraTimer)clearTimeout(m5LocateCameraTimer);
+ world.chapterCamera=view;world.snapCamera=true;
+ notices.push({title:'DrillTruck® 02 localizado',
+  detail:'Mostrando su posición durante 10 segundos · selecciona Recuperar en P01 si quedó lejos',symbol:'machine'});
+ m5LocateCameraTimer=setTimeout(()=>{
+  if(world?.chapterCamera===view){world.chapterCamera=null;world.snapCamera=true;}
+  m5LocateCameraTimer=null;
+ },10000);
+}
+function recoverPersonalTruckFromFaena(){
+ try{
+  restoreMissingPersonalTruck(s);
+  recoverPersonalTruckToBay(s);
+  if(m5LocateCameraTimer){clearTimeout(m5LocateCameraTimer);m5LocateCameraTimer=null;}
+  world.chapterCamera=null;world.snapCamera=true;
+  target=null;stop();
+  syncPersonalTruckVisual();
+  save();renderHUD();
+  notices.push({title:'DrillTruck® 02 recuperado',detail:'Estacionado en P01, junto al acceso del Patio · sin cobro',symbol:'check'});
+ }catch(error){
+  notices.push({title:'No se pudo recuperar la unidad',detail:error.message,symbol:'lock'});
+ }
+}
 function stepPersonalTruck(dt){
  let throttle=-joy.y,steer=joy.x;
  if(keys.w||keys.arrowup)throttle+=1;
@@ -1432,6 +1468,8 @@ faenaCenter=new FaenaCenterUI({
  host:$('#faenaCenter'),state:()=>s,translate:()=>t,format:money,icon,
  onClose:()=>document.body.classList.remove('faenaOpen'),
  onHsec:()=>hsecUI?.open(),
+ onLocatePersonalTruck:locatePersonalTruckInWorld,
+ onRecoverPersonalTruck:recoverPersonalTruckFromFaena,
  onLocate:type=>{const pos=type==='drill'&&m3DrillModel?m3DrillModel.position:
   type==='drillTruck'&&m4DrillTruckModel?m4DrillTruckModel.position:
   type==='dthDrill'&&m4DthModel?m4DthModel.position:null;
