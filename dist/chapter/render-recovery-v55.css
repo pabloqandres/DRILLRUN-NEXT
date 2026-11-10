@@ -1,0 +1,32 @@
+/* V55 render-recovery overlay: only appears when the WebGL scene is lost.
+   Sits above the existing HUD, no mission reset or purchases. */
+#worldRenderRecovery{
+ position:fixed;inset:0;z-index:999;
+ display:grid;place-items:center;
+ padding:20px;
+ pointer-events:auto;
+ background:linear-gradient(130deg,#071825f5,#142e42f0);
+ backdrop-filter:blur(8px);
+ font-family:system-ui,sans-serif;
+ color:#f4f4ec;
+}
+#worldRenderRecovery>div{
+ display:grid;gap:14px;
+ width:min(460px,93vw);
+ padding:26px;
+ border-radius:18px;
+ border:1px solid #73b6d5;
+ background:linear-gradient(145deg,#214459,#102738);
+ box-shadow:0 16px 65px #000a;
+ text-align:center;
+}
+#worldRenderRecovery b{font-size:20px}
+#worldRenderRecovery p{font-size:13px;line-height:1.6;color:#b9d4df}
+#worldRenderRecovery button{
+ margin:auto;min-height:46px;
+ padding:10px 20px;
+ border:1px solid #ffe1a1;
+ border-radius:12px;
+ background:linear-gradient(120deg,#f4c96c,#d9a34b);
+ color:#27323b;font-weight:850;
+}
