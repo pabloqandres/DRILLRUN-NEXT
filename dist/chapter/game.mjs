@@ -67,6 +67,7 @@ import {AvatarRoster} from './avatar-roster.mjs';
 import {avatarDefinition} from './avatars.mjs';
 import {BuilderUI} from './builder-ui.mjs';
 import {BuildingBlueprint} from './building-blueprint.mjs';
+import {ConstructionHologram} from './construction-hologram.mjs';
 import {MODULES,moduleDefinition,pendingConstruction,moduleAvailability} from './module-catalog.mjs';
 import {ProductPreview,officeThumbnail} from './product-preview.mjs';
 import {CharacterStage} from './selector-stage.mjs';
@@ -89,6 +90,7 @@ let m4DrillTruckModel=null,m4ParkingSpot=null,m4VisualsReady=false,m4TruckLoadin
 let m4DthModel=null,m4DthCollider=null,m4Staging=null;
 let m5World=null,patioOverviewUntil=0,m5RcRoute=null,m5DthRoute=null,m5DthDepartRoute=null;
 let catalogBlueprint=null,catalogConstructionCamera=false,catalogPreviewWalk=false;
+let workshopBuildHologram=null,workshopHologramKey=null;
 let siteCinematics=null;
 let world,scene,phase='start',phoneApp=null,phoneOpen=false,category='desks',modalOpen=false,blueprint=false,placement=null,busy=null,keys={},joy={x:0,y:0},pointer=null,target=null,auth={configured:false},account=null,audioContext=null,last=performance.now(),clock=0,lastSave=0,lastHud=0,introAt=0,lastObjective='',qaRoute=false;
 let cloudSyncing=true,cloudLocked=false,cloudStatus='Verificando Google…',cloudEpoch=0;
@@ -379,6 +381,44 @@ function updateM3Visuals(dt){
  // Delivery vehicle animation
  updateDelivery(m3DeliveryVehicle,dt);
 }
+// Workshop L1/L2 shares the exact same 3D hologram used for the office
+// and M5. Construction is keyed by existing job timestamps, never duplicated.
+function updateWorkshopConstructionHologram(now=Date.now()){
+ if(!world||!s||phase!=='play')return;
+ const building=s.workshop?.status==='building';
+ const job=building?s.workshop:s.workshop?.upgrade;
+ const currentKey=job?(building?'ws-l1:':'ws-l2:')+(job.started||'0'):null;
+ if(!job){
+  if(workshopBuildHologram){
+   workshopBuildHologram.finish(now/1000);
+   if(!workshopBuildHologram.update(now/1000,1,{
+    quality:world.quality,resolution:world.renderer.domElement})){
+    workshopBuildHologram.dispose();workshopBuildHologram=null;workshopHologramKey=null;
+   }
+  }
+  return;
+ }
+ if(!workshopBuildHologram||workshopHologramKey!==currentKey){
+  workshopBuildHologram?.dispose();workshopHologramKey=currentKey;
+  const source=world.makeWorkshop(true);
+  if(!building){
+   // L2 extension has a fixed 4.2×6.5m build envelope. It is a projected
+   // volume, not new owned equipment or an unpurchased facility.
+   const shell=new T.Mesh(new T.BoxGeometry(4.2,4.6,6.5),
+    new T.MeshBasicMaterial({color:0x28dcff,transparent:true,opacity:.01}));
+   shell.position.set(5.35,2.3,0);source.add(shell);
+  }
+  workshopBuildHologram=new ConstructionHologram(source,{
+   software:world.renderer.isSoftwareRenderer,quality:world.quality,
+   footprint:{width:building?8.3:12.5,depth:6.5}});
+  workshopBuildHologram.position.set(-7.6,0,-9.3);
+  world.scene.add(workshopBuildHologram);
+ }
+ const duration=Math.max(1,(job.ends||now)-(job.started||now));
+ const pct=Math.max(0,Math.min(1,(now-(job.started||now))/duration));
+ workshopBuildHologram.update(now/1000,pct,{
+  quality:world.quality,resolution:world.renderer.domElement});
+}
 function initM5Visuals(now=Date.now()){
  if(!world||!s?.mission4||s.mission4.phase!=='complete')return;
  if(!m5World)m5World=createPatioWorld(world);
@@ -581,7 +621,7 @@ function autoDispatchTruck(s){
  try{assignTruckToZone(s,nextZone.id);startMaintenance(s,nextZone.id);nextZone.lastMaintenanceAt=Date.now();if(nextZone.status!=='maintenance')return;/* Routine automatic rounds do not need repeated toast messages. */}catch(e){console.error('autoDispatch:',e);}
 }
 async function replayCinematic(orbitOnly,record){if(!s)return;if(!orbitOnly&&!reviewBackup)await cameraReviewScene(s.character);closeModal();closePhone();closeBuilder();startCinematic(orbitOnly,true);if(record||orbitOnly){scene.update(s,0,Date.now());world.update(s,0,clock,false);world.renderer.last=0;world.renderer.render(world.scene,world.camera);const a=document.createElement('a');a.id='handoffDownload';a.download='DrillRun_Primer_Frame_3D.png';a.textContent='Descargar primer frame 3D';const data=world.renderer.domElement.toDataURL('image/png').split(',')[1],bytes=Uint8Array.from(atob(data),c=>c.charCodeAt(0));a.href=URL.createObjectURL(new Blob([bytes],{type:'image/png'}));cameraDebug.host.querySelector('#handoffDownload')?.remove();cameraDebug.host.append(a);if(record)cinemaRecorder.start();}}
-function beginPlay(resuming=false){catalogPreviewWalk=false;catalogBlueprint?.hide();hidden($('#endBuildPreviewWalk'),true);phase='play';blueprint=false;world.inspect=false;world.chapterCamera=null;world.zoom=1;resetOrbit(world.orbit);avatars.activate(s.character);world.setCharacter(s.character);motion.yaw=Number.isFinite(s.facing)?s.facing:Math.PI;world.player.rotation.y=motion.yaw;world.worker.reset();hidden($('#startScreen'),true);hidden($('#characterScreen'),true);hidden($('#intro'),true);hidden($('#hud'),false);world.avatarHeight=avatarDefinition(s.character).height;world.orbit.yaw=motion.yaw-Math.PI;world.snapCamera=true;world.cameraRig.finishEntrance();document.body.classList.remove('hudReveal');void $('#hud').offsetWidth;document.body.style.setProperty('--hud-duration',world.cameraRig.settings.transition.hudSeconds+'s');document.body.classList.add('hudReveal');wind.set(prefs.sound);worksiteAudio.set(prefs.sound);s.introSeen=true;stop();scene.update(s,0,Date.now());hsecWorld?.update(s,0,'play');initM3Visuals();initM5Visuals();ensureSafe();world.playerGround=world.sampleGround(s.position.x,s.position.z);save();if(!resuming){hidden($('#chapterBanner'),false);setTimeout(()=>hidden($('#chapterBanner'),true),2600);}else toast('resumeNote');syncUIEvents();renderHUD();}
+function beginPlay(resuming=false){workshopBuildHologram?.dispose();workshopBuildHologram=null;workshopHologramKey=null;catalogPreviewWalk=false;catalogBlueprint?.hide();hidden($('#endBuildPreviewWalk'),true);phase='play';blueprint=false;world.inspect=false;world.chapterCamera=null;world.zoom=1;resetOrbit(world.orbit);avatars.activate(s.character);world.setCharacter(s.character);motion.yaw=Number.isFinite(s.facing)?s.facing:Math.PI;world.player.rotation.y=motion.yaw;world.worker.reset();hidden($('#startScreen'),true);hidden($('#characterScreen'),true);hidden($('#intro'),true);hidden($('#hud'),false);world.avatarHeight=avatarDefinition(s.character).height;world.orbit.yaw=motion.yaw-Math.PI;world.snapCamera=true;world.cameraRig.finishEntrance();document.body.classList.remove('hudReveal');void $('#hud').offsetWidth;document.body.style.setProperty('--hud-duration',world.cameraRig.settings.transition.hudSeconds+'s');document.body.classList.add('hudReveal');wind.set(prefs.sound);worksiteAudio.set(prefs.sound);s.introSeen=true;stop();scene.update(s,0,Date.now());hsecWorld?.update(s,0,'play');initM3Visuals();initM5Visuals();ensureSafe();world.playerGround=world.sampleGround(s.position.x,s.position.z);save();if(!resuming){hidden($('#chapterBanner'),false);setTimeout(()=>hidden($('#chapterBanner'),true),2600);}else toast('resumeNote');syncUIEvents();renderHUD();}
 $('#skipIntro').onclick=()=>{if(phase!=='intro')return;cinematic.stop();world.cameraRig.reset();beginPlay(cinemaReview);cinemaRecorder?.stop();};$('#menuButton').onclick=showSettings;
 function ensureSafe(){syncOfficeAccess(s);scene.state=s;const r=avatarDefinition(s.character).radius;if(!world.isBlocked(s.position.x,s.position.z,r))return;if(s.inside){for(const z of[-.65,.1,.65])for(const x of[-1.9,-1.1,0,1,2.2])if(!world.isBlocked(-6+x,z,r)){s.position={x:-6+x,z};world.worker.reset();return;}}const cx=s.position.x,cz=s.position.z;for(let d=.5;d<=10;d+=.5)for(let a=0;a<16;a++){const angle=a*Math.PI/8,tx=cx+Math.cos(angle)*d,tz=cz+Math.sin(angle)*d;if(!world.isBlocked(tx,tz,r)){s.position={x:tx,z:tz};s.inside=false;world.worker.reset();return;}}s.position={...CONFIG.officeSlot.access};s.inside=false;world.worker.reset();}
 // ─── Narrative tick & actions ────────────────────────────
@@ -1195,7 +1235,7 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
  if(phase==='play'){narrativeTick(dt);/* Workshop L1 construction tick */if(finishWorkshopConstruction(s,Date.now())){save();renderHUD();notices.push({title:'Taller L1 construido',symbol:'bell'});sound('finish');updateMission3Phase(s);}
  /* M5 fixed modular yard real-time construction. No reward is minted on completion. */
   if(finishPatio(s,wall)){save();renderHUD();if(phoneOpen)renderPhone();notices.push({title:'Misión 5 · Patio L1 operativo',detail:'Inspección HSEC finalizada · acceso habilitado',symbol:'bell'});sound('finish');}
- /* Workshop upgrade construction tick */const wsJob=workshopUpgradeJob(s);if(wsJob&&Date.now()>=wsJob.ends){finishWorkshopUpgrade(s);save();renderHUD();if(workshopCardOpen)showWorkshopCard();notices.push({title:`Taller ampliado a Nv.${workshopLevel(s)}`,symbol:'bell'});sound('finish');updateMission4Phase(s);}if(workshopCardOpen&&wsJob)showWorkshopCard();world.updateWorkshop(s.workshop);
+ /* Workshop upgrade construction tick */const wsJob=workshopUpgradeJob(s);if(wsJob&&Date.now()>=wsJob.ends){finishWorkshopUpgrade(s);save();renderHUD();if(workshopCardOpen)showWorkshopCard();notices.push({title:`Taller ampliado a Nv.${workshopLevel(s)}`,symbol:'bell'});sound('finish');updateMission4Phase(s);}if(workshopCardOpen&&wsJob)showWorkshopCard();world.updateWorkshop(s.workshop);updateWorkshopConstructionHologram(wall);
  initM3Visuals();const m3events=tickMission3(s,dt,wall);if(m3events){for(const e of m3events){if(typeof e==='object'&&e.type==='machineryDelivered'){
   const m=e.machinery;
   if(m.type==='drill'){try{purchaseDrill(s,m.model,true);spawnM3Drill(m.model);notices.push({title:'Perforadora entregada',detail:'Localizar en faena',symbol:'bell',action:()=>{if(m3DrillModel){target={x:m3DrillModel.position.x-2.5,z:m3DrillModel.position.z+3.8};closePhone();closeBuilder();}}});updateMission3Phase(s);}catch(err){console.error('drill delivery:',err);}}
