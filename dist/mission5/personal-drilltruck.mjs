@@ -2,7 +2,7 @@
 // Does not share any M4 maintenance dispatch, zone, position or earnings state.
 import {DRILLTRUCK_COST} from '../mission4/drilltruck.mjs';
 import {FLEET_BAYS} from './fleet-base.mjs';
-import {warehouseChecked} from './patio-staff.mjs';
+import {warehouseChecked,commissionPatio} from './patio-staff.mjs';
 
 export const PERSONAL_DRILLTRUCK_PRICE=DRILLTRUCK_COST;
 export const PERSONAL_DRILLTRUCK_MODEL='drilltruck-personal';
@@ -38,6 +38,7 @@ export function deliverPersonalTruck(s,now=Date.now()){
   speed:0,deliveredAt:now,parkedAt:now
  };
  s.mission5.personalTruck=truck;
+ commissionPatio(s,now); // Sixth real M5 objective completes on delivery, not payment.
  return truck;
 }
 export function canEnterPersonalTruck(s){
