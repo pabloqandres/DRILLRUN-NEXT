@@ -8,6 +8,7 @@ export function newGame(lang='es',character='operator01',now=Date.now()){
  return {version:6,schema:'modular-1',lang,character:CONFIG.protagonists.some(p=>p.id===character&&p.available)?character:'operator01',playerName:'',specialty:avatarDefinition(character).roleKey,bonuses:{...avatarDefinition(character).bonuses},position:{...CONFIG.spawn},inside:false,introSeen:false,bank:CONFIG.bank,cash:CONFIG.cash,energy:CONFIG.maxEnergy,energyAt:now,boosters:CONFIG.boosters,cleared:[],office:{status:'unbuilt'},inventory:[],furniture:[],nextId:1,ledger:[{id:0,key:'capital',amount:CONFIG.cash,at:now}],bankViewed:false,messageRead:false,hasEntered:false,chapterCompletedAt:null,sound:true,facing:Math.PI,savedAt:now,messageReads:[],uiEvents:[],
   /* M3 fields */ personnel:[],contract:null,boreholes:[],geoAnalysis:null,toolInventory:[],spentMaterials:[],orders:[],drill:null,drillRunSessions:[],mission3:null,knowledgeAccelerators:0,workshop:null,
   /* M4 fields */ mission4:null,
+  /* M5 fields · single modular machinery patio */ mission5:null,
   /* Narrative */ narrative:{messages:[],accepted:[],rewardsCollected:[]}};
 }
 export const cleanPlayerName=value=>Array.from(String(value).normalize('NFKC').replace(/[<>\u0000-\u001f\u007f\u202a-\u202e\u2066-\u2069]/g,'').replace(/\s+/g,' ').trim()).slice(0,20).join('');
@@ -27,6 +28,8 @@ export function restore(data,now=Date.now()){
  if(!data||(data.version!==5&&data.version!==6)||!['bank','cash','energy','energyAt','boosters','nextId'].every(k=>finite(data[k]))||data.bank<0||data.cash<0||data.boosters<0||!['unbuilt','building','built'].includes(data.office?.status))return null;
  const s={...newGame(data.lang,data.character,now),...data};const migrating=data.schema!=='modular-1';if(migrating){s.cash=data.cash+data.bank;s.bank=0;s.schema='modular-1';s.migratedFrom='005.5';}
  if(data.version===5){s.version=6;s.migratedFrom=s.migratedFrom||'v5';/* migrate HSEC employee to personnel */ if(s.hsec?.employee&&!s.personnel?.length){s.personnel=[{id:s.hsec.employee.id,role:'hsec',hiredAt:now,source:'m2-migration'}];}}
+ /* M5 is optional in earlier saved games. Never retroactively charge. */
+ s.mission5=s.mission5&&typeof s.mission5==='object'?s.mission5:null;
  /* ensure M3 defaults exist */ s.personnel=Array.isArray(s.personnel)?s.personnel:[];s.contract=s.contract||null;s.boreholes=Array.isArray(s.boreholes)?s.boreholes:[];s.geoAnalysis=s.geoAnalysis||null;s.toolInventory=Array.isArray(s.toolInventory)?s.toolInventory:[];s.spentMaterials=Array.isArray(s.spentMaterials)?s.spentMaterials:[];s.orders=Array.isArray(s.orders)?s.orders:[];s.drill=s.drill||null;s.drillRunSessions=Array.isArray(s.drillRunSessions)?s.drillRunSessions:[];s.mission3=s.mission3||null;s.knowledgeAccelerators=Math.max(0,Math.floor(Number(s.knowledgeAccelerators)||0));
  /* M3 funds safety net — one-time top-up for existing saves with low cash */
  if(s.mission3&&s.mission3.phase!=='inactive'&&!s.mission3.fundingV2){const total=(s.cash||0)+(s.bank||0);const min=25000;if(total<min){const bonus=min-total;s.cash+=bonus;s.ledger.push({id:s.nextId++,key:'Subsidio operacional · Misión 3',amount:bonus,at:now});}s.mission3.fundingV2=true;}
