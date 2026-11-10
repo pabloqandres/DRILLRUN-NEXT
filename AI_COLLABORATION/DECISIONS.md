@@ -1,5 +1,10 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+## 2026-11-10 — Wave 01 runtime: visual-only permission boundary
+
+The user authorizes activation of 14 3D models, excludes Digger.c4d, and requests functional catalog integration. Visual component work is isolated to `chatgpt/asset-wave01-runtime-v55`: real GLB renderer and cyan hologram helper, without mission/economy/save modifications while another chat modifies gameplay. Purchases, world placement, and binary transfer must be completed and tested before enabling any new product CTA; no phantom charges. See `CHANGES/2026-11-10_wave01-glb-runtime-v55.md`.
+
+
 ## 2026-11-10 — V50 Segundo DrillTruck® conducible y M5 de seis objetivos
 
 El usuario pidió una segunda unidad para manejo personal con joystick,
