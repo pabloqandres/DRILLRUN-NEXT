@@ -4,6 +4,16 @@
 
 ## Currently Active
 
+- **ChatGPT — V47 portada M5 y HUD compacto:** rama
+  `chatgpt/v47-live-mission-home-compact-hud`. Portada/estado del
+  jugador leen la misión narrativa aceptada; checklist M5 en HUD
+  muestra solo paso actual y siguiente, con altura que no toca joystick.
+  Archivos `dist/chapter/game.mjs`,
+  `dist/chapter/mission-display.mjs`,
+  `dist/mission5/mission-readout.mjs` y
+  `dist/chapter/hud-reference-v4.css`.
+  Publicación a main aprobada por el usuario, sujeta a CI específico.
+
 - **ChatGPT — V46 M5 checklist y bono:** rama
   `chatgpt/m5-checklist-reward-v46`. Cinco pasos reales sincronizados
   HUD/teléfono, orden funcional estricto y pago único de 🪙 12.000
