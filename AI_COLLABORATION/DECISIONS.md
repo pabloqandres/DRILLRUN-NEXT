@@ -272,3 +272,6 @@ No alterar el progreso M1–M5, los productos reales ni economía de M4.
 - Reuse HSEC cone/fence products at existing prices, no duplicates. New objects are locked until actual GLBs, physical placement, ledger and save compatibility are implemented.
 - Do not create a misleading construction hologram for an undefined site; real GLB hologram using existing cyan ConstructionHologram is mandatory when building becomes constructible.
 - M6+ content must reuse V53 unified Operations and recovered-tool workshop; no parallel operation screens. Change set remains independent of M1–M5.
+
+## 2026-11-10 — V54 HUD de conducción sin texto
+Faro (apagado gris/encendido amarillo) y freno (ícono rojo al presionar) quedan al borde derecho. Joystick horizontal y teclas se normalizan únicamente para el DrillTruck® personal mediante una transformación antes de llamar a la física. Sin duplicar controles ni modificar el DrillTruck® automático. Mantener los cambios concurrentes de catálogo.
