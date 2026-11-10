@@ -17,10 +17,10 @@ export class BuilderUI{
   if(this.hsec?.mode){this.hsec.category='infrastructure';this.hsec.selected=this.selected;}
   this.render();
  }
- close(){this.store.close();this.onSelection(null);}
+ close(){this.store.close();this.onSelection(null);this.onBuildingPreview?.(null);}
  render(){
   this.host.classList.remove('hsecTray','hsecDraftMode');
-  if(this.hsec?.mode){this.hsec.renderBuilder(this);return;}
+  if(this.hsec?.mode){if(this.hsec.drawing||this.hsec.coneZone)this.onBuildingPreview?.(null);this.hsec.renderBuilder(this);return;}
   this.renderStore(this.category,this.selected,id=>{this.category=id;this.render();},id=>{this.selected=id;this.render();});
  }
  // Lazy, one-shot snapshots of the real 3D construction geometry by workshop level.
@@ -68,6 +68,11 @@ export class BuilderUI{
  renderStore(category,selected,onCategory,onSelect){
   const s=this.state(),t=this.translate();this.onSelection(null);
   let products;try{products=catalogProducts(s,t);}catch(e){console.error('catalogProducts error:',e);products=[];}
+  const items=products.filter(p=>p.category===category);
+  const picked=items.find(p=>p.id===selected)||items[0]||null;
+  // Central preview dispatch: all building kinds use the same world renderer.
+  // Selecting or collapsing a catalog card can never start an order.
+  this.onBuildingPreview?.(picked);
   this.store.render({lang:s.lang,products,categories:catalogCategories(s.lang),category,selected,format:this.format,
    thumbnail:p=>p.kind==='module'?this.getOfficeThumbnail(p.level):p.kind==='workshop'?this.getWorkshopThumbnail(p.level):p.kind==='vehicle'&&p.id==='drilltruck'?this.getDrillTruckThumbnail():p.kind==='hsec'&&p.status!=='future'&&this.hsec?.world?this.hsec.world.thumbnail(p.id):null,
    onCategory,onSelect,onClose:this.onClose,onStaff:()=>this.hsec?.open('staff'),
