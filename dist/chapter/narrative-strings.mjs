@@ -103,4 +103,23 @@ export const NARRATIVE_STRINGS={
   'Impressionante, {name}!\n\nHai trasformato un terreno vuoto in un\'operazione di perforazione professionale con produzione automatizzata.\n\nIl tuo DrillTruck è operativo, le zone generano reddito e l\'azienda funziona in modo autonomo.\n\nDal primo giorno a oggi, ogni decisione ti ha portato fin qui.\n\nSono orgogliosa di aver creduto in te.\n\nL\'operazione continuerà a generare reddito automaticamente. La tua azienda è avviata.\n\nCongratulazioni.',
   '令人印象深刻，{name}！\n\n你已經將一片空地轉變為擁有自動化生產的專業鑽井營運。\n\n你的 DrillTruck 正在運行，區域正在產生收入，公司自主運作。\n\n從第一天到今天，每一個決定都把你帶到了這裡。\n\n我為信任你而感到驕傲。\n\n營運將繼續自動產生收入。你的公司已經啟動了。\n\n恭喜。'
  ],
+ // M5 · Two real specialists, modular yard and controlled commissioning
+ narr_m5_name:[
+  'Misión 5: Una base para crecer','Mission 5: A base to grow',
+  'Missão 5: Uma base para crescer','Missione 5: Una base per crescere','任務5：建立成長基地'
+ ],
+ narr_m5_start:[
+  'Hola, {name}.\\n\\nSoy Elena. Acabo de revisar el informe de producción: la DTH y el DrillTruck ya están trabajando, pero la maquinaria sigue dispersa por la faena. Sin un recinto de resguardo, una entrada controlada y un equipo logístico, crecer será cada vez más difícil.\\n\\nLa próxima etapa es construir el Patio de Maquinarias L1 en el terreno reservado al noroeste: caseta con barrera fija, cubierta para camionetas y DrillTruck, galpón, combustible seguro y grandes explanadas abiertas para las perforadoras y futuros equipos pesados. El conjunto costará 45.000 y tardará 20 minutos de construcción holográfica.\\n\\nDespués tendrás que contratar a un guardia de acceso y una técnica de bodega, verificar la barrera y revisar el inventario. Cinco pasos, una base operativa de verdad. No te preocupes: la M4 seguirá produciendo. ¿Comenzamos?',
+  'Hello, {name}. Production is running, but equipment is scattered around the site. Your next step is to build the fixed Level 1 Machinery Yard, with a controlled gate, covered light vehicles, a logistics shed, safe fuel area and open heavy-equipment bays. Construction costs 45,000 and takes 20 minutes. Then hire a security guard and warehouse technician, check the gate and audit your existing stock. Your M4 operation will keep producing. Ready to begin?',
+  'Olá, {name}. A produção está ativa, mas as máquinas estão dispersas. Construa o Pátio de Máquinas L1 com acesso controlado, garagem coberta para veículos leves, galpão, combustível seguro e áreas abertas. A obra custa 45.000 e demora 20 minutos. Depois contrate um guarda e uma técnica de armazém, verifique a barreira e confira o estoque. A produção da M4 continua. Vamos começar?',
+  'Ciao, {name}. La produzione continua, ma i mezzi sono sparsi. Costruisci il Piazzale Macchine L1 con ingresso controllato, copertura per mezzi leggeri, deposito, carburante protetto e piazzole aperte. Costruzione: 45.000 e 20 minuti. Poi assumi una guardia e una tecnica di magazzino, controlla la sbarra e verifica le scorte. La M4 resta produttiva. Cominciamo?',
+  '你好，{name}。生產已開始，但機械仍分散在工地。請在指定位置建造一級機械場：管制入口、輕型車棚、倉庫、安全燃料區和露天重型設備區。造價45,000，建造需20分鐘。之後聘請一名保安和一名倉庫技術員，檢查閘門及現有庫存。M4將持續生產。開始吧！'
+ ],
+ narr_m5_end:[
+  'Excelente trabajo, {name}.\\n\\nEl Patio de Maquinarias L1 ya tiene su obra terminada, acceso supervisado y bodega verificada. El guardia controla la entrada; la técnica conoce cada bit y martillo disponible.\\n\\nAhora tu faena no solo produce: también puede recibir, resguardar y movilizar maquinaria en forma ordenada y segura. Ese espacio es la base de los próximos contratos y de futuras ampliaciones.\\n\\nLa Misión 5 está completada. Seguimos creciendo.',
+  'Excellent work, {name}. The Level 1 Machinery Yard is built, the gate checked and the warehouse audited. Your guard oversees access and your technician tracks the real tool stock. Your drilling site can now store, dispatch and manage equipment safely. Mission 5 complete — the next expansion is possible.',
+  'Excelente trabalho, {name}. O Pátio de Máquinas L1 está construído, o acesso foi verificado e o estoque auditado. O guarda controla a entrada e a técnica acompanha as ferramentas reais. Sua operação já pode organizar e mobilizar máquinas com segurança. Missão 5 concluída.',
+  'Ottimo lavoro, {name}. Il Piazzale Macchine L1 è pronto, il varco è stato controllato e il magazzino verificato. La guardia vigila sull’ingresso e la tecnica gestisce le scorte effettive. Ora il cantiere può custodire e mobilitare i mezzi in sicurezza. Missione 5 completata.',
+  '幹得好，{name}！一級機械場已完工，入口和庫存均已檢查。保安負責出入管制，技術員管理實際工具存貨。現在工地可安全存放和調度設備。任務5完成！'
+ ],
 };
