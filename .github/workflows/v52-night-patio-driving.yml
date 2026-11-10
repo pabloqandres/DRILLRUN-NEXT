@@ -1,0 +1,21 @@
+name: V52 Night Patio and Personal Driving
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  v52-night-driving:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check syntax of affected modules
+        run: |
+          node --check dist/mission5/patio-world.mjs
+          node --check dist/graphics/personal-drilltruck-headlights.mjs
+          node --check dist/audio/worksite-audio.mjs
+          node --check dist/chapter/game.mjs
+      - name: Night driving and prior M5 regressions
+        run: node --test tests/v52-night-patio-driving.test.mjs tests/v50-personal-drilltruck-driving.test.mjs tests/m5-stepwise-checklist-reward-v46.test.mjs
