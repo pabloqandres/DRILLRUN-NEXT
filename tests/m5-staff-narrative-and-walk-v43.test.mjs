@@ -8,7 +8,7 @@ import {pendingMessage,deliverMessage,acceptMission,confirmCompletion} from '../
 import {npcWaypoints} from '../dist/mission5/patio-npc-world.mjs';
 const at=Date.UTC(2026,10,10,13);
 const fixture=()=>{const s=newGame('es','operator01',at);
- s.cash=120000;s.mission4={phase:'complete'};s.narrative={messages:[],accepted:['m1','m2','m3','m4'],rewardsCollected:['m1','m2','m3','m4']};return s;};
+ s.cash=120000;s.mission4={phase:'complete'};s.narrative={messages:['m1','m2','m3','m4'].flatMap(mid=>['start','end'].map(part=>({id:'n:'+mid+':'+part,missionId:mid,characterId:'benefactor',deliveredAt:at-5000,readAt:at-3000,actionTaken:part==='start'?'accept':'collect'}))),accepted:['m1','m2','m3','m4'],rewardsCollected:['m1','m2','m3','m4']};return s;};
 test('M5 opens only after player confirms M4 SMS; no automatic paid building',()=>{
  const s=fixture();const before=s.cash;
  assert.equal(pendingMessage(s)?.id,'n:m5:start');
