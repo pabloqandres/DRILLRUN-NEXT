@@ -31,6 +31,23 @@ export const faenaRouteForApp=app=>({
 const section=(title,body)=>'<section class="faenaSection"><h3>'+title+'</h3>'+body+'</section>';
 const button=(route,label)=>'<button type="button" class="faenaJump" data-faena-route="'+route+'">'+label+' <span aria-hidden="true">›</span></button>';
 const small=(title,value)=>'<div class="faenaMetric"><span>'+esc(title)+'</span><strong>'+esc(value)+'</strong></div>';
+// V56: one explicit recovery entry point for the personal unit, reachable both
+// from the Fleet dashboard and the Patio mission detail. Never auto-charge.
+function personalTruckActions(s){
+ const truck=s.mission5?.personalTruck;
+ const completed=!!(s.mission5?.commissionedAt&&s.narrative?.rewardsCollected?.includes('m5'));
+ const position=truck?.position;
+ const coords=position&&Number.isFinite(position.x)&&Number.isFinite(position.z)
+   ?Math.round(position.x)+' m / '+Math.round(position.z)+' m':'Sin posición registrada';
+ return section('DrillTruck® personal 02 · localización',
+  '<p>'+(truck?'Unidad adquirida · '+(truck.mode==='driving'?'En conducción':'Estacionada')+' · posición '+esc(coords):
+     completed?'Misión 5 completada: puedes restaurar la unidad entregada sin volver a comprarla.':
+     'Aún sin entrega acreditada.')+'</p>'+
+  '<div class="faenaQuickLinks">'+
+   '<button data-faena-personal-locate '+(truck?'':'disabled')+'>Localizar unidad 02</button>'+
+   '<button data-faena-personal-recover '+(truck||completed?'':'disabled')+'>Recuperar en plaza P01 · sin costo</button>'+
+  '</div><p class="faenaHint">Localizar muestra la camioneta durante unos segundos. Recuperar devuelve tu unidad comprada al estacionamiento personal; no crea otra camioneta.</p>');
+}
 
 export class FaenaCenterUI{
  constructor({host,state,translate,format,icon,onClose,onAppAction,onKitOrder,onRecovery,onHsec,onLocate}){
@@ -117,6 +134,7 @@ export class FaenaCenterUI{
      '<div class="faenaMetrics">'+small('DrillTruck® 01',s.mission4?.drillTruck?'Automático':'Pendiente')+small('DrillTruck® 02',truck?truck.mode==='driving'?'En conducción':'Disponible':'Pendiente')+small('Portón HSEC',gateChecked(s)?'Verificado':'Pendiente')+'</div>'+
      '<nav class="faenaQuickLinks">'+button('patio','Plazas, acceso y flota')+button('logistics','Galpón logístico')+'</nav>'+
      section('Unidades registradas','<p>Camionetas techadas: '+yard.covered.length+' · Perforadoras: '+yard.openDrill.length+' · Equipos pesados: '+yard.openHeavy.length+'</p>')+
+     personalTruckActions(s)+
      (truck?section('Vehículo personal 02','<p>El DrillTruck® personal puede conducirse desde su plaza. La unidad automática 01 conserva su servicio de mantenimiento.</p>'):'');
    }
    case 'safety':{
@@ -138,7 +156,7 @@ export class FaenaCenterUI{
     return '<p class="faenaLead">Todos los productos DRILLCO® se solicitan a Casa Matriz. No se compran herramientas dentro del Taller ni de la Bodega.</p>'+
      '<div class="faenaQuickLinks"><button data-faena-view="m3-catalog">RC / EXPLORA®</button><button data-faena-view="m4-dth-catalog">DTH / PUMA®</button>'+button('logistics','Seguimiento de pedidos')+'</div>'+
      m3('m3-catalog');
-   case 'patio':return s.mission5?.status&&s.mission5.status!=='locked'?renderPatioApp(s,fmt,icon):'<p class="faenaHint">El Patio se habilita en Misión 5.</p>';
+   case 'patio':return s.mission5?.status&&s.mission5.status!=='locked'?personalTruckActions(s)+renderPatioApp(s,fmt,icon):'<p class="faenaHint">El Patio se habilita en Misión 5.</p>';
    default:{
     const readout=mission5Readout(s);
     const cards=[
@@ -184,6 +202,8 @@ export class FaenaCenterUI{
   if(b.dataset.faenaRoute){this.open(b.dataset.faenaRoute);return;}
   if(b.dataset.faenaView){this.open(b.dataset.faenaView);return;}
   if(b.hasAttribute('data-faena-hsec')){this.close();this.onHsec?.();return;}
+  if(b.hasAttribute('data-faena-personal-locate')){this.close();this.onLocatePersonalTruck?.();return;}
+  if(b.hasAttribute('data-faena-personal-recover')){this.onRecoverPersonalTruck?.();this.render();return;}
   if(b.hasAttribute('data-faena-workshop-upgrade')){this.onAppAction?.('m3','upgradeWorkshop',null);this.render();return;}
   if(b.dataset.faenaKit){this.onKitOrder?.(b.dataset.faenaKit);this.render();return;}
   if(b.dataset.faenaRecover){this.onRecovery?.(b.dataset.faenaRecover);this.render();return;}
