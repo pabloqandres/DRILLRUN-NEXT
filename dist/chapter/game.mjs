@@ -29,6 +29,8 @@ import {createDthProductionRig,animateDthRig,createMachineryStaging,RC_RESERVE,D
 import {mission4Readout} from '../mission4/operations-guide.mjs';
 import {PATIO_L1,PATIO_FUTURE,patioState,patioUnlocked,patioProgress,startPatio,finishPatio} from '../mission5/patio-state.mjs';
 import {createPatioWorld} from '../mission5/patio-world.mjs';
+import {PatioNPCWorld} from '../mission5/patio-npc-world.mjs';
+import {hirePatioStaff,inspectPatioGate,inspectPatioWarehouse,mission5Objectives} from '../mission5/patio-staff.mjs';
 import {FLEET_BAYS,patioFleetActive,rcAvailableToPark,dthAvailableToPark} from '../mission5/fleet-base.mjs';
 import {rigRouteToPatio,rigRouteFromPatio,advanceRigRoute} from '../mission5/fleet-routes.mjs';
 import {createBoreholeMarker,updateMarkerProgress} from '../mission3/borehole-marker.mjs';
@@ -90,6 +92,7 @@ let m3DrillModel=null,m3BoreholeMarkers=[],m3DeliveryVehicle=null,m3DrillingFx=n
 let m4DrillTruckModel=null,m4ParkingSpot=null,m4VisualsReady=false,m4TruckLoading=false,m4TruckCollider=null;
 let m4DthModel=null,m4DthCollider=null,m4Staging=null;
 let m5World=null,patioOverviewUntil=0,m5RcRoute=null,m5DthRoute=null,m5DthDepartRoute=null;
+let m5NpcWorld=null;
 let catalogBlueprint=null,catalogConstructionCamera=false,catalogPreviewWalk=false;
 let workshopBuildHologram=null,workshopHologramKey=null;
 let siteCinematics=null;
@@ -423,6 +426,7 @@ function updateWorkshopConstructionHologram(now=Date.now()){
 function initM5Visuals(now=Date.now()){
  if(!world||!s?.mission4||s.mission4.phase!=='complete')return;
  if(!m5World)m5World=createPatioWorld(world);
+ if(!m5NpcWorld)m5NpcWorld=new PatioNPCWorld(world);
  const gate=PATIO_L1.gate;
  world.fleetGateInUse=[
   m5RcRoute?m3DrillModel:null,
@@ -680,6 +684,7 @@ function handleNarrativeAction(actionType,missionId){
    if(missionId==='m3'&&canStartMission3(s)&&(!s.mission3||s.mission3.phase==='inactive')){
     startMission3(s);notices.push({title:'Misión 3 desbloqueada — Tu primer contrato',symbol:'bell'});
    }
+   if(missionId==='m5')notices.push({title:'Misión 5 iniciada · Una base para crecer',detail:'Construye el Patio L1 desde Catálogo y contrata el personal al finalizar',symbol:'bell'});
    if(missionId==='m4'&&canStartMission4(s)&&(!s.mission4||s.mission4.phase==='inactive')){
     startMission4(s);notices.push({title:'Misión 4 desbloqueada — Automatiza tu operación',symbol:'bell'});
    }
@@ -693,7 +698,8 @@ function handleNarrativeAction(actionType,missionId){
    showMissionComplete(t(result.name)||'Misión completada',
     missionId==='m3'?paidContract:result.cash,result.boosters,
     missionId==='m3'?'Pago ya acreditado al entregar el contrato':
-    missionId==='m4'?'Producción automatizada habilitada':'');
+    missionId==='m4'?'Producción automatizada habilitada':
+    missionId==='m5'?'Patio L1, guardia y logística habilitados':'');
    save();if(phoneOpen)closePhone();renderHUD();
   }
  }
@@ -970,7 +976,7 @@ function renderHUD(){if(!s)return;
  // Mission objectives appear only after the opening message is accepted.
  hidden($('#objective'),!narrativeMission);
  $('#phoneButton').classList.toggle('missionAwaiting',!!pendingMissionReply());
- setText($('#cashValue'),money(s.cash));setText($('#energyValue'),Math.floor(s.energy)+' / '+CONFIG.maxEnergy);setText($('#boostValue'),s.boosters);const unread=unreadMessages(s).length;hidden($('#phoneBadge'),!unread);setText($('#phoneBadge'),unread);if(avatars&&lastPortraitId!==s.character){lastPortraitId=s.character;$('#playerAvatar').innerHTML=avatars.portrait(s.character);}$('#hud').dataset.avatar=s.character;setText($('#playerName'),s.playerName||t('operatorName'));const lvl=playerLevel(s);setText($('#levelValue'),lvl);const m3On=s.mission3&&s.mission3.phase!=='inactive';const m4HudOn=s.mission4&&s.mission4.phase!=='inactive';const missionSub=s.mission5?(s.mission5.status==='operational'?'Misión 5 · Patio operativo':'Misión 5 · Patio de Maquinarias'):m4HudOn?(s.mission4.phase==='complete'?'Misión 4 · Completada':'Misión 4 · Automatiza tu operación'):m3On?(s.mission3.phase==='complete'?'Misión 3 · Completada':'Misión 3 · Tu primer contrato'):s.hsec?.completedAt?'Misión 2 · Completada':s.chapterCompletedAt?'Misión 1 · Completada':'Misión 1 · '+t('firstSteps');setText($('#playerMission'),
+ setText($('#cashValue'),money(s.cash));setText($('#energyValue'),Math.floor(s.energy)+' / '+CONFIG.maxEnergy);setText($('#boostValue'),s.boosters);const unread=unreadMessages(s).length;hidden($('#phoneBadge'),!unread);setText($('#phoneBadge'),unread);if(avatars&&lastPortraitId!==s.character){lastPortraitId=s.character;$('#playerAvatar').innerHTML=avatars.portrait(s.character);}$('#hud').dataset.avatar=s.character;setText($('#playerName'),s.playerName||t('operatorName'));const lvl=playerLevel(s);setText($('#levelValue'),lvl);const m3On=s.mission3&&s.mission3.phase!=='inactive';const m4HudOn=s.mission4&&s.mission4.phase!=='inactive';const missionSub=s.mission5?(s.mission5.commissionedAt?'Misión 5 · Patio habilitado':s.mission5.status==='operational'?'Misión 5 · Contratar personal':'Misión 5 · Patio en construcción'):m4HudOn?(s.mission4.phase==='complete'?'Misión 4 · Completada':'Misión 4 · Automatiza tu operación'):m3On?(s.mission3.phase==='complete'?'Misión 3 · Completada':'Misión 3 · Tu primer contrato'):s.hsec?.completedAt?'Misión 2 · Completada':s.chapterCompletedAt?'Misión 1 · Completada':'Misión 1 · '+t('firstSteps');setText($('#playerMission'),
  !isMissionAccepted(s,'m1')&&!isMissionCollected(s,'m1')?'Esperando mensaje de bienvenida':
  !narrativeMission?'Esperando nueva misión':missionSub);$('#playerProgress').style.width=(s.chapterCompletedAt?100:s.office.status==='built'?66:s.cleared.length===16?33:Math.round(s.cleared.length/16*33))+'%';
  /* Geo analysis floating card */
@@ -1020,6 +1026,15 @@ function renderHUD(){if(!s)return;
   $('#objectiveProgress').style.width=(checklist.progress*100)+'%';
   setText($('#objectiveCount'),s.mission3.phase==='complete'?'✓':checklist.done+'/'+checklist.total);
 }
+ if(narrativeMission==='m5'){
+  const items=mission5Objectives(s),done=items.filter(x=>x.done).length;
+  const next=items.find(x=>!x.done);
+  setText($('#objective .eyebrow'),'MISIÓN 5');
+  setText($('#objectiveTitle'),'Una base para crecer');
+  setText($('#objectiveDetail'),next?next.label:'Objetivos listos · confirma el mensaje de Elena');
+  setText($('#objectiveCount'),done+' / '+items.length);
+  $('#objectiveProgress').style.width=(done/items.length*100)+'%';
+ }
  /* Mission 3 contract timer: freeze upon physical drilling completion.
     A previously completed 90/90 contract must not display a misleading
     expired 00:00 while waiting for the user to submit from the phone. */
@@ -1121,6 +1136,29 @@ function renderHUD(){if(!s)return;
 function openPhone(app='home'){if(placement||phase!=='play')return;stop();closeBuilder();hsecWorld?.showAssetCard(null);hideDrillCard();hideWorkshopCard();if(!['home','messages','bank','inventory','objectives'].includes(app)&&!app.startsWith('m3-')&&!app.startsWith('m4-')&&!app.startsWith('m5-'))app='messages';stop();phoneApp=app;phoneOpen=true;hidden($('#phone'),false);hidden($('#phoneShade'),false);document.body.classList.add('phoneOpen');renderPhone();}
 function closePhone(){stop();phoneUI.release();phoneOpen=false;hidden($('#phoneShade'),true);hidden($('#phone'),true);document.body.classList.remove('phoneOpen');}
 const phoneUI=new PhoneUI({shell:$('#phone'),content:$('#phoneContent'),title:$('#phoneTitle'),back:$('#phoneBack'),state:()=>s,translate:()=>t,format:money,getWorld:()=>world,onSave:save,onHUD:renderHUD,onNavigate:app=>{if(app==='builder'){openBuilder();return;}phoneApp=app;renderPhone();},onClose:closePhone,onTransfer:(direction,amount)=>{if(action(()=>transfer(s,direction,amount)))notices.push({title:t('transactionDone'),detail:money(s.cash),symbol:'bank'});},
+onM5Action:(type,id)=>{try{
+  if(type==='hire'){
+   const hired=hirePatioStaff(s,id,Date.now());
+   notices.push({title:'Personal contratado',detail:id==='m5-gate-security'?'Guardia de acceso asignado a caseta':'Técnica de bodega asignada al galpón',symbol:'personnel'});
+   if(!m5NpcWorld&&world)m5NpcWorld=new PatioNPCWorld(world);
+   // Model loads only now, after a real paid hire.
+   const staffDef=id==='m5-gate-security'?'guardia':'bodega';
+  }else if(type==='gate'){
+   inspectPatioGate(s);
+   notices.push({title:'Acceso HSEC verificado',detail:'Barrera y control de entrada aprobados',symbol:'check'});
+  }else if(type==='warehouse'){
+   const report=inspectPatioWarehouse(s);
+   notices.push({title:'Inventario de bodega revisado',detail:report.bits+' bits · '+report.hammers+' martillos disponibles',symbol:'check'});
+  }else throw new Error('invalid');
+  save();renderHUD();renderPhone();
+  if(s.mission5?.commissionedAt)narrativeTick(1.5);
+ }catch(e){
+  const message={noMoney:'Saldo insuficiente',buildPatioFirst:'Termina primero la obra del Patio L1',
+   alreadyHired:'Ya contratado',acceptM5First:'Acepta primero el mensaje de Elena',
+   hireGuardFirst:'Debes contratar al guardia',hireTechFirst:'Debes contratar a la técnica',
+   needsHsec:'HSEC pendiente'}[e.message]||e.message;
+  notices.push({title:message,symbol:'lock'});
+ }},
 onM3Action:(type,data)=>{try{
  if(type==='hire'){hirePersonnel(s,data,data+'-01');notices.push({title:'Personal contratado',symbol:'bell'});}
  else if(type==='buyDrill'){const d=drillDefinition(data);if(d){placeMachineryOrder(s,'drill',data,d.price);notices.push({title:'Perforadora solicitada · en camino',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}}
@@ -1246,7 +1284,7 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
  if(s.hsec.completedAt&&isMissionAccepted(s,'m3')&&canStartMission3(s)&&(!s.mission3||s.mission3.phase==='inactive')){startMission3(s);notices.push({title:'Misión 3 desbloqueada — Tu primer contrato',symbol:'bell'});save();}save();}}moveNpc(s,dt);}
  if(phase==='play'){narrativeTick(dt);/* Workshop L1 construction tick */if(finishWorkshopConstruction(s,Date.now())){save();renderHUD();notices.push({title:'Taller L1 construido',symbol:'bell'});sound('finish');updateMission3Phase(s);}
  /* M5 fixed modular yard real-time construction. No reward is minted on completion. */
-  if(finishPatio(s,wall)){save();renderHUD();if(phoneOpen)renderPhone();notices.push({title:'Misión 5 · Patio L1 operativo',detail:'Inspección HSEC finalizada · acceso habilitado',symbol:'bell'});sound('finish');}
+  if(finishPatio(s,wall)){save();renderHUD();if(phoneOpen)renderPhone();notices.push({title:'Patio L1 construido',detail:'Contrata al guardia y a la técnica de bodega para completar M5',symbol:'bell'});sound('finish');}
  /* Workshop upgrade construction tick */const wsJob=workshopUpgradeJob(s);if(wsJob&&Date.now()>=wsJob.ends){finishWorkshopUpgrade(s);save();renderHUD();if(workshopCardOpen)showWorkshopCard();notices.push({title:`Taller ampliado a Nv.${workshopLevel(s)}`,symbol:'bell'});sound('finish');updateMission4Phase(s);}if(workshopCardOpen&&wsJob)showWorkshopCard();world.updateWorkshop(s.workshop);updateWorkshopConstructionHologram(wall);
  initM3Visuals();const m3events=tickMission3(s,dt,wall);if(m3events){for(const e of m3events){if(typeof e==='object'&&e.type==='machineryDelivered'){
   const m=e.machinery;
@@ -1269,6 +1307,7 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
   }}save();}
   updateM4Visuals(dt);
   initM5Visuals(wall);
+  m5NpcWorld?.update(s,dt,wall);
   // Auto-start M4 when M3 completes
   if(s.mission3?.phase==='complete'&&s.contract?.status==='delivered'&&isMissionAccepted(s,'m4')&&canStartMission4(s)&&(!s.mission4||s.mission4.phase==='inactive')){startMission4(s);notices.push({title:'Misión 4 desbloqueada — Automatiza tu operación',symbol:'bell'});save();}
   }
