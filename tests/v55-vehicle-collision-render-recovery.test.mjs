@@ -48,6 +48,9 @@ test('Catalog snapshot contexts are explicitly freed on Android',()=>{
  const hsec=read('dist/hsec/world.mjs');
  assert.match(source,/this\.renderer\.dispose\?\.\(\)/);
  assert.match(source,/this\.renderer\.forceContextLoss\?\.\(\)/);
+ assert.match(source,/let snapshotRenderer=null/);
+ assert.match(source,/if\(ephemeral&&transparent\)/);
+ assert.match(source,/new ProductPreview\(host,world,\{transparent:true,ephemeral:true\}\)/);
  assert.match(source,/antialias:false,alpha:transparent/);
  assert.match(hsec,/finally\{preview\?\.dispose\(\);host\.remove\(\);\}/);
 });
