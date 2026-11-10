@@ -9,7 +9,9 @@
 - `dist/mission5/patio-world.mjs`: elevar los halos a y=0.295, ampliar la cobertura de PointLight sin sombras, mantener presupuesto dinámico por calidad y dejar halos tenues en los focos no prioritarios.
 - Añadir cuatro piscinas de luz sobre aparcaderos pesados y P01 sin agregar geometría sólida, cobros, obstáculos ni fuentes dinámicas nuevas.
 - `tests/v52-night-patio-driving.test.mjs`: adaptar aserciones existentes y añadir regresión que exige halos sobre pintura y cobertura en plazas.
-- Compatibilidad: M1–M5, HSEC, Casa Matriz, precios, saves, DrillTruck® 01 automática y DrillTruck® 02 personal sin cambios.
+- `dist/chapter/faena-center.mjs`: corrige el constructor que OMITÍA guardar los callbacks `onLocatePersonalTruck` y `onRecoverPersonalTruck`. Los botones aparecían activos pero nunca ejecutaban las acciones del controlador. Se reconectan sin alterar propiedad, velocidad, costo, estado, cámara o save de la unidad.
+- `tests/v56-personal-drilltruck-recovery.test.mjs`: prueba real de handlers para localizar y recuperar, además de los tests existentes sobre propiedad/economía.
+- Compatibilidad: M1–M5, HSEC, Casa Matriz, precios, saves, DrillTruck® 01 automática y DrillTruck® 02 personal sin cambios en datos o lógica de movimiento.
 
 ## Limitación de verificación
 - Inspección estática del código y aserciones actualizadas; todavía sin ejecutar `npm test` ni validar imagen WebGL/Android. No llamar corregida a la experiencia hasta probarla visualmente.
@@ -20,7 +22,7 @@
 - `dist/chapter/state.mjs` `restore` devuelve a spawn posiciones fuera de sus cajas admitidas.
 - `dist/mission5/personal-drilltruck.mjs` usa otro rango fijo en `personalTruckAtPlayableLocation`; `repairPersonalTruckPose` también reubica posiciones externas.
 - Para ampliar tránsito se debe coordinar una misma región de mundo (malla de desierto 240×240m) aplicada al movimiento y a la restauración del avatar y camioneta, sin eliminar las colisiones físicas de cercos, edificios, portones, peatones y equipos.
-- Esta rama **no cambia** la lógica de movimiento para no vulnerar ownership ni corromper guardados.
+- Esta rama **no cambia** la lógica de movimiento ni la recuperación subyacente; repara solamente el cableado de los dos botones y el render visual del patio.
 
 ## HUD/UI
 - Se registró deuda visual para rediseño incremental posterior: reducir altura de franjas, translucidez, iconos, agrupación de comandos por contexto (modo caminar/conducir), y mantener targets táctiles. Sin cambios de interfaz en V57.
