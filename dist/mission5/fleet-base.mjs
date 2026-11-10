@@ -6,8 +6,8 @@ export const FLEET_BAYS=Object.freeze({
  drillTruck:Object.freeze({x:-65,z:-4,area:'covered',id:'C03'}),
  pickup1:Object.freeze({x:-72,z:-3,area:'covered',id:'C01'}),
  pickup2:Object.freeze({x:-68.5,z:-3,area:'covered',id:'C02'}),
- rc:Object.freeze({x:-43,z:-1.75,area:'open-drill',id:'D01'}),
- dth:Object.freeze({x:-35.5,z:-1.75,area:'open-drill',id:'D02'}),
+ rc:Object.freeze({x:-41.6,z:-1.75,area:'open-drill',id:'D01'}),
+ dth:Object.freeze({x:-33.8,z:-1.75,area:'open-drill',id:'D02'}),
  caex1:Object.freeze({x:-58,z:-30,area:'open-heavy',id:'H01'}),
  caex2:Object.freeze({x:-46,z:-30,area:'open-heavy',id:'H02'}),
  earthmover:Object.freeze({x:-34,z:-30,area:'open-heavy',id:'H03'})
