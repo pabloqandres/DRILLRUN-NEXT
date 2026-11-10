@@ -2,6 +2,8 @@
 // Renders M4 UI panels inside the existing PhoneUI system.
 import {mission4Phase,mission4Objectives,mission4Objective} from './mission4-state.mjs';
 import {canPurchaseDrillTruck,drillTruckInfo,DRILLTRUCK_COST} from './drilltruck.mjs';
+import {personalTruck,personalTruckOrder,canOrderPersonalTruck,PERSONAL_DRILLTRUCK_PRICE} from '../mission5/personal-drilltruck.mjs';
+import {formatOrderETA} from '../mission3/headquarters.mjs';
 import {DTH_DRILLS,DTH_HAMMERS,DTH_BITS,dthDrillDefinition,canPurchaseDthDrill,dthDrillEquipped,dthDrillAssigned,compatibleDthHammers,compatibleDthBits,canInstallDthTool} from './drills-dth.mjs';
 import {convertableBoreholes,availableZones,zoneById} from './zones.mjs';
 import {maintenanceProgress,MAINTENANCE_PHASES} from './maintenance.mjs';
@@ -230,6 +232,25 @@ function renderDthCatalog(s,t,fmt,icon,cb){
   const inTransit=(s.orders||[]).filter(o=>['pending','dispatched'].includes(o.status)).flatMap(o=>o.items||[]).filter(i=>i.model===b.id).reduce((n,i)=>n+i.qty,0);
   html+=`<button data-m4-action="orderDthTool" data-model="${b.id}" data-type="bit" ${s.cash<b.price+200?'disabled':''}>${icon('store')} Solicitar · ${fmt(b.price)}</button>${inTransit?'<small>En camino: '+inTransit+'</small>':''}</article>`;
  }
+ // M5 expansion: Casa Matriz orders a second, INDEPENDENT DrillTruck®.
+ // The M4 service truck cannot be purchased again or become drivable.
+ if(s.mission5?.status==='operational'&&s.narrative?.accepted?.includes('m5')){
+  const own=personalTruck(s),pending=personalTruckOrder(s);
+  const reason=canOrderPersonalTruck(s);
+  const reasons={auditWarehouseFirst:'Completa antes la inspección inicial de bodega',
+   needsAutoTruck:'El DrillTruck automático de M4 debe seguir operativo',
+   noMoney:'Saldo insuficiente',orderAlreadyPending:'Pedido de vehículo en camino',
+   alreadyOwned:'Vehículo personal ya recibido'};
+  html+='<div class="sectionHeading">Vehículo personal · Expansión M5</div>';
+  html+='<section class="m4OpsNext"><small>DRILLTRUCK® 02 · USO PERSONAL · PLAZA P01</small>'+
+   '<b>Segundo DrillTruck®</b><p>Unidad adicional para recorrer la faena. No realiza recambios automáticos; el DrillTruck® 01 sigue atendiendo la DTH.</p>'+
+   '<p>Precio 🪙 '+fmt(PERSONAL_DRILLTRUCK_PRICE)+' + despacho 🪙 200 · Entrega en 3 min.</p>'+
+   (own?'<span class="itemStatus isInstalled">'+icon('check')+' Recibido · listo para conducir</span>':
+    pending?'<span class="itemStatus">'+icon('clock')+' '+esc(formatOrderETA(pending))+'</span>':
+    '<button class="primary" data-m4-action="buyPersonalTruck" '+(reason?'disabled':'')+'>'+
+     icon('store')+' Solicitar DrillTruck® personal</button>'+
+    (reason?'<small>'+esc(reasons[reason]||reason)+'</small>':''))+'</section>';
+ }
  return html;
 }
 
@@ -274,6 +295,13 @@ function renderDrillTruck(s,t,fmt,icon,cb){
     }
    }
   }
+ }
+ const extra=personalTruck(s),order=personalTruckOrder(s);
+ if(s.mission5?.status==='operational'){
+  html+='<div class="sectionHeading">Segunda unidad · Uso personal</div>'+
+   '<section class="m4OpsNext"><small>PLAZA P01 · ENTRADA DEL PATIO</small>'+
+   '<b>DrillTruck® personal</b><p>'+esc(extra?extra.mode==='driving'?'En conducción':'Estacionado · disponible':order?'En despacho · '+formatOrderETA(order):'Pendiente de comprar en Casa Matriz')+
+   '</p><button data-app="m4-dth-catalog">Abrir Casa Matriz</button></section>';
  }
  return html;
 }

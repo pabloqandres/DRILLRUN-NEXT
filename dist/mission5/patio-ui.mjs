@@ -18,7 +18,7 @@ export function renderPatioApp(s,fmt,icon,now=Date.now()){
  for(const id of PATIO_L1.modules)html+=`<section class="m4OpsNext"><small>MÓDULO PREDEFINIDO</small><b>${esc(id)}</b></section>`;
  const capacity=patioCapacity(s),fleet=fleetOccupancy(s);
  const occupied=items=>items.filter(e=>e.state==='parked').length;
- html+=`<div class="sectionHeading">Plazas y flota real</div><div class="m4OpsEquipment"><b>Vehículos ligeros techados</b><span>${occupied(fleet.covered)} / ${capacity.covered||PATIO_L1.coveredCapacity} plazas ocupadas</span><b>Perforadoras a cielo abierto</b><span>${occupied(fleet.openDrill)} / ${capacity.drill||PATIO_L1.openDrillCapacity} plazas ocupadas</span><b>Equipos pesados a cielo abierto</b><span>${occupied(fleet.openHeavy)} / ${capacity.heavy||PATIO_L1.heavyCapacity} plazas ocupadas</span><b>Portón fijo HSEC</b><span>${capacity.gate?'Habilitado':'Pendiente'}</span></div>`;
+ html+=`<div class="sectionHeading">Plazas y flota real</div><div class="m4OpsEquipment"><b>DrillTruck® personal (P01)</b><span>${fleet.personal?.[0]?fleet.personal[0].state==='working'?'En conducción':'Estacionado':'Libre · vehículo adicional'}</span><b>Vehículos ligeros techados</b><span>${occupied(fleet.covered)} / ${capacity.covered||PATIO_L1.coveredCapacity} plazas ocupadas</span><b>Perforadoras a cielo abierto</b><span>${occupied(fleet.openDrill)} / ${capacity.drill||PATIO_L1.openDrillCapacity} plazas ocupadas</span><b>Equipos pesados a cielo abierto</b><span>${occupied(fleet.openHeavy)} / ${capacity.heavy||PATIO_L1.heavyCapacity} plazas ocupadas</span><b>Portón fijo HSEC</b><span>${capacity.gate?'Habilitado':'Pendiente'}</span></div>`;
  const labels={parked:'Estacionado en su plaza',working:'Operando en faena', 'in-transit':'En transferencia / no estacionado'};
  html+='<div class="sectionHeading">Equipos de tu faena</div>';
  const rows=[...fleet.covered,...fleet.openDrill,...fleet.openHeavy];
@@ -29,7 +29,7 @@ export function renderPatioApp(s,fmt,icon,now=Date.now()){
  // Infrastructure app is read-only for personnel: all hiring lives in Personal.
  const accepted=!!s.narrative?.accepted?.includes('m5');
  const rewarded=!!s.narrative?.rewardsCollected?.includes('m5');
- html+='<div class="sectionHeading">MISIÓN 5 · 5 OBJETIVOS EN ORDEN</div>';
+ html+='<div class="sectionHeading">MISIÓN 5 · 6 OBJETIVOS EN ORDEN</div>';
  html+='<section class="m4OpsNext"><small>'+readout.done+' / '+readout.total+' COMPLETADOS · '+Math.round(readout.progress*100)+'%</small><div class="steps">'+readout.steps.map(o=>
   '<div class="'+(o.done?'done':o.status)+'"><span class="stepNumber">'+(o.done?icon('check'):o.number)+'</span><span><b>'+esc(o.label)+'</b><small>'+esc(o.status==='current'?o.remainingSeconds!==null?clock(o.remainingSeconds)+' restantes · '+o.hint:o.hint:o.status==='locked'?'Se desbloquea al completar el paso anterior':'Completado')+'</small></span></div>'
  ).join('')+'</div><p><b>Siguiente paso:</b> '+esc(readout.pending?.label||'Confirmar cierre con Elena Torres')+'</p></section>';
@@ -47,6 +47,7 @@ export function renderPatioApp(s,fmt,icon,now=Date.now()){
    '<button data-m5-action="warehouse" '+(!tech||!gateChecked(s)||warehouseChecked(s)?'disabled':'')+'>'+icon('check')+' Revisar stock</button></section>';
  }
  if(s.mission5?.commissionedAt)html+='<section class="m4OpsNext"><b>Operación lista · esperando confirmación de Elena</b><p>Abre el mensaje final de M5 para cerrar la misión.</p></section>';
+ html+='<div class="sectionHeading">Segundo DrillTruck® · Movilidad</div><section class="m4OpsNext"><p>La unidad 01 sigue funcionando automáticamente. Solicita la unidad 02 en Casa Matriz y condúcela desde la plaza P01 con joystick y freno.</p><button class="primary" data-app="m4-dth-catalog">'+icon('store')+' Abrir Casa Matriz</button></section>';
  html+='<div class="sectionHeading">Ampliaciones futuras</div>';
  for(const d of PATIO_FUTURE)html+=`<section class="m4OpsNext"><small>L${d.level} · BLOQUEADO</small><h3>${esc(d.name)}</h3><p>Terreno reservado. No construible todavía.</p></section>`;
  html+=`<button class="primary" data-app="builder">${icon('build')} ${status==='operational'?'Abrir Catálogo':status==='building'?'Ver obra en Catálogo':'Construir desde Catálogo'}</button>`;

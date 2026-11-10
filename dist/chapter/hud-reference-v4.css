@@ -1542,3 +1542,33 @@ body.interior #hud #objective[data-mission="m5"]:not(.hidden){
  #hud #objective[data-mission="m5"] .missionCardProgress{padding-top:3px!important;padding-bottom:4px!important}
  #hud #objective[data-mission="m5"] .missionCardFooter{min-height:27px!important;padding-top:4px!important;padding-bottom:4px!important}
 }
+
+/* V50 · DrillTruck personal driving controls, only while boarded.
+   Dedicated brake is intentionally clear of joystick, bottom dock and hand. */
+#hud #personalTruckBrake{
+ position:fixed;right:max(135px,env(safe-area-inset-right));bottom:130px;
+ z-index:95;min-width:80px;height:64px;display:grid;place-items:center;
+ font:900 13px/1 system-ui,sans-serif;letter-spacing:.09em;color:#ffe7d7;
+ background:linear-gradient(145deg,#8b2338,#501629);border:2px solid #d18489;
+ border-radius:18px;box-shadow:0 6px 21px #0008,inset 0 2px 5px #fff3;
+ user-select:none;touch-action:none;-webkit-user-select:none;
+}
+#hud #personalTruckBrake:active,#hud #personalTruckBrake.pressed{
+ background:#ae3a4c;transform:scale(.96);box-shadow:0 2px 12px #000b;
+}
+#hud #personalTruckSpeed{
+ position:fixed;left:50%;transform:translateX(-50%);top:92px;z-index:69;
+ display:flex;align-items:center;gap:8px;padding:7px 12px;
+ color:#f6efe1;background:#102636dd;border:1px solid #648390b0;
+ box-shadow:0 3px 14px #0005;border-radius:12px;pointer-events:none;
+}
+#hud #personalTruckSpeed strong{font:bold 21px/1.1 system-ui,sans-serif;font-variant-numeric:tabular-nums}
+#hud #personalTruckSpeed small{font:600 9px/1.1 system-ui,sans-serif;letter-spacing:.06em}
+#hud #personalTruckBrake.hidden,#hud #personalTruckSpeed.hidden{display:none!important}
+body.phoneOpen #personalTruckBrake{pointer-events:none;opacity:.4}
+@media(max-height:550px),(max-width:760px){
+ #hud #personalTruckBrake{right:108px;bottom:102px;min-width:65px;height:52px;font-size:11px;border-radius:15px}
+ #hud #personalTruckSpeed{top:65px;padding:4px 9px}
+ #hud #personalTruckSpeed strong{font-size:17px}
+ #hud #personalTruckSpeed small{font-size:8px}
+}

@@ -121,6 +121,10 @@ function markings(g){
  for(const x of[-7,5,17])mark(g,x,-13,11.2,15.7,C.yellow);
  // RC and DTH open bays, no overhead canopies or fake static rigs.
  for(const x of[9.4,17.2])mark(g,x,15.25,6.6,10.3,C.yellow);
+ // Personal DrillTruck® bay P01 near the gate, distinct from C03 automatic
+ // service truck. Kept outside the heavy equipment pads and road spine.
+ mark(g,20,-3.2,6.2,3.6,C.white);
+ for(const x of[17.1,22.9])block(g,.14,.07,.42,x,.30,-4.9,C.yellow);
  // Roofed light fleet: six narrow slots only for pickups and DrillTruck.
  for(const x of[-23,-19.4,-15.8,-12.2,-8.6,-5]){
   mark(g,x,14.1,3.4,7.4,C.yellow);
@@ -432,9 +436,14 @@ export function createPatioWorld(w){
    const truck=s.mission4?.drillTruck;
    const truckNear=!!truck?.position&&
     Math.hypot(truck.position.x-PATIO_L1.gate.x,truck.position.z-PATIO_L1.gate.z)<12;
+   const driverTruck=s.mission5?.personalTruck;
+   const personalNear=driverTruck?.mode==='driving'&&
+    Math.hypot(driverTruck.position.x-PATIO_L1.gate.x,
+     driverTruck.position.z-PATIO_L1.gate.z)<10;
    barrierOpen=gateShouldOpen({
     position:status==='operational'&&!s.inside?s.position:null,
-    wasOpen:barrierOpen,vehicleNear:truckNear,routeInUse:!!w.fleetGateInUse
+    wasOpen:barrierOpen,vehicleNear:truckNear||personalNear,
+    routeInUse:!!w.fleetGateInUse
    })&&status==='operational';
    const desired=barrierOpen?-Math.PI/2:0;
    access.rotation.x+=(desired-access.rotation.x)*.18;

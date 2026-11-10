@@ -1,0 +1,28 @@
+name: V50 Personal DrillTruck driving
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  v50-personal-truck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Validate machinery purchase and driving module syntax
+        run: |
+          node --check dist/mission5/personal-drilltruck.mjs
+          node --check dist/mission5/fleet-base.mjs
+          node --check dist/mission5/patio-staff.mjs
+          node --check dist/mission5/mission-readout.mjs
+          node --check dist/mission5/patio-world.mjs
+          node --check dist/mission5/patio-ui.mjs
+          node --check dist/mission3/headquarters.mjs
+          node --check dist/mission4/phone-apps.mjs
+          node --check dist/chapter/game.mjs
+      - name: New M5 driving and historic focused regressions
+        run: node --test tests/v50-personal-drilltruck-driving.test.mjs tests/m5-stepwise-checklist-reward-v46.test.mjs tests/m5-staff-narrative-and-walk-v43.test.mjs tests/v47-live-mission-and-compact-hud.test.mjs tests/v49-patio-personnel-gate-finish.test.mjs

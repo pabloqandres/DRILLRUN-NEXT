@@ -4,6 +4,13 @@
 
 ## Currently Active
 
+- **ChatGPT — V50 DrillTruck® personal:** rama
+  `chatgpt/v50-personal-drilltruck-driving`.
+  Segundo vehículo comprado en Casa Matriz, entrega real, M5 seis pasos,
+  estacionamiento P01 y conducción joystick/freno con cámara chase.
+  Mantener M4 DrillTruck (01) y producción automática sin cambios.
+  QA de flujo M5 y conducción en proceso, preview/PR antes de main.
+
 - **ChatGPT — V47 portada M5 y HUD compacto:** rama
   `chatgpt/v47-live-mission-home-compact-hud`. Portada/estado del
   jugador leen la misión narrativa aceptada; checklist M5 en HUD

@@ -1,5 +1,17 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-10 — V50 DrillTruck® 02 personal (PR)
+
+- Nueva unidad personal adicional comprada en Casa Matriz con despacho
+  de maquinaria real. La unidad 01 conserva servicio automático DTH.
+- Misión 5 amplía de cinco a seis pasos: recepción del segundo vehículo
+  como cierre anterior al SMS final y bono único.
+- Vehículo 02 se estaciona en P01, se aborda por interacción o tap;
+  joystick acelera, gira y retrocede; freno y cámara exterior elevada.
+- Físicas de colisión para estructuras y barrera; datos persisten.
+- Sin nuevas marcas, equipos gratuitos o ingresos falsos.
+- Ver `CHANGES/2026-11-10_v50-personal-drilltruck-driving.md`.
+
 ## 2026-11-10 — V48 Traslado DTH: animación real sincronizada
 
 - DTH recorre el trayecto completo durante los 12 segundos definidos

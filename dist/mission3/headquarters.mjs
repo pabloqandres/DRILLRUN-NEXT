@@ -3,6 +3,7 @@
 import {hammerDefinition,bitDefinition,drillDefinition,purchaseDrill} from './drills.mjs';
 import {dthHammerDefinition,dthBitDefinition,dthDrillDefinition,purchaseDthDrill} from '../mission4/drills-dth.mjs';
 import {purchaseDrillTruck,DRILLTRUCK_COST} from '../mission4/drilltruck.mjs';
+import {deliverPersonalTruck,canOrderPersonalTruck,PERSONAL_DRILLTRUCK_MODEL,PERSONAL_DRILLTRUCK_PRICE} from '../mission5/personal-drilltruck.mjs';
 import {workshopFree} from './inventory.mjs';
 
 const fail=msg=>{throw new Error(msg);};
@@ -21,9 +22,11 @@ export function canPlaceOrder(s,items){
   if(item.qty!==1)return 'invalidQty';
   const def=item.type==='drill'?drillDefinition(item.model):
             item.type==='dthDrill'?dthDrillDefinition(item.model):
-            item.type==='drillTruck'&&item.model==='drilltruck'?{price:DRILLTRUCK_COST}:null;
+            item.type==='drillTruck'&&item.model==='drilltruck'?{price:DRILLTRUCK_COST}:
+            item.type==='drillTruckPersonal'&&item.model===PERSONAL_DRILLTRUCK_MODEL?{price:PERSONAL_DRILLTRUCK_PRICE}:null;
   if(!def||item.unitPrice!==def.price)return 'invalidItem';
   if(['dthDrill','drillTruck'].includes(item.type)&&(!s.mission4||s.mission4.phase==='inactive'))return 'missionNotActive';
+  if(item.type==='drillTruckPersonal'){const reason=canOrderPersonalTruck(s);if(reason)return reason;}
   if((item.type==='drill'&&s.drill)||(item.type==='dthDrill'&&s.mission4?.productionDrill)||(item.type==='drillTruck'&&s.mission4?.drillTruck))return 'alreadyOwned';
   if((s.orders||[]).some(o=>['pending','dispatched'].includes(o.status)&&o.items?.some(i=>i.category==='machinery'&&i.type===item.type)))return 'orderAlreadyPending';
  }
@@ -107,6 +110,10 @@ export function materializeMachinery(s,item,now=Date.now()){
   if(!s.mission4.drillTruck)purchaseDrillTruck(s,true,now);
   return !!s.mission4.drillTruck;
  }
+ if(item.type==='drillTruckPersonal'){
+  if(item.model!==PERSONAL_DRILLTRUCK_MODEL)return false;
+  return !!deliverPersonalTruck(s,now);
+ }
  return false;
 }
 
@@ -170,7 +177,7 @@ export function reconcileDeliveredMachinery(s,now=Date.now()){
   if(order.status!=='delivered')continue;
   for(const item of order.items||[]){
    if(item.category!=='machinery')continue;
-   const existed=item.type==='drill'?!!s.drill:item.type==='dthDrill'?!!s.mission4?.productionDrill:item.type==='drillTruck'?!!s.mission4?.drillTruck:true;
+   const existed=item.type==='drill'?!!s.drill:item.type==='dthDrill'?!!s.mission4?.productionDrill:item.type==='drillTruck'?!!s.mission4?.drillTruck:item.type==='drillTruckPersonal'?!!s.mission5?.personalTruck:true;
    if(!existed&&materializeMachinery(s,item,now))repaired.push(item.type);
   }
  }

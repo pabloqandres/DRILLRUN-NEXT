@@ -4,6 +4,7 @@ import {PATIO_L1} from './patio-state.mjs';
 
 export const FLEET_BAYS=Object.freeze({
  drillTruck:Object.freeze({x:-65,z:-4,area:'covered',id:'C03'}),
+ personalTruck:Object.freeze({x:-31,z:-20.2,heading:Math.PI/2,area:'personal',id:'P01'}),
  pickup1:Object.freeze({x:-72,z:-3,area:'covered',id:'C01'}),
  pickup2:Object.freeze({x:-68.5,z:-3,area:'covered',id:'C02'}),
  rc:Object.freeze({x:-41.6,z:-1.75,area:'open-drill',id:'D01'}),
@@ -42,8 +43,8 @@ export function drillTruckAvailableToPark(s){
 }
 export function fleetOccupancy(s){
  const ready=patioFleetActive(s),m=s?.mission5||{};
- if(!ready)return {operational:false,covered:[],openDrill:[],openHeavy:[]};
- const covered=[],openDrill=[],openHeavy=[];
+ if(!ready)return {operational:false,covered:[],openDrill:[],openHeavy:[],personal:[]};
+ const covered=[],openDrill=[],openHeavy=[],personal=[];
  if(s.mission4?.drillTruck){
   covered.push({id:'drillTruck',name:'DrillTruck®',slot:'C03',
    state:m.truckRelocated?'parked':s.mission4.drillTruck.maintenancePhase?'working':'in-transit'});
@@ -56,5 +57,7 @@ export function fleetOccupancy(s){
   openDrill.push({id:'dth',name:'Perforadora DTH',slot:'D02',
    state:dthAvailableToPark(s)?m.dthParked?'parked':'in-transit':'working'});
  }
- return {operational:true,covered,openDrill,openHeavy};
+ if(m.personalTruck){personal.push({id:'personalTruck',name:'DrillTruck® personal',slot:'P01',
+   state:m.personalTruck.mode==='driving'?'working':'parked'});}
+ return {operational:true,covered,openDrill,openHeavy,personal};
 }
