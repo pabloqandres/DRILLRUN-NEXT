@@ -24,6 +24,10 @@ export class PatioNPCWorld{
    body.scale.setScalar(scalar);
    body.position.y=-bounds.min.y*scalar;
    const rig=new NPCWalkRig(body);
+   // Align the sculpt's local forward axis (+X for the approved Z-wide
+   // models) with the NPC root's movement heading (+Z), without altering
+   // the scene route or the underlying GLB geometry.
+   body.rotation.y+=rig.forwardCorrectionYaw||0;
    body.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=true;}});
    root.visible=false;this.world.scene.add(root);
    const npc={root,rig,def,path:npcWaypoints(def.id),next:1,wait:0,placed:false};
