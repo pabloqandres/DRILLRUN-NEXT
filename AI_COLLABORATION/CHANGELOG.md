@@ -305,3 +305,9 @@
 - `AI_COLLABORATION/` directory with RULES.md, CURRENT_STATE.md, CHANGELOG.md, COMPONENT_OWNERSHIP.md, DESIGN_SYSTEM.md, ACTIVE_WORK.md, DECISIONS.md, CHANGES/
 - `CLAUDE.md` — Claude Code entry point
 - `AGENTS.md` — ChatGPT entry point
+
+## 2026-11-10 — ChatGPT — Wave 01 library de assets 3D
+- 14 GLB optimizados/colorizados y verificados con `trimesh`, lote descargable externo al repositorio (5,79 MB binarios).
+- `design/asset-library-wave1/` registra catálogo potencial sin nuevos precios, compras, lógica ni cambios de guardado.
+- `Digger.c4d` pendiente; rigging y pruebas WebGL/móvil también pendientes. No se ha subido el conjunto binario ni desplegado.
+- Rama `chatgpt/assets-lote01-optimizacion`; ver `CHANGES/2026-11-10_asset-library-wave1.md`.
