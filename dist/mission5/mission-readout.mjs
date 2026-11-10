@@ -11,7 +11,8 @@ const hints={
  guard:'Personal → Logística del Patio → Contratar guardia de acceso.',
  technician:'Personal → Logística del Patio → Contratar técnica de bodega.',
  gate:'Teléfono → Patio de Maquinarias → Verificar portón HSEC.',
- inventory:'Teléfono → Patio de Maquinarias → Revisar stock de bits y martillos.'
+ inventory:'Teléfono → Patio de Maquinarias → Revisar stock de bits y martillos.',
+ personalTruck:'Casa Matriz → PUMA DTH · Solicitar segundo DrillTruck® personal y recibirlo en P01.'
 };
 const esc=x=>String(x).replace(/[&<>"']/g,k=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[k]));
 
@@ -51,6 +52,6 @@ export function renderMission5HudChecklist(readout,{compact=false}={}){
    '<span class="m5HudLabel">'+esc(step.label)+esc(suffix)+'</span></span>';
  }).join('');
  const closure=readout.completed?'<span class="m5HudClosing">Revisa el mensaje final de Elena para cobrar el bono.</span>':'';
- return '<span class="m5HudChecklist" role="list" aria-label="'+(compact?'Paso actual y siguiente de Misión 5':'Cinco objetivos de Misión 5')+'">'+rows+'</span>'+
+ return '<span class="m5HudChecklist" role="list" aria-label="'+(compact?'Paso actual y siguiente de Misión 5':'Seis objetivos de Misión 5')+'">'+rows+'</span>'+
   closure+'<span class="m5HudReward">Bono por completar · 🪙 '+readout.rewardCash.toLocaleString('es-CL')+'</span>';
 }
