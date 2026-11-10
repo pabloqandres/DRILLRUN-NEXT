@@ -21,4 +21,4 @@ jobs:
           node --check dist/mission5/patio-world.mjs
           node --check dist/graphics/personal-drilltruck-headlights.mjs
       - name: Functional and previous regressions
-        run: node --test tests/v53-faena-and-recovery.test.mjs tests/v52-night-patio-driving.test.mjs tests/v50-personal-drilltruck-driving.test.mjs tests/v49-patio-personnel-gate-finish.test.mjs tests/m5-stepwise-checklist-reward-v46.test.mjs tests/m5-staff-narrative-and-walk-v43.test.mjs tests/mission3-meter-precision-v20.test.mjs tests/hsec.test.mjs tests/workshop-boost-economy-v22.test.mjs
+        run: node --test tests/v53-faena-and-recovery.test.mjs tests/v52-night-patio-driving.test.mjs tests/v50-personal-drilltruck-driving.test.mjs tests/v49-patio-personnel-gate-finish.test.mjs tests/m5-stepwise-checklist-reward-v46.test.mjs tests/m5-staff-narrative-and-walk-v43.test.mjs tests/mission3-meter-precision-v20.test.mjs tests/m5-fleet-depot-v33.test.mjs tests/m5-patio-v32.test.mjs
