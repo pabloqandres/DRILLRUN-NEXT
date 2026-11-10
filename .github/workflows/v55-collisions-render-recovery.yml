@@ -1,0 +1,21 @@
+name: V55 Vehicle Collisions and Rendering Recovery
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  v55:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check
+        run: |
+          node --check dist/chapter/product-preview.mjs
+          node --check dist/chapter/game.mjs
+          node --check dist/hsec/world.mjs
+          node --check dist/mission5/personal-drilltruck.mjs
+      - name: Physical collisions, graphics recovery and regressions
+        run: node --test tests/v55-vehicle-collision-render-recovery.test.mjs tests/v54-drilltruck-steering-controls.test.mjs tests/v50-personal-drilltruck-driving.test.mjs tests/v52-night-patio-driving.test.mjs tests/v53-faena-and-recovery.test.mjs tests/v49-patio-personnel-gate-finish.test.mjs tests/m5-stepwise-checklist-reward-v46.test.mjs
