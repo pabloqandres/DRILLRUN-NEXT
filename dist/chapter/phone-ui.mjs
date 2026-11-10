@@ -46,6 +46,7 @@ export class PhoneUI{
    this.back.style.visibility='visible';
    c.className='appContent';
    c.innerHTML=renderPatioApp(s,fmt,icon);
+   c.querySelectorAll('[data-m5-action]').forEach(btn=>btn.onclick=()=>this.onM5Action?.(btn.dataset.m5Action,btn.dataset.m5Staff||null));
   }else if(isM4App(app)){
    const m4Titles={'m4-operaciones':'Operaciones','m4-workshop':'Taller','m4-dth-catalog':'Casa Matriz · DTH','m4-drilltruck':'DrillTruck','m4-zones':'Zonas','m4-objectives':'Objetivos'};
    this.title.textContent=m4Titles[app]||'Operaciones';this.back.style.visibility='visible';
