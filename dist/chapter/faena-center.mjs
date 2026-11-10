@@ -121,15 +121,18 @@ export class FaenaCenterUI{
       '<button class="faenaPrimary" data-faena-hsec>Ver panel HSEC completo</button>';
    }
    case 'contracts':
+    if(!s.mission3||s.mission3.phase==='inactive')return '<p class="faenaHint">Los contratos se habilitan en Misión 3. Continúa la historia desde Mensajes.</p>';
     return '<p class="faenaLead">Gestiona el contrato, revisa los objetivos y continúa desde la misma ventana hacia Producción.</p>'+
      '<nav class="faenaQuickLinks">'+button('production','Ir a Producción')+button('logistics','Pedidos y materiales')+'</nav>'+m3('m3-contract');
    case 'personnel':
+    if(!s.mission3||s.mission3.phase==='inactive')return '<p class="faenaHint">El personal operativo se habilita en Misión 3.</p>';
     return '<p class="faenaLead">Un solo lugar para contratar y consultar el personal operativo, incluida la guardia y la técnica del Patio.</p>'+m3('m3-personnel');
    case 'headquarters':
+    if(!s.mission3||s.mission3.phase==='inactive')return '<p class="faenaHint">Casa Matriz se habilita con tu primer contrato de perforación.</p>';
     return '<p class="faenaLead">Todos los productos DRILLCO® se solicitan a Casa Matriz. No se compran herramientas dentro del Taller ni de la Bodega.</p>'+
      '<div class="faenaQuickLinks"><button data-faena-view="m3-catalog">RC / EXPLORA®</button><button data-faena-view="m4-dth-catalog">DTH / PUMA®</button>'+button('logistics','Seguimiento de pedidos')+'</div>'+
      m3('m3-catalog');
-   case 'patio':return renderPatioApp(s,fmt,icon);
+   case 'patio':return s.mission5?.status&&s.mission5.status!=='locked'?renderPatioApp(s,fmt,icon):'<p class="faenaHint">El Patio se habilita en Misión 5.</p>';
    default:{
     const readout=mission5Readout(s);
     const cards=[
@@ -141,7 +144,7 @@ export class FaenaCenterUI{
      ['contracts','objectives','Contratos','Objetivos, etapas y recompensas']
     ];
     return '<p class="faenaLead">Toda la operación de la faena en una pantalla. Toca un módulo; desde el edificio real abres exactamente la misma interfaz.</p>'+
-     '<div class="faenaMetrics">'+small('Saldo',money(s.cash))+small('Misión 5',readout.done+'/'+readout.total)+small('Pedidos activos',(s.orders||[]).filter(o=>o.status==='dispatched').length)+'</div>'+
+     '<div class="faenaMetrics">'+small('Saldo',money(s.cash))+small('Misión',s.mission5?.status&&s.mission5.status!=='locked'?'M5 · '+readout.done+'/'+readout.total:s.mission4?.phase&&s.mission4.phase!=='inactive'?'M4':s.mission3?.phase&&s.mission3.phase!=='inactive'?'M3':'Base')+small('Pedidos activos',(s.orders||[]).filter(o=>o.status==='dispatched').length)+'</div>'+
      '<div class="faenaGrid">'+cards.map(([id,ico,title,description])=>'<button class="faenaTile" data-faena-route="'+id+'"><span class="faenaTileIcon">'+icon(ico)+'</span><b>'+title+'</b><small>'+description+'</small><span class="faenaTileArrow">›</span></button>').join('')+'</div>'+
      '<nav class="faenaQuickLinks">'+button('personnel','Personal')+button('headquarters','Casa Matriz')+button('patio','Misión 5 · Patio completo')+'</nav>'+
      (readout.pending?section('Siguiente objetivo de Misión 5','<p><b>'+esc(readout.pending.label)+'</b></p><p>'+esc(readout.pending.hint)+'</p>'):'');
