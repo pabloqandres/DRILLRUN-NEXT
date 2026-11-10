@@ -49,8 +49,9 @@ test('M5 completion demands construction AND both real hires AND inspections',()
  assert(deliverMessage(s,'n:m5:end'));
  const cash=s.cash,confirmed=confirmCompletion(s,'m5',at+1200005);
  assert.equal(confirmed.number,5);
- assert.equal(confirmed.cash,0,'No phantom M5 payout');
- assert.equal(s.cash,cash);
+ assert.equal(confirmed.cash,12000,'Approved M5 commissioning bonus');
+ assert.equal(s.cash,cash+12000);
+ assert.equal(s.ledger.filter(e=>e.key==='m5CommissioningReward').length,1);
  assert.equal(pendingMessage(s),null);
 });
 test('M5 hires are one-time unique charges; no GLB or HSEC clones',()=>{
