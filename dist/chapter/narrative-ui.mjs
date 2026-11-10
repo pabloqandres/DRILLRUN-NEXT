@@ -7,7 +7,7 @@ const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 // mission conversation bubbles and animated text (M1 through M5).
 export function resolveNarrativeText(text,playerName){
  const name=String(playerName||'').trim()||'Operador';
- return String(text??'').replace(/\{name\}/g,name);
+ return String(text??'').replace(/\\n/g,'\n').replace(/\{name\}/g,name);
 }
 
 // ─── Contact list (messages home screen) ────────────────
