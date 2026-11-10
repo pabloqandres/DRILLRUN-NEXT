@@ -10,6 +10,13 @@ export const PERSONAL_TRUCK_MAX_SPEED=8.3; // m/s (~30 km/h); walking is 2m/s
 export const PERSONAL_TRUCK_MAX_REVERSE=2.8;
 export const PERSONAL_TRUCK_ENTRY_RADIUS=3.7;
 export const PERSONAL_TRUCK_FOOTPRINT=Object.freeze({halfWidth:1.08,halfLength:2.35});
+// Driver's chase camera and the exported 3D vehicle are visually opposite
+// to the legacy raw steering axis. Normalize one time for both touch and keys.
+// Positive input is screen-right; rendered vehicle must visibly turn right.
+export const personalTruckVisualSteer=horizontal=>{
+ const input=Math.max(-1,Math.min(1,Number(horizontal)||0));
+ return input===0?0:-input;
+};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 

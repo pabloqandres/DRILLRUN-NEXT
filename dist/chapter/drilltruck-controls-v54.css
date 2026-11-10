@@ -1,0 +1,93 @@
+/* V54 · DRILLTRUCK® 02 driving buttons
+   Monochrome professional vehicle controls, illuminated yellow headlamp state.
+   Float beside the vehicle interaction button at the right safe edge.
+   No labels in the game view; labels remain available to screen readers. */
+#hud #personalTruckBrake,
+#hud #personalTruckLights{
+ position:fixed!important;
+ right:var(--safe-r,18px)!important;
+ padding:0!important;
+ min-width:0!important;
+ display:grid;
+ place-items:center;
+ color:#dbe9f2!important;
+ background:linear-gradient(155deg,#28455bfa,#132a3dee)!important;
+ border:1px solid #7395a9d6!important;
+ box-shadow:inset 0 1px #effaff28,0 5px 16px #061522b3!important;
+ font-size:0!important;
+ letter-spacing:0!important;
+ -webkit-tap-highlight-color:transparent;
+ touch-action:manipulation!important;
+ user-select:none;
+ transition:background .17s,border-color .17s,color .17s,box-shadow .17s,transform .09s;
+}
+#hud #personalTruckBrake{
+ width:58px!important;height:58px!important;
+ bottom:calc(var(--safe-b,16px) + 93px)!important;
+ border-radius:17px!important;
+ z-index:95;
+}
+#hud #personalTruckLights{
+ width:52px!important;height:52px!important;
+ right:calc(var(--safe-r,18px) + 3px)!important;
+ bottom:calc(var(--safe-b,16px) + 161px)!important;
+ border-radius:15px!important;
+ z-index:96;
+}
+#hud #personalTruckBrake span,
+#hud #personalTruckLights span{display:grid;place-items:center;line-height:0}
+#hud #personalTruckBrake .uiIcon{
+ width:30px!important;height:30px!important;
+ stroke-width:1.9!important;pointer-events:none
+}
+#hud #personalTruckLights .uiIcon{
+ width:27px!important;height:27px!important;
+ stroke-width:1.9!important;pointer-events:none;
+}
+#hud #personalTruckLights.lightsOn{
+ color:#ffdd55!important;
+ background:linear-gradient(135deg,#615125f6,#302e23f2)!important;
+ border-color:#f7d65b!important;
+ box-shadow:0 0 13px #ffdf638c,inset 0 1px #fff9a43b,0 5px 16px #061522aa!important;
+}
+#hud #personalTruckLights.lightsOn .uiIcon{
+ filter:drop-shadow(0 0 5px #ffdd55aa);
+}
+#hud #personalTruckBrake:active,
+#hud #personalTruckBrake.pressed{
+ color:#fff4ef!important;
+ background:linear-gradient(145deg,#aa3a49,#742438)!important;
+ border-color:#ffc7bb!important;
+ transform:scale(.93);
+ box-shadow:0 0 15px #f0546780,inset 0 2px #ffdbca3a!important;
+}
+#hud #personalTruckBrake.hidden,
+#hud #personalTruckLights.hidden{display:none!important}
+body.drilltruckDriving #hud #builderButton{
+ display:none!important;pointer-events:none!important
+}
+body.phoneOpen #hud #personalTruckBrake,
+body.phoneOpen #hud #personalTruckLights,
+body.faenaOpen #hud #personalTruckBrake,
+body.faenaOpen #hud #personalTruckLights{
+ opacity:.32;pointer-events:none!important
+}
+@media (max-height:550px),(max-width:760px){
+ #hud #personalTruckBrake{
+  width:51px!important;height:51px!important;
+  bottom:calc(var(--safe-b,16px) + 78px)!important;
+  border-radius:15px!important;
+ }
+ #hud #personalTruckLights{
+  width:47px!important;height:47px!important;
+  right:calc(var(--safe-r,18px) + 2px)!important;
+  bottom:calc(var(--safe-b,16px) + 138px)!important;
+  border-radius:14px!important;
+ }
+ #hud #personalTruckBrake .uiIcon{width:27px!important;height:27px!important}
+ #hud #personalTruckLights .uiIcon{width:25px!important;height:25px!important}
+}
+@media(max-height:360px){
+ #hud #personalTruckBrake{bottom:calc(var(--safe-b,16px) + 72px)!important}
+ #hud #personalTruckLights{bottom:calc(var(--safe-b,16px) + 128px)!important}
+}
