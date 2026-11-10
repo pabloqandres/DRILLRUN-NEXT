@@ -16,6 +16,7 @@ export const canHirePatioStaff=(s,id)=>{
  if(s?.mission5?.status!=='operational')return 'buildPatioFirst';
  if(s?.narrative&&!s.narrative.accepted?.includes('m5'))return 'acceptM5First';
  if(hiredPatioStaff(s,id))return 'alreadyHired';
+ if(id==='m5-warehouse-tech'&&!hiredPatioStaff(s,'m5-gate-security'))return 'hireGuardFirst';
  if(!Number.isFinite(s?.cash)||s.cash<def.cost)return 'noMoney';
  return null;
 };
@@ -35,6 +36,7 @@ export const gateChecked=s=>Boolean(s?.mission5?.gateCheckedAt);
 export const warehouseChecked=s=>Boolean(s?.mission5?.warehouseCheckedAt);
 export function inspectPatioGate(s,now=Date.now()){
  if(!hiredPatioStaff(s,'m5-gate-security'))throw new Error('hireGuardFirst');
+ if(!hiredPatioStaff(s,'m5-warehouse-tech'))throw new Error('hireTechnicianFirst');
  if(s?.mission5?.status!=='operational'||!s.mission5?.hsecApproved)throw new Error('needsHsec');
  s.mission5.gateCheckedAt??=now;
  s.mission5.gateCheckCount=(s.mission5.gateCheckCount||0)+1;
@@ -43,6 +45,7 @@ export function inspectPatioGate(s,now=Date.now()){
 }
 export function inspectPatioWarehouse(s,now=Date.now()){
  if(!hiredPatioStaff(s,'m5-warehouse-tech'))throw new Error('hireTechFirst');
+ if(!gateChecked(s))throw new Error('verifyGateFirst');
  if(s?.mission5?.status!=='operational')throw new Error('buildPatioFirst');
  const inventory=(s.toolInventory||[]).filter(e=>e.status==='new'||e.status==='stored'||e.status==='available');
  const bits=inventory.filter(e=>e.type==='bit').length;
