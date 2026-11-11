@@ -88,7 +88,7 @@ export function renderPersonalConsole(s,{roleId=null,candidateId=null,icon=()=>'
       '<em>'+ (ROLE_GROUPS.findIndex(r=>r.id===chosenRole.id)+1)+' / '+ROLE_GROUPS.length+'</em>'+
      '</header>'+cards+'</section>'+details+
   '</div>'+
-  '<footer class="p76Team"><div class="p76TeamSummary"><span>'+icon('personnel')+'</span><strong>Equipo activo <b>'+count+' / '+capacity+'</b></strong><small>Los puestos disponibles aumentan al avanzar de misión</small></div>'+
+  '<footer class="p76Team"><div class="p76TeamSummary"><span>'+icon('dock-personnel')+'</span><strong>Equipo activo <b>'+count+' / '+capacity+'</b></strong><small>Los puestos disponibles aumentan al avanzar de misión</small></div>'+
     '<div class="p76TeamRail">'+teamCards+'</div>'+
     '<label class="p76VolumeLabel" title="Volumen de sonidos de interfaz"><span>'+'<svg class="uiIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 9a5 5 0 0 1 0 6m3-9a9 9 0 0 1 0 12"/></svg>'+'</span><small>SONIDO</small><input data-p76-volume aria-label="Volumen de interacción" type="range" min="0" max="200" step="10" value="150"></label></footer>'+
  '</div>';
