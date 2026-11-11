@@ -1,0 +1,24 @@
+name: V67 responsive welcome + tyre placement + reverse
+on:
+  push:
+    branches: [chatgpt/v67-responsive-entry-wheel-axles]
+  pull_request:
+    paths:
+      - 'dist/graphics/personal-truck-wheels-v66.mjs'
+      - 'dist/mission5/personal-drilltruck.mjs'
+      - 'dist/title-preview-v65.html'
+      - 'dist/chapter/game.mjs'
+      - 'dist/index.html'
+      - 'tests/v67-responsive-entry-reverse-wheels.test.mjs'
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: V67 + V66 regressions
+        run: node --test tests/v67-responsive-entry-reverse-wheels.test.mjs tests/v66-personal-truck-drive-return-ui.test.mjs tests/v66-automatic-drilltruck-wheel-visual.test.mjs
