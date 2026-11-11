@@ -1,0 +1,23 @@
+name: V62 Warm Headlights and Avatar Paving
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  v62-visual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax of V62 modules and visual hooks
+        run: |
+          node --check dist/animation/avatar-pavement-clearance.mjs
+          node --check dist/graphics/personal-drilltruck-headlights.mjs
+          node --check dist/scene.mjs
+          node --check dist/chapter/game.mjs
+          node --check tests/v62-soft-headlights-avatar-paving.test.mjs
+      - name: Warm light, boots and prior movement and patio regressions
+        run: |
+          node --test tests/v62-soft-headlights-avatar-paving.test.mjs tests/v61-collision-headlights-night-yard.test.mjs tests/v60-truck-ground-exit.test.mjs tests/v59-yard-night-gate-grounding.test.mjs tests/v58-personal-truck-free-look.test.mjs tests/v57-open-terrain-and-save.test.mjs tests/v56-personal-drilltruck-recovery.test.mjs tests/v55-vehicle-collision-render-recovery.test.mjs tests/v54-drilltruck-steering-controls.test.mjs tests/v52-night-patio-driving.test.mjs tests/v50-personal-drilltruck-driving.test.mjs
