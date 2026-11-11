@@ -1,5 +1,11 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-10 — V60 DrillTruck® personal 02: contacto de ruedas y salida segura
+- Reemplaza soporte visual de terreno por máximo de 5 puntos por centro + mediana de 4 ruedas con ajuste limitado, eliminando el efecto de levitar al pasar cerca de un relieve.
+- Al bajar, omite temporalmente solo el collider de la propia camioneta, y prueba lugares laterales y posteriores sin atravesar cercos/maquinaria. Se restaura el collider siempre, incluso si falla la comprobación.
+- Conserva propiedades/guardado, física, M4/M5 y economía. CI V60 focal; QA Android visual pendiente. Ver `CHANGES/2026-11-10_v60-truck-ground-exit.md`.
+
+
 ## 2026-11-10 — V59 Patio: barrera lenta, DrillTruck® apoyada e iluminación real ampliada
 - Barrera HSEC: animación de 1.6 segundos independiente de FPS, 1.7 segundos de espera después de perder sensor y apertura anticipada con vehículo a 15 m. Mantiene la colisión física hasta posición segura.
 - DrillTruck® personal 02: altura visual calculada en función del asfalto bajo las ruedas y mínimo del GLB. Evita ruedas enterradas en Patio sin alterar física, guardados ni economía.

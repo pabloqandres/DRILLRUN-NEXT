@@ -62,6 +62,7 @@ import {WorksiteAudio} from '../audio/worksite-audio.mjs';
 import {SiteCinematics} from '../graphics/site-cinematics.mjs';
 import {installPersonalTruckHeadlights} from '../graphics/personal-drilltruck-headlights.mjs';
 import {visualTruckGroundHeight} from '../graphics/personal-truck-grounding.mjs';
+import {findSafePersonalTruckExit} from '../animation/personal-truck-exit.mjs';
 import * as T from '../vendor/three.module.js';
 import {World} from '../scene.mjs';
 import {createMotion,moveController} from '../animation/movement.mjs';
@@ -755,7 +756,20 @@ function togglePersonalTruck(){
  try{
   if(truck.mode==='driving'){
    if(Math.abs(truck.speed)>.42)throw new Error('Frena para bajar del vehículo');
-   const location=exitPositions(truck).find(pos=>!world.isBlocked(pos.x,pos.z,avatarDefinition(s.character).radius+.05));
+   // V60: the vehicle's OWN collider cannot prevent the driver exiting.
+   // Temporarily skip only that box; preserve fences, gate, machinery,
+   // real obstacles and the terrain edge. Restore it even on exceptions.
+   const ownIndex=world.colliders.indexOf(m5PersonalTruckCollider);
+   if(ownIndex>=0)world.colliders.splice(ownIndex,1);
+   let location=null;
+   try{
+    const radius=avatarDefinition(s.character).radius+.05;
+    location=findSafePersonalTruckExit(truck,
+     pos=>!world.isBlocked(pos.x,pos.z,radius));
+   }finally{
+    if(ownIndex>=0&&m5PersonalTruckCollider&&!world.colliders.includes(m5PersonalTruckCollider))
+     world.colliders.push(m5PersonalTruckCollider);
+   }
    if(!location)throw new Error('No hay espacio libre para bajar');
    exitPersonalTruck(s,location);
    truckFreeLook.reset();world.chapterCamera=null;world.snapCamera=true;

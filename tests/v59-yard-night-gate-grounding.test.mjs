@@ -58,9 +58,13 @@ test('V59 personal GLB bottom is supported on raised asphalt and concrete',()=>{
  assert(near(visualTruckGroundHeight(p,0,()=>.17,.08),.105));
  // A tyre crossing a raised pad should hold the underbody up.
  const elevation=(x,z)=>x>1?.48:.19;
- assert(near(visualTruckGroundHeight({x:.3,z:0},0,elevation,0),.495));
+ // V60 regression: one raised tyre no longer hoists the whole truck.
+ // The current centre of mass remains close to the visible terrain height.
+ const nearCurb=visualTruckGroundHeight({x:.3,z:0},0,elevation,0);
+ assert(nearCurb>.205&&nearCurb<.25,'vehicle should not float over single kerb');
  const rotating=(x,z)=>z<-.5?.42:.19;
- assert(near(visualTruckGroundHeight({x:0,z:0},Math.PI/2,rotating,0),.435));
+ const onDiagonal=visualTruckGroundHeight({x:0,z:0},Math.PI/2,rotating,0);
+ assert(onDiagonal>.205&&onDiagonal<.25);
  assert.equal(visualTruckGroundHeight({x:NaN,z:5},0,()=>.2),.12);
 });
 test('V59 yard has nighttime pools above logistic slabs, covered bays and all heavy pads',()=>{
