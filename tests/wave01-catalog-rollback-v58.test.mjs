@@ -16,7 +16,7 @@ test('Original HSEC catalog and construction blueprint remain available',()=>{
  const catalog=src('dist/chapter/construction-catalog.mjs');
  const view=src('dist/chapter/catalog-view.mjs');
  assert.match(catalog,/HSEC_ASSETS/);
- assert.match(catalog,/return HSEC_CATEGORIES\.map\(/);
+ assert.match(catalog,/return HSEC_CATEGORIES\.filter\(d=>d\.id!==\x27management\x27\)\.map\(/);
  assert.match(view,/hasBuildingBlueprint/);
  assert.match(view,/personnelArt\(picked\)/);
  assert.match(view,/thumbnail\(picked\)/);
