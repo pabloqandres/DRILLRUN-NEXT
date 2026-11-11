@@ -120,7 +120,9 @@ test('V66 UI/texture audio and game hooks preserve mission and Cloud Save invari
  assert(css.includes('width:47px!important;height:47px!important'));
  assert(audio.includes('createSoftPickupMotor'));
  assert(!audio.includes("this.personalTruck=engine(65,450,450)"));
- assert(npc.includes('staffHeightRatio(npcVisible,avatarVisible,def.role)'));
+ assert(npc.includes('avatarDefinition(this.world.player.userData.character).height'));
+ assert(!npc.includes('heightOf(this.world.player)'));
+ assert(npc.includes('staffHeightRatio(npcVisible>0.2?npcVisible:baseline,avatarReferenceHeight,def.role)'));
  assert(title.includes('animation:titleSweep 10s'));
  assert(!title.includes('rgba(255,255,255,.20) 50%'));
  assert(!title.includes('#f5f9ff 50%'));
