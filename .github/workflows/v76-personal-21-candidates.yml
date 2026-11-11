@@ -1,0 +1,27 @@
+name: V76 compact Personal 21 candidates and skill persistence
+on:
+  push:
+    branches: [chatgpt/v76-personal-21-candidates-skills-ui]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  v76-personal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Module syntax and assets
+        run: |
+          node --check dist/people/personnel-candidates-v76.mjs
+          node --check dist/people/skill-tree-v76.mjs
+          node --check dist/chapter/personal-console-v76.mjs
+          node --check dist/chapter/faena-center.mjs
+          node --check dist/chapter/game.mjs
+          node --check dist/audio/character-select-feedback-v68.mjs
+      - name: V76 hiring, portraits and prior mission regressions
+        run: |
+          node --test tests/v76-personal-21-candidates.test.mjs tests/v75-personnel-outside-catalog.test.mjs tests/short-contract-narrative.test.mjs tests/v74-catalog-navigation-consistency.test.mjs
