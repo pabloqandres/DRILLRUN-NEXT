@@ -1,0 +1,19 @@
+name: V63 Warm Amber Personal Headlights
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  v63-natural-beam:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and warm pavement bounce tests
+        run: |
+          node --check dist/graphics/personal-drilltruck-headlights.mjs
+          node --check dist/chapter/game.mjs
+          node --check tests/v63-warm-amber-pavement-reflection.test.mjs
+          node --test tests/v63-warm-amber-pavement-reflection.test.mjs tests/v62-soft-headlights-avatar-paving.test.mjs tests/v61-collision-headlights-night-yard.test.mjs tests/v60-truck-ground-exit.test.mjs tests/v59-yard-night-gate-grounding.test.mjs tests/v58-personal-truck-free-look.test.mjs tests/v57-open-terrain-and-save.test.mjs tests/v52-night-patio-driving.test.mjs
