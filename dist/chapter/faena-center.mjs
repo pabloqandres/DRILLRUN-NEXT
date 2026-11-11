@@ -2,6 +2,7 @@
 // Renders EXISTING M3/M4/M5 controllers; no duplicate spending/progression.
 import {renderM3App} from '../mission3/phone-apps.mjs';
 import {renderPersonalConsole} from './personal-console-v76.mjs';
+import {priorityRole} from '../people/personnel-candidates-v76.mjs';
 import {renderM4App} from '../mission4/phone-apps.mjs';
 import {renderPatioApp} from '../mission5/patio-ui.mjs';
 import {mission5Readout} from '../mission5/mission-readout.mjs';
@@ -220,10 +221,7 @@ export class FaenaCenterUI{
    this.render();return;
   }
   if(b.hasAttribute('data-p76-mission')){
-   const priorityRoleId=this.state()?.mission5?.status==='operational'&&!this.state()?.mission5?.staff?.['m5-gate-security']?.hiredAt
-    ?'m5-gate-security':null;
-   if(priorityRoleId)this.personalRole=priorityRoleId;
-   else this.personalRole=null;
+   this.personalRole=priorityRole(this.state()).id;
    this.personalCandidate=null;this.onUIFeedback?.('select');this.render();return;
   }
   if(b.dataset.p76Hire){
