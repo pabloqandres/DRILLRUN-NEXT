@@ -27,7 +27,7 @@ export class CatalogView{
   const canAct=p=>p.action==='manage'||p.canStart&&!p.insufficient;
   const action=p=>p.action==='manage'?(p.status==='building'?c.viewWork:c.manage):p.action==='place'?c.place:c.buy;
   const facts=p=>[[p.route?c.width:c.area,p.route?p.w+' m':Math.round(p.w*p.d*10)/10+' m² · '+p.w+' × '+p.d+' m'],[c.height,p.h+' m'],...(p.capacity?[[c.capacity,p.capacity]]:[]),[c.benefit,p.benefit]];
-  this.host.innerHTML=`<div class="catalogHeader"><div class="catalogCollapsedTitle"><b>${esc(picked?.title||c.catalog)}</b>${picked&&Number.isFinite(picked.price)?`<span class="buildCost">${icon('wallet')}${esc(format(picked.price))}${picked.route?c.perMeter:''}</span>`:''}${picked?`<button id="catalogDetailsToggleCollapsed" class="catalogDetailsToggle">${icon('objectives')}<span>${esc(c.details)}</span></button><button id="catalogPurchaseCollapsed" class="primary" ${canAct(picked)?'':'disabled'}>${icon(picked.action==='manage'?'camp':picked.action==='place'?'location':'wallet')}<span>${esc(action(picked))}</span></button>`:''}</div><span class="catalogBrand">${icon('build')}<b>${esc(c.catalog)}</b></span><nav class="catalogCategories" role="tablist">${categories.map(k=>`<button role="tab" data-catalog-category="${k.id}" aria-selected="${k.id===category}" class="${k.id===category?'selected':''}"><span class="catalogCategoryIcon" aria-hidden="true">${icon(k.icon)}</span><span>${esc(k.label)}</span></button>`).join('')}</nav><button id="catalogCollapse" class="catalogCollapse iconButton" aria-label="${esc(this.collapsed?c.expand:c.collapse)}" aria-expanded="${!this.collapsed}">${icon('back')}</button><button id="closeBuilder" class="catalogClose iconButton" aria-label="${esc(c.close)}">${icon('close')}</button></div>
+  this.host.innerHTML=`<div class="catalogHeader"><div class="catalogCollapsedTitle"><b>${esc(picked?.title||c.catalog)}</b>${picked&&Number.isFinite(picked.price)?`<span class="buildCost">${icon('wallet')}${esc(format(picked.price))}${picked.route?c.perMeter:''}</span>`:''}${picked?`<button id="catalogDetailsToggleCollapsed" class="catalogDetailsToggle">${icon('objectives')}<span>${esc(c.details)}</span></button><button id="catalogPurchaseCollapsed" class="primary" ${canAct(picked)?'':'disabled'}>${icon(picked.action==='manage'?'camp':picked.action==='place'?'location':'wallet')}<span>${esc(action(picked))}</span></button>`:''}</div><span class="catalogBrand">${icon('build')}<b>${esc(c.catalog)}</b></span><button type="button" class="catalogCategoryStep" id="catalogCategoryPrevious" aria-label="Ver categorías anteriores" title="Categorías anteriores">${icon('back')}</button><nav class="catalogCategories" role="tablist" aria-label="Categorías del catálogo">${categories.map(k=>`<button role="tab" data-catalog-category="${k.id}" aria-selected="${k.id===category}" class="${k.id===category?'selected':''}"><span class="catalogCategoryIcon" aria-hidden="true">${icon(k.icon)}</span><span>${esc(k.label)}</span></button>`).join('')}</nav><button type="button" class="catalogCategoryStep" id="catalogCategoryNext" aria-label="Ver más categorías" title="Más categorías">${icon('arrow')}</button><button id="catalogCollapse" class="catalogCollapse iconButton" aria-label="${esc(this.collapsed?c.expand:c.collapse)}" aria-expanded="${!this.collapsed}">${icon('back')}</button><button id="closeBuilder" class="catalogClose iconButton" aria-label="${esc(c.close)}">${icon('close')}</button></div>
   ${picked?`<section class="catalogSummary" aria-label="${esc(picked.title)}"><div class="catalogSummaryText"><b>${esc(picked.title)}</b><p>${esc(picked.benefit)}</p>${hasBuildingBlueprint(picked)?'<small class="catalogBlueprintStatus">'+icon('location')+' VISTA HOLOGRÁFICA EN TERRENO · SIN COBRO</small><div class="catalogPreviewActions"><button id="catalogWalkPreview" class="catalogPreviewControl" type="button">'+icon('player')+' Recorrer</button><button id="catalogCameraPreview" class="catalogPreviewControl" type="button">'+icon('location')+' '+(options.previewCameraActive?'Cámara jugador':'Vista construcción')+'</button></div>':''}</div><div class="catalogQuote">${quote(picked)}</div><small class="catalogRequirement">${icon(picked.reason?'lock':picked.insufficient?'wallet':'check')}<span>${esc(picked.reason||(picked.insufficient?c.insufficient:c[picked.status]))}</span></small><div class="catalogSummaryActions"><button id="catalogDetailsToggle" class="catalogDetailsToggle" aria-expanded="${expanded}" aria-controls="catalogInlineDetails">${icon('objectives')}<span>${esc(expanded?c.back:c.details)}</span></button><button id="catalogPurchase" class="primary" ${canAct(picked)?'':'disabled'}>${icon(picked.action==='manage'?'camp':picked.action==='place'?'location':'wallet')}<span>${esc(action(picked))}</span></button></div></section>`:''}
   ${expanded?`<section id="catalogInlineDetails" class="catalogInlineDetails" aria-label="${esc(c.details)}"><div class="catalogDetailVisual">${personnelArt(picked)|| (thumbnail(picked)?`<img src="${thumbnail(picked)}" alt="Modelo 3D real de ${esc(picked.title)}">`:picked.kind==='vehicle'?`<span class="realAssetLoading" data-real-asset-loading>GENERANDO VISTA DEL MODELO 3D…</span>`:icon(picked.status==='locked'||picked.status==='future'?'lock':'hsec:'+picked.category))}</div><dl class="catalogFacts">${facts(picked).map(([label,value])=>`<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl></section>`:`<div class="constructionRail"><button class="catalogStep" id="catalogPrevious" aria-label="${esc(c.previous)}">${icon('back')}</button><div class="catalogProducts" role="group" aria-label="${esc(c.catalog)}">${items.map(p=>{
    const image=p.status==='future'?null:thumbnail(p);const fallbackIcon=p.status==='locked'||p.status==='future'?'lock':'hsec:'+p.category;
@@ -43,7 +43,40 @@ export class CatalogView{
     else if(tabRect.right>navRect.right)categoryNav.scrollLeft+=tabRect.right-navRect.right+5;
    }
    this.categoryScrollLeft=categoryNav.scrollLeft;
-   categoryNav.addEventListener('scroll',()=>{this.categoryScrollLeft=categoryNav.scrollLeft;},{passive:true});
+   const previous=this.host.querySelector('#catalogCategoryPrevious');
+   const next=this.host.querySelector('#catalogCategoryNext');
+   const syncCategoryArrows=()=>{
+    const scrollable=categoryNav.scrollWidth>categoryNav.clientWidth+2;
+    previous.disabled=!scrollable||categoryNav.scrollLeft<=2;
+    next.disabled=!scrollable||categoryNav.scrollLeft+categoryNav.clientWidth>=categoryNav.scrollWidth-2;
+    previous.setAttribute('aria-hidden',String(!scrollable));
+    next.setAttribute('aria-hidden',String(!scrollable));
+   };
+   const moveCategory=direction=>{
+    categoryNav.scrollBy({left:direction*Math.max(135,categoryNav.clientWidth*.62),behavior:'smooth'});
+   };
+   previous.onclick=()=>moveCategory(-1);
+   next.onclick=()=>moveCategory(1);
+   categoryNav.addEventListener('scroll',()=>{
+    this.categoryScrollLeft=categoryNav.scrollLeft;
+    syncCategoryArrows();
+   },{passive:true});
+   // Desktop wheel or trackpad is supported only while this tab strip
+   // actually overflows. No hijacking of vertical scrolling elsewhere.
+   categoryNav.addEventListener('wheel',event=>{
+    if(categoryNav.scrollWidth<=categoryNav.clientWidth+2)return;
+    if(Math.abs(event.deltaY)<=Math.abs(event.deltaX))return;
+    event.preventDefault();
+    categoryNav.scrollLeft+=event.deltaY;
+   },{passive:false});
+   // Keyboard reachability mirrors native tab-strip navigation.
+   categoryNav.addEventListener('keydown',event=>{
+    if(event.key!=='ArrowRight'&&event.key!=='ArrowLeft')return;
+    const selected=categories.findIndex(c=>c.id===category);
+    const nextIndex=Math.max(0,Math.min(categories.length-1,selected+(event.key==='ArrowRight'?1:-1)));
+    if(nextIndex!==selected){event.preventDefault();onCategory(categories[nextIndex].id);}
+   });
+   requestAnimationFrame(syncCategoryArrows);
   }
   const rail=this.host.querySelector('.catalogProducts');
   if(rail){rail.scrollLeft=this.scroll.get(category)||0;const prev=this.host.querySelector('#catalogPrevious'),next=this.host.querySelector('#catalogNext');const sync=()=>{prev.disabled=rail.scrollLeft<2;next.disabled=rail.scrollLeft+rail.clientWidth>=rail.scrollWidth-2;};rail.onscroll=()=>{this.scroll.set(category,rail.scrollLeft);sync();};requestAnimationFrame(sync);prev.onclick=()=>rail.scrollBy({left:-Math.max(160,rail.clientWidth*.75),behavior:'smooth'});next.onclick=()=>rail.scrollBy({left:Math.max(160,rail.clientWidth*.75),behavior:'smooth'});}

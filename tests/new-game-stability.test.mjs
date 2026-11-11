@@ -170,7 +170,7 @@ test('Brand-new game has no workshop building or storage capacity',()=>{
  const loaded=restore(JSON.parse(JSON.stringify(s)),at+1000);
  assert.equal(loaded.workshop,null);
 });
-test('L1 workshop can be bought once in M3 and only appears after 30-second construction',()=>{
+test('L1 workshop can be bought once in M3 and only appears after 90-second construction',()=>{
  const s=newGame('es','operator01',at);
  s.chapterCompletedAt=at;s.office={status:'built',level:2};
  s.hsec={completedAt:at,assets:[],time:0};
@@ -180,13 +180,13 @@ test('L1 workshop can be bought once in M3 and only appears after 30-second cons
  buildWorkshop(s,at);
  assert.equal(s.cash,before-WORKSHOP_L1_COST);
  assert.equal(workshopCapacity(s),0);
- assert.equal(finishWorkshopConstruction(s,at+29000),false);
- assert.equal(finishWorkshopConstruction(s,at+30001),true);
+ assert.equal(finishWorkshopConstruction(s,at+89000),false);
+ assert.equal(finishWorkshopConstruction(s,at+90001),true);
  assert.equal(workshopCapacity(s),8);
  assert.equal(workshopLevel(s),1);
  assert.equal(canBuildWorkshop(s),'alreadyBuilt');
  assert.equal(s.ledger.filter(l=>l.key==='workshopBuild').length,1);
- const loaded=restore(JSON.parse(JSON.stringify(s)),at+32000);
+ const loaded=restore(JSON.parse(JSON.stringify(s)),at+92000);
  assert.equal(loaded.workshop.status,'built');
  assert.equal(workshopLevel(loaded),1);
 });
