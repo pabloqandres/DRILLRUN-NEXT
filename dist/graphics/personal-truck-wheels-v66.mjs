@@ -21,6 +21,28 @@ function namedWheels(root){
  });
  return found.length===4?found:[];
 }
+function geometryWheels(root,bounds){
+ // Some GLBs export four tyre discs as anonymous meshes. Prefer their
+ // physical geometry to guesswork on body bounds.
+ const size=bounds.getSize(new T.Vector3()),mid=bounds.getCenter(new T.Vector3());
+ const bins=new Map();
+ root.traverse(node=>{
+  if(!node.isMesh||WHEEL_NAME.test(node.name||''))return;
+  const box=new T.Box3().setFromObject(node);
+  if(box.isEmpty())return;
+  const dims=box.getSize(new T.Vector3());
+  const center=root.worldToLocal(box.getCenter(new T.Vector3()));
+  if(dims.x<.06||dims.x>.80||dims.y<.64||dims.y>1.46||
+     dims.z<.64||dims.z>1.46||Math.abs(dims.y-dims.z)>.24||
+     center.y<bounds.min.y+.24||center.y>bounds.min.y+1.12||
+     Math.abs(center.x-mid.x)<size.x*.29||
+     Math.abs(center.z-mid.z)<size.z*.18)return;
+  const key=(center.z>mid.z?'F':'R')+(center.x>mid.x?'R':'L');
+  const score=Math.abs(dims.y-dims.z)+Math.abs(dims.y-.95)*.6;
+  if(!bins.has(key)||score<bins.get(key).score)bins.set(key,{node,score});
+ });
+ return bins.size===4?[...bins.values()].map(v=>v.node):[];
+}
 function createNamedPivot(mesh,root){
  const parent=mesh.parent;
  const center=new T.Box3().setFromObject(mesh).getCenter(new T.Vector3());
@@ -34,11 +56,17 @@ function createNamedPivot(mesh,root){
  steer.userData.v66Front=front;spin.userData.v66WheelRadius=.39;
  return {steer,spin,front,radius:.39,generated:false};
 }
+// V67: physical axle proportions rather than the small V66 decorative points.
+export function fallbackWheelPose(size,center,minY,side,front){
+ const x=center.x+side*clamp(size.x*.49,.82,1.23);
+ const z=center.z+(front?1:-1)*clamp(size.z*(front?.31:.34),1.35,1.90);
+ const y=minY+clamp(size.z*.10,.43,.54);
+ const radius=clamp(size.z*.097,.40,.53);
+ return {x,y,z,radius};
+}
 function createHubOverlay(root,side,front,bounds){
  const size=bounds.getSize(new T.Vector3()),center=bounds.getCenter(new T.Vector3());
- const x=center.x+side*clamp(size.x*.425,.64,1.18);
- const z=center.z+(front?1:-1)*clamp(size.z*.285,1.0,1.6);
- const y=bounds.min.y+clamp(size.y*.20,.29,.48);
+ const {x,y,z,radius}=fallbackWheelPose(size,center,bounds.min.y,side,front);
  const steer=new T.Group(),spin=new T.Group();
  steer.name='Wheel-steer-V66';spin.name='Wheel-spin-V66';
  steer.position.set(x,y,z);root.add(steer);steer.add(spin);
@@ -46,19 +74,18 @@ function createHubOverlay(root,side,front,bounds){
   depthWrite:false,transparent:true,opacity:.90});
  const steel=new T.MeshStandardMaterial({color:0x8b9fa6,roughness:.51,metalness:.43,
   depthWrite:false,transparent:true,opacity:.88});
- const r=clamp(size.y*.17,.23,.36);
- // Small moving hub accents only: do NOT insert another full-size wheel.
+ const r=radius;
+ // Scaled wheel-face accents, never a second overlapping tyre.
  // Each axle-facing side is outward so spin is visible from either side.
- const rim=new T.Mesh(new T.TorusGeometry(r*.58,r*.092,6,18),graphite);
+ const rim=new T.Mesh(new T.TorusGeometry(r*.77,r*.073,8,24),graphite);
  rim.rotation.y=Math.PI/2;rim.position.x=side*.015;spin.add(rim);
  for(let i=0;i<5;i++){
-  const a=i*Math.PI*2/5,spoke=new T.Mesh(new T.BoxGeometry(.025,r*.37,.028),steel);
-  spoke.position.set(side*.028,Math.cos(a)*r*.16,Math.sin(a)*r*.16);
+  const a=i*Math.PI*2/5,spoke=new T.Mesh(new T.BoxGeometry(.032,r*.62,.036),steel);
+  spoke.position.set(side*.028,Math.cos(a)*r*.26,Math.sin(a)*r*.26);
   spoke.rotation.x=a;spin.add(spoke);
  }
  const hub=new T.Mesh(new T.CylinderGeometry(r*.18,r*.18,.045,12),graphite);
  hub.rotation.z=Math.PI/2;hub.position.x=side*.032;spin.add(hub);
- const radius=clamp(size.y*.245,.33,.48);
  steer.userData.v66Front=front;spin.userData.v66WheelRadius=radius;
  return {steer,spin,front,radius,generated:true,
   dispose:()=>{rim.geometry.dispose();hub.geometry.dispose();graphite.dispose();steel.dispose();
@@ -82,14 +109,15 @@ export class PersonalTruckWheels{
    this.wheels=inherited;this.mode='inherited';
   }else{
    const matched=namedWheels(root);
-   if(matched.length===4){
-    for(const mesh of matched)this.wheels.push(createNamedPivot(mesh,root));
-    this.mode='named';
+   // All coordinates must be LOCAL to the model. World AABBs cannot
+   // be used as node positions when the truck is at a remote bay.
+   const bounds=new T.Box3().setFromObject(root);
+   if(!bounds.isEmpty())bounds.applyMatrix4(root.matrixWorld.clone().invert());
+   const actual=matched.length===4?matched:geometryWheels(root,bounds);
+   if(actual.length===4){
+    for(const mesh of actual)this.wheels.push(createNamedPivot(mesh,root));
+    this.mode=matched.length===4?'named':'geometry';
    }else{
-    // All coordinates must be LOCAL to the model. World AABBs cannot
-    // be used as node positions when the car is already at a remote bay.
-    const bounds=new T.Box3().setFromObject(root);
-    if(!bounds.isEmpty())bounds.applyMatrix4(root.matrixWorld.clone().invert());
     if(!bounds.isEmpty())for(const front of [true,false])for(const side of [-1,1])
      this.wheels.push(createHubOverlay(root,side,front,bounds));
     this.mode='hubs';
