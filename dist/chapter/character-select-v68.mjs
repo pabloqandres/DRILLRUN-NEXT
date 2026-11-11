@@ -1,41 +1,46 @@
-// V68 · Cinematic character selector UI. Read-only presentation of AVATARS.bonuses.
-// No game-state writes, no new skill effects, no generated avatar art.
+// V69 · Cinematic selector presentation. All gameplay bonuses remain in
+// AVATARS[].bonuses. The two visible stats per skill are future-facing
+// PRESENTATION attributes: they do not modify missions, economy or saves.
 import {icon} from './icons.mjs';
 
 const DOMAINS=[
- {id:'contract',label:'CONTRATOS',symbol:'wallet',keys:['contractIncome']},
- {id:'maintenance',label:'MANTENIMIENTO',symbol:'wrench',keys:['maintenanceCost','maintenanceTime']},
- {id:'geology',label:'GEOLOGÍA',symbol:'geology',keys:['geologyCost']},
- {id:'construction',label:'CONSTRUCCIÓN',symbol:'build',keys:['constructionTime']}
+ {id:'contract',label:'CONTRATOS',symbol:'wallet',keys:['contractIncome'],
+  stats:[{name:'NEGOCIACIÓN',base:3,boost:true},{name:'GESTIÓN',base:2}]},
+ {id:'maintenance',label:'MANTENIMIENTO',symbol:'wrench',keys:['maintenanceCost','maintenanceTime'],
+  stats:[{name:'TÉCNICA',base:3,boost:true},{name:'EFICIENCIA',base:2}]},
+ {id:'geology',label:'GEOLOGÍA',symbol:'geology',keys:['geologyCost'],
+  stats:[{name:'ANÁLISIS',base:3,boost:true},{name:'PRECISIÓN',base:2}]},
+ {id:'construction',label:'CONSTRUCCIÓN',symbol:'build',keys:['constructionTime'],
+  stats:[{name:'PLANIFICACIÓN',base:3,boost:true},{name:'EJECUCIÓN',base:2}]}
 ];
-const FACTS={
- contractIncome:{title:'NEGOCIACIÓN DE CONTRATOS',text:value=>`Ingresos por contrato ${percent(value)}. Bonificación real de esta especialidad.`},
- maintenanceCost:{title:'MANTENIMIENTO EFICIENTE',text:value=>`Costo de mantenimiento ${percent(value)}.`},
- maintenanceTime:{title:'SERVICIO MÁS RÁPIDO',text:value=>`Tiempo de mantenimiento ${percent(value)}.`},
- geologyCost:{title:'ANÁLISIS GEOLÓGICO',text:value=>`Costo del análisis geológico ${percent(value)}.`},
- constructionTime:{title:'CONSTRUCCIÓN EFICIENTE',text:value=>`Tiempo de construcción ${percent(value)}.`}
+const MESSAGES={
+ contract:'Mejores ingresos cuando completas contratos.',
+ maintenance:'Menor costo y tiempo de mantenimiento.',
+ geology:'Menor costo de análisis geológico.',
+ construction:'Menos tiempo para desarrollar construcciones.'
 };
-const percent=n=>`${n>0?'+':''}${Math.round(Number(n||0)*100)}%`;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// Number(undefined) is NaN; checking it with !==0 formerly selected *every*
+// category as boosted. Normalize missing values to zero before comparison.
+export const hasActualBonus=(bonuses,domain)=>domain.keys.some(k=>Math.abs(Number(bonuses?.[k])||0)>1e-7);
+export const starterSkillLevel=(stat,boosted=false)=>Math.min(5,Math.max(0,stat.base+(boosted&&stat.boost?1:0)));
+const pips=(count,cls='')=>Array.from({length:5},(_,i)=>`<i class="${i<count?'lit':''} ${i===count-1&&cls==='bonus'?'bonusPip':''}"></i>`).join('');
 
 export class CinematicCharacterSelector{
  constructor(screen,{onInteraction=()=>{}}={}){
   this.screen=screen;this.onInteraction=onInteraction;
   this.skill='contract';
   const identity=screen.querySelector('.characterIdentity');
+  if(!identity)throw Error('Selector base incompleto');
   const label=identity.querySelector('label[for="playerNameInput"]');
   const name=identity.querySelector('#playerNameInput');
   const help=identity.querySelector('small[data-i18n="nameHelp"]');
   const title=identity.querySelector('#avatarTitle'),detail=identity.querySelector('#avatarDetail');
   const start=identity.querySelector('#startAdventure');
-  if(!identity||!label||!name||!title||!start)throw Error('Selector base incompleto');
+  if(!label||!name||!title||!start)throw Error('Selector base incompleto');
 
-  const head=document.createElement('div');
-  head.className='v68HeroDetails';
-  head.append(title,detail);
-  const nameRow=document.createElement('div');
-  nameRow.className='v68Name';
-  nameRow.append(label,name);
+  const head=document.createElement('div');head.className='v68HeroDetails';head.append(title,detail);
+  const nameRow=document.createElement('div');nameRow.className='v68Name';nameRow.append(label,name);
   if(help)nameRow.append(help);
   this.stats=document.createElement('div');this.stats.className='v68Stats';
   const skills=document.createElement('div');skills.className='v68Skills';
@@ -53,7 +58,6 @@ export class CinematicCharacterSelector{
   screen.dataset.selectorV68='true';
   this.identity=identity;
 
-  // Keep real imported GLB thumbnails in existing 4 selectable buttons.
   this.rail.addEventListener('click',event=>{
    const button=event.target.closest('[data-v68-skill]');
    if(!button)return;
@@ -62,41 +66,41 @@ export class CinematicCharacterSelector{
    this.onInteraction('skill');
   });
  }
- update({avatar,label,description,figure}){
+ update({avatar,figure}){
   if(!avatar)return;
   if(this.currentId!==avatar.id){
    this.currentId=avatar.id;
    this.bonuses=avatar.bonuses||{};
-   this.skill=DOMAINS.find(domain=>domain.keys.some(k=>Number(this.bonuses[k])!==0))?.id||'contract';
+   // Open the actual specialty automatically on character change.
+   this.skill=DOMAINS.find(domain=>hasActualBonus(this.bonuses,domain))?.id||'contract';
    this.identity.dataset.avatar=avatar.id;
    this.screen.dataset.avatar=avatar.id;
    this.figureArt.innerHTML=figure||'<span class="v68FigureFallback">MODELO 3D</span>';
    this.figureArt.querySelector('img')?.setAttribute('loading','eager');
    this.figureArt.querySelector('img')?.setAttribute('draggable','false');
   }
+  // Four overview skills: baseline 3/5; the ONE gameplay specialty gets
+  // exactly one extra golden square. No confusing +/-4% sign labels.
   this.stats.innerHTML=DOMAINS.map(domain=>{
-   const values=domain.keys.map(key=>Number(this.bonuses[key])||0).filter(Boolean);
-   const active=values.some(v=>Math.abs(v)>.00001);
-   const strongest=Math.max(0,...values.map(v=>Math.abs(v)));
-   const segments=Math.min(5,Math.round(strongest*100));
-   const val=active?values.map(percent).join(' / '):'—';
-   return `<div class="v68Stat ${active?'hasBonus':''}"><span class="v68StatName">${esc(domain.label)}</span><span class="v68StatBars" aria-hidden="true">${Array.from({length:5},(_,i)=>`<i class="${i<segments?'lit':''}"></i>`).join('')}</span><b>${esc(val)}</b></div>`;
+   const boosted=hasActualBonus(this.bonuses,domain);
+   const level=boosted?4:3;
+   return `<div class="v68Stat ${boosted?'hasBonus':''}"><span class="v68StatName">${esc(domain.label)}</span><span class="v68StatBars" aria-label="${level} de 5">${pips(level,boosted?'bonus':'')}</span><b>${boosted?'★':'·'}</b></div>`;
   }).join('');
   this.renderSkills();
  }
  renderSkills(){
-  const domains=DOMAINS;
-  this.rail.innerHTML=domains.map(domain=>{
-   const hasBonus=domain.keys.some(k=>Number(this.bonuses?.[k])!==0);
-   return `<button type="button" data-v68-skill="${domain.id}" class="${this.skill===domain.id?'active':''} ${hasBonus?'unlocked':'neutral'}" title="${domain.label}" aria-label="Ver ${domain.label.toLowerCase()}" aria-pressed="${this.skill===domain.id?'true':'false'}">${icon(domain.symbol)}</button>`;
+  this.rail.innerHTML=DOMAINS.map(domain=>{
+   const bonus=hasActualBonus(this.bonuses,domain);
+   const active=this.skill===domain.id;
+   return `<button type="button" data-v68-skill="${domain.id}" class="${active?'active':''} ${bonus?'unlocked':'neutral'}" title="${domain.label}" aria-label="Ver ${domain.label.toLowerCase()}" aria-pressed="${active?'true':'false'}">${icon(domain.symbol)}</button>`;
   }).join('');
-  const domain=domains.find(d=>d.id===this.skill)||domains[0];
-  const items=domain.keys.map(key=>({key,value:Number(this.bonuses?.[key])||0})).filter(i=>i.value!==0);
-  if(!items.length){
-   this.explanation.innerHTML=`<span class="v68SkillKicker">PERFIL DEL OPERADOR</span><h3>${esc(domain.label)}</h3><p>Este personaje no tiene una bonificación adicional en esta área.</p>`;
-  }else{
-   const heading=items.length>1?'ESPECIALIDAD OPERATIVA':FACTS[items[0].key].title;
-   this.explanation.innerHTML=`<span class="v68SkillKicker">VENTAJA REAL EN EL JUEGO</span><h3>${esc(heading)}</h3>${items.map(item=>`<p>${esc(FACTS[item.key].text(item.value))}</p>`).join('')}`;
-  }
+  const domain=DOMAINS.find(d=>d.id===this.skill)||DOMAINS[0];
+  const bonus=hasActualBonus(this.bonuses,domain);
+  const caption=bonus?MESSAGES[domain.id]:'Área del perfil que podrás desarrollar más adelante.';
+  this.explanation.innerHTML=`<span class="v68SkillKicker">${bonus?'FORTALEZA DEL PERSONAJE':'ATRIBUTOS INICIALES'}</span><h3>${esc(domain.label)}</h3><p class="v69SkillDescription">${esc(caption)}</p><div class="v69SkillMetrics">${domain.stats.map(stat=>{
+   const value=starterSkillLevel(stat,bonus);
+   const upgraded=bonus&&stat.boost;
+   return `<div class="v69SkillMetric"><span>${esc(stat.name)}</span><span class="v69Pips" aria-label="${value} de 5">${pips(value,upgraded?'bonus':'')}</span></div>`;
+  }).join('')}</div>`;
  }
 }
