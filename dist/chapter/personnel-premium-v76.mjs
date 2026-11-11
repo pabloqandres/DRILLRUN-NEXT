@@ -73,7 +73,7 @@ const V78_ADMIN_ART=Object.freeze({
 const portraitIllustration=(c,mode='card')=>{
  const art=V78_ADMIN_ART[c?.id];
  return art
-  ? `<span class="pvArtPortrait pvArtPortrait--${mode} pvArtPortrait--${art}" role="img" aria-label="Retrato ilustrado de ${esc(c.name)}"></span>`
+  ? `<span class="pvArtPortrait pvArtPortrait--${mode} pvArtPortrait--${art}" role="img" aria-label="Retrato ilustrado de ${esc(c.name)}"><img class="pvPortraitImage" src="./assets/npc-portraits-v80/${esc(c.id)}.svg" alt="" draggable="false" loading="lazy"></span>`
   : placeholder(c,mode);
 };
 const placeholder=(c,mode='card')=>`<span class="pvEmptyPortrait pvEmptyPortrait--${mode}" role="img" aria-label="Retrato pendiente de ${esc(c?.name||'personal')}"><span class="pvEmptyPortraitFigure" aria-hidden="true"><span class="pvEmptyHead"></span><span class="pvEmptyBody"></span></span><small>RETRATO PENDIENTE</small></span>`;
