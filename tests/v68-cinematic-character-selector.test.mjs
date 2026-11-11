@@ -54,7 +54,10 @@ test('V68: skill rail uses real avatar bonuses instead of invented mockup stats'
  assert(ui.includes("['contractIncome']"));
  assert(ui.includes("['geologyCost']"));
  assert(ui.includes("['constructionTime']"));
- assert(ui.includes("Este personaje no tiene una bonificación adicional"));
+ assert(!ui.includes("Este personaje no tiene una bonificación adicional"));
+ assert(ui.includes('hasActualBonus(this.bonuses,domain)'));
+ assert(ui.includes('starterSkillLevel'));
+ assert(ui.includes('ÁREA')===false);
  assert(!ui.includes('20%'));
  assert(!ui.includes('VALENTINA'));
 });
