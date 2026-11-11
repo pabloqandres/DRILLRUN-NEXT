@@ -344,3 +344,19 @@ Se reportan **ruedas visiblemente elevadas sobre arena** y botón de salida que 
 - Al bajar (detenido), excluir únicamente el collider físico de **su propia** DrillTruck® de la evaluación del punto de salida; mantener cercos, equipos, otras camionetas, portones, HSEC y límites de terreno. Reponer exactamente el collider con `try/finally`.
 - Buscar posiciones seguras laterales y, si están bloqueadas, alternativas alrededor del vehículo dentro de una distancia peatonal acotada. No teletransportar a través de cercos ni permitir salir si realmente no existe espacio.
 - Pruebas específicas contra terreno irregular, autocolisión y colisiones reales; PR y validación automática antes de integrar. Los reportes de los testers en Android siguen siendo necesarios, sin afirmarlos antes de verlos.
+
+
+## 2026-11-11 — V61: recuperación de colisiones y luz real de Patio/DrillTruck® (Usuario + ChatGPT)
+
+**Evidencia Android:** DrillTruck® 02 quedó cruzada en barandas amarillas junto al edificio Taller/Oficina; el usuario confirma además que el Patio sigue oscuro y los faros encendidos no iluminan el camino. Es una continuación correctiva de las reparaciones V59–V60 previamente solicitadas.
+
+**Diagnóstico confirmado en código:**
+1. `drivePersonalTruck` revisa 9 puntos aislados del contorno únicamente en el destino. A 30 km/h y 80 ms puede avanzar ~0,66 m por paso, atravesando barandas delgadas entre fotogramas.
+2. `installPersonalTruckHeadlights` crea únicamente dos focos `SpotLight` dependientes del GLB y sin decal de superficie visible. El botón HMI puede estar activo mientras el terreno no muestra luz legible, especialmente de noche.
+3. En `patio-world.mjs`, el presupuesto nocturno apaga todas las luces dinámicas salvo las más cercanas. Los halos visuales existentes tienen baja cobertura/intensidad en las plazas y rutas de maquinaria.
+
+**Excepción funcional acotada:** para reparar el defecto del usuario sin reescribir misiones, ChatGPT podrá mejorar el muestreo continuo de la colisión **solo de DrillTruck® 02** en `dist/mission5/personal-drilltruck.mjs`, incluyendo tests de barreras finas, caminos y escape de colisiones antiguas. El módulo no altera velocidad máxima, aceleración, joystick, precios, pedidos ni contadores de misión. Esta excepción queda documentada para coordinación con Claude Code.
+
+**Control compartido:** `dist/chapter/game.mjs` podrá recibir exclusivamente un enlace visual desde la camioneta al proyector de faros; no cambios en estado/guardados/flujo de misión. `dist/graphics/personal-drilltruck-headlights.mjs` y `dist/mission5/patio-world.mjs` se modifican únicamente para iluminación más perceptible en suelo y trabajo nocturno, sin sombras nuevas en Android.
+
+**Pruebas y release:** tests dedicados de barrera fina, paso rápido sin túnel, terreno despejado, recuperación de P01, proyección de luz y visibilidad del Patio; CI específica + regresiones anteriores. Integración/despliegue únicamente después de revisión. No afirmar comprobación visual Android no realizada.
