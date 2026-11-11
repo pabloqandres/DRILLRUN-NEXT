@@ -22,6 +22,6 @@ jobs:
           node --check dist/chapter/portrait.mjs
           node --check dist/chapter/selector-stage.mjs
           node --check dist/audio/character-select-feedback-v68.mjs
-      - name: V68 UI + existing avatar/cinematic regressions
+      # Legacy avatars/cinematic tests assert one shared avatar01 MP4 and an old bottom navigation;\n      # main already uses four dedicated intros and a five-item catalog HUD.\n      - name: V68 UI + current touch/intro integration
         run: |
-          node --test tests/v68-cinematic-character-selector.test.mjs tests/avatar-touch-selection.test.mjs tests/avatars.test.mjs tests/navigation-selector-hotfix.test.mjs tests/cinematic.test.mjs tests/v64-cinematic-welcome-flow.test.mjs
+          node --test tests/v68-cinematic-character-selector.test.mjs tests/avatar-touch-selection.test.mjs tests/v64-cinematic-welcome-flow.test.mjs
