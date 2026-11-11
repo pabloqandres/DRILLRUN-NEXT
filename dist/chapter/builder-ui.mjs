@@ -104,7 +104,6 @@ export class BuilderUI{
     if(p.kind==='drill'||p.kind==='hammer'||p.kind==='bit')return (this.onClose(),this.onPhoneNav?.('m3-catalog'));
     if(p.kind==='dthDrill'||p.kind==='dthHammer'||p.kind==='dthBit')return (this.onClose(),this.onPhoneNav?.('m4-dth-catalog'));
     if(p.kind==='vehicle')return (this.onClose(),this.onPhoneNav?.('m4-drilltruck'));
-    if(p.kind==='personnel')return (this.onClose(),this.onPhoneNav?.('m3-personnel'));
     this.hsec.open('assets');
    },
    onPurchase:p=>{
@@ -114,7 +113,6 @@ export class BuilderUI{
     if(p.kind==='drill')return this.onCatalogAction?.('buyDrill',p.model.id);
     if(p.kind==='dthDrill')return this.onCatalogAction?.('buyDthDrill',p.model.id);
     if(p.kind==='vehicle')return this.onCatalogAction?.('buyTruck',p.model.id);
-    if(p.kind==='personnel')return this.onCatalogAction?.('hire',p.model.id);
     this.hsec?.purchaseFixed(p.id);
    },
    onPlace:p=>this.hsec?.beginDraft(p.id)
