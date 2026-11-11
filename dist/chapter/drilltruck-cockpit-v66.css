@@ -1,0 +1,39 @@
+/* V66 · Desktop/mobile cockpit refinements.
+   No change to headlights or hand action; BRAKE is diagonally up-left.
+   Preserve transparent compact game HUD and avoid buttons colliding. */
+#hud #personalTruckBrake{
+ right:calc(var(--safe-r,18px) + 83px)!important;
+ bottom:calc(var(--safe-b,16px) + 99px)!important;
+ width:52px!important;height:52px!important;
+ border-radius:15px!important;
+}
+#hud #personalTruckBrake .uiIcon{width:27px!important;height:27px!important}
+@media(min-width:1100px) and (min-height:550px){
+ #hud #personalTruckBrake{
+  right:calc(var(--safe-r,18px) + 100px)!important;
+  bottom:calc(var(--safe-b,16px) + 96px)!important;
+ }
+ /* At desktop widths, keep each catalog/navigation hit target independent. */
+ #hud #bottomNav{
+  width:min(690px,calc(100vw - 380px))!important;
+  min-width:0!important;
+  max-width:calc(100vw - 380px)!important;
+ }
+ #hud #bottomNav button{
+  flex:1 1 0!important;min-width:0!important;max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+ }
+}
+@media(max-height:550px),(max-width:760px){
+ #hud #personalTruckBrake{
+  right:calc(var(--safe-r,18px) + 65px)!important;
+  bottom:calc(var(--safe-b,16px) + 82px)!important;
+  width:47px!important;height:47px!important;
+  border-radius:14px!important;
+ }
+ #hud #personalTruckBrake .uiIcon{width:25px!important;height:25px!important}
+}
+/* Don't turn off pointer access while driving. Keep independent z-layers. */
+body.drilltruckDriving #hud #personalTruckBrake{z-index:97!important}
+body.drilltruckDriving #hud #personalTruckLights{z-index:96!important}
