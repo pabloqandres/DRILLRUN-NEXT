@@ -1,0 +1,26 @@
+name: V69 direct login, adult NPC and cinematic selector corrections
+on:
+  push:
+    branches: [chatgpt/v69-direct-entry-npc-selector-polish]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  v69-focused:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: |
+          node --check dist/chapter/game.mjs
+          node --check dist/chapter/character-select-v68.mjs
+          node --check dist/mission5/patio-npc-world.mjs
+          node --check dist/chapter/selector-stage.mjs
+          node --check tests/v69-direct-entry-npc-skill-portrait.test.mjs
+      - name: V69 + current V68/V66/V64 regression
+        run: |
+          node --test tests/v69-direct-entry-npc-skill-portrait.test.mjs tests/v68-cinematic-character-selector.test.mjs tests/v66-personal-truck-drive-return-ui.test.mjs tests/v64-cinematic-welcome-flow.test.mjs
