@@ -1,0 +1,20 @@
+name: V65 Blueprint Title Immersion
+on:
+  pull_request:
+    branches: [main, chatgpt/v64-cinematic-welcome-concept]
+  workflow_dispatch:
+jobs:
+  v65-blueprint-title:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify screen, game hook and V64→V65 regression
+        run: |
+          node --check dist/chapter/game.mjs
+          node --test tests/v64-cinematic-welcome-flow.test.mjs tests/v65-blueprint-title-animation.test.mjs
+      - name: Preserve game and avatar regressions
+        run: |
+          node --test tests/v63-warm-amber-pavement-reflection.test.mjs tests/v62-soft-headlights-avatar-paving.test.mjs
