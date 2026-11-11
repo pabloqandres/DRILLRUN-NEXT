@@ -68,6 +68,15 @@ export function catalogProducts(s,t){
   products.push({id:d.id,kind:'hsec',category:d.category,title:d.name,level:existing?.level||d.level,description:d.benefit,benefit:d.benefit,price,seconds:d.future||existing?null:d.seconds,w:d.w,d:d.d,h:d.h,capacity:d.capacity?d.capacity+' '+c.units:null,status,reason:d.future?c.later:!s.chapterCompletedAt?c.chapter:'',model:d,route:!!d.route,canStart:status==='available',action:existing?'manage':d.fixed?'buy':'place',insufficient:Number.isFinite(price)&&price>s.cash});
  }
 
+ // V71 M2 wayfinding: the existing Galpón de mantenimiento belongs
+ // directly after Oficina in Edificios. This moves only the reference
+ // within the read-only product array; costs, unlocks and purchases stay intact.
+ const galponIndex=products.findIndex(p=>p.id==='shed'&&p.category==='infrastructure');
+ if(galponIndex>1){
+  const [galpon]=products.splice(galponIndex,1);
+  products.splice(1,0,galpon);
+ }
+
  // ── Equipment: RC Drills ──
  try{
  const m3On=s.mission3&&s.mission3.phase!=='inactive';
