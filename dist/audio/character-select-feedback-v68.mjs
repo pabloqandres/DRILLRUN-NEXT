@@ -1,5 +1,5 @@
-// V68 · Quiet tactile feedback for the character creator.
-// Original procedural Web Audio only: no sampled/licensed audio or new dependencies.
+// V70 · Audible but restrained tactile feedback for the character creator.
+// Original procedural Web Audio only, ~2.5× V68 amplitude; no samples or dependencies.
 // Uses an existing AudioContext and the user's current sound preference.
 export class CharacterSelectFeedback{
  constructor({context,enabled=()=>true,haptics=()=>true}={}){
@@ -17,14 +17,14 @@ export class CharacterSelectFeedback{
   for(let i=0;i<count;i++){n=(Math.imul(n,1664525)+1013904223)>>>0;data[i]=n/2147483648-1;}
   this.noise=buffer;this.noiseRate=ctx.sampleRate;return buffer;
  }
- tone(ctx,{frequency=500,end=310,duration=.085,level=.011}={}){
+ tone(ctx,{frequency=500,end=310,duration=.085,level=.024}={}){
   const t=ctx.currentTime+.003;
   const oscillator=ctx.createOscillator(),gain=ctx.createGain(),filter=ctx.createBiquadFilter();
   oscillator.type='sine';oscillator.frequency.setValueAtTime(frequency,t);
   oscillator.frequency.exponentialRampToValueAtTime(Math.max(65,end),t+duration);
   filter.type='lowpass';filter.frequency.value=1850;
   gain.gain.setValueAtTime(.00001,t);
-  gain.gain.exponentialRampToValueAtTime(level,t+.011);
+  gain.gain.exponentialRampToValueAtTime(Math.min(.055,Math.max(.00001,level)),t+.011);
   gain.gain.exponentialRampToValueAtTime(.00001,t+duration);
   oscillator.connect(filter);filter.connect(gain);gain.connect(ctx.destination);
   oscillator.start(t);oscillator.stop(t+duration+.003);
@@ -38,7 +38,7 @@ export class CharacterSelectFeedback{
   filter.frequency.setValueAtTime(480,t);
   filter.frequency.exponentialRampToValueAtTime(1460,t+.12);
   gain.gain.setValueAtTime(.00001,t);
-  gain.gain.exponentialRampToValueAtTime(.009,t+.035);
+  gain.gain.exponentialRampToValueAtTime(.023,t+.035);
   gain.gain.exponentialRampToValueAtTime(.00001,t+.155);
   source.connect(filter);filter.connect(gain);gain.connect(ctx.destination);
   source.start(t);source.stop(t+.16);
@@ -56,12 +56,12 @@ export class CharacterSelectFeedback{
    const ctx=this.context?.();
    if(!ctx)return;
    if(ctx.state==='suspended')ctx.resume().catch(()=>{});
-   if(kind==='select'){this.whoosh(ctx);this.tone(ctx,{frequency:590,end:390,duration:.09,level:.011});}
-   else if(kind==='skill'){this.tone(ctx,{frequency:620,end:430,duration:.072,level:.009});}
-   else if(kind==='confirm'){this.tone(ctx,{frequency:370,end:260,duration:.12,level:.015});}
-   else if(kind==='type'){this.tone(ctx,{frequency:650,end:530,duration:.032,level:.0028});}
-   else if(kind==='focus'){this.tone(ctx,{frequency:570,end:500,duration:.055,level:.006});}
-   else this.tone(ctx,{frequency:410,end:315,duration:.058,level:.007});
+   if(kind==='select'){this.whoosh(ctx);this.tone(ctx,{frequency:590,end:390,duration:.09,level:.028});}
+   else if(kind==='skill'){this.tone(ctx,{frequency:620,end:430,duration:.072,level:.023});}
+   else if(kind==='confirm'){this.tone(ctx,{frequency:370,end:260,duration:.12,level:.039});}
+   else if(kind==='type'){this.tone(ctx,{frequency:650,end:530,duration:.032,level:.0068});}
+   else if(kind==='focus'){this.tone(ctx,{frequency:570,end:500,duration:.055,level:.014});}
+   else this.tone(ctx,{frequency:410,end:315,duration:.058,level:.018});
   }catch{}
  }
 }

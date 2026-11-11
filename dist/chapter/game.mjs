@@ -61,6 +61,7 @@ import {CinematicRecorder} from '../camera/recorder.mjs';
 import {DesertWind} from '../camera/ambient.mjs';
 import {WorksiteAudio} from '../audio/worksite-audio.mjs';
 import {CharacterSelectFeedback} from '../audio/character-select-feedback-v68.mjs';
+import {tryImmersive,canRequestImmersive,isImmersive} from './immersive-entry-v70.mjs';
 import {CinematicCharacterSelector} from './character-select-v68.mjs';
 import {SiteCinematics} from '../graphics/site-cinematics.mjs';
 import {installPersonalTruckHeadlights} from '../graphics/personal-drilltruck-headlights.mjs';
@@ -347,7 +348,7 @@ async function ensureWorld(forSelection=false){
  if(cameraDev){cameraDebug=new CameraDebug({onOfficeThumbnail:()=>builderUI.thumbnail,onRecordGraphics:()=>{cinemaRecorder.start();setTimeout(()=>cinemaRecorder.stop(),12000);},rig:world.cameraRig,world,onPreset:()=>{stop();world.snapCamera=true;resetOrbit(world.orbit);},onFreeze:stop,onReplay:(orbitOnly,record)=>replayCinematic(orbitOnly,record),onFixture:cameraReviewScene,onRestore:restoreReviewScene,onCapture:id=>{world.cameraRig.setPreset(id);world.snapCamera=true;resetOrbit(world.orbit);world.update(s,0,clock,false);world.renderer.last=0;world.renderer.render(world.scene,world.camera);return world.renderer.domElement.toDataURL('image/png');}});cinemaRecorder=new CinematicRecorder(world,cinematic,cameraDebug.host);}
  if(qa)installQA();last=performance.now();if(qa)setInterval(()=>frame(performance.now()),1000/30);else requestAnimationFrame(frame);loadingProgress(1,1);hidden($('#loading'),true);
 }
-async function chooseCharacter(fresh=false){try{await ensureWorld(true);freshGameRequested=!!fresh;previousCloudGeneration=cloudGeneration(readSave());s=newGame(prefs.lang,'operator01');selectedAvatar='operator01';avatars.activate(selectedAvatar);world.playerGround=0;$('#playerNameInput').value='';s.sound=prefs.sound;notices.clear();rewardQueue.length=0;phase='character';world.inspect=true;world.inspectMode='worker';world.inspectAngle='three';world.zoom=.8;world.player.rotation.y=0;motion.yaw=0;hidden($('#startScreen'),true);hidden($('#characterScreen'),false);renderCharacters();}catch(e){console.error(e);setText($('#loadStage'),t('invalid'));}}
+async function chooseCharacter(fresh=false){try{await ensureWorld(true);freshGameRequested=!!fresh;previousCloudGeneration=cloudGeneration(readSave());s=newGame(prefs.lang,'operator01');selectedAvatar='operator01';avatars.activate(selectedAvatar);world.playerGround=0;$('#playerNameInput').value='';s.sound=prefs.sound;notices.clear();rewardQueue.length=0;phase='character';refreshFullscreenAction();world.inspect=true;world.inspectMode='worker';world.inspectAngle='three';world.zoom=.8;world.player.rotation.y=0;motion.yaw=0;hidden($('#startScreen'),true);hidden($('#characterScreen'),false);renderCharacters();}catch(e){console.error(e);setText($('#loadStage'),t('invalid'));}}
 // Cards and visible 3D characters share exactly one selection flow.
 function selectAvatar(id){
  if(phase!=='character'||!avatars?.entries.has(id))return false;
@@ -405,10 +406,12 @@ $('#play').onclick=async()=>{
   phase='start';hidden($('#startScreen'),false);toast('invalid');
  }finally{entryTransitionBusy=false;}
 };
-$('#newGame').onclick=()=>{if(cloudSyncing||cloudLocked)return;modal(`<h2>${esc(t('newGame'))}</h2><p>${esc(t('resetAsk'))}</p><div class="modalActions">${button('cancel','keepSave')}${button('confirm','replaceSave',true)}</div>`);$('#keepSave').onclick=closeModal;$('#replaceSave').onclick=()=>{closeModal();void chooseCharacter(true);};};
-$('#backStart').onclick=()=>{selectorFeedback.play('back');freshGameRequested=false;phase='start';hidden($('#characterScreen'),true);hidden($('#startScreen'),false);s=readSave();hasSave=!!s;applyText();};
+$('#newGame').onclick=()=>{if(cloudSyncing||cloudLocked)return;requestImmersive();modal(`<h2>${esc(t('newGame'))}</h2><p>${esc(t('resetAsk'))}</p><div class="modalActions">${button('cancel','keepSave')}${button('confirm','replaceSave',true)}</div>`);$('#keepSave').onclick=closeModal;$('#replaceSave').onclick=()=>{requestImmersive();closeModal();void chooseCharacter(true);};};
+$('#backStart').onclick=()=>{selectorFeedback.play('back');freshGameRequested=false;phase='start';refreshFullscreenAction();hidden($('#characterScreen'),true);hidden($('#startScreen'),false);s=readSave();hasSave=!!s;applyText();};
 $('#startAdventure').onclick=async()=>{
  if(cloudSyncing||cloudLocked)return;
+ // This explicit tap gives browsers another eligible fullscreen gesture.
+ requestImmersive();
  if(selectorPreviewOnly){
   // Use the same name validation, but NEVER activate a new cloud generation.
   try{setPlayerIdentity(s,selectedAvatar,$('#playerNameInput').value);}
@@ -443,7 +446,24 @@ $('#startAdventure').onclick=async()=>{
  s.facing=Math.PI;s.position={...CONFIG.spawn};requestImmersive();
  startCinematic(false,false);save();updateStartAccount();
 };
-function requestImmersive(){const el=document.documentElement;if(!document.fullscreenElement&&el.requestFullscreen)el.requestFullscreen({navigationUI:'hide'}).catch(()=>{});}
+function refreshFullscreenAction(){
+ const button=$('#selectorFullscreen');
+ if(!button)return;
+ hidden(button,phase!=='character'||isImmersive(document)||!canRequestImmersive(document));
+}
+function requestImmersive(){
+ // An installed PWA already launches without a browser URL bar. Browsers
+ // opened inside another app may reject this request; never fake success.
+ const promise=tryImmersive(document);
+ void promise.then(ok=>{
+  refreshFullscreenAction();
+  if(!ok)console.info('[DRILL RUN] Fullscreen denied by browser container; PWA standalone is the reliable fallback.');
+ });
+ return promise;
+}
+$('#selectorFullscreen').onclick=()=>{selectorFeedback.play('skill');void requestImmersive();};
+document.addEventListener('fullscreenchange',refreshFullscreenAction);
+document.addEventListener('webkitfullscreenchange',refreshFullscreenAction);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 function startCinematic(orbitOnly=false,review=false){stop();phase='intro';cinemaReview=review;blueprint=false;world.inspect=false;world.chapterCamera=null;world.avatarHeight=avatarDefinition(s.character).height;world.player.rotation.y=s.facing;motion.yaw=s.facing;world.worker.reset();resetOrbit(world.orbit);world.orbit.yaw=s.facing-Math.PI;hidden($('#hud'),true);hidden($('#characterScreen'),true);hidden($('#startScreen'),true);notices.clear();wind.set(false);worksiteAudio.set(false);cinematic.start(s.character,{orbitOnly});}
 async function cameraReviewScene(id,mode=null){if(!world)return;cinematic.stop();cinemaRecorder?.stop();if(!reviewBackup)reviewBackup={state:s?JSON.parse(JSON.stringify(s)):null,hasSave};await avatars.load(id);s=newGame(prefs.lang,id);s.character=id;s.playerName='Revisión';s.facing=Math.PI;s.position={...CONFIG.spawn};s.introSeen=true;s.messageReads=['welcome'];if(mode==='office'){s.cleared=CLEARABLES.map(o=>o.id);startOffice(s,'office01');accelerate(s);s.position={...CONFIG.officeSlot.access};s.uiEvents=['message:welcome','mission:clear','mission:office','message:office-store'];}hasSave=true;avatars.activate(id);world.playerGround=0;world.worker.reset();rewardQueue.length=0;beginPlay(true);notices.clear();}

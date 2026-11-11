@@ -417,3 +417,8 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Guardia y técnica dejan de calibrarse con AABB skinned transitoria y usan la estatura adulta nominal del avatar. Sin rutas/compra/misiones modificadas.
 - Selector: corrige detección `Number(undefined)!==0`, abre bono de cada avatar, reemplaza +/- porcentajes por barras de 4 áreas con 2 atributos visuales y +1 a especialidad. Primer plano GLB más cercano y key/rim siguen al personaje; gradiente central transparente.
 - Tests V64/V66/V68 actualizados, nuevos V69 y workflow focal. Rama `chatgpt/v69-direct-entry-npc-selector-polish`. Ver CHANGES/2026-11-11_v69-direct-entry-npc-selector-polish.md.
+
+## 2026-11-11 — V70 fullscreen de entrada + microsonidos audibles
+- Rama `chatgpt/v70-immersive-entry-ui-feedback`; referencia captura Android con barra URL encima del selector. Solicita fullscreen desde los cuatro gestos de entrada, no después de promesas Google, y añade control manual de reintento en selección sólo si la API está disponible. El navegador puede denegar; PWA instalada mantiene modo fullscreen sin URL.
+- CSS V70 usa alto `100dvh`, márgenes inferiores y CTA compacto para que «Comenzar mi proyecto» permanezca visible aun con barra de navegación. Volumen de clicks y whoosh V68 aumenta ~2.5×, teclado tenue y preferencias Sonido/vibración respetadas.
+- Tests V70 + regresiones V69/V68/V64 superaron CI dedicada, preview Vercel READY. Sin Cloud Save, misiones, economía ni modelo 3D modificado. Ver `CHANGES/2026-11-11_v70-immersive-entry-ui-feedback.md`.
