@@ -1,7 +1,7 @@
 // DRILL RUN NEXT GENERATION · V59
 // Purely visual support height for the purchased personal DrillTruck®.
 // No vehicle physics, collision footprint, save state or purchase values here.
-export function visualTruckGroundHeight(position,heading,sampleGround,clearance=0){
+export function visualTruckGroundHeight(position,heading,sampleGround,modelMinY=0){
  const x=position?.x,z=position?.z,yaw=Number.isFinite(heading)?heading:0;
  if(!Number.isFinite(x)||!Number.isFinite(z)||typeof sampleGround!=='function')return .12;
  // Ground contacts below the four tyre corners plus the vehicle centre.
@@ -15,6 +15,6 @@ export function visualTruckGroundHeight(position,heading,sampleGround,clearance=
   if(Number.isFinite(v))support=Math.max(support,v);
  }
  const foot=Number.isFinite(support)?support:.12;
- const bottomOffset=Number.isFinite(clearance)?clearance:0;
- return foot+Math.max(0,bottomOffset)+.015;
+ const bottom=Number.isFinite(modelMinY)?modelMinY:0;
+ return foot-bottom+.015;
 }
