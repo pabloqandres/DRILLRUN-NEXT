@@ -376,63 +376,35 @@ $('#playerNameInput').oninput=()=>{
 };
 $('#playerNameInput').onfocus=()=>selectorFeedback.play('focus');
 
-// V64: the authenticated start screen still owns Google/Cloud Save.
- // After its existing world loading, a same-origin cinematic gate gives the
- // player one deliberate JUGAR before the ORIGINAL avatar/restore branches.
-let welcomeTransitionBusy=false;
-function displayWelcomeV64(){
- phase='welcome';
- hidden($('#startScreen'),true);
- hidden($('#characterScreen'),true);
- hidden($('#loading'),true);
- hidden($('#welcomeScreen'),false);
- const frame=$('#welcomeFrame');
- if(frame&&!frame.getAttribute('src'))frame.src='./title-preview-v65.html?embedded=1';
-}
+// V69: one login, one action. Removed the redundant V64/V65 intermediary
+// JUGAR screen while preserving the original Google/Cloud state and intro.
+let entryTransitionBusy=false;
 $('#play').onclick=async()=>{
- if(cloudSyncing||cloudLocked||welcomeTransitionBusy)return;
+ if(cloudSyncing||cloudLocked||entryTransitionBusy)return;
+ // Browser fullscreen requires this click gesture, before the first await.
+ requestImmersive();
  if(selectorPreviewOnly){
-  // V68 safe QA: never overwrite the user's current Google/local game.
-  // chooseCharacter(false) creates only the temporary in-memory selector state.
   selectorFeedback.play('confirm');
-  void chooseCharacter(false);
+  void chooseCharacter(false); // in-memory selector QA, no save replacement
   return;
  }
- welcomeTransitionBusy=true;
+ entryTransitionBusy=true;
  try{
-  // Preload exactly what the destination would need. Nothing is saved here.
-  await ensureWorld(!hasSave);
-  displayWelcomeV64();
- }catch(e){console.error('[V64 welcome load]',e);phase='start';hidden($('#welcomeScreen'),true);hidden($('#startScreen'),false);toast('invalid');}
- finally{welcomeTransitionBusy=false;}
-};
-async function acceptWelcomeV64(){
- if(phase!=='welcome'||cloudSyncing||cloudLocked||welcomeTransitionBusy)return;
- welcomeTransitionBusy=true;
- try{
-  hidden($('#welcomeScreen'),true);
-  const frame=$('#welcomeFrame');
-  if(frame)frame.removeAttribute('src'); // release animated layers / GPU memory
   if(!hasSave){
    await chooseCharacter(true);
   }else{
-   // Same restore routine used by #play before V64. No save migration.
-   requestImmersive();await ensureWorld();s=readSave();
-   if(!s){hasSave=false;await chooseCharacter();return;}
+   // Existing restore route, formerly reached after the intermediary JUGAR.
+   await ensureWorld();
+   s=readSave();
+   if(!s){hasSave=false;await chooseCharacter(true);return;}
    prefs.lang=s.lang;prefs.sound=s.sound;t=translator(s.lang);
    applyText();hasSave=true;beginPlay(true);
   }
  }catch(e){
-  console.error('[V64 welcome enter]',e);
-  phase='start';hidden($('#welcomeScreen'),true);hidden($('#startScreen'),false);
-  toast('invalid');
- }finally{welcomeTransitionBusy=false;}
-}
-window.addEventListener('message',event=>{
- if(event.origin!==location.origin||event.source!==$('#welcomeFrame')?.contentWindow||
-  event.data?.type!=='drillrun-welcome-enter-v64')return;
- void acceptWelcomeV64();
-});
+  console.error('[V69 direct entry]',e);
+  phase='start';hidden($('#startScreen'),false);toast('invalid');
+ }finally{entryTransitionBusy=false;}
+};
 $('#newGame').onclick=()=>{if(cloudSyncing||cloudLocked)return;modal(`<h2>${esc(t('newGame'))}</h2><p>${esc(t('resetAsk'))}</p><div class="modalActions">${button('cancel','keepSave')}${button('confirm','replaceSave',true)}</div>`);$('#keepSave').onclick=closeModal;$('#replaceSave').onclick=()=>{closeModal();void chooseCharacter(true);};};
 $('#backStart').onclick=()=>{selectorFeedback.play('back');freshGameRequested=false;phase='start';hidden($('#characterScreen'),true);hidden($('#startScreen'),false);s=readSave();hasSave=!!s;applyText();};
 $('#startAdventure').onclick=async()=>{
@@ -1810,7 +1782,8 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
    // V68: true playable GLB hero bust, close to the camera. Keep the
    // original 3D model, materials, rig, click detection and cinematic intro.
    selectorV68Zoom=Math.max(0,selectorV68Zoom-dt*2.7);
-   world.chapterCamera={target:new T.Vector3(-4.88,1.40,5.67),offset:new T.Vector3(0,.11,2.42+selectorV68Zoom*.48)};
+   // V69: head-and-shoulders portrait at foreground, anchored on real GLB.
+   world.chapterCamera={target:new T.Vector3(-5.02,1.54,5.68),offset:new T.Vector3(0,.08,1.56+selectorV68Zoom*.42)};
   }
  else if(phase==='play'&&builderOpen&&catalogConstructionCamera&&catalogBlueprint?.spec&&!modalOpen&&
   !hsecUI?.drawing&&!hsecUI?.coneZone){
