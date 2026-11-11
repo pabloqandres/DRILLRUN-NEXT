@@ -9,6 +9,30 @@ const ROUTES={
  'm5-warehouse-tech':[[-69,-19],[-73,-19],[-73,-17],[-68,-16],[-66,-19],[-69,-19]]
 };
 export const npcWaypoints=id=>(ROUTES[id]||[]).map(([x,z])=>({x,z}));
+// V66: compare visible character MESH bounds, never armature/helper extents.
+// Some image-to-GLB NPC exports contain oversized invisible root helpers.
+function visibleCharacterBox(object){
+ const box=new T.Box3();
+ object.updateWorldMatrix(true,true);
+ object.traverse(node=>{
+  if(!node.isMesh||!node.visible||!node.geometry)return;
+  const b=new T.Box3().setFromObject(node,true);
+  if(!b.isEmpty())box.union(b);
+ });
+ return box;
+}
+const heightOf=object=>{
+ if(!object)return 0;
+ const b=visibleCharacterBox(object);
+ return b.isEmpty()?0:b.getSize(new T.Vector3()).y;
+};
+export const staffHeightRatio=(npcHeight,playerHeight,role)=>{
+ if(!Number.isFinite(npcHeight)||npcHeight<.05)return 1;
+ const player=Number.isFinite(playerHeight)&&playerHeight>1.2&&playerHeight<3.8?playerHeight:1.85;
+ const target=player*(role==='security'?1.01:.94);
+ return Math.max(.6,Math.min(3.5,target/npcHeight));
+};
+
 export class PatioNPCWorld{
  constructor(world){this.world=world;this.loaded=new Map();this.pending=new Map();this.failed=new Set();}
  async load(def){
@@ -19,11 +43,20 @@ export class PatioNPCWorld{
    const gltf=await new GLTFLoader().loadAsync(url);
    const root=new T.Group(),body=gltf.scene;
    root.name='M5 NPC · '+def.label;root.userData.npcId=def.id;root.add(body);
-   const bounds=new T.Box3().setFromObject(body),dims=bounds.getSize(new T.Vector3());
-   const scalar=(def.role==='security'?1.78:1.68)/Math.max(.001,dims.y);
+   const bounds=visibleCharacterBox(body),dims=bounds.getSize(new T.Vector3());
+   const scalar=(def.role==='security'?1.82:1.74)/Math.max(.001,dims.y);
    body.scale.setScalar(scalar);
    body.position.y=-bounds.min.y*scalar;
    const rig=new NPCWalkRig(body);
+   // Once the approved walking rig is attached, match the ACTUAL visible
+   // avatar at game scale (not an assumed GLB height). Keep adult proportions.
+   const npcVisible=heightOf(rig.mesh||body);
+   const avatarVisible=heightOf(this.world.player);
+   const calibration=staffHeightRatio(npcVisible,avatarVisible,def.role);
+   body.scale.multiplyScalar(calibration);
+   body.position.y*=calibration;
+   root.userData.visualHeight=heightOf(rig.mesh||body);
+   root.userData.avatarReferenceHeight=avatarVisible;
    // Align the sculpt's local forward axis (+X for the approved Z-wide
    // models) with the NPC root's movement heading (+Z), without altering
    // the scene route or the underlying GLB geometry.
