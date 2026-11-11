@@ -74,9 +74,9 @@ test('V59 yard has nighttime pools above logistic slabs, covered bays and all he
  assert.match(patio,/pool\.position\.y=floorY/);
  assert.match(patio,/\[-19,-11\.2,\.525\]/);
  assert.match(patio,/\[1\.5,14\.3,\.525\]/);
- assert.match(patio,/\[-7,-13,18,\.295\]/);
- assert.match(patio,/\[20,-3\.2,14,\.295\]/);
- assert.match(patio,/for\(const pool of bayPools\)pool\.material\.opacity=night\?\.39:0/);
+ assert.match(patio,/\[-7,-13,20,\.295\]/);
+ assert.match(patio,/\[20,-3\.2,17,\.295\]/);
+ assert.match(patio,/for\(const pool of bayPools\)pool\.material\.opacity=night\?\.62:0/);
  assert.match(patio,/new T\.PointLight\(0xffedc1,0,17,2\)/);
 });
 test('V59 only corrects visual height: no driving physics or paid vehicle state changes',()=>{
