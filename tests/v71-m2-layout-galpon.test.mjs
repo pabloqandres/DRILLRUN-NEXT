@@ -1,0 +1,65 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {newGame} from '../dist/chapter/state.mjs';
+import {catalogProducts} from '../dist/chapter/construction-catalog.mjs';
+import {HSEC_ASSETS} from '../dist/hsec/catalog.mjs';
+const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+const catalog=()=>catalogProducts(newGame('es'),key=>key);
+test('V71 M2: Galpón follows Office immediately in Edificios without duplication',()=>{
+ const list=catalog();
+ const buildings=list.filter(p=>p.category==='infrastructure');
+ assert.deepEqual(buildings.slice(0,2).map(p=>p.id),['office','shed']);
+ assert.equal(list.filter(p=>p.id==='shed').length,1);
+ const d=HSEC_ASSETS.find(p=>p.id==='shed'),shed=buildings[1];
+ assert.equal(shed.title,d.name);
+ assert.equal(shed.price,d.price);
+ assert.equal(shed.category,d.category);
+ assert.equal(shed.kind,'hsec');
+ assert.equal(shed.model,d);
+});
+test('V71 M2: Existing shop and yard maintain relative order, no game financial writes',()=>{
+ const buildings=catalog().filter(p=>p.category==='infrastructure').map(p=>p.id);
+ assert(buildings.indexOf('workshop')>buildings.indexOf('shed'));
+ assert(buildings.indexOf('patio-maquinarias-l1')>buildings.indexOf('workshop'));
+ const src=read('dist/chapter/construction-catalog.mjs');
+ assert(src.includes("const galponIndex=products.findIndex(p=>p.id==='shed'&&p.category==='infrastructure')"));
+ assert(src.includes('products.splice(1,0,galpon)'));
+ const block=src.slice(src.indexOf('// V71 M2 wayfinding'),src.indexOf('// ── Equipment: RC Drills'));
+ assert(!/s\.cash\s*=|save\(|startModule\(|buildAsset\(|price\s*=|status\s*=/.test(block));
+});
+test('V71 M2: HSEC five tabs are pinned ahead of scrollable checklist',()=>{
+ const ui=read('dist/hsec/ui.mjs'),css=read('dist/chapter/m2-layout-v71.css');
+ for(const t of ['overview','assets','staff','orders','history'])assert(ui.includes("'"+t+"'"));
+ assert.match(css,/#modal #modalCard\.hsecModal \.hsecPanel\{[\s\S]*?grid-template-rows:auto auto auto minmax\(0,1fr\)!important/);
+ assert.match(css,/\.hsecPanel>\.hsecTabs\{[\s\S]*?grid-row:3/);
+ assert.match(css,/\.hsecPanel>\.hsecBody\{[\s\S]*?grid-row:4/);
+ assert(css.includes('overflow-y:auto!important'));
+ assert(css.includes('overflow-x:auto!important'));
+ assert(css.includes('touch-action:pan-x!important'));
+});
+test('V71 M2: Office quick sheet is narrower and keeps GLB preview and upgrade CTA visible',()=>{
+ const css=read('dist/chapter/m2-layout-v71.css');
+ const html=read('dist/index.html');
+ const game=read('dist/chapter/game.mjs');
+ assert(html.includes('m2-layout-v71.css?v=71'));
+ assert(html.indexOf('m2-layout-v71.css?v=71')>html.indexOf('office-quick-v39.css?v=39'));
+ assert(css.includes('width:min(410px,43vw)!important'));
+ assert(css.includes('grid-template-columns:minmax(0,1fr)!important'));
+ assert(css.includes('height:clamp(115px,27dvh,180px)!important'));
+ assert(css.includes('overflow-y:auto!important'));
+ assert(css.includes('grid-template-columns:minmax(0,1fr)!important'));
+ assert(game.includes('id="officeUpgrade"'));
+ assert(game.includes('id="buyOfficeUpgrade"'));
+ assert(game.includes('officePanelPreview=new ProductPreview'));
+ assert(!/startModule\(|spendCash\(/.test(css));
+});
+test('V71 M2: Visual CSS remains scoped to office and HSEC, not gameplay',()=>{
+ const s=read('dist/chapter/m2-layout-v71.css');
+ assert(!s.includes('body.builderOpen'));
+ assert(!s.includes('#hud'));
+ assert(!s.includes('#player'));
+ assert(!s.includes('#startScreen'));
+ assert(s.includes('safe-area-inset-top'));
+ assert(s.includes('@media(orientation:landscape) and (max-height:520px)'));
+});
