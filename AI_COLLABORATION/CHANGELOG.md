@@ -1,5 +1,19 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-11 — V65.1 Galpón holográfico respetando profundidad y polvo ambiental
+- Mantiene barrido **exclusivamente sobre logo**, no sobre toda la pantalla. Construcción blueprint progresiva en 3 zonas con fases desfasadas, energía de líneas y nodos de instalación.
+- Se recorta el galpón posterior izquierdo usando la silueta del módulo real de primer plano, tanto en trazos animados SVG como en brillo azul WebP, para impedir transparencias poco creíbles.
+- Se añaden bancos de polvo y granos a ras del suelo que cruzan la parte baja y los pies de los personajes **detrás de JUGAR**, con movimiento reducido respetado; sin video ni costo WebGL.
+- Prototipo sólo en rama de revisión; auth/guardados/M1–M5 sin modificaciones. Validación en Chromium 1280×720 y 832×384; pendiente Android. Ver `CHANGES/2026-11-11_v65-animated-blueprints-depth-dust.md`.
+
+
+## 2026-11-11 — V64 Pantalla cinematográfica de bienvenida y logo aprobado
+- Base visual aprobada: paisaje de faena en Atacama, dos operadores con casco/EPP, edificios reales y blueprints azules, DrillTruck® genérica y logo metálico DRILL RUN NEXT GENERATION extraído de los píxeles originales.
+- Nueva vista liviana de entrada con parallax, polvo, escaneo/pulso hologramas, neón de botón JUGAR real, brillo del logo, accesibilidad para movimiento reducido; WebP + CSS, sin MP4 pesado.
+- Reutilización del logo exacto en pantalla de login y carga. Flujo nuevo con puerta intermedia `login → carga → bienvenida → selector o continuar`; Cloud Save y lógica de juego sin cambios.
+- Rama de prototipo sin publicar hasta aceptación, test V64 y QA en Android pendientes. Ver `CHANGES/2026-11-11_v64-cinematic-welcome.md`.
+
+
 ## 2026-11-11 — V63 Faros ámbar cálidos y reflejo tenue sobre pavimento
 - Ajuste de temperatura percibida de faros de la DrillTruck® personal 02 al ámbar cálido de las capturas antiguas. Se conservan cono, intensidad, dirección y calidad.
 - Añadidas dos manchas de luz ovales, breves y completamente difuminadas, adaptadas a arena/asfalto por altura real, sin volver al decal largo y blanco de V61. Solo de noche se ven plenamente, y se apagan con el HUD.

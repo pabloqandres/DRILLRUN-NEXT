@@ -223,6 +223,8 @@ function updateStartAccount(){
 function cloudLock(){
  if(cloudLocked)return;
  cloudLocked=true;cloudSyncing=false;cloudStatus='Partida activa en otro dispositivo';
+ // V65: a cloud lease conflict must never leave the cinematic above recovery.
+ if(phase==='welcome'){hidden($('#welcomeScreen'),true);$('#welcomeFrame')?.removeAttribute('src');}
  stop();
  if(phase==='play'){closePhone();closeBuilder();hidden($('#hud'),true);}
  phase='cloud-locked';hidden($('#startScreen'),false);
@@ -249,6 +251,7 @@ async function reconcileGoogleSave(){
  if(attempt!==cloudEpoch)return;
  if(result.status!=='ready'){
   cloudSyncing=false;cloudLocked=true;cloudStatus='No se pudo sincronizar · No se sobrescribió la partida';
+  if(phase==='welcome'){hidden($('#welcomeScreen'),true);$('#welcomeFrame')?.removeAttribute('src');}
   phase='cloud-locked';hidden($('#startScreen'),false);hidden($('#hud'),true);showCloudLock();updateStartAccount();return;
  }
  const changed=(result.source==='cloud'||result.source==='new-game')&&!!result.state;
@@ -343,7 +346,56 @@ function selectAvatar(id){
 // by the canvas gesture handler, while roster buttons call selectAvatar directly.
 function renderCharacters(){const node=$('#characterSlots');node.innerHTML=CONFIG.protagonists.map((p,i)=>`<button data-character="${p.id}" class="avatarChoice ${selectedAvatar===p.id?'selected':''}" aria-pressed="${selectedAvatar===p.id}"><span class="avatarThumb">${avatars.portrait(p.id)||icon('player')}</span><span><b>${esc(t(p.roleKey))}</b><small>${esc(t(p.labelKey))}</small></span><i>${String(i+1).padStart(2,'0')}</i></button>`).join('');node.querySelectorAll('button').forEach(b=>b.onclick=()=>selectAvatar(b.dataset.character));const p=avatarDefinition(selectedAvatar);setText($('#avatarTitle'),t(p.roleKey));setText($('#avatarDetail'),t(p.summaryKey));$('#avatarPerk').innerHTML=`<span class="perkSymbol">${icon(p.perkIcon)}</span><div><span class="perkHeading">${esc(t('specialtyBonus'))}</span><strong>${esc(t(p.perkKey))}</strong><small class="perkStatus">${icon(p.id==='operator04'?'check':'lock')}${esc(t(p.id==='operator04'?'bonusActive':'bonusFuture'))}</small></div>`;$('#startAdventure').disabled=!avatars.entries.has(p.id)||$('#playerNameInput').value.trim().length<2;hidden($('#provisionalNote'),true);}
 $('#playerNameInput').oninput=renderCharacters;
-$('#play').onclick=async()=>{if(cloudSyncing||cloudLocked)return;if(!hasSave)return chooseCharacter(true);try{requestImmersive();await ensureWorld();s=readSave();if(!s){hasSave=false;return chooseCharacter();}prefs.lang=s.lang;prefs.sound=s.sound;t=translator(s.lang);applyText();hasSave=true;beginPlay(true);}catch(e){console.error(e);toast('invalid');}};
+// V64: the authenticated start screen still owns Google/Cloud Save.
+ // After its existing world loading, a same-origin cinematic gate gives the
+ // player one deliberate JUGAR before the ORIGINAL avatar/restore branches.
+let welcomeTransitionBusy=false;
+function displayWelcomeV64(){
+ phase='welcome';
+ hidden($('#startScreen'),true);
+ hidden($('#characterScreen'),true);
+ hidden($('#loading'),true);
+ hidden($('#welcomeScreen'),false);
+ const frame=$('#welcomeFrame');
+ if(frame&&!frame.getAttribute('src'))frame.src='./title-preview-v65.html?embedded=1';
+}
+$('#play').onclick=async()=>{
+ if(cloudSyncing||cloudLocked||welcomeTransitionBusy)return;
+ welcomeTransitionBusy=true;
+ try{
+  // Preload exactly what the destination would need. Nothing is saved here.
+  await ensureWorld(!hasSave);
+  displayWelcomeV64();
+ }catch(e){console.error('[V64 welcome load]',e);phase='start';hidden($('#welcomeScreen'),true);hidden($('#startScreen'),false);toast('invalid');}
+ finally{welcomeTransitionBusy=false;}
+};
+async function acceptWelcomeV64(){
+ if(phase!=='welcome'||cloudSyncing||cloudLocked||welcomeTransitionBusy)return;
+ welcomeTransitionBusy=true;
+ try{
+  hidden($('#welcomeScreen'),true);
+  const frame=$('#welcomeFrame');
+  if(frame)frame.removeAttribute('src'); // release animated layers / GPU memory
+  if(!hasSave){
+   await chooseCharacter(true);
+  }else{
+   // Same restore routine used by #play before V64. No save migration.
+   requestImmersive();await ensureWorld();s=readSave();
+   if(!s){hasSave=false;await chooseCharacter();return;}
+   prefs.lang=s.lang;prefs.sound=s.sound;t=translator(s.lang);
+   applyText();hasSave=true;beginPlay(true);
+  }
+ }catch(e){
+  console.error('[V64 welcome enter]',e);
+  phase='start';hidden($('#welcomeScreen'),true);hidden($('#startScreen'),false);
+  toast('invalid');
+ }finally{welcomeTransitionBusy=false;}
+}
+window.addEventListener('message',event=>{
+ if(event.origin!==location.origin||event.source!==$('#welcomeFrame')?.contentWindow||
+  event.data?.type!=='drillrun-welcome-enter-v64')return;
+ void acceptWelcomeV64();
+});
 $('#newGame').onclick=()=>{if(cloudSyncing||cloudLocked)return;modal(`<h2>${esc(t('newGame'))}</h2><p>${esc(t('resetAsk'))}</p><div class="modalActions">${button('cancel','keepSave')}${button('confirm','replaceSave',true)}</div>`);$('#keepSave').onclick=closeModal;$('#replaceSave').onclick=()=>{closeModal();void chooseCharacter(true);};};
 $('#backStart').onclick=()=>{freshGameRequested=false;phase='start';hidden($('#characterScreen'),true);hidden($('#startScreen'),false);s=readSave();hasSave=!!s;applyText();};
 $('#startAdventure').onclick=async()=>{
