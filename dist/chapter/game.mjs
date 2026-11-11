@@ -105,7 +105,7 @@ let resumeBaselineSavedAt=s?.savedAt??null;
 let hsecWorld=null,hsecUI=null,hsecElapsed=0,hsecLastSignature='',hsecFollow=false,hsecRecorder=null;
 let constructionCallout=null,guidance=null,cinematic=null,cameraDebug=null,cinemaRecorder=null,reviewBackup=null,cinemaReview=false,locomotionReview=null,qaComputerPath=null,qaWalkRoute=null,characterStage=null,avatars=null,builderOpen=false,managingOffice=false,officePanelPreview=null,selectedBuildModule=null,lastPortraitId=null,selectedAvatar='operator01';
 let m3DrillModel=null,m3BoreholeMarkers=[],m3DeliveryVehicle=null,m3DrillingFx=null,m3VisualsReady=false;
-let m4DrillTruckModel=null,m4ParkingSpot=null,m4VisualsReady=false,m4TruckLoading=false,m4TruckCollider=null;
+let m4DrillTruckModel=null,m4TruckWheels=null,m4ParkingSpot=null,m4VisualsReady=false,m4TruckLoading=false,m4TruckCollider=null;
 let m4DthModel=null,m4DthCollider=null,m4Staging=null;
 let m5World=null,patioOverviewUntil=0,m5RcRoute=null,m5DthRoute=null,m5DthDepartRoute=null;
 let m5NpcWorld=null,m5PersonalTruckModel=null,m5PersonalTruckCollider=null,m5TruckLighting=null,m5TruckWheels=null,truckBrakePressed=false,m5PersonalTruckFallback=false,m5LocateCameraTimer=null;
@@ -604,6 +604,7 @@ function initM4Visuals(){
    mdl.traverse(c=>{if(c.isMesh){c.castShadow=true;c.receiveShadow=true;}});
    const wrapper=new T.Group();wrapper.name='drilltruck-wrapper';wrapper.add(mdl);
    m4DrillTruckModel=wrapper;
+   m4TruckWheels=new PersonalTruckWheels(m4DrillTruckModel); // V66: wheel visuals only
    initTruckRouteState(m4DrillTruckModel);
    // Position at saved truck position or parking
    const truckPos=s.mission4?.drillTruck?.position||{x:-13.5,z:-9.3};
@@ -620,7 +621,7 @@ function initM4Visuals(){
    // Dynamic collider for truck
    m4TruckCollider={x:truckPos.x,z:truckPos.z,w:2.5,d:5,_truck:true};
    world.colliders.push(m4TruckCollider);
-  }).catch(e=>{console.error('DrillTruck GLB load failed, using procedural:',e);m4DrillTruckModel=createProceduralTruck();initTruckRouteState(m4DrillTruckModel);const tp=s.mission4?.drillTruck?.position||{x:-13.5,z:-9.3};m4DrillTruckModel.position.set(tp.x,0.12,tp.z);world.scene.add(m4DrillTruckModel);if(s.mission4?.drillTruck?.maintenancePhase==='dispatch'){const z2=s.mission4.drillTruck.maintenanceZone;if(z2)startTruckRoute(m4DrillTruckModel,z2,'out',!!s.mission5?.truckRelocated);}else if(s.mission4?.drillTruck?.maintenancePhase==='return'){const z2=s.mission4.drillTruck.maintenanceZone;if(z2)startTruckRoute(m4DrillTruckModel,z2,'return',!!s.mission5?.truckRelocated);}m4TruckCollider={x:tp.x,z:tp.z,w:2.5,d:5,_truck:true};world.colliders.push(m4TruckCollider);});
+  }).catch(e=>{console.error('DrillTruck GLB load failed, using procedural:',e);m4DrillTruckModel=createProceduralTruck();m4TruckWheels=new PersonalTruckWheels(m4DrillTruckModel);initTruckRouteState(m4DrillTruckModel);const tp=s.mission4?.drillTruck?.position||{x:-13.5,z:-9.3};m4DrillTruckModel.position.set(tp.x,0.12,tp.z);world.scene.add(m4DrillTruckModel);if(s.mission4?.drillTruck?.maintenancePhase==='dispatch'){const z2=s.mission4.drillTruck.maintenanceZone;if(z2)startTruckRoute(m4DrillTruckModel,z2,'out',!!s.mission5?.truckRelocated);}else if(s.mission4?.drillTruck?.maintenancePhase==='return'){const z2=s.mission4.drillTruck.maintenanceZone;if(z2)startTruckRoute(m4DrillTruckModel,z2,'return',!!s.mission5?.truckRelocated);}m4TruckCollider={x:tp.x,z:tp.z,w:2.5,d:5,_truck:true};world.colliders.push(m4TruckCollider);});
  }
  m4VisualsReady=true;
 }
@@ -742,6 +743,9 @@ function updateM4Visuals(dt){
     !(s.mission5?.status==='operational'&&!s.mission5.truckRelocated)){
   autoDispatchTruck(s);
  }
+ // V66: M4 wheels read preexisting route displacement, never drive it.
+ if(m4TruckWheels&&m4DrillTruckModel)
+  m4TruckWheels.updateFromPose(dt,truckRouteActive(m4DrillTruckModel));
  // Sync truck collider position
  if(m4TruckCollider&&m4DrillTruckModel){
   m4TruckCollider.x=m4DrillTruckModel.position.x;
