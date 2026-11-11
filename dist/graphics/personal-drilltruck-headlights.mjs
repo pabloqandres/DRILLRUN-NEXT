@@ -1,5 +1,5 @@
 // DRILL RUN NEXT GENERATION · V63 warm automotive headlights, personal 02.
-// Small, feathered amber pavement bounce — no long laser wedge, no AdditiveBlending.
+// Small, feathered amber pavement bounce — no long laser wedge, sin mezcla aditiva.
 // No shadows, new colliders, gameplay state or changes to M4 service vehicle.
 import * as T from '../vendor/three.module.js';
 
