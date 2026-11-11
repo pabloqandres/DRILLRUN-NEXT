@@ -1,5 +1,11 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-10 — V58 cámara libre de DrillTruck® personal (PR)
+- La cámara fija de conducción reemplazada por cámara exterior con órbita relativa al heading del vehículo. El arrastre desde mitad derecha rota visión horizontal/vertical y pinza/rueda cambia distancia; cámara hogar restablece vista trasera.
+- Joystick, freno, luces, movimiento físico, colisiones, economía, misiones, Cloud Save y control de DrillTruck® automática se mantienen idénticos.
+- Componente en `dist/camera/personal-truck-free-look.mjs`, enlace visual limitado a `game.mjs`, test `v58-personal-truck-free-look.test.mjs` y workflow `v58-personal-truck-free-look.yml`. QA Android requerido; ver CHANGES/2026-11-10_v58-truck-free-look.md.
+
+
 ## 2026-11-10 — V57 Patio L1: cobertura de luz nocturna (rama para revisión)
 
 - Ampliación del paño transitable sobre malla real de 240 × 240 m: límite de seguridad en ±108 m y una misma regla para peatón, vehículo personal y restauración de guardados. Se eliminan bloqueos rectangulares heredados sin eliminar cercos, portones ni colisiones de instalaciones.
