@@ -50,8 +50,8 @@ function personalTruckActions(s){
 }
 
 export class FaenaCenterUI{
- constructor({host,state,translate,format,icon,onClose,onAppAction,onKitOrder,onRecovery,onHsec,onLocate}){
-  Object.assign(this,{host,state,translate,format,icon,onClose,onAppAction,onKitOrder,onRecovery,onHsec,onLocate});
+ constructor({host,state,translate,format,icon,onClose,onAppAction,onKitOrder,onRecovery,onHsec,onLocate,onLocatePersonalTruck,onRecoverPersonalTruck}){
+  Object.assign(this,{host,state,translate,format,icon,onClose,onAppAction,onKitOrder,onRecovery,onHsec,onLocate,onLocatePersonalTruck,onRecoverPersonalTruck});
   this.route='overview';this.view='';this.lastKey='';
   host.addEventListener('click',event=>this.handle(event));
  }

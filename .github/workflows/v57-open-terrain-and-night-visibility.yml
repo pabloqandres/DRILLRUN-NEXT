@@ -1,0 +1,25 @@
+name: V57 Open Terrain and Night Worksite
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  v57-terrain-lighting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Source and tests syntax
+        run: |
+          node --check dist/chapter/navigation-areas.mjs
+          node --check dist/scene.mjs
+          node --check dist/chapter/state.mjs
+          node --check dist/mission5/personal-drilltruck.mjs
+          node --check dist/mission5/patio-world.mjs
+          node --check dist/chapter/faena-center.mjs
+          node --check tests/v57-open-terrain-and-save.test.mjs
+      - name: V57 new terrain, prior navigation, paid truck recovery, night lights
+        run: |
+          node --test tests/v57-open-terrain-and-save.test.mjs tests/m5-office-patio-passability-v40.test.mjs tests/m5-patio-navigation-v34.test.mjs tests/v56-personal-drilltruck-recovery.test.mjs tests/v55-vehicle-collision-render-recovery.test.mjs tests/v52-night-patio-driving.test.mjs

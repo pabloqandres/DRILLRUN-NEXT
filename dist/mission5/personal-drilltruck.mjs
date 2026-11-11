@@ -2,6 +2,7 @@
 // Does not share any M4 maintenance dispatch, zone, position or earnings state.
 import {DRILLTRUCK_COST} from '../mission4/drilltruck.mjs';
 import {FLEET_BAYS} from './fleet-base.mjs';
+import {isPlayableTerrain} from '../chapter/navigation-areas.mjs';
 import {warehouseChecked,commissionPatio} from './patio-staff.mjs';
 
 export const PERSONAL_DRILLTRUCK_PRICE=DRILLTRUCK_COST;
@@ -62,8 +63,8 @@ const finiteLocation=p=>!!p&&Number.isFinite(p.x)&&Number.isFinite(p.z);
 export function personalTruckAtPlayableLocation(truck){
  const p=truck?.position;
  if(!finiteLocation(p))return false;
- // Entire original mission area plus the continuous Office–Patio corridor.
- return p.x>=-80&&p.x<=35&&p.z>=-42&&p.z<=15;
+ // Same visible terrain boundary as avatar, vehicles and save restoration.
+ return isPlayableTerrain(p.x,p.z);
 }
 export function repairPersonalTruckPose(s,now=Date.now()){
  const truck=personalTruck(s);if(!truck||personalTruckAtPlayableLocation(truck))return false;
@@ -72,8 +73,9 @@ export function repairPersonalTruckPose(s,now=Date.now()){
  truck.speed=0;truck.mode='parked';truck.recoveredAt=now;
  // The player may have been inside the invalid-position truck on a
  // previous session. Reposition only if the saved avatar is also invalid.
- if(!finiteLocation(s.position)||!Number.isFinite(s.position.x)||Math.abs(s.position.x)>90||
-    Math.abs(s.position.z)>48){s.position={x:bay.x-3.8,z:bay.z};s.inside=false;}
+ if(!isPlayableTerrain(s.position?.x,s.position?.z)){
+  s.position={x:bay.x-3.8,z:bay.z};s.inside=false;
+ }
  return true;
 }
 // Explicit valet recovery for a PAID/owned vehicle only. No new order, charge,
