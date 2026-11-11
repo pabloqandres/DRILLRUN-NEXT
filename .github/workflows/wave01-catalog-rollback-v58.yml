@@ -1,0 +1,27 @@
+name: V58 Wave 01 Catalog Rollback
+
+on:
+  pull_request:
+    paths:
+      - "dist/chapter/construction-catalog.mjs"
+      - "dist/chapter/catalog-view.mjs"
+      - "dist/chapter/asset-library-wave01.mjs"
+      - "dist/assets3d/drillrun-pack/**"
+      - "tests/wave01-catalog-rollback-v58.test.mjs"
+      - ".github/workflows/wave01-catalog-rollback-v58.yml"
+  workflow_dispatch:
+
+jobs:
+  verify-original-catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Wave 01 rollback tests
+        run: node --test tests/wave01-catalog-rollback-v58.test.mjs
+      - name: Preserve production catalog module syntax
+        run: |
+          node --check dist/chapter/construction-catalog.mjs
+          node --check dist/chapter/catalog-view.mjs
