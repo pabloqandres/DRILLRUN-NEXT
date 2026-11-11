@@ -7,7 +7,7 @@ import {assetModel,releaseModel,HsecWorld} from '../dist/hsec/world.mjs';
 import {HSEC_ASSETS,HSEC_ANCHORS as A} from '../dist/hsec/catalog.mjs';
 import {CLEARABLES,CONFIG} from '../dist/chapter/config.mjs';
 function chapter2(){const s=newGame();s.cleared=CLEARABLES.map(o=>o.id);startOffice(s,'office01');accelerate(s);s.inside=true;useOfficeComputer(s);s.inside=false;s.position={...CONFIG.officeSlot.access};tickHsec(s,0);return s;}
-function install(s,type){const a=buildAsset(s,type,suggestedPose(s,type));tickHsec(s,26);return a;}
+function install(s,type){const a=buildAsset(s,type,suggestedPose(s,type));tickHsec(s,type==='shed'?60:26);return a;}
 function site(){const s=chapter2();startModule(s,'office-l2','office01');accelerate(s);for(const type of ['shed','vehicle','pedestrian','crossing','railing','railing','railing','tower','tower','tower','tower','cone','cone','cone','cone','cone','cone','sign','extinguisher'])install(s,type);return s;}
 function simulate(s,seconds){for(let i=0;i<seconds*20;i++){if(i%20===0)tickHsec(s,1);moveNpc(s,.05);}}
 test('chapter 2 unlocks only after the existing chapter, grant is idempotent across restore',()=>{const s=newGame();ensureHsec(s);tickHsec(s,10);assert.equal(s.hsec.grant,false);assert.throws(()=>buildAsset(s,'shed',{x:6,z:-4}));const p=chapter2(),cash=p.cash;tickHsec(p,10);assert.equal(p.cash,cash);const loaded=restore(JSON.parse(JSON.stringify(p)));restoreHsec(loaded);tickHsec(loaded,10);assert.equal(loaded.cash,cash);});
