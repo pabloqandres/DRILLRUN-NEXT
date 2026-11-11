@@ -53,6 +53,7 @@ import {syncOfficeAccess} from './office-access.mjs';
 import {ObjectiveGuide} from './guidance.mjs';
 import {CAMERA_KEY,cameraSettings} from '../camera/config.mjs';
 import {installWorldGestures} from '../camera/gestures.mjs';
+import {PersonalTruckFreeLook} from '../camera/personal-truck-free-look.mjs';
 import {CinematicDirector} from '../camera/cinematic.mjs';
 import {CameraDebug} from '../camera/debug.mjs';
 import {CinematicRecorder} from '../camera/recorder.mjs';
@@ -109,7 +110,7 @@ let world,scene,phase='start',phoneApp=null,phoneOpen=false,category='desks',mod
 let cloudSyncing=true,cloudLocked=false,cloudStatus='Verificando Google…',cloudEpoch=0;
 let faenaCenter=null,faenaRefreshAt=0;
 let freshGameRequested=false,previousCloudGeneration=0;
-const motion=createMotion(),qa=new URLSearchParams(location.search).has('chapterqa'),cameraDev=new URLSearchParams(location.search).get('dev')==='camera';
+const motion=createMotion(),truckFreeLook=new PersonalTruckFreeLook(),qa=new URLSearchParams(location.search).has('chapterqa'),cameraDev=new URLSearchParams(location.search).get('dev')==='camera';
 function loadCameraSettings(){try{return cameraSettings(JSON.parse(localStorage.getItem(CAMERA_KEY)));}catch{return cameraSettings();}}
 function persistCamera(){try{localStorage.setItem(CAMERA_KEY,JSON.stringify(world.cameraRig.settings));}catch{}}
 const getGameAudioContext=()=>{audioContext??=new (window.AudioContext||window.webkitAudioContext)();return audioContext;};
@@ -297,7 +298,11 @@ async function ensureWorld(forSelection=false){
   const pan=cameraRelativeIntent(-dx*panScale,dy*panScale,world.cameraRig.heading);
   world.cameraRig.panBuilder(pan.x,pan.z);
   return;
- }if(!world.orbit.manual)world.orbit.yaw=world.cameraRig.heading;rotateOrbit(world.orbit,dx*world.cameraRig.settings.controls.touchSensitivity,dy*world.cameraRig.settings.controls.touchSensitivity);},onZoom:delta=>{if(phase==='play')world.cameraRig.zoomBy(delta);},onEnd:persistCamera,onTap:(x,y)=>{if(phase==='character'){const id=avatars?.pickSelector(x,y);if(id)selectAvatar(id);return;}if(phase==='play'&&hsecUI?.drawing&&!modalOpen&&!phoneOpen){const p=world.pick(x,y,0);if(p)hsecUI.pick(p);return;}if(phase!=='play'||builderOpen||modalOpen||phoneOpen||faenaCenter?.visible||busy)return;const p=world.pick(x,y,placement?.42:0);if(!s.inside&&s.office.status==='built'&&world.office.visible&&world.ray.intersectObject(world.office,true).some(h=>{for(let o=h.object;o;o=o.parent)if(!o.visible)return false;return true;})){manageOffice();return;}// Touch/click on DrillTruck® 02 opens an explicit Enter prompt. A direct
+ }if(personalTruck(s)?.mode==='driving'){
+  // V58: right-side drag changes ONLY the camera, never vehicle steering.
+  truckFreeLook.rotate(dx,dy,world.cameraRig.settings.controls.touchSensitivity);
+  return;
+ }if(!world.orbit.manual)world.orbit.yaw=world.cameraRig.heading;rotateOrbit(world.orbit,dx*world.cameraRig.settings.controls.touchSensitivity,dy*world.cameraRig.settings.controls.touchSensitivity);},onZoom:delta=>{if(phase!=='play')return;if(personalTruck(s)?.mode==='driving')truckFreeLook.zoomBy(delta);else world.cameraRig.zoomBy(delta);},onEnd:persistCamera,onTap:(x,y)=>{if(phase==='character'){const id=avatars?.pickSelector(x,y);if(id)selectAvatar(id);return;}if(phase==='play'&&hsecUI?.drawing&&!modalOpen&&!phoneOpen){const p=world.pick(x,y,0);if(p)hsecUI.pick(p);return;}if(phase!=='play'||builderOpen||modalOpen||phoneOpen||faenaCenter?.visible||busy)return;const p=world.pick(x,y,placement?.42:0);if(!s.inside&&s.office.status==='built'&&world.office.visible&&world.ray.intersectObject(world.office,true).some(h=>{for(let o=h.object;o;o=o.parent)if(!o.visible)return false;return true;})){manageOffice();return;}// Touch/click on DrillTruck® 02 opens an explicit Enter prompt. A direct
  // tap or a hand action never takes over the M4 automatic DrillTruck.
  const personal=personalTruck(s);
  if(!s.inside&&personal&&m5PersonalTruckModel&&
@@ -741,10 +746,11 @@ function togglePersonalTruck(){
    const location=exitPositions(truck).find(pos=>!world.isBlocked(pos.x,pos.z,avatarDefinition(s.character).radius+.05));
    if(!location)throw new Error('No hay espacio libre para bajar');
    exitPersonalTruck(s,location);
-   world.chapterCamera=null;world.snapCamera=true;
+   truckFreeLook.reset();world.chapterCamera=null;world.snapCamera=true;
    notices.push({title:'Saliste del DrillTruck® personal',symbol:'personnel'});
   }else{
    enterPersonalTruck(s);
+   truckFreeLook.reset(); // Start behind the vehicle; orbit belongs only to the ride.
    // Auto-enable when first boarding at night. Later choices persist.
    if(typeof truck.headlightsOn!=='boolean'){
     const hour=(10+(s.hsec?.time||0)/600*24)%24;
@@ -1582,7 +1588,7 @@ $('#personalTruckLights').onclick=()=>{
  m5TruckLighting?.set(truck.headlightsOn,world.quality);
  save();renderHUD();
 };
-$('#cameraHome').onclick=()=>{world.zoom=1;resetOrbit(world.orbit);world.cameraRig.reset();persistCamera();};
+$('#cameraHome').onclick=()=>{world.zoom=1;resetOrbit(world.orbit);world.cameraRig.reset();truckFreeLook.reset();world.snapCamera=true;persistCamera();};
 $('#endBuildPreviewWalk').onclick=()=>{
  catalogPreviewWalk=false;catalogBlueprint?.hide();
  hidden($('#endBuildPreviewWalk'),true);world.snapCamera=true;
@@ -1653,10 +1659,13 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
   }
  avatars?.updateSelector(phase==='character',selectedAvatar,s,dt,clock);characterStage?.update(phase==='character',clock,selectedAvatar);
  if(phase==='play'&&personalTruck(s)?.mode==='driving'){
-   // Third-person raised chase camera, no cab/interior.
-   const pt=personalTruck(s),yaw=pt.heading;
-   world.chapterCamera={target:new T.Vector3(pt.position.x,1.8,pt.position.z),
-    offset:new T.Vector3(-Math.sin(yaw)*10.7,7.2,-Math.cos(yaw)*10.7)};
+   // V58: elevated chase camera follows the truck's heading, with a
+   // user-controlled relative orbit from right-half touch-drag.
+   const pt=personalTruck(s),view=truckFreeLook.view(pt.position,pt.heading);
+   world.chapterCamera={
+    target:new T.Vector3(view.target.x,view.target.y,view.target.z),
+    offset:new T.Vector3(view.offset.x,view.offset.y,view.offset.z)
+   };
   }
   else if(phase==='character'){world.chapterCamera={target:new T.Vector3(-4.55+Math.max(0,Math.min(.5,(730-innerWidth)/324)),1.0,5.35),offset:new T.Vector3(0,.55,6.1)};}
  else if(phase==='play'&&builderOpen&&catalogConstructionCamera&&catalogBlueprint?.spec&&!modalOpen&&

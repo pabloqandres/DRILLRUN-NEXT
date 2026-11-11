@@ -1,0 +1,21 @@
+name: V58 Personal DrillTruck Free Look
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  v58-camera:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax of V58 camera and shared visual hook
+        run: |
+          node --check dist/camera/personal-truck-free-look.mjs
+          node --check dist/chapter/game.mjs
+          node --check tests/v58-personal-truck-free-look.test.mjs
+      - name: Free look, vehicle camera, driving and collision regressions
+        run: |
+          node --test tests/v58-personal-truck-free-look.test.mjs tests/v57-open-terrain-and-save.test.mjs tests/v56-personal-drilltruck-recovery.test.mjs tests/v54-drilltruck-steering-controls.test.mjs tests/v50-personal-drilltruck-driving.test.mjs
