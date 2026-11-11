@@ -418,3 +418,31 @@
  #faenaCenter .pvArtPortrait--detail{width:47px;flex-basis:47px}
  #faenaCenter .pvTeamSlot .pvArtPortrait--team{width:28px;flex-basis:28px}
 }
+
+
+/* V79: role-specific mission backdrop and salary presentation; no gameplay effects. */
+#faenaCenter button.pvMission[data-pv-mission]{
+ position:relative;isolation:isolate;overflow:hidden;
+ background-image:linear-gradient(90deg,#071e32ed 0%,#09253bbd 65%,#071e3270),var(--pv-scene);
+ background-size:cover;background-position:center;
+ border-color:#5599bb;
+}
+#faenaCenter .pvMission[data-pv-mission]>*{position:relative;z-index:1}
+#faenaCenter .pvMission[data-pv-mission="m1"]{--pv-scene:url('../assets/personnel-missions-v79/m1.svg')}
+#faenaCenter .pvMission[data-pv-mission="m2"]{--pv-scene:url('../assets/personnel-missions-v79/m2.svg')}
+#faenaCenter .pvMission[data-pv-mission="m3"]{--pv-scene:url('../assets/personnel-missions-v79/m3.svg')}
+#faenaCenter .pvMission[data-pv-mission="m4"]{--pv-scene:url('../assets/personnel-missions-v79/m4.svg')}
+#faenaCenter .pvMission[data-pv-mission="m5"]{--pv-scene:url('../assets/personnel-missions-v79/m5.svg')}
+#faenaCenter .pvMission[data-pv-mission="free"]{--pv-scene:url('../assets/personnel-missions-v79/free.svg')}
+#faenaCenter .pvProposedSalary{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;
+ gap:3px 7px;padding:5px 7px;border-radius:8px;background:#12364d;border:1px solid #3a718b;
+ color:#cde4ee;font-size:9px}
+#faenaCenter .pvProposedSalary strong{color:#ffde9f;font-size:11px}
+#faenaCenter .pvProposedSalary small{color:#aac3d2;font-size:8px}
+#faenaCenter .pvFutureNote{padding:3px 5px;font-size:8px}
+@media(orientation:landscape) and (max-height:480px){
+ #faenaCenter .pvFutureNote{display:none}
+ #faenaCenter .pvProposedSalary{padding:3px 5px;gap:2px;font-size:7px}
+ #faenaCenter .pvProposedSalary strong{font-size:9px}
+ #faenaCenter .pvProposedSalary small{font-size:7px}
+}
