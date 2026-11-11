@@ -59,8 +59,8 @@ export class CharacterSelectFeedback{
    if(kind==='select'){this.whoosh(ctx);this.tone(ctx,{frequency:590,end:390,duration:.09,level:.028});}
    else if(kind==='skill'){this.tone(ctx,{frequency:620,end:430,duration:.072,level:.023});}
    else if(kind==='confirm'){this.tone(ctx,{frequency:370,end:260,duration:.12,level:.039});}
-   else if(kind==='type'){this.tone(ctx,{frequency:650,end:530,duration:.032,level:.0148});}
-   else if(kind==='focus'){this.tone(ctx,{frequency:570,end:500,duration:.055,level:.006});}
+   else if(kind==='type'){this.tone(ctx,{frequency:650,end:530,duration:.032,level:.0068});}
+   else if(kind==='focus'){this.tone(ctx,{frequency:570,end:500,duration:.055,level:.014});}
    else this.tone(ctx,{frequency:410,end:315,duration:.058,level:.018});
   }catch{}
  }
