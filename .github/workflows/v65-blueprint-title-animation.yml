@@ -1,7 +1,7 @@
 name: V65 Blueprint Title Immersion
 on:
   pull_request:
-    branches: [main]
+    branches: [main, chatgpt/v64-cinematic-welcome-concept]
   workflow_dispatch:
 jobs:
   v65-blueprint-title:
