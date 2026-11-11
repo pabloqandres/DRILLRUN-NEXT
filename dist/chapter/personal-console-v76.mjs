@@ -7,10 +7,10 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const money=n=>Math.round(Number(n)||0).toLocaleString('es-CL');
 const pictograms={admin:'objectives',driller:'machine',helper:'wrench',hsec:'lock',
  tecnicoDrillco:'wrench','m5-gate-security':'lock','m5-warehouse-tech':'inventory'};
-const skillIcons={negotiation:'objectives',efficiency:'gauge',planning:'time',
- coordination:'personnel',reports:'objectives',drilling:'machine',precision:'geology',
+const skillIcons={negotiation:'objectives',efficiency:'dock-gauge',planning:'time',
+ coordination:'dock-personnel',reports:'objectives',drilling:'machine',precision:'geology',
  safety:'lock',maintenance:'wrench',diagnosis:'geology',logistics:'inventory',
- response:'time',leadership:'personnel',automation:'wrench'};
+ response:'time',leadership:'dock-personnel',automation:'wrench'};
 const explain={
  invalidCandidate:'Candidato no disponible',invalidRole:'Rol no disponible',
  lockedMission:'Se habilitará al avanzar de misión',roleFull:'Puesto ya cubierto',
@@ -68,7 +68,7 @@ export function renderPersonalConsole(s,{roleId=null,candidateId=null,icon=()=>'
    '<div class="p76Skill"><span>'+icon(skillIcons[x.id]||'objectives')+'</span><b>'+esc(x.label)+'</b>'+bars(x.level,j===0)+'</div>'
   ).join('')+'</div>'+
   '<div class="p76HireInfo"><span>Contratación única</span><strong>'+icon('wallet')+' '+money(chosen.hireCost)+'</strong></div>'+
-  '<button class="p76Hire" type="button" data-p76-hire="'+chosen.id+'" '+(reason?'disabled':'')+'>'+icon(reason?'lock':'personnel')+
+  '<button class="p76Hire" type="button" data-p76-hire="'+chosen.id+'" '+(reason?'disabled':'')+'>'+icon(reason?'lock':'dock-personnel')+
    (hired?' Puesto cubierto':reason?' '+esc(explain[reason]||reason):' Contratar a '+esc(chosen.name.split(' ')[0]))+'</button>'+
   '<small class="p76SkillNote">Los atributos quedan registrados para futuras especializaciones; todavía no generan pagos adicionales.</small>'+
  '</aside>';
@@ -76,7 +76,7 @@ export function renderPersonalConsole(s,{roleId=null,candidateId=null,icon=()=>'
   const p=currentTeam[i],c=employeeCandidate(p);
   if(!p)return '<div class="p76TeamSlot empty"><span>＋</span><small>Vacante</small></div>';
   const role=ROLE_BY_ID[p.role]||ROLE_BY_ID[p.id];
-  return '<div class="p76TeamSlot occupied">'+(c?portrait(c):'<span class="p76Unknown">'+icon('personnel')+'</span>')+
+  return '<div class="p76TeamSlot occupied">'+(c?portrait(c):'<span class="p76Unknown">'+icon('dock-personnel')+'</span>')+
    '<span><b>'+esc(c?.name||p.displayName||'Personal contratado')+'</b><small>'+esc(role?.short||p.role||'Operativo')+'</small></span><i>✓</i></div>';
  }).join('');
  return '<div class="p76Console" data-role="'+chosenRole.id+'">'+
@@ -90,6 +90,6 @@ export function renderPersonalConsole(s,{roleId=null,candidateId=null,icon=()=>'
   '</div>'+
   '<footer class="p76Team"><div class="p76TeamSummary"><span>'+icon('personnel')+'</span><strong>Equipo activo <b>'+count+' / '+capacity+'</b></strong><small>Los puestos disponibles aumentan al avanzar de misión</small></div>'+
     '<div class="p76TeamRail">'+teamCards+'</div>'+
-    '<label class="p76VolumeLabel" title="Volumen de sonidos de interfaz"><span>'+icon('sound')+'</span><small>SONIDO</small><input data-p76-volume aria-label="Volumen de interacción" type="range" min="0" max="200" step="10" value="150"></label></footer>'+
+    '<label class="p76VolumeLabel" title="Volumen de sonidos de interfaz"><span>'+'<svg class="uiIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 9a5 5 0 0 1 0 6m3-9a9 9 0 0 1 0 12"/></svg>'+'</span><small>SONIDO</small><input data-p76-volume aria-label="Volumen de interacción" type="range" min="0" max="200" step="10" value="150"></label></footer>'+
  '</div>';
 }
