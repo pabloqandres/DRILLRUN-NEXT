@@ -428,3 +428,8 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Nuevo `dist/chapter/m2-layout-v71.css` (cargado al final de `dist/index.html`): tabs HSEC siempre visibles en cabecera con desplazamiento horizontal cuando proceda; checklist con scroll vertical propio. Ficha de Oficina estrecha con preview real y acciones de mejora accesibles, sin tapar la construcción.
 - Catalog de Edificios muestra **Oficina → Galpón → Taller → Patio**; mueve la referencia existente `shed` sin cambiar datos, estado, economía ni condiciones.
 - Test V71 y regresiones V39/V16 pasaron en CI focal. Preview READY; QA visual móvil pendiente. Documentación `CHANGES/2026-11-11_v71_mission2-hsec-office-galpon.md`.
+
+## 2026-11-11 — V72: Galpón 60 s con progreso y M2 vehicular 12 m
+- Galpón de mantenimiento pasa de 25 s a **60 s**, con barra del estilo Taller y MM:SS real en HUD, ficha en mundo y HSEC, usando únicamente el estado actual. Se preservan Galpones terminados y se extienden sólo trabajos antiguos aún en construcción.
+- Objetivo de camino vehicular ahora requiere **al menos 12 metros finalizados** (distancia en checklist + barra), sin conectividad invisible a puntos fijos. La ruta sugerida mide 13,85 m y lo satisface. Condición peatonal, cruces seguros y puntuación HSEC se mantienen.
+- Nuevos tests V72 y CI focal 13/13 OK, con V71 y M2 V16. Legacy `hsec.test.mjs` no se usa en gate porque presupone boosters iniciales y un presupuesto de mallas ya desactualizados. QA Android pendiente. Véase `CHANGES/2026-11-11_v72_shed-road-meters.md`.

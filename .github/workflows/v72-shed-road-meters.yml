@@ -1,0 +1,29 @@
+name: V72 M2 shed 60s and road metre objective
+on:
+  push:
+    branches: [chatgpt/v72-shed-minute-progress]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  v72-m2:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Syntax validation
+        run: |
+          node --check dist/hsec/catalog.mjs
+          node --check dist/hsec/state.mjs
+          node --check dist/hsec/ui.mjs
+          node --check dist/hsec/world.mjs
+          node --check dist/hsec/shed-progress-v72.mjs
+          node --check dist/hsec/mission-readout.mjs
+      # Legacy hsec.test.mjs still expects unavailable startup boosters and a
+      # retired <=8-mesh geometry budget, so it is not an authoritative gate.
+      - name: V72 and current mission 2 regressions
+        run: |
+          node --test tests/v72-shed-road-meters.test.mjs tests/live-mission-checklists-v16.test.mjs tests/v71-m2-layout-galpon.test.mjs
