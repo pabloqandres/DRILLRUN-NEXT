@@ -48,5 +48,7 @@ test('V79: management shows stored employee skills, salary and no payroll transa
  assert(html.includes('Sin cobros activos'));
  assert.equal(JSON.stringify(s),before);
  const src=read('dist/chapter/faena-center.mjs');
- for(const attr of ['data-pv-team-open','data-pv-team-back','data-pv-team-person'])assert(src.includes(attr));
+ for(const attr of ['data-pv-team-open','data-pv-team-back'])assert(src.includes(attr));
+ assert(src.includes('b.dataset.pvTeamPerson'));
+ assert(read('dist/chapter/personnel-premium-v76.mjs').includes('data-pv-team-person='));
 });
