@@ -729,7 +729,7 @@ function syncPersonalTruckVisual(){
   m5PersonalTruckModel.updateWorldMatrix(true,true);
   const modelBounds=new T.Box3().setFromObject(m5PersonalTruckModel);
   m5PersonalTruckModel.userData.groundContactMinY=Number.isFinite(modelBounds.min.y)?modelBounds.min.y:0;
-  m5TruckLighting=installPersonalTruckHeadlights(m5PersonalTruckModel);
+  m5TruckLighting=installPersonalTruckHeadlights(m5PersonalTruckModel,world);
   world.scene.add(m5PersonalTruckModel);
   if(!m5PersonalTruckCollider){
    m5PersonalTruckCollider={x:truck.position.x,z:truck.position.z,
@@ -744,7 +744,12 @@ function syncPersonalTruckVisual(){
   (x,z)=>world.sampleGround(x,z),m5PersonalTruckModel.userData.groundContactMinY);
  m5PersonalTruckModel.position.set(truck.position.x,visualY,truck.position.z);
  m5PersonalTruckModel.rotation.y=truck.heading;
- m5TruckLighting?.set(truck.mode==='driving'&&!!truck.headlightsOn,world.quality);
+ // V63: a feather-soft amber pavement bounce follows the vehicle with
+ // actual terrain height. Match the existing Patio day/night schedule.
+ const headlightHour=(10+(s.hsec?.time||0)/600*24)%24;
+ const headlightNight=headlightHour>=19||headlightHour<6;
+ m5TruckLighting?.set(truck.mode==='driving'&&!!truck.headlightsOn,world.quality,headlightNight);
+ m5TruckLighting?.updateGround(truck.position,truck.heading,(x,z)=>world.sampleGround(x,z));
  if(m5PersonalTruckCollider){
   m5PersonalTruckCollider.x=truck.position.x;
   m5PersonalTruckCollider.z=truck.position.z;
