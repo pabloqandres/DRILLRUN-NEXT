@@ -7,17 +7,20 @@ const source=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const patio={x:-51,z:-17,w:54.4,d:43.4,y:.19,_patioL1:true};
 const near=(a,b,tol=.001)=>Math.abs(a-b)<=tol;
 
-test('V62 returns the warm, soft headlight rig and entirely removes the V61 white road laser',()=>{
+test('V63 preserves warm, soft spotlight rig without the V61 white road laser',()=>{
  const h=source('dist/graphics/personal-drilltruck-headlights.mjs');
  const game=source('dist/chapter/game.mjs');
- assert.match(h,/new T\.SpotLight\(0xfff2d4,0,35,Math\.PI\/7,\.65,1\.3\)/);
+ assert.match(h,/new T\.SpotLight\(WARM_BEAM,0,35,Math\.PI\/7,\.65,1\.3\)/);
  assert.match(h,/lamp\.target\.position\.set\(x\*1\.7,-\.35,17\)/);
  assert.match(h,/lamp\.castShadow=false/);
- assert.match(h,/frontFill\.intensity=on\?3:0/);
- assert.match(h,/item\.intensity=on\?\(quality==='low'\?17:27\):0/);
- assert.match(game,/installPersonalTruckHeadlights\(m5PersonalTruckModel\)/);
+ assert.match(h,/frontFill\.intensity=isOn\?3:0/);
+ assert.match(h,/item\.intensity=isOn\?\(quality==='low'\?17:27\):0/);
+ assert.match(game,/installPersonalTruckHeadlights\(m5PersonalTruckModel,world\)/);
  assert.match(game,/m5TruckLighting\?\.set\(truck\.mode==='driving'/);
  assert.doesNotMatch(h,/roadLightTexture|projectPersonalTruckRoadLight|makeRoadProjection|AdditiveBlending|PROJECTION_LENGTH/);
+ assert.match(h,/new T\.SpotLight\(WARM_BEAM/);
+ assert.match(h,/T\.NormalBlending/);
+ assert.match(h,/updatePersonalTruckWarmBounce/);
  assert.doesNotMatch(game,/m5TruckLighting\?\.project\(/);
 });
 
