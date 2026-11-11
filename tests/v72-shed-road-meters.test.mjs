@@ -1,23 +1,20 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {newGame,startOffice,accelerate,startModule,useOfficeComputer} from '../dist/chapter/state.mjs';
-import {CLEARABLES} from '../dist/chapter/clearables.mjs';
-import {CONFIG} from '../dist/chapter/config.mjs';
 import {HSEC_ASSETS,HSEC_BALANCE,HSEC_STEPS} from '../dist/hsec/catalog.mjs';
-import {buildAsset,tickHsec,restoreHsec,evaluation,routeLength} from '../dist/hsec/state.mjs';
+import {buildAsset,ensureHsec,tickHsec,restoreHsec,evaluation,routeLength} from '../dist/hsec/state.mjs';
 import {suggestedPose,ROUTES} from '../dist/hsec/layout.mjs';
 import {mission2Readout} from '../dist/hsec/mission-readout.mjs';
 import {shedBuildProgress,timeLabel,renderShedProgress} from '../dist/hsec/shed-progress-v72.mjs';
 const source=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const m2=()=>{
- const s=newGame();
- s.cleared=CLEARABLES.map(o=>o.id);
- startOffice(s,'office01');accelerate(s);
- s.inside=true;useOfficeComputer(s);s.inside=false;s.position={...CONFIG.officeSlot.access};
- tickHsec(s,0);
- startModule(s,'office-l2','office01');accelerate(s);
- return s;
+ // Isolated, schema-compatible M2 state. No fictitious boosters, no economic
+ // shortcuts, no dependency on the older chapter-1 accelerate test fixture.
+ const s={
+  chapterCompletedAt:1,office:{level:2,status:'built'},cash:50000,
+  ledger:[],nextId:1,inventory:[],boosters:0,position:{x:0,z:0}
+ };
+ ensureHsec(s);tickHsec(s,0);return s;
 };
 test('V72 M2: only Galpón construction is exactly 60 seconds, other assets remain 25',()=>{
  assert.equal(HSEC_ASSETS.find(a=>a.id==='shed').seconds,60);
