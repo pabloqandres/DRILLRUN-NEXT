@@ -1,0 +1,9 @@
+/* V73 · Workshop L1 uses the same 3D construction indicator as the
+   approved Galpón progress HUD (shed-progress-v72.css). */
+#hud .workshopL1BuildHud{top:max(104px,calc(env(safe-area-inset-top) + 91px));border-color:#9bc8d6b8}
+#hud .workshopL1BuildHud .shedProgressHeading{letter-spacing:.055em}
+#hud .workshopL1BuildHud .shedProgressHeading span{white-space:normal;line-height:1.25}
+@media(orientation:landscape) and (max-height:500px){
+ #hud .workshopL1BuildHud{top:clamp(81px,15.5vh,98px)}
+}
+@media(prefers-reduced-motion:reduce){#hud .workshopL1BuildHud .shedProgressTrack i{transition:none}}
