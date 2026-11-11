@@ -11,7 +11,23 @@ export const WORKSHOP_LEVELS=[
 ];
 
 export const WORKSHOP_L1_COST=2500;
-export const WORKSHOP_L1_SECONDS=30;
+export const WORKSHOP_L1_SECONDS=90;
+// Migrate only UNFINISHED 30-second L1 jobs. A finished workshop stays built;
+// no additional money, worker or action is generated.
+export function migrateWorkshopL1Construction(s){
+ const w=s?.workshop;
+ if(w?.level!==1||w.status!=='building')return false;
+ if(!Number.isFinite(w.started)||!Number.isFinite(w.ends))return false;
+ if(Math.abs((w.ends-w.started)-30000)>1)return false;
+ w.ends=w.started+WORKSHOP_L1_SECONDS*1000;
+ return true;
+}
+export function workshopL1Progress(s,now=Date.now()){
+ const w=s?.workshop;
+ if(!w||w.status!=='building'||!Number.isFinite(w.started)||!Number.isFinite(w.ends))return null;
+ const duration=Math.max(1,w.ends-w.started),remaining=Math.max(0,w.ends-now);
+ return {remaining,percent:Math.round(Math.max(0,Math.min(1,(now-w.started)/duration))*100),duration};
+}
 export function workshopBuilt(s){return !!s.workshop&&s.workshop.status!=='building';}
 export function workshopLevel(s){return workshopBuilt(s)?s.workshop.level:0;}
 export function canBuildWorkshop(s){
@@ -29,6 +45,7 @@ export function buildWorkshop(s,now=Date.now()){
  return s.workshop;
 }
 export function finishWorkshopConstruction(s,now=Date.now()){
+ migrateWorkshopL1Construction(s);
  const w=s.workshop;
  if(!w||w.status!=='building'||now<w.ends)return false;
  w.status='built';delete w.started;delete w.ends;
