@@ -1,4 +1,4 @@
-name: V76 Personnel: 21 NPC identities, skills and compact UI
+name: "V76 Personnel: 21 NPC identities, skills and compact UI"
 on:
   push:
     branches: [chatgpt/v76-personal-roster-premium]
