@@ -61,6 +61,7 @@ import {DesertWind} from '../camera/ambient.mjs';
 import {WorksiteAudio} from '../audio/worksite-audio.mjs';
 import {SiteCinematics} from '../graphics/site-cinematics.mjs';
 import {installPersonalTruckHeadlights} from '../graphics/personal-drilltruck-headlights.mjs';
+import {visualTruckGroundHeight} from '../graphics/personal-truck-grounding.mjs';
 import * as T from '../vendor/three.module.js';
 import {World} from '../scene.mjs';
 import {createMotion,moveController} from '../animation/movement.mjs';
@@ -720,6 +721,13 @@ function syncPersonalTruckVisual(){
   m5PersonalTruckFallback=!officialReady;
   m5PersonalTruckModel.name='drilltruck-personal-02';
   m5PersonalTruckModel.userData={personal:true,temporaryVisual:m5PersonalTruckFallback};
+  // V59: measure the actual wheel/underbody geometry ONCE before mounting
+  // decorative headlights, avoiding GLB offsets being buried in raised asphalt.
+  m5PersonalTruckModel.position.set(0,0,0);
+  m5PersonalTruckModel.rotation.set(0,0,0);
+  m5PersonalTruckModel.updateWorldMatrix(true,true);
+  const modelBounds=new T.Box3().setFromObject(m5PersonalTruckModel);
+  m5PersonalTruckModel.userData.groundContactMinY=Number.isFinite(modelBounds.min.y)?modelBounds.min.y:0;
   m5TruckLighting=installPersonalTruckHeadlights(m5PersonalTruckModel);
   world.scene.add(m5PersonalTruckModel);
   if(!m5PersonalTruckCollider){
@@ -729,7 +737,11 @@ function syncPersonalTruckVisual(){
   }
  }
  m5PersonalTruckModel.visible=true;
- m5PersonalTruckModel.position.set(truck.position.x,.12,truck.position.z);
+ // V59: match the actual asphalt/grading height under all four wheels,
+ // not the fixed .12 m used by the old parking surface. Y is visual only.
+ const visualY=visualTruckGroundHeight(truck.position,truck.heading,
+  (x,z)=>world.sampleGround(x,z),m5PersonalTruckModel.userData.groundContactMinY);
+ m5PersonalTruckModel.position.set(truck.position.x,visualY,truck.position.z);
  m5PersonalTruckModel.rotation.y=truck.heading;
  m5TruckLighting?.set(truck.mode==='driving'&&!!truck.headlightsOn,world.quality);
  if(m5PersonalTruckCollider){
