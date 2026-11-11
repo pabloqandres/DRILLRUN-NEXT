@@ -1,0 +1,47 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const file=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+const splash=file('dist/title-preview-v65.html');
+const game=file('dist/chapter/game.mjs');
+const index=file('dist/index.html');
+test('V65 keeps approved logo shine but removes ONLY the full-screen light sweep',()=>{
+ assert.match(splash,/<div id="logoShine" aria-hidden="true"><\/div>/);
+ assert.match(splash,/#logoShine\{[^}]*animation:titleSweep 10s/);
+ assert.match(splash,/@keyframes titleSweep\{/);
+ assert.doesNotMatch(splash,/<div id="scan"><\/div>/);
+ assert.doesNotMatch(splash,/#scan\{/);
+ assert.doesNotMatch(splash,/@keyframes scan\{/);
+ assert.match(splash,/#playHero \.gleam\{[^}]*animation:titleSweep 7s/);
+});
+test('V65 buildings are drawn in staged and staggered SVG segments, not video',()=>{
+ assert.match(splash,/<svg id="buildLines" viewBox="0 0 1672 941"/);
+ assert.equal((splash.match(/class="build-site"/g)||[]).length,3);
+ assert((splash.match(/class="construct-line /g)||[]).length>=10);
+ assert((splash.match(/class="construct-trace"/g)||[]).length>=3);
+ assert((splash.match(/class="holo-node"/g)||[]).length>=5);
+ assert.match(splash, /--site-phase:0s/);
+ assert.match(splash, /--site-phase:3\.4s/);
+ assert.match(splash, /--site-phase:6\.5s/);
+ assert.match(splash, /animation:blueprintConstruct 15s linear infinite/);
+ assert.match(splash, /animation:blueprintEnergy 15s linear infinite/);
+ assert.match(splash, /animation:blueprintNode 15s ease-in-out infinite/);
+ assert.match(splash, /stroke-dasharray:100/);
+ assert.match(splash, /stroke-dashoffset:100/);
+ assert.match(splash, /@media\(prefers-reduced-motion:reduce\)/);
+ assert.doesNotMatch(splash, /<video|<source[^>]*video|new WebGLRenderer/);
+ assert(splash.length<750000,'mobile HTML is lightweight and WebP self-contained');
+});
+test('V65 welcome routes to existing login/cloud save and avatar/restore paths',()=>{
+ assert.match(index, /id="welcomeScreen"/);
+ assert.match(index, /id="startScreen"/);
+ assert.match(index, /id="loading"/);
+ assert.match(index, /id="characterScreen"/);
+ assert.match(game, /frame\.src='\.\/*title-preview-v65\.html\?embedded=1'/);
+ assert.match(game, /event\.source!==\$\('#welcomeFrame'\)\?\.contentWindow/);
+ assert.match(game, /event\.origin!==location\.origin/);
+ assert.match(splash, /window\.parent\.postMessage\(\{type:'drillrun-welcome-enter-v64'\},window\.location\.origin\)/);
+ assert.match(game, /await chooseCharacter\(true\)/);
+ assert.match(game, /beginPlay\(true\)/);
+ assert.match(game, /cloudStartNewGame\(s\)/);
+});
