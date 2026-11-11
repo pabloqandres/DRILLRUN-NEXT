@@ -23,7 +23,7 @@ test('V62 returns the warm, soft headlight rig and entirely removes the V61 whit
 
 test('V62 boots gain only a few centimetres over general paved Patio and road',()=>{
  const surfaces=[{x:3,z:5,w:2,d:2,y:.115},patio];
- assert(near(avatarPavementClearance(-51,-17,surfaces),.032));
+ assert(near(avatarPavementClearance(-51,-24,surfaces),.032)); // outside the elevated central road
  assert(near(avatarPavementClearance(-51,-14,surfaces),.040));
  assert(near(avatarPavementClearance(-51,3.2,surfaces),.125),
   'protected pedestrian deck is raised above regular paving');
