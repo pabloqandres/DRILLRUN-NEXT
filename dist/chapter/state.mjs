@@ -2,7 +2,7 @@ import {CONFIG,CLEARABLES,PRODUCTS} from './config.mjs';
 import {avatarDefinition} from './avatars.mjs';
 import {moduleDefinition,MODULES,BUILD_ZONES,moduleFixtures,pendingConstruction,moduleAvailability} from './module-catalog.mjs';
 import {migrateNarrative,ensureNarrative} from './narrative.mjs';
-import {canWalkM5Area} from './navigation-areas.mjs';
+import {isPlayableTerrain} from './navigation-areas.mjs';
 export class GameError extends Error{constructor(key){super(key);this.key=key;}}
 const fail=key=>{throw new GameError(key);},finite=n=>Number.isFinite(n),product=id=>PRODUCTS.find(p=>p.id===id);
 export function newGame(lang='es',character='operator01',now=Date.now()){
@@ -67,12 +67,10 @@ export function restore(data,now=Date.now()){
  s.nextId=Math.max(1,Math.floor(s.nextId),...s.inventory.map(o=>Number(o.id.split('-')[1])+1||1));
  s.ledger=(Array.isArray(s.ledger)?s.ledger:[]).filter(o=>finite(o.amount)&&finite(o.at)).slice(-100);
  {
-  // Preserve every legitimate M5 office-to-patio path position after
-  // resuming a phone/PC Cloud Save; don't teleport back behind an old wall.
-  const pos=s.position,x=pos?.x,z=pos?.z;
-  const main=finite(x)&&finite(z)&&x>=-16&&x<=33&&Math.abs(z)<=13;
-  const expansion=canWalkM5Area(x,z,s.mission4?.phase==='complete');
-  if(!main&&!expansion)s.position={...CONFIG.spawn};
+  // V57: preserve legal positions anywhere on the 240 m map across all
+  // mission stages. Discard only corrupt/outside-terrain saved positions.
+  const pos=s.position;
+  if(!isPlayableTerrain(pos?.x,pos?.z))s.position={...CONFIG.spawn};
  }
  if(s.office.status==='building'&&(!finite(s.office.started)||!finite(s.office.ends)||s.office.ends<s.office.started))return null;
  if(s.office.status==='built'){s.office.level=s.office.level===2?2:1;installModuleFixtures(s);}else s.inside=false;
