@@ -20,5 +20,6 @@ Convertir la maqueta premium de selección en un flujo funcional, real y respons
 - Referencia de calidad: boceto cinematográfico aprobado por usuario. La calidad del modelo depende de los GLB realmente importados; **la foto del mockup no se inyecta a la pantalla**.
 - Se mantiene la relación entre los cuatro GLB y cuatro videos de intro, sin cambiar assets ni rutas.
 - Regresión antigua `avatars.test.mjs`/`cinematic.test.mjs` asume aún un único intro compartido, mientras `main` ya contiene los archivos diferenciados; `navigation-selector-hotfix.test.mjs` supone navegación inferior anterior. Se excluyeron del workflow focal V68; se reportan como desactualizadas, no se cambia la lógica para hacerlas pasar.
+- El URL de la misma Vercel preview con `?selectorPreview=1` permite entrar al selector por Continuar sin una partida nueva. El botón Comenzar valida nombre y reproduce feedback, pero abre una confirmación visual y **no llama Cloud Start, save, ni crea generación de partida**. El URL normal mantiene el flujo de partida completo.
 - Sin cambios de misiones, perfiles persistidos, economía, HSEC, contrato ni compras. Sin merge a main/prod sin QA del usuario y aprobación expresa.
 - QA Android pendiente: verificar vista cercana GLB, vista corporal, 4 cards, nombre con teclado visible, habilidades y gestos/vibración admitidos por navegador.
