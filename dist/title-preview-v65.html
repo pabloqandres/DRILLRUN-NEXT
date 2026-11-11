@@ -195,7 +195,16 @@ body.embedded #modeTools,body.embedded #watermark,body.embedded #entryBurst .ent
  document.body.classList.toggle('embedded',embedded);
  $('playHero').addEventListener('click',()=>{
    $('entryBurst').classList.add('active');$('playHero').disabled=true;
-   if(embedded&&window.parent!==window)window.parent.postMessage({type:'drillrun-welcome-enter-v64'},window.location.origin);
+   if(embedded&&window.parent!==window){
+     // V67: fallback fullscreen directly on JUGAR's user gesture. The parent
+     // message is asynchronous, so requesting it after postMessage is too late.
+     try{
+       const parentDoc=window.parent.document;
+       if(!parentDoc.fullscreenElement&&parentDoc.documentElement.requestFullscreen)
+         parentDoc.documentElement.requestFullscreen({navigationUI:'hide'}).catch(()=>{});
+     }catch{}
+     window.parent.postMessage({type:'drillrun-welcome-enter-v64'},window.location.origin);
+   }
    loaded=true;
  });
  $('returnBtn').addEventListener('click',()=>{$('entryBurst').classList.remove('active');$('playHero').disabled=false;});
