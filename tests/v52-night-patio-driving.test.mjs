@@ -20,12 +20,12 @@ test('Patio L1 has eight functional luminaires and additional task lights',()=>{
 });
 test('Personal vehicle headlights cast light forward and follow yaw',()=>{
  assert.match(headlights,/new T\.SpotLight\(/);
- assert.match(headlights,/lamp\.target\.position\.set\(x\*1\.55,-1\.0,14\)/);
- assert.match(headlights,/projectPersonalTruckRoadLight/);
- assert.match(headlights,/scene\.add\(mesh\)/);
+ assert.match(headlights,/lamp\.target\.position\.set\(x\*1\.7,-\.35,17\)/);
+ assert.doesNotMatch(headlights,/projectPersonalTruckRoadLight|makeRoadProjection/);
+ assert.doesNotMatch(headlights,/AdditiveBlending/);
  assert.match(headlights,/root\.add\(lights\)/);
  assert.match(headlights,/lamp\.castShadow=false/);
- assert.match(game,/installPersonalTruckHeadlights\(m5PersonalTruckModel,world\)/);
+ assert.match(game,/installPersonalTruckHeadlights\(m5PersonalTruckModel\)/);
  assert.match(game,/m5TruckLighting\?\.set\(truck\.mode==='driving'/);
  assert.match(game,/truck\.headlightsOn=!truck\.headlightsOn/);
  assert.match(html,/id="personalTruckLights"/);

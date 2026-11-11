@@ -1,5 +1,11 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-11 — V62 Faros cálidos y botas correctamente apoyadas
+- Se retira por completo el proyector blanco aditivo de 21 m de la V61 y se recuperan los faros originales V60 de tono cálido, con encendido, apagado y rumbo del vehículo sin cambios.
+- Ajuste visual localizado del avatar sobre pavimento y senda elevada del Patio (+3–4 cm habituales, con transición de borde), sin levantarlo en arena ni tocar `sampleGround`, misiones, economía o guardados.
+- Se conservan la protección de barandas V61, iluminación instalada del Patio y controles de conducción. Tests V52/V61 actualizados y nueva CI V62; referencia `CHANGES/2026-11-11_v62-natural-light-boot-clearance.md`. Validación visual Android pendiente.
+
+
 ## 2026-11-11 — V61 DrillTruck® antiatrapamiento y faros que iluminan camino
 - Prevención de atravesar barandas finas a 30 km/h: huella con 21 muestras y barrido cada 12 cm durante aceleración, giro, deslizamiento; permite desenganchar una posición ya solapada mediante marcha atrás.
 - Faros personales de luz cálida con proyección real y adaptada a la altura del suelo en dirección de avance, sin depender del eje visual GLB. Encendido/apagado coincide con HUD.
