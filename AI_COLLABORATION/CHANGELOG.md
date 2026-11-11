@@ -408,3 +408,6 @@ Corregido margen vehicular y movimiento en estrechamientos; unificación de cont
 
 ## 2026-11-10 — V56 Recuperación DrillTruck® personal 02
 Modelo visual independiente de carga M4, localizador de flota y recuperación en P01 sin compra extra, reparación de pose inválida en partidas guardadas, CI para propiedad y M5. Sin cambios en ingresos/misiones.
+
+## 2026-11-11 — V68 selector cinematográfico real
+- Rama `chatgpt/v68-cinematic-real-avatar-selector` desde main e9393305. Reencuadre cercano del GLB real, retratos/figura fuente del mismo asset, diseño responsive, bonos auténticos y campo de nombre, click/whoosh y vibración discreta. Ajustes acotados shared hooks con coordinación en DECISIONS. CI focal y preview, QA usuario pendiente; no producción.
