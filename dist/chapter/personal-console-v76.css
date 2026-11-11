@@ -1,0 +1,231 @@
+/* V76 · Premium compact Personal, landscape-first. No branding on assets.
+   Owns only the Personal route of Centro de Faena; all other modules unchanged. */
+#faenaCenter[data-personal-v76="true"]{background:#061a2ac9;backdrop-filter:blur(6px)}
+#faenaCenter[data-personal-v76="true"] .faenaDialog{
+ width:min(1150px,94vw)!important;height:min(658px,88dvh)!important;
+ min-height:0!important;max-height:calc(100dvh - 12px);
+ grid-template-rows:auto minmax(0,1fr)!important;
+ border:1px solid #4688a7;border-radius:15px;
+ box-shadow:0 16px 60px #020c14cd,0 0 0 1px #5f9dc22c inset;
+}
+#faenaCenter[data-personal-v76="true"] .faenaHeader{
+ min-height:46px!important;padding:7px 12px!important;
+ background:linear-gradient(95deg,#0b263a,#153b4c 57%,#0b2539);
+}
+#faenaCenter[data-personal-v76="true"] .faenaHeader h2{font-size:18px!important}
+#faenaCenter[data-personal-v76="true"] .faenaHeader small{font-size:8px!important}
+#faenaCenter[data-personal-v76="true"] .faenaFooter{display:none!important}
+#faenaCenter[data-personal-v76="true"] .faenaBody{
+ height:100%;min-height:0;overflow:hidden!important;touch-action:auto;
+}
+#faenaCenter[data-personal-v76="true"] .faenaContent{
+ height:100%;min-height:0;box-sizing:border-box;padding:6px 8px 8px!important;
+}
+#faenaCenter .p76Console{
+ width:100%;height:100%;min-height:0;box-sizing:border-box;
+ display:grid;grid-template-rows:minmax(0,1fr) auto;gap:7px;
+ color:#e4f0f5;font-family:inherit;
+}
+#faenaCenter .p76Console *{box-sizing:border-box}
+#faenaCenter .p76Main{
+ display:grid;grid-template-columns:minmax(150px,25%) minmax(275px,44%) minmax(185px,31%);
+ gap:8px;min-height:0;overflow:hidden;
+}
+#faenaCenter .p76Sidebar,#faenaCenter .p76Selection,#faenaCenter .p76Details{
+ min-width:0;min-height:0;border:1px solid #3f7892;border-radius:12px;
+ background:linear-gradient(153deg,#123b53,#09293d 72%);
+ box-shadow:inset 0 1px #c3f0ff1b;overflow:hidden;
+}
+#faenaCenter .p76Sidebar{padding:7px;display:flex;flex-direction:column;gap:7px}
+#faenaCenter .p76Mission{
+ width:100%;min-height:76px;max-height:106px;flex:0 0 auto;
+ display:flex;align-items:stretch;position:relative;overflow:hidden;
+ border:1px solid #d6ad5795;border-radius:11px;
+ background:linear-gradient(95deg,#1b3349 15%,#243a47 55%,#453727);
+ padding:0!important;color:#fff6e7;text-align:left;box-shadow:0 0 14px #d88e2a20;
+}
+#faenaCenter .p76MissionBackdrop{
+ position:absolute;inset:0;background:
+ radial-gradient(circle at 84% 44%,#ffb64a6b,transparent 36%),
+ linear-gradient(115deg,#0b243acd 11%,#0b23359c 71%,transparent),linear-gradient(#52637120,#182a34ad);
+}
+#faenaCenter .p76MissionText{position:relative;z-index:1;display:flex;flex-direction:column;gap:3px;padding:8px 12px;min-width:0}
+#faenaCenter .p76Mission small{font-size:clamp(7px,.75vw,10px);font-weight:850;color:#ffe28b;letter-spacing:.09em}
+#faenaCenter .p76Mission strong{font-size:clamp(12px,1.3vw,19px);line-height:1.1;white-space:normal}
+#faenaCenter .p76Mission span span{font-size:clamp(8px,.85vw,11px);color:#dceaf1;line-height:1.2}
+#faenaCenter .p76Mission span span b{color:#f8d478}
+#faenaCenter .p76Mission>i{position:absolute;right:9px;top:36%;font-size:25px;font-style:normal;color:#ffdd85;z-index:1}
+#faenaCenter .p76RoleHeader{display:flex;justify-content:space-between;gap:5px;align-items:center;padding:0 3px}
+#faenaCenter .p76RoleHeader strong{color:#93cae1;font-size:clamp(9px,.94vw,12px);letter-spacing:.095em}
+#faenaCenter .p76RoleHeader small{color:#7fa6b8;font-size:9px}
+#faenaCenter .p76Roles{
+ min-height:0;overflow-y:auto;overscroll-behavior:contain;
+ scrollbar-width:thin;scrollbar-color:#4f91ac #0a273b;
+ display:flex;flex-direction:column;gap:4px;padding:1px 2px 4px;
+}
+#faenaCenter .p76Role{
+ flex:0 0 auto;width:100%;display:flex;align-items:center;gap:8px;
+ min-height:31px;padding:4px 7px!important;margin:0!important;border:1px solid #42728a;
+ border-radius:8px;background:linear-gradient(120deg,#1a455b,#173348);
+ color:#cfe9f4;text-align:left;font-size:clamp(9px,.9vw,12px);
+}
+#faenaCenter .p76Role.chosen{
+ border-color:#ffe297;background:linear-gradient(105deg,#544d37,#26465a);
+ color:#fff5d6;box-shadow:0 0 10px #ffc6535b,inset 0 0 0 1px #ffe1a13d;
+}
+#faenaCenter .p76Role.locked{opacity:.66}
+#faenaCenter .p76RoleGlyph{display:grid;place-items:center;flex:0 0 22px;width:22px;color:#a4d9ef}
+#faenaCenter .p76RoleGlyph svg{width:19px;height:19px}
+#faenaCenter .p76RoleLabel{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;font-weight:780}
+#faenaCenter .p76Role em{font-size:9px;flex:0 0 auto;font-style:normal;padding:2px 5px;color:#a9d5e2;background:#0a2436;border-radius:6px}
+#faenaCenter .p76Role em.hasStaff{background:#215743;color:#95f5be}
+#faenaCenter .p76Selection{padding:8px;display:flex;flex-direction:column;gap:8px}
+#faenaCenter .p76SelectionHead{display:flex;align-items:center;gap:8px;min-height:42px;min-width:0}
+#faenaCenter .p76SelectionHead>span:nth-child(2){display:flex;flex:1;min-width:0;flex-direction:column;gap:3px}
+#faenaCenter .p76SelectionHead strong{font-size:clamp(12px,1.3vw,20px);line-height:1.12;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#faenaCenter .p76SelectionHead small{font-size:9px;color:#b7cddd;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+#faenaCenter .p76SelectionIcon{color:#78dff3;display:grid;place-items:center;flex:0 0 26px}
+#faenaCenter .p76SelectionIcon svg{width:24px;height:24px}
+#faenaCenter .p76SelectionHead>em{font-style:normal;flex:0 0 auto;color:#ffd47f;font-size:11px;font-weight:850}
+#faenaCenter .p76Cards{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;
+ min-height:0;height:100%;align-items:stretch;
+}
+#faenaCenter .p76Candidate{
+ display:flex;flex-direction:column;gap:4px;min-width:0;min-height:0;
+ margin:0!important;padding:5px!important;border:1px solid #3f809b;
+ border-radius:10px;background:linear-gradient(160deg,#1b4861,#0d2a41);
+ box-shadow:inset 0 1px #b9f2ff1c;color:#f3f7f6;text-align:left;overflow:hidden;
+}
+#faenaCenter .p76Candidate.chosen{border:2px solid #ffd36c;padding:4px!important;box-shadow:0 0 12px #ffc34779,inset 0 0 12px #ffc34715}
+#faenaCenter .p76CandidateArt{display:block;position:relative;flex:1 1 70px;min-height:52px;overflow:hidden;border-radius:7px;background:#10293b}
+#faenaCenter .p76CandidateArt img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 15%}
+#faenaCenter .p76ChosenMark{position:absolute;top:2px;right:3px;padding:2px 5px;background:#ffcf5d;border-radius:5px;font-style:normal;font-size:12px;color:#29200e}
+#faenaCenter .p76Candidate>b{display:block;flex:0 0 auto;font-size:clamp(9px,.93vw,13px);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#faenaCenter .p76Highlights{display:flex;flex-direction:column;gap:2px}
+#faenaCenter .p76Highlights span{display:flex;justify-content:space-between;gap:3px;color:#b8d7e4;font-size:clamp(7px,.72vw,10px);white-space:nowrap;min-width:0}
+#faenaCenter .p76Highlights em{color:#bce4a4;font-style:normal;font-weight:800}
+#faenaCenter .p76Cost{display:flex;align-items:center;justify-content:center;gap:5px;min-height:27px;flex:0 0 auto;background:#173a4d;border:1px solid #5886a4;border-radius:7px;font-size:clamp(10px,1.03vw,15px);font-weight:900;color:#ffdd7d}
+#faenaCenter .p76Cost svg{width:17px;height:17px}
+#faenaCenter .p76Status{display:block;flex:0 0 auto;text-align:center;font-size:8px;letter-spacing:.07em;color:#8bcef0}
+#faenaCenter .p76Candidate.hired .p76Status{color:#7ef1af}
+#faenaCenter .p76Details{padding:8px;display:flex;flex-direction:column;gap:7px}
+#faenaCenter .p76DetailHead{display:flex;gap:9px;align-items:center;min-height:66px;border-bottom:1px solid #3a7490;padding-bottom:6px}
+#faenaCenter .p76DetailPortrait{display:block;flex:0 0 65px;width:65px;height:69px;object-fit:cover;border-radius:8px;border:1px solid #6eabba}
+#faenaCenter .p76DetailText{display:flex;flex-direction:column;min-width:0;gap:3px}
+#faenaCenter .p76DetailText small{color:#82c8e0;font-size:8px;letter-spacing:.1em;font-weight:750}
+#faenaCenter .p76DetailText strong{font-size:clamp(13px,1.4vw,20px);white-space:normal;line-height:1.1}
+#faenaCenter .p76DetailText span{font-size:9px;color:#c4deea}
+#faenaCenter .p76DetailSkills{display:flex;flex-direction:column;gap:6px;min-height:0}
+#faenaCenter .p76DetailSkills h3{display:flex;justify-content:space-between;align-items:center;gap:6px;margin:0 0 1px!important;font-size:10px;letter-spacing:.1em;color:#afd7e5}
+#faenaCenter .p76DetailSkills h3 small{font-size:8px;color:#94aeb9;letter-spacing:0;font-weight:400}
+#faenaCenter .p76Skill{display:grid;grid-template-columns:21px minmax(0,1fr) auto;gap:5px;align-items:center;min-height:30px;padding:5px 6px;border:1px solid #477e95;border-radius:8px;background:#164054}
+#faenaCenter .p76Skill>span:first-child svg{width:17px;height:17px;color:#93d6e8}
+#faenaCenter .p76Skill>b{font-size:clamp(9px,.8vw,11px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#faenaCenter .p76Pips{display:flex;gap:2px;flex:0 0 auto}
+#faenaCenter .p76Pips i{display:block;width:7px;height:8px;transform:skewX(-8deg);background:#345a6d;border-radius:1px}
+#faenaCenter .p76Pips i.on{background:linear-gradient(#fff2ba,#e6aa41)}
+#faenaCenter .p76Pips i.accent{box-shadow:0 0 6px #ffce5c}
+#faenaCenter .p76HireInfo{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:8px;color:#adcad7;font-size:10px}
+#faenaCenter .p76HireInfo strong{display:flex;align-items:center;gap:4px;color:#ffdc85;font-size:14px}
+#faenaCenter .p76HireInfo svg{width:17px;height:17px}
+#faenaCenter .p76Hire{
+ width:100%;min-width:0;min-height:38px;margin:0!important;padding:7px 10px!important;
+ display:flex;align-items:center;justify-content:center;gap:8px;
+ border:1px solid #fff0ac;border-radius:9px;
+ background:linear-gradient(150deg,#ffe6a0,#ffbf40);color:#302516;
+ box-shadow:0 0 13px #f7bd4580,inset 0 1px #fff9db;
+ font-size:clamp(10px,.97vw,13px);font-weight:900;
+}
+#faenaCenter .p76Hire svg{width:20px;height:20px}
+#faenaCenter .p76Hire:disabled{background:#294a5a;color:#bdd1d9;border-color:#6b91a4;box-shadow:none;opacity:.76;cursor:default}
+#faenaCenter .p76SkillNote{color:#90b3be;font-size:8px;line-height:1.2;text-align:center}
+#faenaCenter .p76Team{display:flex;gap:8px;min-height:59px;max-height:69px;overflow:hidden;align-items:stretch}
+#faenaCenter .p76TeamSummary{
+ flex:0 0 154px;display:flex;align-items:center;gap:8px;padding:7px 9px;
+ border:1px solid #4a93b0;border-radius:10px;background:#123c55;
+}
+#faenaCenter .p76TeamSummary>span{flex:0 0 28px;color:#62d3ed}
+#faenaCenter .p76TeamSummary>span svg{width:27px;height:27px}
+#faenaCenter .p76TeamSummary strong{font-size:12px;line-height:1.2}
+#faenaCenter .p76TeamSummary strong b{display:block;color:#ffca5c}
+#faenaCenter .p76TeamSummary small{display:none}
+#faenaCenter .p76TeamRail{
+ display:flex;gap:6px;flex:1;overflow-x:auto;overscroll-behavior-x:contain;
+ scrollbar-width:thin;scrollbar-color:#4688a1 #0a2b3d;touch-action:pan-x;
+}
+#faenaCenter .p76TeamSlot{
+ display:flex;gap:6px;align-items:center;flex:0 0 123px;min-width:0;padding:6px 7px;
+ border:1px solid #437b99;border-radius:10px;background:#14394f;
+}
+#faenaCenter .p76TeamSlot.empty{border-style:dashed;color:#b3ccda;justify-content:center}
+#faenaCenter .p76TeamSlot.empty>span{font-size:22px;opacity:.8}
+#faenaCenter .p76TeamSlot.empty small{font-size:9px}
+#faenaCenter .p76TeamSlot img,#faenaCenter .p76Unknown{width:40px;height:44px;flex:0 0 40px;object-fit:cover;border-radius:6px;background:#1a4259}
+#faenaCenter .p76TeamSlot>span:nth-child(2){min-width:0;display:flex;flex-direction:column;gap:3px}
+#faenaCenter .p76TeamSlot b{font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#faenaCenter .p76TeamSlot small{font-size:8px;color:#a5cad9}
+#faenaCenter .p76TeamSlot i{font-style:normal;color:#9dffbd;margin-left:auto}
+#faenaCenter .p76VolumeLabel{
+ flex:0 0 88px;display:flex;flex-direction:column;justify-content:center;gap:1px;
+ align-items:center;padding:4px 5px;border-radius:9px;background:#102e44;
+ border:1px solid #3a6a85;color:#8dcbdd;
+}
+#faenaCenter .p76VolumeLabel>span svg{width:16px;height:16px}
+#faenaCenter .p76VolumeLabel small{font-size:8px;letter-spacing:.1em}
+#faenaCenter .p76VolumeLabel input{width:75px;min-height:14px;height:14px;accent-color:#ffc65f}
+#faenaCenter .p76Console button:focus-visible{outline:2px solid #a7e5ff;outline-offset:2px}
+@media(orientation:landscape) and (max-height:480px){
+ #faenaCenter[data-personal-v76="true"] .faenaDialog{height:90dvh!important}
+ #faenaCenter[data-personal-v76="true"] .faenaHeader{min-height:36px!important;padding:4px 9px!important}
+ #faenaCenter[data-personal-v76="true"] .faenaHeader h2{font-size:14px!important}
+ #faenaCenter[data-personal-v76="true"] .faenaContent{padding:4px!important}
+ #faenaCenter .p76Console{gap:4px}
+ #faenaCenter .p76Main{gap:5px;grid-template-columns:minmax(143px,26%) minmax(240px,43%) minmax(164px,31%)}
+ #faenaCenter .p76Sidebar,#faenaCenter .p76Selection,#faenaCenter .p76Details{padding:5px}
+ #faenaCenter .p76Mission{min-height:56px;max-height:64px}
+ #faenaCenter .p76MissionText{padding:5px 9px;gap:2px}
+ #faenaCenter .p76RoleHeader{margin:0}
+ #faenaCenter .p76Role{min-height:26px;padding:3px 5px!important}
+ #faenaCenter .p76RoleGlyph{flex-basis:18px;width:18px}
+ #faenaCenter .p76RoleGlyph svg{width:16px;height:16px}
+ #faenaCenter .p76Selection{gap:4px}
+ #faenaCenter .p76SelectionHead{min-height:29px}
+ #faenaCenter .p76SelectionIcon svg{width:20px;height:20px}
+ #faenaCenter .p76Cards{gap:4px}
+ #faenaCenter .p76Candidate{padding:3px!important;gap:2px}
+ #faenaCenter .p76Candidate.chosen{padding:2px!important}
+ #faenaCenter .p76CandidateArt{min-height:38px}
+ #faenaCenter .p76Highlights span{font-size:7px}
+ #faenaCenter .p76Cost{min-height:21px}
+ #faenaCenter .p76Status{font-size:7px}
+ #faenaCenter .p76Details{gap:4px}
+ #faenaCenter .p76DetailHead{min-height:53px;padding-bottom:3px;gap:6px}
+ #faenaCenter .p76DetailPortrait{height:49px;width:50px;flex-basis:50px}
+ #faenaCenter .p76DetailSkills{gap:3px}
+ #faenaCenter .p76DetailSkills h3{font-size:9px}
+ #faenaCenter .p76Skill{min-height:24px;padding:3px 4px;grid-template-columns:15px minmax(0,1fr) auto;gap:3px}
+ #faenaCenter .p76Skill>span:first-child svg{width:13px;height:13px}
+ #faenaCenter .p76Pips i{width:5px;height:6px}
+ #faenaCenter .p76Hire{min-height:28px;padding:4px!important}
+ #faenaCenter .p76SkillNote{display:none}
+ #faenaCenter .p76Team{min-height:46px;max-height:49px;gap:5px}
+ #faenaCenter .p76TeamSummary{flex-basis:120px;padding:3px 5px}
+ #faenaCenter .p76TeamSummary>span{flex-basis:20px}
+ #faenaCenter .p76TeamSummary>span svg{width:20px;height:20px}
+ #faenaCenter .p76TeamSummary strong{font-size:10px}
+ #faenaCenter .p76TeamSlot{flex-basis:108px;padding:3px 4px}
+ #faenaCenter .p76TeamSlot img,#faenaCenter .p76Unknown{width:30px;height:35px;flex-basis:30px}
+ #faenaCenter .p76VolumeLabel{flex-basis:72px}
+ #faenaCenter .p76VolumeLabel input{width:62px}
+}
+@media(max-width:730px){
+ #faenaCenter .p76Main{grid-template-columns:minmax(118px,26%) minmax(205px,43%) minmax(140px,31%)}
+ #faenaCenter .p76RoleHeader small{display:none}
+ #faenaCenter .p76Role{gap:4px}
+ #faenaCenter .p76DetailPortrait{display:none}
+ #faenaCenter .p76Pips i{width:4px}
+}
+@media(prefers-reduced-motion:reduce){
+ #faenaCenter .p76Console *{transition:none!important;animation:none!important}
+}
