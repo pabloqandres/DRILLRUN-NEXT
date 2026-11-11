@@ -438,3 +438,9 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Taller Nivel 1 pasa a 90 s; barra verde/porcentaje/MM:SS en HUD anclados a timestamps de la obra; ampliación L2 sigue 300 s, precio igual. Migración idempotente sólo para obras antiguas aún en curso.
 - Camila Reyes comunica 3 sondajes de 30 m en los 5 idiomas. El teléfono lee la cantidad real desde el contrato, sin fallback falso a 6.
 - CI focal de V73 + regresiones de contratos y narrativa completó con éxito. Diseño de Personal sigue pendiente de aprobación; auditoría navegación de 8 categorías será un cambio aparte.
+
+## 2026-11-11 — V74 navegación completa de Catálogo (M1–M5)
+- Las ocho categorías ya existían, incluyendo **Seguridad** y **Personal**, pero las dos últimas quedaban fuera del área visible del panel horizontal sin indicador de navegación.
+- Flechas visibles anteriores/siguientes con estado deshabilitado correcto, desplazamiento con gesto horizontal en Android, rueda de mouse en PC y flechas de teclado, sin perder la categoría activa al reconstruir UI.
+- CSS con tamaños responsive y controles accesibles; sin tocar lista de productos, precios, restricciones, Cloud Save, campañas ni misiones.
+- Suite V74 + regresiones V71/V58 pasó. La pantalla Personal premium sigue sin implementar hasta aprobación.
