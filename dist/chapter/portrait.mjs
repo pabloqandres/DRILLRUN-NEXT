@@ -23,8 +23,8 @@ export function renderFullBodyPortrait(world,host,height=1.85){
  key.position.set(-2.4,4.5,3.5);scene.add(key);
  const rim=new T.DirectionalLight(0x6ddaff,1.55);
  rim.position.set(3,2.8,-2);scene.add(rim);
- const inv=world.player.matrixWorld.clone().invert(),v=new T.Vector3(),geometries=[];
  world.player.updateMatrixWorld(true);
+ const inv=world.player.matrixWorld.clone().invert(),v=new T.Vector3(),geometries=[];
  for(const original of world.worker.meshes){
   if(!original.geometry?.attributes?.position)continue;
   original.skeleton?.update?.();
