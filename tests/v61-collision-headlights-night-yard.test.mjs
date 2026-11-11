@@ -1,14 +1,12 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import * as T from '../dist/vendor/three.module.js';
 import {World} from '../dist/scene.mjs';
 import {drivePersonalTruck} from '../dist/mission5/personal-drilltruck.mjs';
 import {
  personalTruckFootprintProbes,countPersonalTruckCollision,
  sweptPersonalTruckCollision,PERSONAL_TRUCK_SWEEP_STEP
 } from '../dist/animation/personal-truck-swept-collision.mjs';
-import {projectPersonalTruckRoadLight} from '../dist/graphics/personal-drilltruck-headlights.mjs';
 
 const source=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const near=(x,y,margin=.001)=>Math.abs(x-y)<=margin;
@@ -62,33 +60,17 @@ test('V61 existing rail overlap can back out but not plow deeper into it',()=>{
  assert(result.position.z<0,'existing penetration must not trap reverse');
  assert.equal(result.blocked,true);
 });
-test('V61 projected headlights follow road terrain, both heading and grade',()=>{
- const vertices=new T.BufferAttribute(new Float32Array((9*23)*3),3);
- const projector={geo:{
-  getAttribute:()=>vertices,computeBoundingSphere(){}
- }};
- const sample=(x,z)=>x*.06+z*.02;
- assert.equal(projectPersonalTruckRoadLight(projector,{x:5,z:6},0,sample),true);
- const first=[vertices.getX(4),vertices.getY(4),vertices.getZ(4)];
- assert(near(first[0],5));assert(first[2]>8);
- assert(near(first[1],sample(first[0],first[2])+.055));
- assert.equal(projectPersonalTruckRoadLight(projector,{x:5,z:6},Math.PI/2,sample),true);
- const turned=[vertices.getX(4),vertices.getY(4),vertices.getZ(4)];
- assert(turned[0]>first[0],'light should rotate to the direction of movement');
- assert(near(turned[2],6));
- assert(near(turned[1],sample(turned[0],turned[2])+.055));
-});
-test('V61 road projector only exists while headlights are on and is disposed safely',()=>{
- const sourceCode=source('dist/graphics/personal-drilltruck-headlights.mjs');
+test('V62 headlights use the original soft, warm lighting without V61 laser decal',()=>{
+ const headlights=source('dist/graphics/personal-drilltruck-headlights.mjs');
  const game=source('dist/chapter/game.mjs');
- assert.match(sourceCode,/projector\.mesh\.visible=illuminated/);
- assert.match(sourceCode,/projector\.mesh\.removeFromParent\(\)/);
- assert.match(sourceCode,/projector\.geo\.dispose\(\)/);
- assert.match(sourceCode,/scene\.add\(mesh\)/);
- assert.match(sourceCode,/blending:T\.AdditiveBlending/);
- assert.match(game,/installPersonalTruckHeadlights\(m5PersonalTruckModel,world\)/);
- assert.match(game,/m5TruckLighting\?\.project\(truck\.position,truck\.heading/);
- assert.match(game,/m5TruckLighting\?\.set\(truck\.mode==='driving'&&!!truck\.headlightsOn/);
+ assert.match(headlights,/new T\\.SpotLight\\(0xfff2d4,0,35/);
+ assert.match(headlights,/lamp\\.castShadow=false/);
+ assert.match(headlights,/frontFill\\.intensity=on\\?3:0/);
+ assert.match(headlights,/root\\.add\\(lights\\)/);
+ assert.doesNotMatch(headlights,/makeRoadProjection|projectPersonalTruckRoadLight|AdditiveBlending|new T\\.PlaneGeometry/);
+ assert.match(game,/installPersonalTruckHeadlights\\(m5PersonalTruckModel\\)/);
+ assert.match(game,/m5TruckLighting\\?\\.set\\(truck\\.mode==='driving'/);
+ assert.doesNotMatch(game,/m5TruckLighting\\?\\.project\\(/);
 });
 test('V61 patio working areas receive continuous visible illumination even on mobile',()=>{
  const patio=source('dist/mission5/patio-world.mjs');
