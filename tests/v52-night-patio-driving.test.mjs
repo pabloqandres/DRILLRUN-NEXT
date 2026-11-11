@@ -36,10 +36,12 @@ test('Boarding hides exterior avatar BEFORE render and routes audio to engine',(
  assert.match(game,/personalDriving:personalTruck\(s\)\?\.mode==='driving'/);
  assert.match(game,/personalSpeed:personalTruck\(s\)\?\.speed\|\|0/);
  assert.match(game,/moving:walking&&personalTruck\(s\)\?\.mode!=='driving'/);
- assert.match(audio,/this\.personalTruck=engine\(/);
+ assert.match(audio,/this\.personalTruck=createSoftPickupMotor\(/);
  assert.match(audio,/this\.fade\(this\.personalTruck\.out,personalDriving\?/);
  assert.match(audio,/if\(personalDriving\)\{this\.stepDistance=0;return;\}/);
- assert.match(audio,/68\+rpm\*105/);
+ assert.match(audio,/const idleHz=59\+rpm\*67/);
+ assert.match(audio,/this\.personalTruck\.harmonic/);
+ assert.match(audio,/this\.personalTruck\.filter/);
 });
 
 test('Night pavement pools stay above the road markings, with bay coverage',()=>{

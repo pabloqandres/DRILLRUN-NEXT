@@ -1,5 +1,13 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-11 — V66 (preview): DrillTruck® personal y automática, sesión, NPC/HUD
+- Ruedas en ambos vehículos: M5 liga giro a velocidad y ángulo delantero; M4 usa solamente el movimiento que ya realiza en su ruta de servicio, sin alterar la misión 4 ni mantenimiento.
+- Conducción pickup tipo bicicleta, progresiva y de reversa/brake realista; motor original suave sin archivos externos.
+- Al reanudar, unidad personal existente regresa a P01 y avatar tras 3,5 h a acceso oficina; respeta cash y Cloud Save.
+- NPC M5 a altura adulta comparada al avatar; freno diagonal y dock escritorio; JUGAR sin sombra blanca pero logo conserva su sweep.
+- Tests V66 + regresiones históricas, CI focal; no publicación en producción hasta aprobación. Ver `CHANGES/2026-11-11_v66-personal-automatic-truck-return-drive-ui.md`.
+
+
 ## 2026-11-11 — V65.1 Galpón holográfico respetando profundidad y polvo ambiental
 - Mantiene barrido **exclusivamente sobre logo**, no sobre toda la pantalla. Construcción blueprint progresiva en 3 zonas con fases desfasadas, energía de líneas y nodos de instalación.
 - Se recorta el galpón posterior izquierdo usando la silueta del módulo real de primer plano, tanto en trazos animados SVG como en brillo azul WebP, para impedir transparencias poco creíbles.
