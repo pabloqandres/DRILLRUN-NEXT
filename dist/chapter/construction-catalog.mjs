@@ -3,7 +3,6 @@ import {constructionSeconds,landReady} from './state.mjs';
 import {HSEC_ASSETS,HSEC_CATEGORIES} from '../hsec/catalog.mjs';
 import {workshopLevel,workshopUpgradeJob,WORKSHOP_LEVELS,canUpgradeWorkshop,canBuildWorkshop,WORKSHOP_L1_COST,WORKSHOP_L1_SECONDS} from '../mission3/inventory.mjs';
 import {DRILLS,canPurchaseDrill} from '../mission3/drills.mjs';
-import {ROLES,personnelByRole,canHire} from '../mission3/personnel.mjs';
 import {DTH_DRILLS,canPurchaseDthDrill} from '../mission4/drills-dth.mjs';
 import {DRILLTRUCK_COST,canPurchaseDrillTruck,drillTruckState} from '../mission4/drilltruck.mjs';
 import {pendingOrders} from '../mission3/headquarters.mjs';
@@ -15,7 +14,7 @@ const LOCALES={es:ES,en:EN,pt:{...EN,catalog:'Catálogo',infrastructure:'Edifíc
 const ACTIONS={es:{collapse:'Contraer ficha',expand:'Expandir ficha',buy:'Comprar',place:'Ubicar',noCharge:'Compra directa · ubicación asignada'},en:{collapse:'Collapse panel',expand:'Expand panel',buy:'Buy',place:'Place',noCharge:'Direct purchase · assigned location'},pt:{collapse:'Recolher ficha',expand:'Expandir ficha',buy:'Comprar',place:'Posicionar',details:'Ficha técnica',noCharge:'Compra direta · local atribuído'},it:{collapse:'Comprimi scheda',expand:'Espandi scheda',buy:'Acquista',place:'Posiziona',details:'Scheda tecnica',noCharge:'Acquisto diretto · posizione assegnata'},'zh-Hant':{collapse:'收合面板',expand:'展開面板',buy:'購買',place:'放置',details:'技術資料',noCharge:'直接購買 · 指定位置'}};
 export const catalogCopy=lang=>({...LOCALES[lang]||ES,...ACTIONS[lang]||ACTIONS.es});
 export const catalogDuration=seconds=>seconds>=60?`${Math.floor(seconds/60)} min${seconds%60?' '+Math.round(seconds%60)+' s':''}`:`${Math.round(seconds)} s`;
-export function catalogCategories(lang){const c=catalogCopy(lang);return HSEC_CATEGORIES.map(d=>({id:d.id,label:c[d.id],icon:'hsec:'+d.id}));}
+export function catalogCategories(lang){const c=catalogCopy(lang);return HSEC_CATEGORIES.filter(d=>d.id!=='management').map(d=>({id:d.id,label:c[d.id],icon:'hsec:'+d.id}));}
 
 // Reason text for blocked purchase
 function blockReason(code,c){
@@ -109,15 +108,8 @@ export function catalogProducts(s,t){
  const truckStatus=!m4On?'locked':truckOwned?'installed':truckOnOrder?'building':truckBlocked?'locked':'available';
  products.push({id:'drilltruck',kind:'vehicle',category:'vehicles',title:'DrillTruck',level:1,description:'Vehículo autónomo de mantenimiento en terreno',benefit:'Mantenimiento automatizado de sondajes',price:truckOwned||truckOnOrder?null:DRILLTRUCK_COST,seconds:null,w:5.5,d:2.2,h:2.8,capacity:'1 zona',status:truckStatus,reason:!m4On?c.later:truckOnOrder?c.ordered:blockReason(truckBlocked,c),model:{id:'drilltruck'},canStart:truckStatus==='available',action:truckOwned?'manage':truckOnOrder?'manage':'buy',insufficient:truckStatus==='available'&&s.cash<DRILLTRUCK_COST});
 
- // ── Management / Personnel ──
- const ROLE_NAMES={hsec:'Profesional HSEC',admin:'Administrador',driller:'Perforista',helper:'Ayudante',techVisit:'Visita Técnica',tecnicoDrillco:'Técnico DRILLCO'};
- const ROLE_DESCS={hsec:'Inspección y mantenimiento HSEC',admin:'Logística y planificación',driller:'Operación de perforadora',helper:'Apoyo en faenas',techVisit:'Geólogo temporal',tecnicoDrillco:'Automatización y mantenimiento avanzado'};
- for(const r of ROLES){
-  const hired=personnelByRole(s,r.id);const blocked=canHire(s,r.id);
-  const isFull=hired.length>=r.limit;
-  const status=isFull?'installed':blocked&&blocked!=='noMoney'?'locked':'available';
-  products.push({id:'role-'+r.id,kind:'personnel',category:'management',title:ROLE_NAMES[r.id]||r.id,level:1,description:ROLE_DESCS[r.id]||'',benefit:ROLE_DESCS[r.id]||'',price:isFull?null:r.hireCost,seconds:null,w:0,d:0,h:1.75,capacity:r.limit+' '+c.units,status,reason:blockReason(blocked,c),model:r,canStart:status==='available'&&!blocked,action:isFull?'manage':'buy',insufficient:status==='available'&&s.cash<r.hireCost});
- }
+ // Staffing is managed only by the independent Personal workspace.
+ // It is intentionally absent from purchasing/building catalog products.
  }catch(e){console.error('catalogProducts extended:',e);}
 
  products[0].insufficient=Number.isFinite(products[0].price)&&products[0].price>s.cash;

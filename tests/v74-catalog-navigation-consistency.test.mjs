@@ -5,15 +5,15 @@ import {newGame} from '../dist/chapter/state.mjs';
 import {catalogCategories,catalogProducts} from '../dist/chapter/construction-catalog.mjs';
 import {HSEC_CATEGORIES,HSEC_ASSETS} from '../dist/hsec/catalog.mjs';
 const source=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const expected=['infrastructure','equipment','vehicles','mobility','boundaries','lighting','emergencies','management'];
-test('V74: all 8 existing catalog tabs are defined, including Seguridad and Personal',()=>{
+const expected=['infrastructure','equipment','vehicles','mobility','boundaries','lighting','emergencies'];
+test('V75: seven purchasing/construction tabs remain; Personnel is a separate workspace',()=>{
  const cats=catalogCategories('es');
  assert.deepEqual(cats.map(x=>x.id),expected);
- assert.deepEqual(cats.slice(-2).map(x=>x.label),['Seguridad','Personal']);
- assert.deepEqual(HSEC_CATEGORIES.map(x=>x.id),expected);
+ assert.equal(cats.at(-1).label,'Seguridad');
+ assert.deepEqual(HSEC_CATEGORIES.filter(x=>x.id!=='management').map(x=>x.id),expected);
  for(const c of cats){assert(c.icon,'Missing icon for '+c.id);}
 });
-test('V74: 8 categories stay in the same order in M1, M2, M3, M4 and M5',()=>{
+test('V75: seven catalogue tabs stay in same order across M1–M5',()=>{
  const chapterStates=Array.from({length:5},(_,i)=>{
   const s=newGame('es','operator01');
   if(i>=1){s.chapterCompletedAt=1;s.office={status:'built',level:2};s.hsec={completedAt:1};}
@@ -32,16 +32,16 @@ test('V74: 8 categories stay in the same order in M1, M2, M3, M4 and M5',()=>{
    assert(expected.includes(p.category),`unknown category in M${i+1}: ${p.id}/${p.category}`);
   }
   assert(products.some(p=>p.category==='emergencies'),`M${i+1} security products missing`);
-  assert(products.some(p=>p.category==='management'),`M${i+1} personnel products missing`);
+  assert(!products.some(p=>p.category==='management'||p.kind==='personnel'),`M${i+1} must keep HR outside purchasing catalogue`);
   assert.equal(JSON.stringify(chapterStates[i]),before,`M${i+1} browsing unexpectedly changes state`);
  }
 });
-test('V74: management and safety use original roles/HSEC definitions, not fabricated items',()=>{
+test('V75: Safety products remain intact and Personnel is not a buildable product',()=>{
  const safety=HSEC_ASSETS.filter(a=>a.category==='emergencies');
  assert(safety.length>=1);
  const catalog=catalogProducts(newGame('es','operator01'),key=>String(key));
  for(const p of catalog.filter(p=>p.category==='emergencies'))assert(p.kind==='hsec');
- for(const p of catalog.filter(p=>p.category==='management'))assert(p.kind==='personnel'||p.kind==='hsec');
+ assert(!catalog.some(p=>p.kind==='personnel'||p.category==='management'));
  assert(catalog.find(x=>x.id==='office'));
  assert(catalog.find(x=>x.id==='shed'));
 });
@@ -67,6 +67,6 @@ test('V74: no catalog product state, price or purchasing handlers were changed',
  const view=source('dist/chapter/catalog-view.mjs');
  assert(builder.includes("onPurchase:p=>"));
  assert(builder.includes("if(p.kind==='workshop')return this.onCatalogAction?.('buildWorkshop')"));
- assert(builder.includes("if(p.kind==='personnel')return this.onCatalogAction?.('hire',p.model.id)"));
+ assert(!builder.includes("if(p.kind==='personnel')return this.onCatalogAction?.('hire',p.model.id)"));
  assert(view.includes("this.host.querySelector('#catalogPurchase')?.addEventListener('click',purchaseHandler)"));
 });

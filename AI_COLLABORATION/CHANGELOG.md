@@ -444,3 +444,8 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Flechas visibles anteriores/siguientes con estado deshabilitado correcto, desplazamiento con gesto horizontal en Android, rueda de mouse en PC y flechas de teclado, sin perder la categoría activa al reconstruir UI.
 - CSS con tamaños responsive y controles accesibles; sin tocar lista de productos, precios, restricciones, Cloud Save, campañas ni misiones.
 - Suite V74 + regresiones V71/V58 pasó. La pantalla Personal premium sigue sin implementar hasta aprobación.
+
+## 2026-11-11 — V75 Catálogo 7 categorías, Personal independiente
+- Se elimina **Personal** del Catálogo: ahora Edificios / Equipos / Vehículos / Caminos / Delimitación / Iluminación / Seguridad. Se retiran los productos virtuales de personal y el acceso a contratación duplicado dentro de Builder.
+- El botón **Personal** sigue abriendo su ventana propia en Centro de Faena, con contrataciones de M3/M4/M5, inventario de NPC y limitaciones de rol sin cambios. La futura interfaz premium queda pendiente de aprobación.
+- Las siete categorías se validan en M1–M5 y se conserva la nueva navegación V74 (flechas, swipe y teclado). Pruebas V75 + V74 + V71 correctas, QA visual Android pendiente.
