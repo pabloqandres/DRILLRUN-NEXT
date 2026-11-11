@@ -32,18 +32,16 @@ test('V65 buildings are drawn in staged and staggered SVG segments, not video',(
  assert.doesNotMatch(splash, /<video|<source[^>]*video|new WebGLRenderer/);
  assert(splash.length<750000,'mobile HTML is lightweight and WebP self-contained');
 });
-test('V65 welcome routes to existing login/cloud save and avatar/restore paths',()=>{
- assert.match(index, /id="welcomeScreen"/);
- assert.match(index, /id="startScreen"/);
- assert.match(index, /id="loading"/);
- assert.match(index, /id="characterScreen"/);
- assert.match(game, /frame\.src='\.\/*title-preview-v65\.html\?embedded=1'/);
- assert.match(game, /event\.source!==\$\('#welcomeFrame'\)\?\.contentWindow/);
- assert.match(game, /event\.origin!==location\.origin/);
- assert.match(splash, /window\.parent\.postMessage\(\{type:'drillrun-welcome-enter-v64'\},window\.location\.origin\)/);
- assert.match(game, /await chooseCharacter\(true\)/);
- assert.match(game, /beginPlay\(true\)/);
- assert.match(game, /cloudStartNewGame\(s\)/);
+test('V69 single login replaces the old V65 welcome gate without changing restore',()=>{
+ assert.doesNotMatch(index,/id="welcomeScreen"|id="welcomeFrame"/);
+ assert.match(index,/id="startScreen"/);
+ assert.match(index,/id="loading"/);
+ assert.match(index,/id="characterScreen"/);
+ assert.doesNotMatch(game,/displayWelcomeV64|acceptWelcomeV64/);
+ assert.doesNotMatch(game,/title-preview-v65\.html\?embedded=1/);
+ assert.match(game,/await chooseCharacter\(true\)/);
+ assert.match(game,/beginPlay\(true\)/);
+ assert.match(game,/cloudStartNewGame\(s\)/);
 });
 
 test('V65.1 left hall hologram respects perspective and physical prefab occlusion',()=>{
@@ -72,9 +70,8 @@ test('V65.1 rolling ground dust travels behind JUGAR and stays low',()=>{
  assert.doesNotMatch(splash, /<video|canvas\.getContext\('webgl'\)/);
 });
 
-test('V65 Cloud Save lockouts close the welcome overlay and keep recovery accessible',()=>{
- const gates=[...game.matchAll(/if\(phase==='welcome'\)\{hidden\(\$\('#welcomeScreen'\),true\);\$\('#welcomeFrame'\)\?\.removeAttribute\('src'\);\}/g)];
- assert.equal(gates.length,2,'protect both lease conflict and reconciliation failure');
+test('V69 Cloud Save lockouts remain available without intermediary overlay',()=>{
+ assert.doesNotMatch(game,/phase==='welcome'/);
  assert.match(game,/function cloudLock\(\)/);
  assert.match(game,/No se pudo sincronizar · No se sobrescribió la partida/);
  assert.match(game,/phase='cloud-locked';hidden\(\$\('#startScreen'\),false\)/);
