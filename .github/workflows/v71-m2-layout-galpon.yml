@@ -1,0 +1,20 @@
+name: V71 Mission 2 tabs, office and shed layout
+on:
+  push:
+    branches: [chatgpt/v71-m2-hsec-office-galpon-layout]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  m2-layout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288ca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: M2 layout, product order and existing UI invariants
+        run: |
+          node --check dist/chapter/construction-catalog.mjs
+          node --test tests/v71-m2-layout-galpon.test.mjs tests/office-quick-card-v39.test.mjs tests/live-mission-checklists-v16.test.mjs
