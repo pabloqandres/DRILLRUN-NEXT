@@ -298,3 +298,12 @@ La unidad 02 está identificada por `s.mission5.personalTruck` y no puede desapa
 5. Inspeccionar en WebGL real, incluso de noche. No confundir límite invisible con una huella de colisión existente.
 
 **Ownership/release:** ChatGPT limita V57 a iluminación visual (`patio-world.mjs`). Claude implementa la ampliación funcional como cambio independiente; PR y CI antes de unir a `main`, sin despliegue no autorizado.
+
+## 2026-11-10 — V57: autorización directa del usuario para implementación y publicación integrada
+
+Tras confirmar que la V57 no estaba desplegada, el usuario solicitó explícitamente **«Dale con V57 y ampliación de terreno»**. Se autoriza a ChatGPT una excepción puntual de ownership para unificar el límite físico en `navigation-areas.mjs`, `scene.mjs`, `state.mjs` y `personal-drilltruck.mjs`, además de ajustar tests históricos del límite. La rama `chatgpt/v57-night-yard-visibility` integra V57 iluminación/recuperación con navegación.
+
+- Implementación acotada al límite transitable y persistencia; no tocar progresión, economía, compras, M4 producción ni reglas de colisión sólida. Mantener margen dentro de malla 240×240 m.
+- Bloqueo siempre en paredes reales/HSEC, no por fase M4/M5 ni rectángulos artificiales.
+- Verificar test focalizado de caminos, vehículo, restauración y suite CI. Anotar limitaciones antes de merge.
+- Solicitud se interpreta como aprobación para publicar este alcance una vez validado; la verificación de `main` y Vercel se informa separadamente. No incluye rediseñar todo el HUD.
