@@ -729,7 +729,7 @@ function syncPersonalTruckVisual(){
   m5PersonalTruckModel.updateWorldMatrix(true,true);
   const modelBounds=new T.Box3().setFromObject(m5PersonalTruckModel);
   m5PersonalTruckModel.userData.groundContactMinY=Number.isFinite(modelBounds.min.y)?modelBounds.min.y:0;
-  m5TruckLighting=installPersonalTruckHeadlights(m5PersonalTruckModel);
+  m5TruckLighting=installPersonalTruckHeadlights(m5PersonalTruckModel,world);
   world.scene.add(m5PersonalTruckModel);
   if(!m5PersonalTruckCollider){
    m5PersonalTruckCollider={x:truck.position.x,z:truck.position.z,
@@ -745,6 +745,9 @@ function syncPersonalTruckVisual(){
  m5PersonalTruckModel.position.set(truck.position.x,visualY,truck.position.z);
  m5PersonalTruckModel.rotation.y=truck.heading;
  m5TruckLighting?.set(truck.mode==='driving'&&!!truck.headlightsOn,world.quality);
+ // V61: a terrain-following road projection travels in the vehicle's
+ // heading, independent of original GLB front-axis orientation.
+ m5TruckLighting?.project(truck.position,truck.heading,(x,z)=>world.sampleGround(x,z));
  if(m5PersonalTruckCollider){
   m5PersonalTruckCollider.x=truck.position.x;
   m5PersonalTruckCollider.z=truck.position.z;

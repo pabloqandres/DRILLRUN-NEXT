@@ -1,0 +1,24 @@
+name: V61 Swept Collision and Night Driving
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  v61-collision-night:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: |
+          node --check dist/animation/personal-truck-swept-collision.mjs
+          node --check dist/graphics/personal-drilltruck-headlights.mjs
+          node --check dist/mission5/personal-drilltruck.mjs
+          node --check dist/mission5/patio-world.mjs
+          node --check dist/chapter/game.mjs
+          node --check tests/v61-collision-headlights-night-yard.test.mjs
+      - name: Thin fence, road projector, patio and personal truck regressions
+        run: |
+          node --test tests/v61-collision-headlights-night-yard.test.mjs tests/v60-truck-ground-exit.test.mjs tests/v59-yard-night-gate-grounding.test.mjs tests/v58-personal-truck-free-look.test.mjs tests/v57-open-terrain-and-save.test.mjs tests/v56-personal-drilltruck-recovery.test.mjs tests/v55-vehicle-collision-render-recovery.test.mjs tests/v54-drilltruck-steering-controls.test.mjs tests/v52-night-patio-driving.test.mjs tests/v50-personal-drilltruck-driving.test.mjs

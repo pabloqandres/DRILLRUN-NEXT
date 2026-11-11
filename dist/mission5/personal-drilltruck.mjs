@@ -3,6 +3,7 @@
 import {DRILLTRUCK_COST} from '../mission4/drilltruck.mjs';
 import {FLEET_BAYS} from './fleet-base.mjs';
 import {isPlayableTerrain} from '../chapter/navigation-areas.mjs';
+import {countPersonalTruckCollision,sweptPersonalTruckCollision} from '../animation/personal-truck-swept-collision.mjs';
 import {warehouseChecked,commissionPatio} from './patio-staff.mjs';
 
 export const PERSONAL_DRILLTRUCK_PRICE=DRILLTRUCK_COST;
@@ -142,30 +143,23 @@ export function drivePersonalTruck(s,{throttle=0,steer=0,brake=false}={},dt=0,bl
  // Real 2.16 × 4.70 m footprint, not the avatar's radius. Road paint,
  // sidewalk markings and normal grade transitions are traversable, while the
  // caller still tests true structural footprints and the HSEC gate.
- const front={x:Math.sin(heading)*PERSONAL_TRUCK_FOOTPRINT.halfLength,
-  z:Math.cos(heading)*PERSONAL_TRUCK_FOOTPRINT.halfLength};
- const side={x:Math.cos(heading)*PERSONAL_TRUCK_FOOTPRINT.halfWidth,
-  z:-Math.sin(heading)*PERSONAL_TRUCK_FOOTPRINT.halfWidth};
- const probes=[[0,0],[front.x,front.z],[-front.x,-front.z],
-  [side.x,side.z],[-side.x,-side.z],
-  [front.x+side.x,front.z+side.z],[front.x-side.x,front.z-side.z],
-  [-front.x+side.x,-front.z+side.z],[-front.x-side.x,-front.z-side.z]];
- // Gentle body tolerance (0.10 m). The old 0.38 m footprint margin
- // artificially widened the truck by 76 cm on narrow gate approaches.
- const occupied=(x,z)=>probes.reduce((n,[ox,oz])=>n+Number(!!blocked(x+ox,z+oz,.10)),0);
+ // V61: sample the whole vehicle profile and sweep the travel continuously
+ // so slender HSEC railings cannot slip between 9 isolated probes at 30 km/h.
+ // This samples only actual world colliders, not a forbidden HSEC score or a
+ // new invisible boundary. An existing overlap may be reversed out safely.
  const oldX=truck.position.x,oldZ=truck.position.z;
- const initial=occupied(oldX,oldZ);
- const full=occupied(nx,nz);
- let collision=full>0;
+ const initial=countPersonalTruckCollision(oldX,oldZ,truck.heading,blocked);
+ const sweep=(tx,tz)=>sweptPersonalTruckCollision(oldX,oldZ,tx,tz,heading,blocked,initial);
+ const full=sweep(nx,nz),collision=full.hits>0;
+ const freeOrEscaping=path=>!path.blocked&&
+  (initial===0||path.final<initial||v<0);
  let nextX=oldX,nextZ=oldZ;
- if(full===0||initial>0&&full<initial){ // Move free, or ESCAPE a pre-existing overlap.
+ if(freeOrEscaping(full)){
   nextX=nx;nextZ=nz;
  }else if(Math.abs(v)>.05){
-  // Slide parallel to walls/curbs instead of freezing when the bumper clips
-  // the corner of a crosswalk fence. Never drive THROUGH physical barriers.
-  const xHit=occupied(nx,oldZ),zHit=occupied(oldX,nz);
-  const xOkay=xHit===0||(initial>0&&xHit<initial);
-  const zOkay=zHit===0||(initial>0&&zHit<initial);
+  // Keep the original wall-following slide, but sweep each axis as well.
+  const alongX=sweep(nx,oldZ),alongZ=sweep(oldX,nz);
+  const xOkay=freeOrEscaping(alongX),zOkay=freeOrEscaping(alongZ);
   if(xOkay&&(!zOkay||Math.abs(dx)>=Math.abs(dz)))nextX=nx;
   else if(zOkay)nextZ=nz;
   else if(xOkay)nextX=nx;

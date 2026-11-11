@@ -16,14 +16,16 @@ test('Patio L1 has eight functional luminaires and additional task lights',()=>{
  assert.match(patio,/new T\.PointLight\(0xffe9c6,0,19,2\)/);
  assert.match(patio,/const night=status==='operational'/);
  assert.match(patio,/const budget=w\.quality==='low'\?3:w\.quality==='high'\?6:4/);
- assert.match(patio,/lamp\.light\.intensity=selected\?\(w\.quality==='low'\?34:48\):0/);
+ assert.match(patio,/lamp\.light\.intensity=night\?\(selected\?\(w\.quality==='low'\?40:56\)/);
 });
 test('Personal vehicle headlights cast light forward and follow yaw',()=>{
  assert.match(headlights,/new T\.SpotLight\(/);
- assert.match(headlights,/lamp\.target\.position\.set\(x\*1\.7,-\.35,17\)/);
+ assert.match(headlights,/lamp\.target\.position\.set\(x\*1\.55,-1\.0,14\)/);
+ assert.match(headlights,/projectPersonalTruckRoadLight/);
+ assert.match(headlights,/scene\.add\(mesh\)/);
  assert.match(headlights,/root\.add\(lights\)/);
  assert.match(headlights,/lamp\.castShadow=false/);
- assert.match(game,/installPersonalTruckHeadlights\(m5PersonalTruckModel\)/);
+ assert.match(game,/installPersonalTruckHeadlights\(m5PersonalTruckModel,world\)/);
  assert.match(game,/m5TruckLighting\?\.set\(truck\.mode==='driving'/);
  assert.match(game,/truck\.headlightsOn=!truck\.headlightsOn/);
  assert.match(html,/id="personalTruckLights"/);
@@ -43,8 +45,9 @@ test('Boarding hides exterior avatar BEFORE render and routes audio to engine',(
 test('Night pavement pools stay above the road markings, with bay coverage',()=>{
  assert.match(patio,/pool\.position\.set\(x,\.295,z\)/);
  assert.match(patio,/const bayPools=\[/);
- assert.match(patio,/\[-7,-13,18,\.295\]/);
+ assert.match(patio,/\[-7,-13,20,\.295\]/);
+ assert.match(patio,/\[-17,3\.2,18,\.295\]/);
  assert.match(patio,/\[-19,-10\.8,13,\.525\]/);
- assert.match(patio,/pool\.material\.opacity=night\?\.39:0/);
+ assert.match(patio,/pool\.material\.opacity=night\?\.62:0/);
  assert.match(patio,/const budget=w\.quality==='low'\?3:w\.quality==='high'\?6:4/);
 });

@@ -1,5 +1,12 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-11 — V61 DrillTruck® antiatrapamiento y faros que iluminan camino
+- Prevención de atravesar barandas finas a 30 km/h: huella con 21 muestras y barrido cada 12 cm durante aceleración, giro, deslizamiento; permite desenganchar una posición ya solapada mediante marcha atrás.
+- Faros personales de luz cálida con proyección real y adaptada a la altura del suelo en dirección de avance, sin depender del eje visual GLB. Encendido/apagado coincide con HUD.
+- Patio L1: luminarias más visibles, cobertura de vías interiores, herramientas, combustible y plazas abiertas y techadas, con calidad móvil.
+- Mantiene conducción, M1–M5, HSEC y economía; nueva CI de colisiones/luz y regresiones V50–V61. Ver `CHANGES/2026-11-11_v61-collision-night-headlights.md`. QA visual Android pendiente.
+
+
 ## 2026-11-10 — V60 DrillTruck® personal 02: contacto de ruedas y salida segura
 - Reemplaza soporte visual de terreno por máximo de 5 puntos por centro + mediana de 4 ruedas con ajuste limitado, eliminando el efecto de levitar al pasar cerca de un relieve.
 - Al bajar, omite temporalmente solo el collider de la propia camioneta, y prueba lugares laterales y posteriores sin atravesar cercos/maquinaria. Se restaura el collider siempre, incluso si falla la comprobación.
