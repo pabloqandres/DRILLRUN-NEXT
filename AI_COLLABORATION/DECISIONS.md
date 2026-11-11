@@ -417,3 +417,7 @@ ChatGPT implementa en el módulo visual de faros dos manchas ovales muy difumina
 **Release gate:** esta nueva funcionalidad NO entra a main hasta preview/QA y aprobación expresa. Se registra información de pruebas (CI dirigida, modelo de rueda GLB si no se puede inspeccionar, además de las dos fallas antiguas de M4 en CI general).
 
 **Ampliación confirmada por el usuario (misma V66):** la camioneta automática de M4 también debe girar ruedas. Implementado mediante `PersonalTruckWheels.updateFromPose(dt,truckRouteActive)` en el loop gráfico posterior al `updateTruckRoute`. La función del recorrido M4 y sus estados no se tocan. El clone de M4 destinado a la camioneta personal reconoce rigs V66 heredados para no producir ruedas duplicadas. Se agregan tests de lectura M4 sin mutación de posición/rumbo/route.
+
+## 2026-11-11 — V67: excepción transversal acotada, responsive y marcha atrás
+
+El usuario verifica visualmente V66 en Android y solicita corregir la portada estirada, pantalla completa al entrar, marcha atrás desde cero y llantas pequeñas/desplazadas. ChatGPT implementa cambios visuales bajo su ownership y modifica **solo** el umbral de desaceleración en `dist/mission5/personal-drilltruck.mjs` (área funcional) y el hook de gesto de entrada en `dist/chapter/game.mjs` (compartido). Esta coordinación queda anotada para Claude Code; no hay cambios a la lógica M4/M5, estado, misiones ni dinero. Rama V67 separada, PR antes de publicar, tests V66/V67. El navegador no garantiza fullscreen al abrir enlace: PWA standalone o gesto explícito.
