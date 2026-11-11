@@ -2,6 +2,7 @@
 // Roles: hsec (from M2), admin, driller, techVisit (temporary)
 import {EMPLOYEES} from '../hsec/catalog.mjs';
 import {workshopLevel} from './inventory.mjs';
+import {candidateById,candidateHirePrice,skillSnapshot} from '../chapter/personnel-candidates-v76.mjs';
 
 export const ROLES=[
  {id:'hsec',nameKey:'hsecRole',salary:0,limit:1,hireCost:350,requires:'officeL2',
@@ -25,9 +26,14 @@ export function personnelRoster(s){return s.personnel||[];}
 
 export function personnelByRole(s,roleId){return (s.personnel||[]).filter(p=>p.role===roleId);}
 
-export function canHire(s,roleId){
+export function canHire(s,roleId,candidateId=null){
  const role=roleDef(roleId);
  if(!role)return 'invalidRole';
+ const candidate=candidateById(candidateId);
+ // Old calls such as "admin-01" remain valid, but known candidates
+ // must always belong to the selected role.
+ if(candidate&&candidate.role!==roleId)return 'invalidCandidate';
+ if(roleId==='hsec'&&s.hsec?.employee)return 'roleFull';
  const current=personnelByRole(s,roleId);
  if(current.length>=role.limit)return 'roleFull';
  if(role.requires==='officeL2'&&(!s.office||s.office.level<2))return 'needsOfficeL2';
@@ -35,14 +41,16 @@ export function canHire(s,roleId){
  if(role.requires==='drillPurchased'&&!s.drill)return 'needsDrill';
  if(role.requires==='geoRequested'&&!s.geoAnalysis?.requested)return 'needsGeoRequest';
  if(role.requires==='workshopNv2'&&workshopLevel(s)<2)return 'needsWorkshopNv2';
- if(s.cash<role.hireCost)return 'noMoney';
+ if(s.cash<candidateHirePrice(roleId,candidateId,role.hireCost))return 'noMoney';
  return null;
 }
 
 export function hirePersonnel(s,roleId,candidateId,now=Date.now()){
- const blocked=canHire(s,roleId);
+ const blocked=canHire(s,roleId,candidateId);
  if(blocked)fail(blocked);
  const role=roleDef(roleId);
+ const candidate=candidateById(candidateId);
+ const price=candidateHirePrice(roleId,candidateId,role.hireCost);
  // For HSEC, validate candidate from HSEC catalog
  if(roleId==='hsec'){
   const emp=EMPLOYEES.find(e=>e.id===candidateId);
@@ -51,18 +59,21 @@ export function hirePersonnel(s,roleId,candidateId,now=Date.now()){
  const person={
   id:candidateId||roleId+'-'+(s.nextId++),
   role:roleId,
-  gender:roleId==='hsec'?(EMPLOYEES.find(e=>e.id===candidateId)?.gender||'man'):'man',
+  gender:candidate?.gender||(roleId==='hsec'?(EMPLOYEES.find(e=>e.id===candidateId)?.gender||'man'):'man'),
+  candidateId:candidate?.id||null,
+  name:candidate?.name||null,
+  skillProfile:skillSnapshot(candidate?.id),
   level:1,
   skills:[...role.skills],
   state:'idle',
   assignment:null,
-  hireCost:role.hireCost,
+  hireCost:price,
   hiredAt:now,
   source:'hired'
  };
- s.cash-=role.hireCost;
+ s.cash-=price;
  s.personnel.push(person);
- s.ledger.push({id:s.nextId++,key:'hire-'+roleId,amount:-role.hireCost,at:now});
+ s.ledger.push({id:s.nextId++,key:'hire-'+roleId,amount:-price,at:now});
  return person;
 }
 
