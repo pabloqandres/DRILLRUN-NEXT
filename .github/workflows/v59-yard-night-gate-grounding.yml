@@ -1,0 +1,23 @@
+name: V59 Yard Lighting Gate and Grounding
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  v59-night-ground-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check modified module and test syntax
+        run: |
+          node --check dist/animation/patio-gate-motion.mjs
+          node --check dist/graphics/personal-truck-grounding.mjs
+          node --check dist/mission5/patio-world.mjs
+          node --check dist/chapter/game.mjs
+          node --check tests/v59-yard-night-gate-grounding.test.mjs
+      - name: V59 gate/light/wheels and M5/vehicle/camera regressions
+        run: |
+          node --test tests/v59-yard-night-gate-grounding.test.mjs tests/v58-personal-truck-free-look.test.mjs tests/v57-open-terrain-and-save.test.mjs tests/v56-personal-drilltruck-recovery.test.mjs tests/v55-vehicle-collision-render-recovery.test.mjs tests/v54-drilltruck-steering-controls.test.mjs tests/v52-night-patio-driving.test.mjs tests/v50-personal-drilltruck-driving.test.mjs tests/m5-office-patio-passability-v40.test.mjs tests/m5-patio-navigation-v34.test.mjs
