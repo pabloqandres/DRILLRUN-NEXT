@@ -4,6 +4,9 @@
 
 ## Currently Active
 
+- **2026-11-11 · ChatGPT V67 (en revisión):** rama `chatgpt/v67-responsive-entry-wheel-axles`. Corrección visual welcome ultrawide, solicitud fullscreen tras gesto, rueda M4/M5 con geometría o fallback ajustado, y microexcepción en marcha atrás para evitar deadzone a 60 FPS. Sin misiones, economía o saves. Tests y PR; pendiente CI y QA Android. Véase `CHANGES/2026-11-11_v67-responsive-title-reverse-wheel-axles.md`.
+
+
 - **ChatGPT — V50 DrillTruck® personal:** rama
   `chatgpt/v50-personal-drilltruck-driving`.
   Segundo vehículo comprado en Casa Matriz, entrega real, M5 seis pasos,
