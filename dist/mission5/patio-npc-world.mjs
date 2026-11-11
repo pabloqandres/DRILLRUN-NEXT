@@ -4,6 +4,7 @@ import * as T from '../vendor/three.module.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {PATIO_STAFF,hiredPatioStaff} from './patio-staff.mjs';
 import {NPCWalkRig} from './npc-locomotion.mjs';
+import {avatarDefinition} from '../chapter/avatars.mjs';
 const ROUTES={
  'm5-gate-security':[[-28,-9],[-31,-10],[-32,-14],[-29,-14.8],[-27,-13],[-28,-9]],
  'm5-warehouse-tech':[[-69,-19],[-73,-19],[-73,-17],[-68,-16],[-66,-19],[-69,-19]]
@@ -48,15 +49,18 @@ export class PatioNPCWorld{
    body.scale.setScalar(scalar);
    body.position.y=-bounds.min.y*scalar;
    const rig=new NPCWalkRig(body);
-   // Once the approved walking rig is attached, match the ACTUAL visible
-   // avatar at game scale (not an assumed GLB height). Keep adult proportions.
+   // V69: compare to the approved adult avatar stature, not the AABB of a
+   // dynamically skinned player (whose idle pose can under-report height).
+   // Normalization is visual-only; no route, collider or staff cost changes.
    const npcVisible=heightOf(rig.mesh||body);
-   const avatarVisible=heightOf(this.world.player);
-   const calibration=staffHeightRatio(npcVisible,avatarVisible,def.role);
+   const avatarReferenceHeight=avatarDefinition(this.world.player.userData.character).height;
+   const baseline=(def.role==='security'?1.82:1.74);
+   const calibration=staffHeightRatio(npcVisible>0.2?npcVisible:baseline,avatarReferenceHeight,def.role);
    body.scale.multiplyScalar(calibration);
    body.position.y*=calibration;
    root.userData.visualHeight=heightOf(rig.mesh||body);
-   root.userData.avatarReferenceHeight=avatarVisible;
+   root.userData.avatarReferenceHeight=avatarReferenceHeight;
+   root.userData.npcTargetHeight=avatarReferenceHeight*(def.role==='security'?1.01:.94);
    // Align the sculpt's local forward axis (+X for the approved Z-wide
    // models) with the NPC root's movement heading (+Z), without altering
    // the scene route or the underlying GLB geometry.
