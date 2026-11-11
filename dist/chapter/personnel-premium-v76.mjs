@@ -1,4 +1,5 @@
-// V76 · Compact, accessible Personnel experience for M3–M5.
+// V77 · Visual placeholders, three visible skills and true roster selection.
+// Base V76 still handles candidate identities and mission-authoritative hires.
 // Pure presentation: existing mission hire actions are the only authority.
 // Candidate skill data is persisted by the employment controllers, and
 // skill gameplay effects are reserved for a separately approved system.
@@ -64,6 +65,8 @@ export function personnelAvailability(s,role,candidateId){
  return isPatio(role)?canHirePatioStaff(s,role,candidateId):canHire(s,role,candidateId);
 }
 export const portrait=c=>c?.portrait||'';
+const placeholder=(c,mode='card')=>`<span class="pvEmptyPortrait pvEmptyPortrait--${mode}" role="img" aria-label="Retrato pendiente de ${esc(c?.name||'personal')}"><span class="pvEmptyPortraitFigure" aria-hidden="true"><span class="pvEmptyHead"></span><span class="pvEmptyBody"></span></span><small>RETRATO PENDIENTE</small></span>`;
+const candidateSkillRows=c=>Object.entries(c?.skills||{}).map(([name,val])=>`<span class="pvCandidateSkill"><span>${esc(PERSONNEL_SKILL_LABELS[name]||name)}</span><span class="pvMiniPips" aria-label="${val} de 5">${Array.from({length:5},(_,i)=>`<i class="${i<val?'on':''}"></i>`).join('')}</span></span>`).join('');
 const skillRows=c=>Object.entries(c?.skills||{}).map(([name,val])=>
  `<div class="pvSkill" title="Habilidad registrada para progresión futura, sin bono económico activo"><span>${esc(PERSONNEL_SKILL_LABELS[name]||name)}</span><span class="pvPips" aria-label="${val} de 5">${Array.from({length:5},(_,i)=>`<i class="${i<val?'on':''}"></i>`).join('')}</span><b>${val}/5</b></div>`
 ).join('');
@@ -79,7 +82,7 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon){
  const entries=candidatesForRole(role.id),selected=entries.find(c=>c.id===selectedId)||entries[0];
  const blocked=personnelAvailability(s,role.id,selected?.id);
  const employed=team.find(p=>p.candidateId===selected?.id);
- const someHired=hiredRole(s,role.id),warning=blocked==='missionLocked'?'Se habilita en misión '+role.unlock:reasons[blocked]||blocked;
+ const warning=blocked==='missionLocked'?'Se habilita en misión '+role.unlock:reasons[blocked]||blocked;
  const step=role.id===required&&mission>=role.unlock;
  const countTxt=`${Math.min(count,capacity)} / ${capacity}`;
  const entryCards=entries.map((c,i)=>{
@@ -87,17 +90,17 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon){
   const isSelected=c.id===selected.id;
   const locked=personnelAvailability(s,role.id,c.id);
   return `<button class="pvCandidate ${isSelected?'selected':''} ${busy?'hired':''} ${locked&&!busy?'unavailable':''}" type="button" data-pv-candidate="${c.id}" aria-pressed="${isSelected}">
-   <span class="pvPortrait"><img src="${esc(portrait(c))}" alt="Retrato ilustrado de ${esc(c.name)}" loading="${i===0?'eager':'lazy'}"></span>
+   <span class="pvPortrait">${placeholder(c)}</span>
    <span class="pvCandidateName">${esc(c.name)}</span><span class="pvCandidateStars" aria-label="Perfil de ${c.grade} estrellas">${'★'.repeat(c.grade)}<span>${'★'.repeat(5-c.grade)}</span></span>
-   <span class="pvCandidateFeature">${esc(PERSONNEL_SKILL_LABELS[Object.keys(c.skills)[0]])} <b>${Object.values(c.skills)[0]}/5</b></span>
+   <span class="pvCandidateMetrics">${candidateSkillRows(c)}</span>
    <span class="pvCandidateCost">${money(c.hireCost)}</span>
    <span class="pvCandidateState">${busy?'CONTRATADO':locked?'BLOQUEADO':'DISPONIBLE'}</span>
   </button>`;
  }).join('');
  const slots=Array.from({length:Math.min(capacity,8)},(_,i)=>{
   const p=team[i];
-  if(p){const c=candidateById(p.candidateId);return `<button class="pvTeamSlot occupied" type="button" data-pv-roster="${esc(p.role)}" aria-label="Ver ${esc(p.name||roleById(p.role)?.label||'contratado')}">
-   ${c?`<img src="${esc(portrait(c))}" alt="">`:`<span class="pvTeamFallback">${icon('personnel')}</span>`}
+  if(p){const c=candidateById(p.candidateId);return `<button class="pvTeamSlot occupied" type="button" data-pv-roster="${esc(p.role)}" data-pv-person="${esc(p.candidateId||'')}" aria-label="Ver ${esc(p.name||roleById(p.role)?.label||'contratado')}">
+   ${c?`${placeholder(c,'team')}`:`<span class="pvTeamFallback">${icon('personnel')}</span>`}
    <span><b>${esc(p.name||roleById(p.role)?.label||'Contratado')}</b><small>${esc(roleById(p.role)?.short||p.role)}</small></span><span class="pvHiredCheck">${icon('check')}</span></button>`;}
   return `<span class="pvTeamSlot vacant"><span class="pvPlus">+</span><span>Disponible</span></span>`;
  }).join('');
@@ -119,7 +122,7 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon){
   </section>
   <aside class="pvDetail" aria-label="Ficha del candidato seleccionado">
    <div class="pvDetailHero"><div><span class="pvEyebrow">CANDIDATO SELECCIONADO</span><h3>${esc(selected.name)}</h3><span class="pvCandidateStars">${'★'.repeat(selected.grade)}<span>${'★'.repeat(5-selected.grade)}</span></span></div>
-   <img src="${esc(portrait(selected))}" alt="Retrato de ${esc(selected.name)}"></div>
+   ${placeholder(selected,'detail')}</div>
    <p class="pvBio">${esc(selected.description)}</p>
    <div class="pvSkillsHeader">HABILIDADES <span>REGISTRADAS</span></div>
    <div class="pvSkills">${skillRows(selected)}</div>
