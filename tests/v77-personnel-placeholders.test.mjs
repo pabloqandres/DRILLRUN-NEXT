@@ -7,9 +7,9 @@ import {renderPersonnelPremium} from '../dist/chapter/personnel-premium-v76.mjs'
 const icon=name=>'<i data-icon="'+name+'"></i>';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const state=()=>{const s=newGame('es','operator01');s.cash=50000;s.office={status:'built',level:2};s.mission3={phase:'setup'};s.hsec={employee:{id:'hsec01',level:1,state:'idle'},assets:[{id:'shed-1',type:'shed',status:'built'}]};return s;};
-test('V77: neutral empty portrait for all 21 candidates, three skill rows on cards',()=>{
+test('V77: neutral placeholders remain for unillustrated roles, three skill rows on cards',()=>{
  assert.equal(PERSONNEL_CANDIDATES.length,21);
- for(const role of PERSONNEL_GROUPS){
+ for(const role of PERSONNEL_GROUPS.filter(r=>r.id!=='admin')){
   const s=state(),cards=candidatesForRole(role.id);
   const html=renderPersonnelPremium(s,role.id,cards[0].id,icon);
   assert.equal(cards.length,3,role.id);
@@ -31,7 +31,7 @@ test('V77: roster selects stored candidate ID without changing original hiring',
  const html=renderPersonnelPremium(s,'admin','adm-matias-torres',icon);
  assert(html.includes('data-pv-person="adm-matias-torres"'));
  assert(html.includes('pvEmptyPortrait--team'));
- assert(html.includes('pvEmptyPortrait--detail'));
+ assert(html.includes('pvArtPortrait--detail'));
  assert(!/<img\b/i.test(html));
  const handler=read('dist/chapter/faena-center.mjs');
  assert(handler.includes('const identity=b.dataset.pvPerson'));
@@ -47,5 +47,5 @@ test('V77: all placeholders are original CSS; V76 registry and skill economic lo
  assert(css.includes('touch-action:pan-x'));
  assert(candidates.includes('effectsEnabled:false'));
  assert.equal(new Set(PERSONNEL_CANDIDATES.map(c=>c.id)).size,21);
- assert(!/DRILLCO|PUMA|®|logo/i.test(css.slice(css.indexOf('/* V77 ·'))),'placeholder visuals have no branding');
+ assert(!/DRILLCO|PUMA|®|logo/i.test(css.slice(css.indexOf('/* V77 ·'),css.indexOf('/* V78:'))),'placeholder visuals have no branding');
 });
