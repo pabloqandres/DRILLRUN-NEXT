@@ -21,6 +21,7 @@ import {acceptContract,startDrilling,completeContract,contractDeadline,isContrac
 import {toolCondition} from '../mission3/wear.mjs';
 import {drillDefinition,bitDefinition,hammerDefinition,HAMMERS,BITS} from '../mission3/drills.mjs';
 import {requestAnalysis,accelerateAnalysis,technicianArrives,startAnalysisTimer} from '../mission3/geology.mjs';
+import {WorkshopL1BuildHud} from './workshop-build-hud-v73.mjs';
 import {purchaseDrill,installTool} from '../mission3/drills.mjs';
 import {placeOrder,placeMachineryOrder,reconcileDeliveredMachinery} from '../mission3/headquarters.mjs';
 import {buildWorkshop,finishWorkshopConstruction,upgradeWorkshop,workshopLevel,workshopCapacity,workshopUsed,workshopFree,WORKSHOP_LEVELS,workshopUpgradeJob,workshopUpgradeProgress,finishWorkshopUpgrade,accelerateWorkshop,canDemolishWorkshop,demolishWorkshop} from '../mission3/inventory.mjs';
@@ -113,7 +114,7 @@ let m4DthModel=null,m4DthCollider=null,m4Staging=null;
 let m5World=null,patioOverviewUntil=0,m5RcRoute=null,m5DthRoute=null,m5DthDepartRoute=null;
 let m5NpcWorld=null,m5PersonalTruckModel=null,m5PersonalTruckCollider=null,m5TruckLighting=null,m5TruckWheels=null,truckBrakePressed=false,m5PersonalTruckFallback=false,m5LocateCameraTimer=null;
 let catalogBlueprint=null,catalogConstructionCamera=false,catalogPreviewWalk=false;
-let workshopBuildHologram=null,workshopHologramKey=null;
+let workshopBuildHologram=null,workshopHologramKey=null,workshopL1BuildHud=null;
 let siteCinematics=null;
 let world,scene,phase='start',phoneApp=null,phoneOpen=false,category='desks',modalOpen=false,blueprint=false,placement=null,busy=null,keys={},joy={x:0,y:0},pointer=null,target=null,auth={configured:false},account=null,audioContext=null,last=performance.now(),clock=0,lastSave=0,lastHud=0,introAt=0,lastObjective='',qaRoute=false;
 let cloudSyncing=true,cloudLocked=false,cloudStatus='Verificando Google…',cloudEpoch=0;
@@ -300,7 +301,7 @@ async function ensureWorld(forSelection=false){
  hsecWorld.onRepair=(orderId)=>{const h=ensureHsec(s);const o=h.orders.find(o=>o.id===orderId);if(!o)return;try{assignOrder(s,orderId,'player');save();renderHUD();notices.push({title:'Reparación iniciada',symbol:'🔧'});}catch(e){notices.push({title:e.message,symbol:'⚠️'});}};
  hsecWorld.onInspect=(assetId)=>{try{const h=ensureHsec(s),before=h.orders.filter(o=>o.assetId===assetId&&o.status==='pending').length;inspectAsset(s,assetId);save();renderHUD();const after=h.orders.filter(o=>o.assetId===assetId&&o.status==='pending').length,created=after-before;notices.push({title:created>0?`${created} reparación${created>1?'es':''} detectada${created>1?'s':''} — toca para reparar`:'Sin problemas detectados',symbol:'🔍'});}catch(e){notices.push({title:e.message,symbol:'⚠️'});}};
  hsecWorld.onUpgrade=(assetId)=>{try{upgradeAsset(s,assetId);save();renderHUD();notices.push({title:'Superficie mejorada',symbol:'⬆'});}catch(e){notices.push({title:e.message,symbol:'⚠️'});}};
- hsecWorld.onRemove=(assetId)=>{try{retireAsset(s,assetId);save();renderHUD();notices.push({title:'Activo retirado',symbol:'🗑'});}catch(e){notices.push({title:e.message,symbol:'⚠️'});};};hsecUI=new HsecUI({state:()=>s,world:hsecWorld,format:money,onSave:()=>{scene.update(s,0,Date.now());hsecWorld.update(s,0,'play');ensureSafe();save();renderHUD();},onStop:stop,notify:text=>notices.push({title:text,symbol:'bell'}),showModal:modal,hideModal:closeModal,openBuilder,closeBuilder,manageOffice,onGoto:p=>{target={x:p.x,z:p.z};}});builderUI.hsec=hsecUI;guidance=new ObjectiveGuide(world,$('#hud'),()=>t);constructionCallout=new ConstructionCallout(world,$('#buildHud'));characterStage=new CharacterStage(world);await world.characterReady;avatars=new AvatarRoster(world);loadingProgress(1,forSelection?4:2);
+ hsecWorld.onRemove=(assetId)=>{try{retireAsset(s,assetId);save();renderHUD();notices.push({title:'Activo retirado',symbol:'🗑'});}catch(e){notices.push({title:e.message,symbol:'⚠️'});};};hsecUI=new HsecUI({state:()=>s,world:hsecWorld,format:money,onSave:()=>{scene.update(s,0,Date.now());hsecWorld.update(s,0,'play');ensureSafe();save();renderHUD();},onStop:stop,notify:text=>notices.push({title:text,symbol:'bell'}),showModal:modal,hideModal:closeModal,openBuilder,closeBuilder,manageOffice,onGoto:p=>{target={x:p.x,z:p.z};}});builderUI.hsec=hsecUI;guidance=new ObjectiveGuide(world,$('#hud'),()=>t);constructionCallout=new ConstructionCallout(world,$('#buildHud'));workshopL1BuildHud??=new WorkshopL1BuildHud($('#hud'));characterStage=new CharacterStage(world);await world.characterReady;avatars=new AvatarRoster(world);loadingProgress(1,forSelection?4:2);
  if(forSelection)await avatars.loadAll((done,total)=>{loadingProgress(done,total);});else await avatars.load(s?.character||'operator01');
  avatars.activate(s?.character||'operator01');builderUI.world=world;
  try{builderUI.thumbnail=officeThumbnail(world);}catch(error){
@@ -1875,7 +1876,7 @@ world.update(s,dt,clock,walking,false,personalTruck(s)?.mode==='driving');
   personalSpeed:personalTruck(s)?.speed||0,
   walkSurfaces:world.walkSurfaces||[]
  });
- constructionCallout?.update(s,phase==='play'&&!builderOpen&&!modalOpen&&!phoneOpen,t);world.player.visible=phase!=='start'&&personalTruck(s)?.mode!=='driving'&&(phase!=='character'||!!CONFIG.protagonists.find(p=>p.id===selectedAvatar)?.available);
+ workshopL1BuildHud?.update(s,wall,phase==='play');constructionCallout?.update(s,phase==='play'&&!builderOpen&&!modalOpen&&!phoneOpen,t);world.player.visible=phase!=='start'&&personalTruck(s)?.mode!=='driving'&&(phase!=='character'||!!CONFIG.protagonists.find(p=>p.id===selectedAvatar)?.available);
  guidance?.update(s,phase==='play'&&!builderOpen&&!modalOpen&&!phoneOpen&&!placement);if(phase==='play')showNextReward();
  if(faenaCenter?.visible&&now-faenaRefreshAt>2600&&
    !$('#faenaCenter').contains(document.activeElement)){faenaRefreshAt=now;faenaCenter.render();}
