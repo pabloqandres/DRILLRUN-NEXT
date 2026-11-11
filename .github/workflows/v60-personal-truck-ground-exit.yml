@@ -1,0 +1,22 @@
+name: V60 Personal Truck Ground and Exit
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  v60-ground-exit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Parse V60 affected modules
+        run: |
+          node --check dist/graphics/personal-truck-grounding.mjs
+          node --check dist/animation/personal-truck-exit.mjs
+          node --check dist/chapter/game.mjs
+          node --check tests/v60-truck-ground-exit.test.mjs
+      - name: Regressions V60, grounding V59, camera, M5 and vehicle collisions
+        run: |
+          node --test tests/v60-truck-ground-exit.test.mjs tests/v59-yard-night-gate-grounding.test.mjs tests/v58-personal-truck-free-look.test.mjs tests/v57-open-terrain-and-save.test.mjs tests/v56-personal-drilltruck-recovery.test.mjs tests/v55-vehicle-collision-render-recovery.test.mjs tests/v54-drilltruck-steering-controls.test.mjs tests/v52-night-patio-driving.test.mjs tests/v50-personal-drilltruck-driving.test.mjs tests/m5-office-patio-passability-v40.test.mjs
