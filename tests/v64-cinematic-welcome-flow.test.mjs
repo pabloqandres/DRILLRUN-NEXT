@@ -36,22 +36,19 @@ test('V64 approved brand logo is reused on Google login and loading screens',()=
  assert.match(css,/data:image\/webp;base64,/);
  assert.match(css,/font-size:0!important/);
 });
-test('V64 login, load, welcome, avatar/restore flow',()=>{
+test('V69: login directly enters character creation or restores gameplay',()=>{
  assert.match(html,/id="startScreen"/);
  assert.match(html,/id="loading"/);
- assert.match(html,/id="welcomeScreen" class="screen hidden"/);
  assert.match(html,/id="characterScreen"/);
- assert.match(html,/id="welcomeFrame"/);
- assert.match(game, /await ensureWorld\(!hasSave\);\s*displayWelcomeV64\(\)/);
- assert.match(game, /phase='welcome'/);
- assert.match(game, /if\(!hasSave\)\{\s*await chooseCharacter\(true\)/);
- assert.match(game, /prefs\.lang=s\.lang;prefs\.sound=s\.sound;t=translator\(s\.lang\)/);
- assert.match(game, /applyText\(\);hasSave=true;beginPlay\(true\)/);
- assert.match(game, /event\.origin!==location\.origin/);
- assert.match(game, /event\.source!==\$\('#welcomeFrame'\)\?\.contentWindow/);
- assert.match(game, /event\.data\?\.type!=='drillrun-welcome-enter-v64'/);
- assert.match(game, /frame\.removeAttribute\('src'\)/);
- assert.match(game, /if\(cloudSyncing\|\|cloudLocked\|\|welcomeTransitionBusy\)return/);
+ assert.doesNotMatch(html,/id="welcomeScreen"|id="welcomeFrame"/);
+ assert.match(game,/if\(cloudSyncing\|\|cloudLocked\|\|entryTransitionBusy\)return/);
+ assert.match(game,/requestImmersive\(\);\s*if\(selectorPreviewOnly\)/);
+ assert.match(game,/if\(!hasSave\)\{\s*await chooseCharacter\(true\)/);
+ assert.match(game,/await ensureWorld\(\);\s*s=readSave\(\)/);
+ assert.match(game,/prefs\.lang=s\.lang;prefs\.sound=s\.sound;t=translator\(s\.lang\)/);
+ assert.match(game,/applyText\(\);hasSave=true;beginPlay\(true\)/);
+ assert.doesNotMatch(game,/displayWelcomeV64|acceptWelcomeV64/);
+ assert.doesNotMatch(game,/window\.addEventListener\('message',event/);
 });
 test('V64 does not alter Google auth, saves, missions or character intro',()=>{
  assert.match(game, /prepareAuth\(user=>/);
