@@ -1,5 +1,8 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+**2026-11-10 · V58 · Solicitud de retiro del lote de catálogo Wave 01:** rama `chatgpt/remove-wave01-catalog-v58`; revierte sólo la inyección de 8 productos, categoría circularidad y atlas de previews; elimina módulo/manifest/workflow/test Wave 01, conserva catálogo original, HSEC, economía y misiones. No fusionar PR #72/#67; GLB solo en rama archivada. `CHANGES/2026-11-10_wave01-catalog-rollback-v58.md`.
+
+
 ## 2026-11-10 — V50 DrillTruck® 02 personal (PR)
 
 - Nueva unidad personal adicional comprada en Casa Matriz con despacho
