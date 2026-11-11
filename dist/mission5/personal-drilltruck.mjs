@@ -129,15 +129,34 @@ export function drivePersonalTruck(s,{throttle=0,steer=0,brake=false}={},dt=0,bl
  dt=clamp(Number(dt)||0,0,.08);
  throttle=clamp(Number(throttle)||0,-1,1);
  steer=clamp(Number(steer)||0,-1,1);
+ // V66: kinematic bicycle steering, progressive pedal/brake, no instant
+ // direction inversion. This is deliberately scoped to the PAID personal unit.
  let v=Number.isFinite(truck.speed)?truck.speed:0;
- if(brake)v+=clamp(-v,-16*dt,16*dt);
- else if(Math.abs(throttle)>.08)v+=throttle*(v>=0?4.1:3.4)*dt;
- else v+=clamp(-v,-2.7*dt,2.7*dt);
+ const coast=1.32,serviceBrake=5.7,oppositeBrake=5.2;
+ const approach=(value,target,maxDelta)=>value+clamp(target-value,-maxDelta,maxDelta);
+ if(brake){v=approach(v,0,serviceBrake*dt);}
+ else if(Math.abs(throttle)>.075){
+  if(v*throttle<-.008){
+   // Reverse pedal first slows the moving wheels, then engages reverse.
+   v=approach(v,0,oppositeBrake*Math.abs(throttle)*dt);
+  }else{
+   const accel=throttle>0?2.45:1.62; // pickup / gentle reverse gear
+   v+=throttle*accel*dt;
+  }
+ }else v=approach(v,0,coast*dt);
  v=clamp(v,-PERSONAL_TRUCK_MAX_REVERSE,PERSONAL_TRUCK_MAX_SPEED);
- if(Math.abs(v)<.045)v=0;
+ if(Math.abs(v)<.035)v=0;
  let heading=Number.isFinite(truck.heading)?truck.heading:0;
- const wheel=1.05*clamp(Math.abs(v)/2.5,0,1);
- heading+=steer*wheel*dt*Math.sign(v||1);
+ // Wheelbase ~2.85m, road pickup max ~32° near stop, reduced at speed.
+ const wheelbase=2.85;
+ const maxAngle=.56*(1-.43*clamp(Math.abs(v)/PERSONAL_TRUCK_MAX_SPEED,0,1));
+ const targetAngle=steer*maxAngle;
+ const lastAngle=Number.isFinite(truck.steerAngle)?truck.steerAngle:0;
+ const rate=Math.abs(steer)<.075?2.8:1.55;
+ const steerAngle=approach(lastAngle,targetAngle,rate*dt);
+ truck.steerAngle=steerAngle;
+ // Turn radius R=L/tan(delta); signed velocity naturally reverses yaw.
+ heading+=v*Math.tan(steerAngle)/wheelbase*dt;
  const dx=Math.sin(heading)*v*dt,dz=Math.cos(heading)*v*dt;
  const nx=truck.position.x+dx,nz=truck.position.z+dz;
  // Real 2.16 × 4.70 m footprint, not the avatar's radius. Road paint,
@@ -179,6 +198,6 @@ export function drivePersonalTruck(s,{throttle=0,steer=0,brake=false}={},dt=0,bl
  }
  truck.speed=v;
  s.position={...truck.position}; // Keep mission/POI distances tied to actual vehicle
- return {moving:Math.abs(v)>.05,blocked:collision,speed:v,heading:truck.heading,
-  position:{...truck.position}};
+ return {moving:Math.abs(v)>.05,blocked:collision,speed:v,steerAngle:truck.steerAngle,
+  heading:truck.heading,position:{...truck.position}};
 }
