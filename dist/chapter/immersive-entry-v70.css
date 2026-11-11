@@ -1,0 +1,51 @@
+/* V70 · This selector must be usable in Android in-app browser chrome, too.
+   Fullscreen is requested on user interaction but may be denied by the host. */
+@supports(height:100dvh){
+ #characterScreen[data-selector-v68="true"]{
+  height:100dvh;
+  max-height:100dvh;
+  bottom:auto;
+ }
+}
+#characterScreen[data-selector-v68="true"] #selectorFullscreen{
+ position:absolute;left:47%;top:2.9%;z-index:12;
+ display:grid;place-items:center;
+ width:clamp(30px,3.1vw,44px);height:clamp(30px,3.1vw,44px);
+ min-height:0;padding:clamp(6px,.7vw,10px);border-radius:9px;
+ border:1px solid #83d8e38c;
+ background:linear-gradient(160deg,#15364be6,#071c2cf0);
+ color:#e8f9ff;box-shadow:inset 0 1px #fff3,0 3px 13px #0008;
+ opacity:.85;touch-action:manipulation;pointer-events:auto;
+}
+#characterScreen[data-selector-v68="true"] #selectorFullscreen svg{display:block;width:100%;height:100%}
+#characterScreen[data-selector-v68="true"] #selectorFullscreen:active{opacity:1;transform:scale(.97)}
+#characterScreen[data-selector-v68="true"] #selectorFullscreen.hidden{display:none!important}
+@media(orientation:landscape) and (max-height:650px){
+ #characterScreen[data-selector-v68="true"] .characterIdentity{
+  /* Browser URL/toolbar removes playable height; keep CTA safely in view. */
+  top:max(13px,3vh)!important;
+  bottom:max(17px,env(safe-area-inset-bottom))!important;
+  gap:clamp(3px,.75vh,8px)!important;
+  padding:clamp(6px,.8vw,12px)!important;
+  min-height:0;
+ }
+ #characterScreen[data-selector-v68="true"] .v68Name{gap:2px}
+ #characterScreen[data-selector-v68="true"] .v68Name input{height:clamp(31px,5.4vh,42px);min-height:31px}
+ #characterScreen[data-selector-v68="true"] .v68Stats{gap:clamp(1px,.3vh,4px)}
+ #characterScreen[data-selector-v68="true"] #startAdventure{
+  min-height:clamp(33px,5.8vh,50px);
+  height:clamp(33px,5.8vh,50px);
+ }
+ #characterScreen[data-selector-v68="true"] .v68Figure{bottom:5%}
+}
+@media(orientation:landscape) and (max-height:400px){
+ #characterScreen[data-selector-v68="true"] .characterIdentity{
+  top:8px!important;bottom:13px!important;
+  gap:2px!important;padding:6px!important;
+ }
+ #characterScreen[data-selector-v68="true"] .v68Name input{height:29px;min-height:29px}
+ #characterScreen[data-selector-v68="true"] #startAdventure{height:32px;min-height:32px}
+ #characterScreen[data-selector-v68="true"] .v69SkillDescription{
+  overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;
+ }
+}
