@@ -307,3 +307,16 @@ Tras confirmar que la V57 no estaba desplegada, el usuario solicitó explícitam
 - Bloqueo siempre en paredes reales/HSEC, no por fase M4/M5 ni rectángulos artificiales.
 - Verificar test focalizado de caminos, vehículo, restauración y suite CI. Anotar limitaciones antes de merge.
 - Solicitud se interpreta como aprobación para publicar este alcance una vez validado; la verificación de `main` y Vercel se informa separadamente. No incluye rediseñar todo el HUD.
+
+## 2026-11-10 — V58 DrillTruck® personal: cámara giratoria libre (Usuario + ChatGPT)
+
+**Pedido:** mientras el jugador conduce la unidad 02, la cámara debe girar con el dedo desde la mitad derecha de la pantalla, como la cámara del avatar. No usar giro de cámara para cambiar el rumbo ni bloquear el joystick.
+
+**Excepción compartida acotada:** ChatGPT implementa la cámara visual en `dist/camera/personal-truck-free-look.mjs`; sólo ajusta los enlaces táctiles y la vista de `dist/chapter/game.mjs` (archivo compartido), sin modificar la física `drivePersonalTruck`, misión, economía o guardado.
+
+- Cámara elevada exterior se mantiene detrás del vehículo al ingresar, y acompaña su dirección con un desplazamiento angular elegido por el jugador.
+- Deslizamiento horizontal/vertical desde la superficie del juego, lado derecho (control existente `installWorldGestures`), controla únicamente azimut/inclinación de vista. Joystick en lado izquierdo conserva aceleración, marcha atrás, giro y freno sin interferencias.
+- El modo de conducción no guarda ángulos en el estado de misión, no afecta la propiedad de la camioneta ni la cámara del avatar. `cameraHome` vuelve a vista detrás del vehículo; al salir y reingresar se reinicia el modo.
+- El zoom táctil opcional de pinza y rueda actúa sobre cámara de vehículo, manteniendo distancia mínima/ máxima razonable.
+- Tests sintéticos deben verificar vista predeterminada, giro libre, seguimiento dinámico al vehículo, retorno a inicio, límites de inclinación/zoom y código acoplado.
+- Trabajo en rama `chatgpt/v58-personal-drilltruck-free-look`, PR antes de merge. Solicitud del usuario es para activar la función; validación de despliegue y cámara real Android deben informarse sin asumirlas.
