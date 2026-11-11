@@ -59,9 +59,13 @@ export const ROLE_BY_ID=Object.freeze(Object.fromEntries(ROLE_GROUPS.map(r=>[r.i
 export const candidatesForRole=id=>CANDIDATES.filter(c=>c.roleId===id);
 export const hiredForRole=(s,roleId)=>roleId.startsWith('m5-')
  ?(hiredPatioStaff(s,roleId)?[s.mission5.staff[roleId]]:[])
+ :roleId==='hsec'&&s?.hsec?.employee
+ ?[...(s?.personnel||[]).filter(p=>p.role==='hsec'),{...s.hsec.employee,role:'hsec',candidateId:s.hsec.employee.id}].slice(0,1)
  :(s?.personnel||[]).filter(p=>p.role===roleId);
 export const activeTeam=s=>[
  ...(s?.personnel||[]).filter(p=>p.role!=='techVisit'),
+ ...(s?.hsec?.employee&&!(s?.personnel||[]).some(p=>p.role==='hsec')
+  ?[{...s.hsec.employee,role:'hsec',candidateId:s.hsec.employee.id}]:[]),
  ...PATIO_STAFF.filter(def=>hiredPatioStaff(s,def.id)).map(def=>s.mission5.staff[def.id])
 ];
 export function missionIndex(s){
@@ -88,6 +92,7 @@ export function candidateBlockReason(s,candidate){
  const role=ROLE_BY_ID[c.roleId];
  if(!role)return 'invalidRole';
  if(missionIndex(s)<role.minMission)return 'lockedMission';
+ if(role.id==='hsec'&&s?.hsec?.employee)return 'roleFull';
  const reason=role.engine==='m5'?canHirePatioStaff(s,c.roleId):canHire(s,c.roleId);
  if(reason)return reason;
  return Number(s?.cash||0)<c.hireCost?'noMoney':null;
@@ -109,6 +114,7 @@ export function hireCandidate(s,candidateId,now=Date.now()){
   s.ledger.push({id:s.nextId++,key:'candidatePremium',candidateId:c.id,role:role.id,amount:-extra,at:now});
  }
  hired.candidateId=c.id;hired.displayName=c.name;
+ if(role.engine==='m3')hired.gender=c.art.gender==='w'?'woman':'man';
  hired.profileSkills={...c.skills};hired.profileSkillsVersion=1;
  hired.skillsGameplayActive=false; // explicitly future-facing
  hired.hireCost=c.hireCost;
