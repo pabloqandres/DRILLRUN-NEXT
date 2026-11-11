@@ -86,7 +86,7 @@ const navRole=(s,g,role,ico)=>{
  return `<button type="button" class="pvRole ${g.id===role?'selected':''} ${unlocked?'':'locked'}" data-pv-role="${g.id}" aria-pressed="${g.id===role}" title="${unlocked?g.description:'Se habilita en misión '+g.unlock}">
  <span class="pvRoleIcon">${ico(icons[g.id]||'personnel')}</span><span class="pvRoleLabel">${esc(g.label)}</span><b class="pvRoleCounter">${unlocked?n:'M'+g.unlock}</b></button>`;
 };
-export function renderPersonnelPremium(s,selectedRole,selectedId,icon,view='recruit'){
+export function renderPersonnelPremium(s,selectedRole,selectedId,icon,view='recruit',detailTab='ficha'){
  if(view==='team')return renderPersonnelManagement(s,selectedId,icon);
  const role=roleById(selectedRole)||PERSONNEL_GROUPS[0];
  const team=activePersonnel(s),count=activePersonnelCount(s),capacity=Math.max(count,personnelCapacity(s));
@@ -97,6 +97,7 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon,view='recr
  const warning=blocked==='missionLocked'?'Se habilita en misión '+role.unlock:reasons[blocked]||blocked;
  const step=role.id===required&&mission>=role.unlock;
  const countTxt=`${Math.min(count,capacity)} / ${capacity}`;
+ const activeTab=['ficha','desarrollo','salario','historial'].includes(detailTab)?detailTab:'ficha';
  const free=!!(s?.mission5?.commissionedAt&&s?.narrative?.rewardsCollected?.includes('m5'));
  const missionArt=free?'free':'m'+mission;
  const missionTitle=free?'Juego libre':mission===5?'Una base para crecer':mission===4?'Operación productiva':mission===3?'Tu primer contrato':'Seguridad de tu operación';
@@ -138,11 +139,16 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon,view='recr
   <aside class="pvDetail" aria-label="Ficha del candidato seleccionado">
    <div class="pvDetailHero"><div><span class="pvEyebrow">CANDIDATO SELECCIONADO</span><h3>${esc(selected.name)}</h3><span class="pvCandidateStars">${'★'.repeat(selected.grade)}<span>${'★'.repeat(5-selected.grade)}</span></span></div>
    ${portraitIllustration(selected,'detail')}</div>
-   <p class="pvBio">${esc(selected.description)}</p>
-   <div class="pvSkillsHeader">HABILIDADES <span>REGISTRADAS</span></div>
-   <div class="pvSkills">${skillRows(selected)}</div>
-   <div class="pvFutureNote">${icon('zap')} Habilidades iniciales. Progresión aún no activada.</div>
-   <div class="pvProposedSalary"><span>Salario por turno · propuesto</span><strong>${money(selected.salaryPerShift)}</strong><small>Sin cobro activo</small></div>
+   <nav class="pvDetailTabs" aria-label="Datos del candidato">${[['ficha','Ficha'],['desarrollo','Desarrollo'],['salario','Salario'],['historial','Historial']].map(([id,label])=>`<button type="button" data-pv-detail-tab="${id}" class="${activeTab===id?'active':''}" aria-pressed="${activeTab===id}">${label}</button>`).join('')}</nav>
+   <div class="pvDetailBody">
+   ${activeTab==='ficha'? `<p class="pvBio">${esc(selected.description)}</p>
+    <div class="pvSkillsHeader">HABILIDADES <span>NIVEL INICIAL</span></div>
+    <div class="pvSkills">${skillRows(selected)}</div>
+    <div class="pvProposedSalary"><span>Salario por turno · propuesto</span><strong>${money(selected.salaryPerShift)}</strong><small>Sin cobro activo</small></div>`:
+    activeTab==='desarrollo'? `<div class="pvTabTitle">Desarrollo de habilidades</div><div class="pvSkills">${skillRows(selected)}</div><p class="pvTabNote">La progresión aún no está activada. Los empleados contratados conservan sus perfiles guardados.</p>`:
+    activeTab==='salario'? `<div class="pvTabTitle">Condiciones económicas</div><div class="pvDetailMetric"><span>Contratación única</span><b>${money(selected.hireCost)}</b></div><div class="pvDetailMetric"><span>Salario propuesto por turno</span><b>${money(selected.salaryPerShift)}</b></div><p class="pvTabNote">Información de referencia: no existen cargos salariales automáticos.</p>`:
+    `<div class="pvTabTitle">Historial del personaje</div><p class="pvTabNote">${employed?'Ya forma parte de tu equipo.':'Aún no has contratado a este candidato.'} Los pagos y mejoras se registrarán cuando estén disponibles.</p>`}
+   </div>
    <div class="pvHireActions"><span class="pvHirePrice"><small>COSTO ÚNICO</small><b>${money(selected.hireCost)}</b></span>
     <button class="pvHire ${blocked?'blocked':''}" data-pv-hire type="button" ${blocked?'disabled':''}>${icon(blocked?'lock':'personnel')} ${employed?'Contratado':blocked?'No disponible':'Contratar'}</button></div>
    ${blocked?`<small class="pvHireReason">${esc(warning)}</small>`:''}
