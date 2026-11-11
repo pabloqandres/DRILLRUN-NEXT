@@ -3,7 +3,7 @@ import * as T from '../vendor/three.module.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {CandidateRig} from '../assets3d/worker-candidate.mjs';
 import {AVATARS,avatarDefinition} from './avatars.mjs';
-import {renderPlayerPortrait} from './portrait.mjs';
+import {renderPlayerPortrait,renderFullBodyPortrait} from './portrait.mjs';
 // Runtime skin weight cleanup. Only removes incorrect influences — never replaces good weights.
 // Fixes head deformation and torso bounce from shared skeleton rigging.
 function cleanSkinWeights(mesh){
@@ -96,7 +96,26 @@ export class AvatarRoster{
   return closest;
  }
  portrait(id){const e=this.entries.get(id);if(!e)return '';if(!e.portrait){const host=document.createElement('span');renderPlayerPortrait({...this.world,player:e.root,worker:e.rig},host,e.definition.height);e.portrait=host.innerHTML;}return e.portrait;}
+ // V68 · one living hero avatar in the world; all four REAL GLBs remain
+ // independently selectable through their source-backed portrait cards.
+ // Never clone/change a game character or saved position outside selector phase.
+ figure(id){
+  const e=this.entries.get(id);if(!e)return '';
+  if(!e.figure){
+   const host=document.createElement('span');
+   renderFullBodyPortrait({...this.world,player:e.root,worker:e.rig},host,e.definition.height);
+   e.figure=host.innerHTML;
+  }
+  return e.figure;
+ }
  updateSelector(show,selected,state,dt,time){
-  for(const a of AVATARS){const e=this.entries.get(a.id);if(!e)continue;e.root.visible=show||a.id===this.selected;if(!show)continue;const i=AVATARS.indexOf(a),chosen=a.id===selected;const x=-5.5+this.displayOffsets[i],z=5.2+(chosen?.45:0);e.root.position.set(x,0,z);e.root.rotation.y=0;if(chosen){state.position={x,z};}else e.rig.update(dt,()=>0,time);}
+  for(const a of AVATARS){
+   const e=this.entries.get(a.id);if(!e)continue;
+   const chosen=a.id===selected;
+   e.root.visible=show?chosen:a.id===this.selected;
+   if(!show)continue;
+   const x=-5.55,z=5.68;
+   if(chosen){e.root.position.set(x,0,z);e.root.rotation.y=0;state.position={x,z};}
+  }
  }
 }
