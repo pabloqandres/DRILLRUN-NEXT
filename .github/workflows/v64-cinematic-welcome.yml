@@ -1,0 +1,20 @@
+name: V64 Cinematic Welcome
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  v64-welcome:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and self-contained title UI
+        run: |
+          node --check dist/chapter/game.mjs
+          node --test tests/v64-cinematic-welcome-flow.test.mjs
+      - name: Previous login/cloud/intro/mission regressions
+        run: |
+          node --test tests/v50-personal-drilltruck-driving.test.mjs tests/v62-soft-headlights-avatar-paving.test.mjs tests/v63-warm-amber-pavement-reflection.test.mjs
