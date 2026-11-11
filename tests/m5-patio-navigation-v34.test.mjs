@@ -20,14 +20,18 @@ test('M5 can be walked into BEFORE L1 is purchased; continuous route from old fa
  for(const [x,z] of [[-8,-9],[-12,-12],[-19,-14],[-24,-14],[-51,-17],[-76,-36]]){
   assert.equal(w.isBlocked(x,z,.34),false,'unexpected invisible blocker at '+x+','+z);
  }
- for(const [x,z] of [[-90,-50],[-200,0],[50,30]]){
-  assert.equal(w.isBlocked(x,z,.34),true,'outer world remains blocked');
+ for(const [x,z] of [[-90,-50],[50,30],[98,98]]){
+  assert.equal(w.isBlocked(x,z,.34),false,'V57 open desert blocked');
+ }
+ for(const [x,z] of [[-200,0],[110,0],[0,-110]]){
+  assert.equal(w.isBlocked(x,z,.34),true,'physical terrain edge must remain blocked');
  }
 });
-test('before M4, non-built M5 parcel remains inaccessible',()=>{
+test('V57 no invisible M4-gated map walls: non-built parcel is walkable',()=>{
  const w=world(false);
- assert.equal(w.isBlocked(-51,-17,.34),true);
- assert.equal(w.isBlocked(-24,-14,.34),true);
+ assert.equal(w.isBlocked(-51,-17,.34),false);
+ assert.equal(w.isBlocked(-24,-14,.34),false);
+ assert.equal(w.isBlocked(40,20,.34),false);
 });
 test('player support height matches desert mesh on plot and access, not buried at y=0',()=>{
  const w=world(true);
