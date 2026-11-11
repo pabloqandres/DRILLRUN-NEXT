@@ -38,6 +38,11 @@ test('V68: the original identity, start and Google save routes survive the visua
  assert(game.includes('new CinematicCharacterSelector'));
  assert(game.includes('avatars.figure(p.id)'));
  assert(game.includes("$('#playerNameInput').oninput=()=>"));
+ assert(game.includes("selectorPreviewOnly"));
+ assert(game.includes("new URLSearchParams(location.search).has('selectorPreview')"));
+ assert(game.includes("No se ha creado ni reemplazado ninguna partida guardada."));
+ assert(game.includes("void chooseCharacter(false)"));
+ assert(game.indexOf("if(selectorPreviewOnly){",game.indexOf("$('#startAdventure').onclick"))<game.indexOf("s.cloudGeneration=previousCloudGeneration+1"));
  assert(!game.includes("$('#playerNameInput').oninput=renderCharacters"));
  assert(html.includes('character-select-v68.css?v=68'));
  assert(html.includes('id="playerNameInput"'));
