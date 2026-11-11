@@ -1531,8 +1531,9 @@ function closePhone(){stop();phoneUI.release();phoneOpen=false;hidden($('#phoneS
 const phoneUI=new PhoneUI({shell:$('#phone'),content:$('#phoneContent'),title:$('#phoneTitle'),back:$('#phoneBack'),state:()=>s,translate:()=>t,format:money,getWorld:()=>world,onSave:save,onHUD:renderHUD,onNavigate:app=>{if(app==='builder'){openBuilder();return;}if(app==='faena-center'){openFaena('overview');return;}phoneApp=app;renderPhone();},onClose:closePhone,onTransfer:(direction,amount)=>{if(action(()=>transfer(s,direction,amount)))notices.push({title:t('transactionDone'),detail:money(s.cash),symbol:'bank'});},
 onM5Action:(type,id)=>{try{
   if(type==='hire'){
-   const hired=hirePatioStaff(s,id,Date.now());
-   notices.push({title:'Personal contratado',detail:id==='m5-gate-security'?'Guardia de acceso asignado a caseta':'Técnica de bodega asignada al galpón',symbol:'personnel'});
+   const [staffId,candidateId]=String(id||'').split('|');
+    const hired=hirePatioStaff(s,staffId,Date.now(),candidateId||null);
+   notices.push({title:'Personal contratado',detail:staffId==='m5-gate-security'?'Guardia de acceso asignado a caseta':'Técnica de bodega asignada al galpón',symbol:'personnel'});
    if(!m5NpcWorld&&world)m5NpcWorld=new PatioNPCWorld(world);
    // Model loads only now, after a real paid hire.
    // No auto-assignment to HSEC personnel; actor loader is unique per hired id.
@@ -1553,7 +1554,11 @@ onM5Action:(type,id)=>{try{
   notices.push({title:message,symbol:'lock'});
  }},
 onM3Action:(type,data)=>{try{
- if(type==='hire'){hirePersonnel(s,data,data+'-01');notices.push({title:'Personal contratado',symbol:'bell'});}
+ if(type==='hire'){
+   const [roleId,chosenId]=String(data||'').split('|');
+   hirePersonnel(s,roleId,chosenId||roleId+'-01');
+   notices.push({title:'Personal contratado',symbol:'bell'});
+  }
  else if(type==='buyDrill'){const d=drillDefinition(data);if(d){placeMachineryOrder(s,'drill',data,d.price);notices.push({title:'Perforadora solicitada · en camino',symbol:'bell'});if(m3DeliveryVehicle)departDelivery(m3DeliveryVehicle);}}
  else if(type==='acceptContract'){acceptContract(s,data);notices.push({title:'Contrato aceptado',symbol:'bell'});}
  else if(type==='completeContract'){const result=completeContract(s);notices.push({title:'Contrato entregado · espera confirmación',detail:money(result.reward),symbol:'messages'});}
@@ -1604,6 +1609,7 @@ function openFaena(route='overview'){
 }
 faenaCenter=new FaenaCenterUI({
  host:$('#faenaCenter'),state:()=>s,translate:()=>t,format:money,icon,
+  onFeedback:kind=>selectorFeedback.play(kind),
  onClose:()=>document.body.classList.remove('faenaOpen'),
  onHsec:()=>hsecUI?.open(),
  onLocatePersonalTruck:locatePersonalTruckInWorld,

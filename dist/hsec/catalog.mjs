@@ -21,7 +21,7 @@ export const HSEC_ASSETS=[
  ...[['control','Caseta de control',2,2,2.5],['speedbump','Lomo de toro',2.8,.45,.1],['mirror','Espejo convexo',.5,.2,2],['recycling','Punto limpio',1.4,.7,1.2],['spill','Contención de derrames',1.2,.8,.25],['shower','Ducha de emergencia',.8,.8,2.4],['cable','Protector de cables',1,.3,.07],['drain','Rejilla de drenaje',1,.5,.02],['handrail','Pasamanos peatonal',2,.12,1]].map(([id,name,w,d,h])=>def(id,name,['mirror','speedbump','cable','drain'].includes(id)?'mobility':['handrail','control'].includes(id)?'boundaries':'emergencies',null,w,d,h,{future:true,benefit:'Registrado para una etapa posterior',maintenance:'Según ficha de conservación'}))
 ];
 export const assetDefinition=id=>HSEC_ASSETS.find(d=>d.id===id);
-export const EMPLOYEES=[{id:'hsec01',name:'Profesional HSEC · Candidato 01',gender:'man',asset:'hsec-npc1.glb',salary:0,hireCost:350,level:1},{id:'hsec02',name:'Profesional HSEC · Candidata 02',gender:'woman',asset:'hsec-npc2.glb',salary:0,hireCost:350,level:1}];
+export const EMPLOYEES=[{id:'hsec01',name:'Profesional HSEC · Candidato 01',gender:'man',asset:'hsec-npc1.glb',salary:0,hireCost:350,level:1},{id:'hsec02',name:'Profesional HSEC · Candidata 02',gender:'woman',asset:'hsec-npc2.glb',salary:0,hireCost:350,level:1},{id:'hsec03',name:'Profesional HSEC · Candidata 03',gender:'woman',asset:'hsec-npc2.glb',salary:0,hireCost:330,level:1}];
 export const HSEC_STEPS=['Mejora la oficina a nivel 2','Construye el galpón de mantenimiento','Construye al menos 12 m de camino vehicular y conecta senderos peatonales','Ilumina rutas e instala extintores','Alcanza 80 puntos HSEC'];
 
 // Ten data levels are prepared; only the playable variants are exposed.

@@ -449,3 +449,10 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Se elimina **Personal** del Catálogo: ahora Edificios / Equipos / Vehículos / Caminos / Delimitación / Iluminación / Seguridad. Se retiran los productos virtuales de personal y el acceso a contratación duplicado dentro de Builder.
 - El botón **Personal** sigue abriendo su ventana propia en Centro de Faena, con contrataciones de M3/M4/M5, inventario de NPC y limitaciones de rol sin cambios. La futura interfaz premium queda pendiente de aprobación.
 - Las siete categorías se validan en M1–M5 y se conserva la nueva navegación V74 (flechas, swipe y teclado). Pruebas V75 + V74 + V71 correctas, QA visual Android pendiente.
+
+## 2026-11-11 — V76 Personal premium con 21 candidatos
+- Ventana Personal compacta, independiente del Catálogo: 7 roles × 3 candidatos, carrusel de tarjetas con retrato ficticio, ficha ampliada, habilidades 1–5, contratación y equipo activo, orientación automática hacia requisito M3/M4/M5.
+- Se añaden 21 retratos SVG originales sin marcas ni logos como primer pase de arte (sujetos a aprobación visual), nombres/IDs propios, precios por candidato y perfiles de habilidades persistentes con `effectsEnabled:false` (sin efectos nuevos de economía).
+- La contratación usa las acciones de M3/M5 originales y conserva el guardado, modelos GLB existentes y posiciones de NPC. Slots del UI crecen con el avance de misión; no hay bloqueo adicional.
+- Audio UI/selector ahora tiene control de volumen 0,5–3,5, valor inicial 2×, conserva mute y háptica mínima.
+- CI V76 focal y regresiones V75/V73/V70 aprobadas. Preview Vercel READY; revisar Android y aprobar calidad del arte antes de dar versión final. Ver `CHANGES/2026-11-11_v76_personnel-premium.md`.

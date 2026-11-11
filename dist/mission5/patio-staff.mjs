@@ -1,6 +1,7 @@
 // DRILL RUN NEXT GENERATION — M5 staff. Permanent, player-funded jobs.
 // NO clone of HSEC prevencionistas and NO automatic personnel on build.
 // HSEC safety scoring, M4 production and Fleet still own their state.
+import {candidateById,candidateHirePrice,skillSnapshot} from '../chapter/personnel-candidates-v76.mjs';
 export const PATIO_STAFF=Object.freeze([
  Object.freeze({id:'m5-gate-security',label:'Guardia de acceso',role:'security',
   cost:1800,site:{x:-29,z:-7.5},asset:'npc-m5-gate-security.glb'}),
@@ -10,26 +11,29 @@ export const PATIO_STAFF=Object.freeze([
 export const STAFF_BY_ID=Object.freeze(Object.fromEntries(PATIO_STAFF.map(p=>[p.id,p])));
 export const STAFF_IDS=Object.freeze(PATIO_STAFF.map(e=>e.id));
 export const hiredPatioStaff=(s,id)=>Boolean(s?.mission5?.staff?.[id]?.hiredAt);
-export const canHirePatioStaff=(s,id)=>{
+export const canHirePatioStaff=(s,id,candidateId=null)=>{
  const def=STAFF_BY_ID[id];
  if(!def)return 'unknownStaff';
+ const candidate=candidateById(candidateId);
+ if(candidateId&&(!candidate||candidate.role!==id))return 'invalidCandidate';
  if(s?.mission5?.status!=='operational')return 'buildPatioFirst';
  if(s?.narrative&&!s.narrative.accepted?.includes('m5'))return 'acceptM5First';
  if(hiredPatioStaff(s,id))return 'alreadyHired';
  if(id==='m5-warehouse-tech'&&!hiredPatioStaff(s,'m5-gate-security'))return 'hireGuardFirst';
- if(!Number.isFinite(s?.cash)||s.cash<def.cost)return 'noMoney';
+ if(!Number.isFinite(s?.cash)||s.cash<candidateHirePrice(id,candidateId,def.cost))return 'noMoney';
  return null;
 };
-export function hirePatioStaff(s,id,now=Date.now()){
- const reason=canHirePatioStaff(s,id);
+export function hirePatioStaff(s,id,now=Date.now(),candidateId=null){
+ const reason=canHirePatioStaff(s,id,candidateId);
  if(reason)throw new Error(reason);
  const def=STAFF_BY_ID[id];
- s.cash-=def.cost;
+ const candidate=candidateById(candidateId),price=candidateHirePrice(id,candidateId,def.cost);
+ s.cash-=price;
  s.mission5.staff??={};
  // One roster entry per role, persisted in Cloud Save.
- s.mission5.staff[id]={id,role:def.role,hiredAt:now,position:{...def.site}};
+ s.mission5.staff[id]={id,role:def.role,hiredAt:now,position:{...def.site},candidateId:candidate?.id||null,name:candidate?.name||null,skillProfile:skillSnapshot(candidate?.id),hireCost:price};
  s.ledger??=[];s.nextId??=1;
- s.ledger.push({id:s.nextId++,key:'m5Personnel',role:id,amount:-def.cost,at:now});
+ s.ledger.push({id:s.nextId++,key:'m5Personnel',role:id,amount:-price,at:now});
  return s.mission5.staff[id];
 }
 export const gateChecked=s=>Boolean(s?.mission5?.gateCheckedAt);

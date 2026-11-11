@@ -5,6 +5,12 @@ export class CharacterSelectFeedback{
  constructor({context,enabled=()=>true,haptics=()=>true}={}){
   this.context=context;this.enabled=enabled;this.haptics=haptics;
   this.last=Object.create(null);this.noise=null;this.noiseRate=0;
+  // V76: shared adjustable UI volume for character selection and Personnel.
+  // Audio is opt-in via existing sound settings; this does not affect world SFX.
+ }
+ uiVolume(){
+  try{return Math.max(.5,Math.min(3.5,Number(localStorage.getItem('drillrun-ui-volume-v76'))||2));}
+  catch{return 2;}
  }
  pulse(milliseconds){
   if(!this.haptics()||typeof navigator==='undefined'||!navigator.vibrate)return;
@@ -26,9 +32,10 @@ export class CharacterSelectFeedback{
   gain.gain.setValueAtTime(.00001,t);
   gain.gain.exponentialRampToValueAtTime(Math.min(.055,Math.max(.00001,level)),t+.011);
   gain.gain.exponentialRampToValueAtTime(.00001,t+duration);
-  oscillator.connect(filter);filter.connect(gain);gain.connect(ctx.destination);
+  const master=ctx.createGain();master.gain.value=this.uiVolume();
+  oscillator.connect(filter);filter.connect(gain);gain.connect(master);master.connect(ctx.destination);
   oscillator.start(t);oscillator.stop(t+duration+.003);
-  oscillator.onended=()=>{oscillator.disconnect();filter.disconnect();gain.disconnect();};
+  oscillator.onended=()=>{oscillator.disconnect();filter.disconnect();gain.disconnect();master.disconnect();};
  }
  whoosh(ctx){
   const t=ctx.currentTime+.003,source=ctx.createBufferSource();
@@ -40,9 +47,10 @@ export class CharacterSelectFeedback{
   gain.gain.setValueAtTime(.00001,t);
   gain.gain.exponentialRampToValueAtTime(.023,t+.035);
   gain.gain.exponentialRampToValueAtTime(.00001,t+.155);
-  source.connect(filter);filter.connect(gain);gain.connect(ctx.destination);
+  const master=ctx.createGain();master.gain.value=this.uiVolume();
+  source.connect(filter);filter.connect(gain);gain.connect(master);master.connect(ctx.destination);
   source.start(t);source.stop(t+.16);
-  source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();};
+  source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();master.disconnect();};
  }
  play(kind){
   if(kind==='select')this.pulse(8);

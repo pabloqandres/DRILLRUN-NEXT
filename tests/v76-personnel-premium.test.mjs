@@ -1,0 +1,130 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {newGame} from '../dist/chapter/state.mjs';
+import {PERSONNEL_GROUPS,PERSONNEL_CANDIDATES,candidateById,candidatesForRole,skillSnapshot,personnelUnlockMission,personnelCapacity,activePersonnelCount} from '../dist/chapter/personnel-candidates-v76.mjs';
+import {ROLES,canHire,hirePersonnel} from '../dist/mission3/personnel.mjs';
+import {PATIO_STAFF,canHirePatioStaff,hirePatioStaff} from '../dist/mission5/patio-staff.mjs';
+import {EMPLOYEES} from '../dist/hsec/catalog.mjs';
+import {renderPersonnelPremium,activePersonnel,nextRequiredRole,personnelAvailability,roleCount} from '../dist/chapter/personnel-premium-v76.mjs';
+const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+const icon=name=>'<svg data-icon="'+name+'"></svg>';
+const m3=()=>{const s=newGame('es','operator01');s.mission3={phase:'setup'};s.office={status:'built',level:2};s.hsec={assets:[{id:'shed-1',type:'shed',status:'built'}],employee:{id:'hsec01',level:1,state:'idle'}};s.cash=50000;return s;};
+const m5=()=>{const s=m3();s.mission4={phase:'complete'};s.mission5={status:'operational',staff:{}};s.narrative={accepted:['m5']};return s;};
+test('V76: exactly 21 unique people, three in each of seven role groups',()=>{
+ assert.equal(PERSONNEL_GROUPS.length,7);
+ assert.equal(PERSONNEL_CANDIDATES.length,21);
+ assert.equal(new Set(PERSONNEL_CANDIDATES.map(c=>c.id)).size,21);
+ assert.equal(new Set(PERSONNEL_CANDIDATES.map(c=>c.name)).size,21);
+ for(const role of PERSONNEL_GROUPS){
+  assert.equal(candidatesForRole(role.id).length,3,role.id);
+  for(const c of candidatesForRole(role.id)){
+   assert.equal(c.skills&&Object.keys(c.skills).length,3,c.id);
+   assert(Object.values(c.skills).every(v=>Number.isInteger(v)&&v>=1&&v<=5),c.id);
+   assert(c.hireCost>0,c.id);
+   assert(c.portrait.endsWith(c.id+'.svg'),c.id);
+   const svg=read('dist/assets/npc-portraits-v76/'+c.id+'.svg');
+   assert(svg.startsWith('<svg'),c.id);
+   assert(svg.includes('viewBox="0 0 300 370"'),c.id);
+   assert(!/<text\b|<image\b|<foreignObject\b|DRILLCO|PUMA|logo|®/i.test(svg),c.id+' has unauthorized brand/label');
+  }
+ }
+});
+test('V76: skills are saved with identity but have no active economic effects',()=>{
+ const s=m3(),c=candidatesForRole('admin')[0],cash=s.cash;
+ assert.equal(canHire(s,'admin',c.id),null);
+ const p=hirePersonnel(s,'admin',c.id,100);
+ assert.equal(p.id,c.id);
+ assert.equal(p.candidateId,c.id);
+ assert.equal(p.name,c.name);
+ assert.deepEqual(p.skillProfile.skills,c.skills);
+ assert.equal(p.skillProfile.effectsEnabled,false);
+ assert.equal(p.skillProfile.progressionVersion,1);
+ assert.equal(p.hireCost,c.hireCost);
+ assert.equal(s.cash,cash-c.hireCost);
+ assert.equal(s.ledger.at(-1).amount,-c.hireCost);
+ assert.equal(canHire(s,'admin',candidatesForRole('admin')[1].id),'roleFull');
+ assert.equal(ROLES.find(r=>r.id==='admin').hireCost,800);
+});
+test('V76: alternative hires charge exactly the selected price; legacy role hire still works',()=>{
+ const a=m3(),b=m3();
+ const c=candidatesForRole('admin')[1];
+ assert.equal(canHire(a,'admin',c.id),null);
+ assert.equal(hirePersonnel(a,'admin',c.id,123).hireCost,950);
+ assert.equal(a.cash,50000-950);
+ assert.equal(hirePersonnel(b,'admin','admin-01',123).hireCost,800);
+ assert.equal(b.cash,50000-800);
+ assert.equal(b.personnel[0].skillProfile,null);
+ assert.equal(canHire(m3(),'driller',c.id),'invalidCandidate');
+});
+test('V76: three HSEC IDs are registered without removing original M2 employees',()=>{
+ assert.equal(EMPLOYEES.length,3);
+ for(const id of ['hsec01','hsec02','hsec03'])assert(EMPLOYEES.some(e=>e.id===id));
+ assert.equal(canHire(m3(),'hsec','hsec02'),'roleFull');
+});
+test('V76: guard and warehouse technician candidates persist with their unique paid identity',()=>{
+ const s=m5();
+ const guard=candidatesForRole('m5-gate-security')[2];
+ assert.equal(canHirePatioStaff(s,'m5-gate-security',guard.id),null);
+ const cash=s.cash,hire=hirePatioStaff(s,'m5-gate-security',100,guard.id);
+ assert.equal(hire.id,'m5-gate-security');
+ assert.equal(hire.candidateId,guard.id);
+ assert.deepEqual(hire.skillProfile.skills,guard.skills);
+ assert.equal(hire.skillProfile.effectsEnabled,false);
+ assert.equal(s.cash,cash-guard.hireCost);
+ assert.equal(s.ledger.at(-1).amount,-guard.hireCost);
+ const yard=candidatesForRole('m5-warehouse-tech')[1];
+ assert.equal(canHirePatioStaff(s,'m5-warehouse-tech',yard.id),null);
+ const tech=hirePatioStaff(s,'m5-warehouse-tech',101,yard.id);
+ assert.equal(tech.candidateId,yard.id);
+ assert.equal(tech.hireCost,yard.hireCost);
+ assert.deepEqual(PATIO_STAFF.map(x=>x.cost),[1800,2200]);
+});
+test('V76: capacity expands by mission before relevant hires',()=>{
+ const s=newGame('es','operator01');
+ assert.equal(personnelCapacity(s),1);
+ s.mission3={phase:'setup'};
+ assert.equal(personnelCapacity(s),5);
+ s.mission4={phase:'production'};
+ assert.equal(personnelCapacity(s),6);
+ s.mission5={status:'operational'};
+ assert.equal(personnelCapacity(s),8);
+});
+test('V76: active roster includes HSEC and M5 without double count, mission banner guides next hire',()=>{
+ const s=m3();
+ assert.equal(personnelUnlockMission(s),3);
+ assert.equal(activePersonnel(s).length,1);
+ assert.equal(activePersonnelCount(s),1);
+ assert.equal(nextRequiredRole(s),'admin');
+ let html=renderPersonnelPremium(s,'admin',candidatesForRole('admin')[0].id,icon);
+ assert(html.includes('Administrador de contrato'));
+ assert.equal((html.match(/data-pv-candidate=/g)||[]).length,3);
+ assert(html.includes('data-pv-hire'));
+ assert(html.includes('pvTeamSlot occupied'));
+ assert(html.includes('MISIÓN 3'));
+ assert(html.includes('pvFutureNote'));
+ hirePersonnel(s,'admin',candidatesForRole('admin')[0].id,123);
+ assert.equal(nextRequiredRole(s),'driller');
+ const late=m5();assert.equal(nextRequiredRole(late),'m5-gate-security');
+ hirePatioStaff(late,'m5-gate-security',222,candidatesForRole('m5-gate-security')[0].id);
+ assert.equal(nextRequiredRole(late),'m5-warehouse-tech');
+});
+test('V76: integration has event delegation and shared adjustable selector/UI volume',()=>{
+ const faena=read('dist/chapter/faena-center.mjs');
+ const game=read('dist/chapter/game.mjs');
+ const sound=read('dist/audio/character-select-feedback-v68.mjs');
+ const css=read('dist/chapter/personnel-premium-v76.css');
+ const html=read('dist/index.html');
+ assert(faena.includes("renderPersonnelPremium(s,this.personnelRole"));
+ assert(faena.includes("b.hasAttribute('data-pv-hire')"));
+ assert(faena.includes("this.onAppAction?.(role.startsWith('m5-')?'m5':'m3','hire',role+'|'+candidateId)"));
+ assert(faena.includes('data-pv-volume'));
+ assert(game.includes('onFeedback:kind=>selectorFeedback.play(kind)'));
+ assert(game.includes("const [staffId,candidateId]=String(id||'').split('|')"));
+ assert(game.includes("const [roleId,chosenId]=String(data||'').split('|')"));
+ assert(sound.includes("localStorage.getItem('drillrun-ui-volume-v76')"));
+ assert(sound.includes('master.gain.value=this.uiVolume()'));
+ assert(css.includes('.pvDialog'));
+ assert(css.includes('@media(orientation:landscape) and (max-height:480px)'));
+ assert(html.includes('personnel-premium-v76.css?v=76'));
+});

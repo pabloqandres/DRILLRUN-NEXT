@@ -1,6 +1,8 @@
 // V53 · One operational workspace with contextual entry points.
 // Renders EXISTING M3/M4/M5 controllers; no duplicate spending/progression.
 import {renderM3App} from '../mission3/phone-apps.mjs';
+import {renderPersonnelPremium,nextRequiredRole,personnelAvailability} from './personnel-premium-v76.mjs';
+import {candidatesForRole,candidateById} from './personnel-candidates-v76.mjs';
 import {renderM4App} from '../mission4/phone-apps.mjs';
 import {renderPatioApp} from '../mission5/patio-ui.mjs';
 import {mission5Readout} from '../mission5/mission-readout.mjs';
@@ -50,14 +52,26 @@ function personalTruckActions(s){
 }
 
 export class FaenaCenterUI{
- constructor({host,state,translate,format,icon,onClose,onAppAction,onKitOrder,onRecovery,onHsec,onLocate,onLocatePersonalTruck,onRecoverPersonalTruck}){
-  Object.assign(this,{host,state,translate,format,icon,onClose,onAppAction,onKitOrder,onRecovery,onHsec,onLocate,onLocatePersonalTruck,onRecoverPersonalTruck});
+ constructor({host,state,translate,format,icon,onClose,onAppAction,onKitOrder,onRecovery,onHsec,onLocate,onLocatePersonalTruck,onRecoverPersonalTruck,onFeedback}){
+  Object.assign(this,{host,state,translate,format,icon,onClose,onAppAction,onKitOrder,onRecovery,onHsec,onLocate,onLocatePersonalTruck,onRecoverPersonalTruck,onFeedback});
   this.route='overview';this.view='';this.lastKey='';
+  this.personnelRole=null;this.personnelCandidate=null;
   host.addEventListener('click',event=>this.handle(event));
+  host.addEventListener('input',event=>{
+   if(!event.target.matches('[data-pv-volume]'))return;
+   const value=Math.max(.5,Math.min(3.5,Number(event.target.value)||1.7));
+   try{localStorage.setItem('drillrun-ui-volume-v76',String(value));}catch{}
+   this.onFeedback?.('skill');
+  });
  }
  get visible(){return !this.host.classList.contains('hidden');}
  open(route='overview'){
+  const previous=this.route;
   this.route=routes[route]?route:faenaRouteForApp(route);
+  if(this.route==='personnel'&&previous!=='personnel'){
+   this.personnelRole=nextRequiredRole(this.state());
+   this.personnelCandidate=candidatesForRole(this.personnelRole)[0]?.id||null;
+  }
   this.view=route.startsWith('m3-')||route.startsWith('m4-')?route:'';
   this.host.classList.remove('hidden');this.host.hidden=false;
   this.render();
@@ -150,7 +164,7 @@ export class FaenaCenterUI{
      '<nav class="faenaQuickLinks">'+button('production','Ir a Producción')+button('logistics','Pedidos y materiales')+'</nav>'+m3('m3-contract');
    case 'personnel':
     if(!s.mission3||s.mission3.phase==='inactive')return '<p class="faenaHint">El personal operativo se habilita en Misión 3.</p>';
-    return '<p class="faenaLead">Un solo lugar para contratar y consultar el personal operativo, incluida la guardia y la técnica del Patio.</p>'+m3('m3-personnel');
+    return renderPersonnelPremium(s,this.personnelRole||nextRequiredRole(s),this.personnelCandidate,icon);
    case 'headquarters':
     if(!s.mission3||s.mission3.phase==='inactive')return '<p class="faenaHint">Casa Matriz se habilita con tu primer contrato de perforación.</p>';
     return '<p class="faenaLead">Todos los productos DRILLCO® se solicitan a Casa Matriz. No se compran herramientas dentro del Taller ni de la Bodega.</p>'+
@@ -182,21 +196,65 @@ export class FaenaCenterUI{
   const title=this.view?({ 'm3-catalog':'Casa Matriz RC','m4-dth-catalog':'Casa Matriz DTH','m3-geology':'Geología','m4-zones':'Zonas','m3-orders':'Pedidos','m4-workshop':'Equipos DTH','m3-inventory':'Stock RC','m4-drilltruck':'DrillTruck®'})[this.view]||routes[route]:routes[route];
   const prev=this.view?route:route==='overview'?'': 'overview';
   const currentScroll=this.lastKey===route+':'+this.view?this.host.querySelector('.faenaBody')?.scrollTop||0:0;
-  this.host.innerHTML='<div class="faenaDialog" role="dialog" aria-modal="true" aria-label="Centro de Faena">'+
+  const isPersonnel=route==='personnel'&&!this.view;
+  let pvVolume=1.7;try{pvVolume=Math.max(.5,Math.min(3.5,Number(localStorage.getItem('drillrun-ui-volume-v76'))||1.7));}catch{}
+  const volumeControl=isPersonnel?'<label class="pvVolume" title="Volumen de interacción"><span>Sonido UI</span><input data-pv-volume type="range" min="0.5" max="3.5" step="0.1" value="'+pvVolume+'" aria-label="Volumen de interacciones"/></label>':'';
+  this.host.innerHTML='<div class="faenaDialog '+(isPersonnel?'pvDialog':'')+'" role="dialog" aria-modal="true" aria-label="Centro de Faena">'+
    '<header class="faenaHeader"><div><small>DRILL RUN · OPERACIÓN</small><h2>'+esc(title||'Centro de Faena')+'</h2></div>'+
-   '<div class="faenaHeaderActions">'+(prev?'<button data-faena-back aria-label="Volver">‹ Volver</button>':'')+
+   '<div class="faenaHeaderActions">'+volumeControl+(prev?'<button data-faena-back aria-label="Volver">‹ Volver</button>':'')+
    '<button data-faena-close aria-label="Cerrar Centro de Faena">✕</button></div></header>'+
    '<div class="faenaBody"><div class="faenaContent">'+this.pageHtml(s,t,fmt,icon)+'</div></div>'+
-   '<footer class="faenaFooter"><button data-faena-route="overview">'+icon('inventory')+' Centro de Faena</button>'+
+   (isPersonnel?'':'<footer class="faenaFooter"><button data-faena-route="overview">'+icon('inventory')+' Centro de Faena</button>'+
    '<button data-faena-route="production">'+icon('geology')+' Producción</button>'+
    '<button data-faena-route="logistics">'+icon('store')+' Logística</button>'+
-   '<button data-faena-route="workshop">'+icon('wrench')+' Taller</button></footer></div>';
+   '<button data-faena-route="workshop">'+icon('wrench')+' Taller</button></footer>')+'</div>';
   const body=this.host.querySelector('.faenaBody');if(body)body.scrollTop=currentScroll;
+  if(isPersonnel){
+   const strip=this.host.querySelector('.pvCandidates'),choice=strip?.querySelector('.pvCandidate[aria-pressed="true"]');
+   // Keep selected candidate in frame on phone, where only two cards fit.
+   if(strip&&choice){
+    const start=choice.offsetLeft-strip.offsetLeft;
+    strip.scrollLeft=Math.max(0,start-(strip.clientWidth-choice.clientWidth)/2);
+   }
+  }
   this.lastKey=route+':'+this.view;
  }
  handle(e){
   const b=e.target.closest('button');
   if(!b||b.disabled||!this.host.contains(b))return;
+  if(b.dataset.pvRole){
+   this.personnelRole=b.dataset.pvRole;
+   this.personnelCandidate=candidatesForRole(this.personnelRole)[0]?.id||null;
+   this.onFeedback?.('select');this.render();return;
+  }
+  if(b.dataset.pvCandidate){
+   this.personnelCandidate=b.dataset.pvCandidate;
+   this.onFeedback?.('select');this.render();return;
+  }
+  if(b.hasAttribute('data-pv-prev')||b.hasAttribute('data-pv-next')){
+   const entries=candidatesForRole(this.personnelRole);
+   const current=entries.findIndex(x=>x.id===this.personnelCandidate);
+   const direction=b.hasAttribute('data-pv-next')?1:-1;
+   this.personnelCandidate=entries[(current+direction+entries.length)%entries.length]?.id||null;
+   this.onFeedback?.('select');this.render();return;
+  }
+  if(b.hasAttribute('data-pv-requirement')){
+   this.personnelRole=nextRequiredRole(this.state());
+   this.personnelCandidate=candidatesForRole(this.personnelRole)[0]?.id||null;
+   this.onFeedback?.('skill');this.render();return;
+  }
+  if(b.dataset.pvRoster){
+   this.personnelRole=b.dataset.pvRoster;
+   this.personnelCandidate=candidatesForRole(this.personnelRole)[0]?.id||null;
+   this.onFeedback?.('skill');this.render();return;
+  }
+  if(b.hasAttribute('data-pv-hire')){
+   const s=this.state(),role=this.personnelRole,candidateId=this.personnelCandidate;
+   if(personnelAvailability(s,role,candidateId))return;
+   this.onFeedback?.('confirm');
+   this.onAppAction?.(role.startsWith('m5-')?'m5':'m3','hire',role+'|'+candidateId);
+   this.render();return;
+  }
   if(b.hasAttribute('data-faena-close')){this.close();return;}
   if(b.hasAttribute('data-faena-back')){if(this.view){this.view='';this.render();}else this.open('overview');return;}
   if(b.dataset.faenaRoute){this.open(b.dataset.faenaRoute);return;}
