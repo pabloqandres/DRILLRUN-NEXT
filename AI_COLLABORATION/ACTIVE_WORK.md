@@ -1,5 +1,8 @@
 # Active Work — DRILL RUN NEXT GENERATION
 
+**2026-11-10 · V58 catálogo:** retiro aprobado de Wave 01 en `chatgpt/remove-wave01-catalog-v58`. Las ocho fichas nuevas, categoría y previews rechazados dejan producción; conservar modelos GLB en rama V55 sin merge. No tocar M1–M5 ni V57. Ver `CHANGES/2026-11-10_wave01-catalog-rollback-v58.md`.
+
+
 **Last updated:** 2026-11-06
 
 ## Currently Active
