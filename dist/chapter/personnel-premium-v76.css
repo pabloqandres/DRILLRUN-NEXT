@@ -418,3 +418,126 @@
  #faenaCenter .pvArtPortrait--detail{width:47px;flex-basis:47px}
  #faenaCenter .pvTeamSlot .pvArtPortrait--team{width:28px;flex-basis:28px}
 }
+
+
+/* V79: role-specific mission backdrop and salary presentation; no gameplay effects. */
+#faenaCenter button.pvMission[data-pv-mission]{
+ position:relative;isolation:isolate;overflow:hidden;
+ background-image:linear-gradient(90deg,#071e32ed 0%,#09253bbd 65%,#071e3270),var(--pv-scene);
+ background-size:cover;background-position:center;
+ border-color:#5599bb;
+}
+#faenaCenter .pvMission[data-pv-mission]>*{position:relative;z-index:1}
+#faenaCenter .pvMission[data-pv-mission="m1"]{--pv-scene:url('../assets/personnel-missions-v79/m1.svg')}
+#faenaCenter .pvMission[data-pv-mission="m2"]{--pv-scene:url('../assets/personnel-missions-v79/m2.svg')}
+#faenaCenter .pvMission[data-pv-mission="m3"]{--pv-scene:url('../assets/personnel-missions-v79/m3.svg')}
+#faenaCenter .pvMission[data-pv-mission="m4"]{--pv-scene:url('../assets/personnel-missions-v79/m4.svg')}
+#faenaCenter .pvMission[data-pv-mission="m5"]{--pv-scene:url('../assets/personnel-missions-v79/m5.svg')}
+#faenaCenter .pvMission[data-pv-mission="free"]{--pv-scene:url('../assets/personnel-missions-v79/free.svg')}
+#faenaCenter .pvProposedSalary{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;
+ gap:3px 7px;padding:5px 7px;border-radius:8px;background:#12364d;border:1px solid #3a718b;
+ color:#cde4ee;font-size:9px}
+#faenaCenter .pvProposedSalary strong{color:#ffde9f;font-size:11px}
+#faenaCenter .pvProposedSalary small{color:#aac3d2;font-size:8px}
+#faenaCenter .pvFutureNote{padding:3px 5px;font-size:8px}
+@media(orientation:landscape) and (max-height:480px){
+ #faenaCenter .pvFutureNote{display:none}
+ #faenaCenter .pvProposedSalary{padding:3px 5px;gap:2px;font-size:7px}
+ #faenaCenter .pvProposedSalary strong{font-size:9px}
+ #faenaCenter .pvProposedSalary small{font-size:7px}
+}
+
+
+/* V79: read-only crew management, spacious on desktop, usable on short mobile. */
+#faenaCenter .pvTeamManage{flex:0 0 115px;display:flex;align-items:center;justify-content:center;
+ gap:5px;padding:5px;border-radius:9px;background:#154663;border:1px solid #5ea9bd;
+ color:#e7faff;font-size:10px;font-weight:800;cursor:pointer}
+#faenaCenter .pvTeamManage .uiIcon{width:14px;height:14px}
+#faenaCenter .pvManagementRoot{display:grid;grid-template-rows:50px minmax(0,1fr) 48px}
+#faenaCenter .pvManagementTop{display:flex;justify-content:space-between;align-items:center;
+ padding:8px 12px;gap:10px;border-bottom:1px solid #346782}
+#faenaCenter .pvManagementTop button{border:1px solid #589ab8;border-radius:8px;
+ background:#163f57;color:white;padding:7px;cursor:pointer}
+#faenaCenter .pvManagementTop>div{display:flex;flex-direction:column;gap:2px;text-align:right}
+#faenaCenter .pvManagementTop strong{font-size:14px}
+#faenaCenter .pvManagementTop small{font-size:9px;color:#adcede}
+#faenaCenter .pvManagementGrid{min-height:0;display:grid;grid-template-columns:minmax(160px,36%) 1fr;
+ gap:12px;padding:12px}
+#faenaCenter .pvManagementRoster,#faenaCenter .pvManagementDetail{min-height:0;min-width:0;
+ padding:11px;border:1px solid #437e9e;border-radius:11px;overflow-y:auto;touch-action:pan-y;
+ background:linear-gradient(160deg,#0d3048,#0a1d30)}
+#faenaCenter .pvManagementRoster h3{font-size:13px;margin:0 0 9px}
+#faenaCenter .pvManagedMembers{display:grid;gap:7px}
+#faenaCenter .pvManagedMember{min-width:0;width:100%;display:flex;align-items:center;
+ gap:8px;text-align:left;background:#143b55;border:1px solid #487e97;border-radius:9px;
+ color:#eef8ff;padding:6px;cursor:pointer}
+#faenaCenter .pvManagedMember.selected{border-color:#ffe18a;box-shadow:inset 3px 0 #ffca65}
+#faenaCenter .pvManagedMember>.pvArtPortrait,#faenaCenter .pvManagedMember>.pvEmptyPortrait{
+ width:47px;height:55px;flex:0 0 47px}
+#faenaCenter .pvManagedMember>span:last-child{min-width:0;display:flex;flex-direction:column;gap:3px}
+#faenaCenter .pvManagedMember b{font-size:11px}
+#faenaCenter .pvManagedMember small{font-size:9px;color:#b6d4df}
+#faenaCenter .pvManagementHero{display:flex;gap:11px;border-bottom:1px solid #42718a;padding-bottom:9px}
+#faenaCenter .pvManagementHero>.pvArtPortrait,#faenaCenter .pvManagementHero>.pvEmptyPortrait{
+ width:90px;height:104px;flex:0 0 90px}
+#faenaCenter .pvManagementHero h3{font-size:18px;margin:4px 0}
+#faenaCenter .pvManagementHero small{font-size:9px;color:#8ecddf}
+#faenaCenter .pvManagementHero p{font-size:10px;color:#bed8e3;line-height:1.35}
+#faenaCenter .pvManagementFacts{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:10px 0}
+#faenaCenter .pvManagementFacts>div{padding:8px;background:#123b52;border:1px solid #417b94;
+ border-radius:8px;display:flex;flex-direction:column;gap:4px}
+#faenaCenter .pvManagementFacts small{font-size:9px;color:#a6c8d8}
+#faenaCenter .pvManagementFacts b{font-size:11px;color:#ffe0a7}
+#faenaCenter .pvManagementSkillsHead{display:flex;align-items:center;justify-content:space-between;
+ gap:8px;padding-bottom:5px;margin:9px 0;border-bottom:1px solid #3e6f8b}
+#faenaCenter .pvManagementSkillsHead b{font-size:11px}
+#faenaCenter .pvManagementSkillsHead span{font-size:9px;color:#86e3ec}
+#faenaCenter .pvManagementSkills{display:grid;gap:6px}
+#faenaCenter .pvManageSkill{display:grid;grid-template-columns:minmax(0,1fr) auto 29px;
+ gap:5px;align-items:center;font-size:10px}
+#faenaCenter .pvManageSkill .pvPips i{width:12px;height:9px}
+#faenaCenter .pvManagementLocked{margin-top:10px;padding:8px;border-radius:8px;
+ background:#102f45;border:1px dashed #5d7d96;font-size:9px;color:#aac9d8;line-height:1.4}
+#faenaCenter .pvManagementFoot{display:flex;align-items:center;justify-content:space-between;
+ gap:10px;padding:8px 12px;border-top:1px solid #477f99;color:#cfe7f2;font-size:10px}
+#faenaCenter .pvManagementFoot b{color:#ffdea0}
+#faenaCenter .pvManagementFoot small{color:#a8c9d6;font-size:9px}
+#faenaCenter .pvManageEmpty{font-size:11px;color:#b5d3e1}
+@media(orientation:landscape) and (max-height:480px){
+ #faenaCenter .pvTeamManage{flex-basis:87px;font-size:8px}
+ #faenaCenter .pvManagementRoot{grid-template-rows:35px minmax(0,1fr) 32px}
+ #faenaCenter .pvManagementTop{padding:3px 6px}
+ #faenaCenter .pvManagementTop button{font-size:9px;padding:3px}
+ #faenaCenter .pvManagementTop strong{font-size:11px}
+ #faenaCenter .pvManagementGrid{padding:6px;gap:6px}
+ #faenaCenter .pvManagementRoster,#faenaCenter .pvManagementDetail{padding:6px;border-radius:8px}
+ #faenaCenter .pvManagementRoster h3{font-size:10px;margin-bottom:4px}
+ #faenaCenter .pvManagedMembers{gap:4px}
+ #faenaCenter .pvManagedMember{padding:3px;gap:4px}
+ #faenaCenter .pvManagedMember>.pvArtPortrait,#faenaCenter .pvManagedMember>.pvEmptyPortrait{
+  width:31px;height:38px;flex-basis:31px}
+ #faenaCenter .pvManagedMember b{font-size:9px}
+ #faenaCenter .pvManagedMember small{font-size:7px}
+ #faenaCenter .pvManagementHero{gap:6px;padding-bottom:4px}
+ #faenaCenter .pvManagementHero>.pvArtPortrait,#faenaCenter .pvManagementHero>.pvEmptyPortrait{
+  width:49px;height:57px;flex-basis:49px}
+ #faenaCenter .pvManagementHero h3{font-size:12px;margin:2px 0}
+ #faenaCenter .pvManagementHero p{font-size:8px;line-height:1.25;margin:2px 0}
+ #faenaCenter .pvManagementFacts{gap:4px;margin:5px 0}
+ #faenaCenter .pvManagementFacts>div{padding:4px;gap:2px}
+ #faenaCenter .pvManagementFacts small{font-size:7px}
+ #faenaCenter .pvManagementFacts b{font-size:9px}
+ #faenaCenter .pvManagementSkillsHead{margin:5px 0}
+ #faenaCenter .pvManagementSkillsHead b{font-size:9px}
+ #faenaCenter .pvManagementSkillsHead span{font-size:8px}
+ #faenaCenter .pvManagementSkills{gap:4px}
+ #faenaCenter .pvManageSkill{font-size:8px}
+ #faenaCenter .pvManagementLocked{margin-top:5px;padding:5px;font-size:8px}
+ #faenaCenter .pvManagementFoot{padding:4px 8px;font-size:8px}
+ #faenaCenter .pvManagementFoot small{font-size:7px}
+}
+@media(max-width:740px){#faenaCenter .pvManagementGrid{grid-template-columns:minmax(115px,36%) 1fr}}
+@media(orientation:portrait){
+ #faenaCenter .pvManagementRoot{grid-template-rows:48px minmax(0,1fr) 46px}
+ #faenaCenter .pvManagementGrid{grid-template-columns:1fr;grid-template-rows:35% minmax(0,1fr)}
+}

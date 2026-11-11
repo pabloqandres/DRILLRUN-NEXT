@@ -95,12 +95,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Especialista en negociación de contratos y acuerdos de suministro.",
     "portrait": "./assets/npc-portraits-v76/adm-camila-rojas.svg",
     "skills": {
-      "negotiation": 5,
-      "efficiency": 4,
-      "planning": 3
+      "negotiation": 2,
+      "efficiency": 2,
+      "planning": 1
     },
     "skillEffectStatus": "reserved",
-    "rank": 1
+    "rank": 1,
+    "salaryPerShift": 140,
+    "payrollStatus": "planned"
   },
   {
     "id": "adm-matias-torres",
@@ -112,12 +114,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Ordena entregables y reduce fricciones entre equipos.",
     "portrait": "./assets/npc-portraits-v76/adm-matias-torres.svg",
     "skills": {
-      "efficiency": 5,
-      "coordination": 4,
-      "reporting": 3
+      "efficiency": 3,
+      "coordination": 2,
+      "reporting": 2
     },
     "skillEffectStatus": "reserved",
-    "rank": 2
+    "rank": 2,
+    "salaryPerShift": 165,
+    "payrollStatus": "planned"
   },
   {
     "id": "adm-sofia-ibarra",
@@ -129,12 +133,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Planifica hitos y documenta avances con precisión.",
     "portrait": "./assets/npc-portraits-v76/adm-sofia-ibarra.svg",
     "skills": {
-      "planning": 5,
-      "negotiation": 3,
-      "reporting": 4
+      "planning": 2,
+      "negotiation": 1,
+      "reporting": 1
     },
     "skillEffectStatus": "reserved",
-    "rank": 3
+    "rank": 3,
+    "salaryPerShift": 125,
+    "payrollStatus": "planned"
   },
   {
     "id": "op-diego-arancibia",
@@ -146,12 +152,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Operador centrado en rendimiento y control de maniobras.",
     "portrait": "./assets/npc-portraits-v76/op-diego-arancibia.svg",
     "skills": {
-      "drilling": 5,
-      "precision": 4,
-      "safety": 3
+      "drilling": 2,
+      "precision": 2,
+      "safety": 1
     },
     "skillEffectStatus": "reserved",
-    "rank": 1
+    "rank": 1,
+    "salaryPerShift": 130,
+    "payrollStatus": "planned"
   },
   {
     "id": "op-renato-paredes",
@@ -163,12 +171,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Destaca coordinando instalación y operación en terreno.",
     "portrait": "./assets/npc-portraits-v76/op-renato-paredes.svg",
     "skills": {
-      "rigging": 5,
-      "drilling": 4,
-      "coordination": 4
+      "rigging": 3,
+      "drilling": 2,
+      "coordination": 2
     },
     "skillEffectStatus": "reserved",
-    "rank": 2
+    "rank": 2,
+    "salaryPerShift": 155,
+    "payrollStatus": "planned"
   },
   {
     "id": "op-valentina-soto",
@@ -180,12 +190,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Operación de bajo riesgo y lectura cuidadosa del terreno.",
     "portrait": "./assets/npc-portraits-v76/op-valentina-soto.svg",
     "skills": {
-      "precision": 5,
-      "safety": 5,
-      "drilling": 3
+      "precision": 2,
+      "safety": 1,
+      "drilling": 1
     },
     "skillEffectStatus": "reserved",
-    "rank": 3
+    "rank": 3,
+    "salaryPerShift": 115,
+    "payrollStatus": "planned"
   },
   {
     "id": "aux-nicolas-vera",
@@ -197,12 +209,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Apoyo ágil y constante al equipo de perforación.",
     "portrait": "./assets/npc-portraits-v76/aux-nicolas-vera.svg",
     "skills": {
-      "support": 5,
-      "teamwork": 4,
-      "safety": 3
+      "support": 2,
+      "teamwork": 2,
+      "safety": 1
     },
     "skillEffectStatus": "reserved",
-    "rank": 1
+    "rank": 1,
+    "salaryPerShift": 65,
+    "payrollStatus": "planned"
   },
   {
     "id": "aux-tomas-leiva",
@@ -214,12 +228,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Se especializa en preparar herramientas y maniobras.",
     "portrait": "./assets/npc-portraits-v76/aux-tomas-leiva.svg",
     "skills": {
-      "rigging": 4,
-      "support": 4,
-      "efficiency": 5
+      "rigging": 3,
+      "support": 2,
+      "efficiency": 2
     },
     "skillEffectStatus": "reserved",
-    "rank": 2
+    "rank": 2,
+    "salaryPerShift": 75,
+    "payrollStatus": "planned"
   },
   {
     "id": "aux-javiera-silva",
@@ -231,12 +247,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Cuida los protocolos y trabaja muy bien en equipo.",
     "portrait": "./assets/npc-portraits-v76/aux-javiera-silva.svg",
     "skills": {
-      "safety": 5,
-      "teamwork": 5,
-      "support": 3
+      "safety": 2,
+      "teamwork": 1,
+      "support": 1
     },
     "skillEffectStatus": "reserved",
-    "rank": 3
+    "rank": 3,
+    "salaryPerShift": 60,
+    "payrollStatus": "planned"
   },
   {
     "id": "hsec01",
@@ -248,12 +266,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Prevencionista experto en inspecciones preventivas.",
     "portrait": "./assets/npc-portraits-v76/hsec01.svg",
     "skills": {
-      "inspection": 5,
-      "safety": 4,
-      "compliance": 3
+      "inspection": 2,
+      "safety": 2,
+      "compliance": 1
     },
     "skillEffectStatus": "reserved",
-    "rank": 1
+    "rank": 1,
+    "salaryPerShift": 95,
+    "payrollStatus": "planned"
   },
   {
     "id": "hsec02",
@@ -265,12 +285,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Orientada a normas, señalética y cumplimiento HSEC.",
     "portrait": "./assets/npc-portraits-v76/hsec02.svg",
     "skills": {
-      "compliance": 5,
-      "safety": 4,
-      "inspection": 4
+      "compliance": 3,
+      "safety": 2,
+      "inspection": 2
     },
     "skillEffectStatus": "reserved",
-    "rank": 2
+    "rank": 2,
+    "salaryPerShift": 115,
+    "payrollStatus": "planned"
   },
   {
     "id": "hsec03",
@@ -282,12 +304,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Destaca en prevención y respuesta temprana.",
     "portrait": "./assets/npc-portraits-v76/hsec03.svg",
     "skills": {
-      "safety": 5,
-      "response": 4,
-      "inspection": 3
+      "safety": 2,
+      "response": 1,
+      "inspection": 1
     },
     "skillEffectStatus": "reserved",
-    "rank": 3
+    "rank": 3,
+    "salaryPerShift": 90,
+    "payrollStatus": "planned"
   },
   {
     "id": "tall-lucas-medina",
@@ -299,12 +323,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Experiencia en mantenimiento y recuperación de herramientas.",
     "portrait": "./assets/npc-portraits-v76/tall-lucas-medina.svg",
     "skills": {
-      "maintenance": 5,
-      "repair": 4,
-      "automation": 3
+      "maintenance": 2,
+      "repair": 2,
+      "automation": 1
     },
     "skillEffectStatus": "reserved",
-    "rank": 1
+    "rank": 1,
+    "salaryPerShift": 270,
+    "payrollStatus": "planned"
   },
   {
     "id": "tall-antonia-fuentes",
@@ -316,12 +342,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Especialista en automatización y diagnóstico técnico.",
     "portrait": "./assets/npc-portraits-v76/tall-antonia-fuentes.svg",
     "skills": {
-      "automation": 5,
-      "analysis": 4,
-      "maintenance": 4
+      "automation": 3,
+      "analysis": 2,
+      "maintenance": 2
     },
     "skillEffectStatus": "reserved",
-    "rank": 2
+    "rank": 2,
+    "salaryPerShift": 310,
+    "payrollStatus": "planned"
   },
   {
     "id": "tall-rodrigo-salinas",
@@ -333,12 +361,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Reparaciones robustas y trabajo seguro en el taller.",
     "portrait": "./assets/npc-portraits-v76/tall-rodrigo-salinas.svg",
     "skills": {
-      "repair": 5,
-      "maintenance": 4,
-      "efficiency": 3
+      "repair": 2,
+      "maintenance": 1,
+      "efficiency": 1
     },
     "skillEffectStatus": "reserved",
-    "rank": 3
+    "rank": 3,
+    "salaryPerShift": 250,
+    "payrollStatus": "planned"
   },
   {
     "id": "acc-oscar-pena",
@@ -350,12 +380,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Control de accesos con especial cuidado de la seguridad.",
     "portrait": "./assets/npc-portraits-v76/acc-oscar-pena.svg",
     "skills": {
-      "vigilance": 5,
-      "safety": 4,
-      "response": 3
+      "vigilance": 2,
+      "safety": 2,
+      "response": 1
     },
     "skillEffectStatus": "reserved",
-    "rank": 1
+    "rank": 1,
+    "salaryPerShift": 85,
+    "payrollStatus": "planned"
   },
   {
     "id": "acc-carolina-munoz",
@@ -367,12 +399,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Respuesta rápida ante situaciones operativas.",
     "portrait": "./assets/npc-portraits-v76/acc-carolina-munoz.svg",
     "skills": {
-      "response": 5,
-      "vigilance": 4,
-      "coordination": 4
+      "response": 3,
+      "vigilance": 2,
+      "coordination": 2
     },
     "skillEffectStatus": "reserved",
-    "rank": 2
+    "rank": 2,
+    "salaryPerShift": 100,
+    "payrollStatus": "planned"
   },
   {
     "id": "acc-patricio-figueroa",
@@ -384,12 +418,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Verificación rigurosa de procedimientos y permisos.",
     "portrait": "./assets/npc-portraits-v76/acc-patricio-figueroa.svg",
     "skills": {
-      "compliance": 5,
-      "vigilance": 4,
-      "safety": 3
+      "compliance": 2,
+      "vigilance": 1,
+      "safety": 1
     },
     "skillEffectStatus": "reserved",
-    "rank": 3
+    "rank": 3,
+    "salaryPerShift": 80,
+    "payrollStatus": "planned"
   },
   {
     "id": "pat-catalina-herrera",
@@ -401,12 +437,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Orden y control del stock en el patio de vehículos.",
     "portrait": "./assets/npc-portraits-v76/pat-catalina-herrera.svg",
     "skills": {
-      "inventory": 5,
-      "logistics": 4,
-      "fleet": 3
+      "inventory": 2,
+      "logistics": 2,
+      "fleet": 1
     },
     "skillEffectStatus": "reserved",
-    "rank": 1
+    "rank": 1,
+    "salaryPerShift": 110,
+    "payrollStatus": "planned"
   },
   {
     "id": "pat-ignacio-rivas",
@@ -418,12 +456,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Especialista en circulación y disponibilidad de flota.",
     "portrait": "./assets/npc-portraits-v76/pat-ignacio-rivas.svg",
     "skills": {
-      "fleet": 5,
-      "maintenance": 4,
-      "logistics": 4
+      "fleet": 3,
+      "maintenance": 2,
+      "logistics": 2
     },
     "skillEffectStatus": "reserved",
-    "rank": 2
+    "rank": 2,
+    "salaryPerShift": 125,
+    "payrollStatus": "planned"
   },
   {
     "id": "pat-florencia-nunez",
@@ -435,12 +475,14 @@ export const PERSONNEL_CANDIDATES=Object.freeze([
     "description": "Organización de recepción, inventario y abastecimiento.",
     "portrait": "./assets/npc-portraits-v76/pat-florencia-nunez.svg",
     "skills": {
-      "logistics": 5,
-      "inventory": 4,
-      "safety": 4
+      "logistics": 2,
+      "inventory": 1,
+      "safety": 1
     },
     "skillEffectStatus": "reserved",
-    "rank": 3
+    "rank": 3,
+    "salaryPerShift": 100,
+    "payrollStatus": "planned"
   }
 ].map(c=>Object.freeze({...c,skills:Object.freeze(c.skills)})));
 export const candidateById=id=>PERSONNEL_CANDIDATES.find(c=>c.id===id)||null;
@@ -459,3 +501,6 @@ export const candidateHirePrice=(role,candidateId,fallback)=>{
  const c=candidateById(candidateId);
  return c?.role===role?c.hireCost:fallback;
 };
+
+// V79: read-only payroll proposal, not an economic or time-driven system.
+export const PERSONNEL_PAYROLL_POLICY=Object.freeze({cycleCountPerTurn:4,automaticDebitsEnabled:false,offlineDebitsEnabled:false,trainingEffectsEnabled:false});
