@@ -71,3 +71,12 @@ test('V65.1 rolling ground dust travels behind JUGAR and stays low',()=>{
  assert.match(splash, /#groundDust \.dust-bank,#groundDust \.ground-grit,#groundDust \.foot-lift\{animation:none;opacity:0\}/);
  assert.doesNotMatch(splash, /<video|canvas\.getContext\('webgl'\)/);
 });
+
+test('V65 Cloud Save lockouts close the welcome overlay and keep recovery accessible',()=>{
+ const gates=[...game.matchAll(/if\(phase==='welcome'\)\{hidden\(\$\('#welcomeScreen'\),true\);\$\('#welcomeFrame'\)\?\.removeAttribute\('src'\);\}/g)];
+ assert.equal(gates.length,2,'protect both lease conflict and reconciliation failure');
+ assert.match(game,/function cloudLock\(\)/);
+ assert.match(game,/No se pudo sincronizar · No se sobrescribió la partida/);
+ assert.match(game,/phase='cloud-locked';hidden\(\$\('#startScreen'\),false\)/);
+ assert.match(game,/showCloudLock\(\)/);
+});
