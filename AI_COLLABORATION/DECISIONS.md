@@ -394,3 +394,15 @@ ChatGPT implementa en el módulo visual de faros dos manchas ovales muy difumina
 **Archivos compartidos:** `dist/index.html` recibe sección mínima de bienvenida y referencia CSS; `dist/chapter/game.mjs` solo encapsula la transición visual anterior y el evento del iframe (excepción exclusiva de continuidad de UX solicitada por usuario). No tocar otros handlers de navegación, ni renderizado M1–M5. Los estilos visuales son exclusivos de ChatGPT. El prototipo directo `dist/title-preview-v64.html` puede abrirse sin autenticar para revisar en Android.
 
 **Release gate:** rama `chatgpt/v64-cinematic-welcome-concept` → PR preview. **No publicar en main/producción hasta la aprobación explícita del usuario del comportamiento implementado.** Tests de estructura, eventos y no-regresión primero.
+
+## 2026-11-11 — V65.1: perspectiva, oclusión de galpón y polvo a ras del suelo
+**Aclaración explícita del usuario:** conservar el destello que recorre el logo DRILL RUN; quitar **solo** el efecto que barría toda la pantalla. Aumentar inmersión con secuencias progresivas de construcción y después corregir la perspectiva/oclusión especialmente en el galpón holográfico posterior izquierdo, donde trazos o pulsos azules se superponían sobre el módulo real del primer plano. Solicita polvo móvil en la parte baja, a los pies de ambos personajes y **por detrás de JUGAR**.
+
+**Solución implementada (preview únicamente):**
+- Se preserva `#logoShine` con `animation:titleSweep 10s`; se elimina `#scan` de pantalla completa.
+- Cada blueprint usa una cadena SVG con estructura alineada a la foto aprobada en coordenadas 1672×941, secuencias foundation → columns → roof → details desfasadas por sitio, trazos de energía y puntos de anclaje.
+- El galpón trasero izquierdo usa máscara SVG `galponDepthV65` que recorta su dibujo donde el módulo/cabina real se ubica en primer plano. **La misma máscara de profundidad se aplica a los píxeles alfa del WebP de brillo azul** para evitar que incluso el resplandor pulse por encima de la construcción.
+- Se agregan cinco bancos suaves de arena de desplazamiento horizontal (gradientes radiales, sin video/canvas), dos pequeñas nubes de polvo cerca de los pies y diez granos movidos por viento. Están recortados a la zona inferior 67–100% y el layer z-index 7 queda **detrás** de JUGAR z-index 20. Se desactivan completamente bajo `prefers-reduced-motion`.
+- No se usa IA de re-generación del arte, ni marcas externas, ni se cambian posiciones de personajes, botón, identidad, auth, guardados, HSEC, misiones o economía. CSS + SVG + textura WebP comprima, sin librerías nuevas.
+
+**Estado:** rama `chatgpt/v65-blueprint-line-build-immersion`, derivada de V64 (también sin publicar). **No fusionar ni desplegar en producción sin aprobación explícita** del usuario. Pruebas de navegador Chromium horizontal y tests automáticos; usuario debe validar la percepción visual en Android.
