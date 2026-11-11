@@ -39,7 +39,8 @@ test('New visual stylesheet loads last and cache revision changes, other modals 
  const v38=html.indexOf('workshop-card-v37.css');
  const v39=html.indexOf('office-quick-v39.css?v=39');
  assert(v38>0&&v39>v38);
- assert(html.includes('game.mjs?v=20261110-office-sheet-v39'));
+ // The game script cache revision advanced after V39; verify it remains a versioned module.
+ assert.match(html,/<script type="module" src="\.\/chapter\/game\.mjs\?v=[^"]+"><\/script>/);
  assert(!/\bstartModule\(/.test(stylesheet));
  assert(game.includes("officePanelPreview=new ProductPreview"));
 });
