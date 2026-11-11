@@ -1,5 +1,11 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-11 — V63 Faros ámbar cálidos y reflejo tenue sobre pavimento
+- Ajuste de temperatura percibida de faros de la DrillTruck® personal 02 al ámbar cálido de las capturas antiguas. Se conservan cono, intensidad, dirección y calidad.
+- Añadidas dos manchas de luz ovales, breves y completamente difuminadas, adaptadas a arena/asfalto por altura real, sin volver al decal largo y blanco de V61. Solo de noche se ven plenamente, y se apagan con el HUD.
+- Tests V63 y regresiones V52/V61/V62 adaptadas; preserva control, economía, misiones y guardados. QA visual Android pendiente. Ver `CHANGES/2026-11-11_v63-warm-amber-headlights.md`.
+
+
 ## 2026-11-11 — V62 Faros cálidos y botas correctamente apoyadas
 - Se retira por completo el proyector blanco aditivo de 21 m de la V61 y se recuperan los faros originales V60 de tono cálido, con encendido, apagado y rumbo del vehículo sin cambios.
 - Ajuste visual localizado del avatar sobre pavimento y senda elevada del Patio (+3–4 cm habituales, con transición de borde), sin levantarlo en arena ni tocar `sampleGround`, misiones, economía o guardados.
