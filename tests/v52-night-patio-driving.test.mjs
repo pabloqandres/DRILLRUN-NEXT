@@ -42,7 +42,9 @@ test('Boarding hides exterior avatar BEFORE render and routes audio to engine',(
 
 test('Night pavement pools stay above the road markings, with bay coverage',()=>{
  assert.match(patio,/pool\.position\.set\(x,\.295,z\)/);
- assert.match(patio,/const bayPools=\[\[-7,-13,18\]/);
- assert.match(patio,/pool\.material\.opacity=night\?\.27:0/);
+ assert.match(patio,/const bayPools=\[/);
+ assert.match(patio,/\[-7,-13,18,\.295\]/);
+ assert.match(patio,/\[-19,-10\.8,13,\.525\]/);
+ assert.match(patio,/pool\.material\.opacity=night\?\.39:0/);
  assert.match(patio,/const budget=w\.quality==='low'\?3:w\.quality==='high'\?6:4/);
 });
