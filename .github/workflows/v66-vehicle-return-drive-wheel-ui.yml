@@ -1,0 +1,24 @@
+name: V66 Vehicle Return Wheels NPC & UI
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  v66-vehicle-focused:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Parse all modified JS
+        run: |
+          node --check dist/chapter/game.mjs
+          node --check dist/mission5/personal-session-return.mjs
+          node --check dist/mission5/personal-drilltruck.mjs
+          node --check dist/graphics/personal-truck-wheels-v66.mjs
+          node --check dist/mission5/patio-npc-world.mjs
+          node --check dist/audio/worksite-audio.mjs
+      - name: V66 session/wheel/driving/UI + existing M4/M5 protections
+        run: |
+          node --test tests/v66-personal-truck-drive-return-ui.test.mjs tests/v66-automatic-drilltruck-wheel-visual.test.mjs tests/v50-personal-drilltruck-driving.test.mjs tests/v54-drilltruck-steering-controls.test.mjs tests/v56-personal-drilltruck-recovery.test.mjs tests/v61-collision-headlights-night-yard.test.mjs tests/v65-blueprint-title-animation.test.mjs
