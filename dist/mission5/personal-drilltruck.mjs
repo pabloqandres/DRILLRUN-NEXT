@@ -140,7 +140,7 @@ export function drivePersonalTruck(s,{throttle=0,steer=0,brake=false}={},dt=0,bl
    // Reverse pedal first slows the moving wheels, then engages reverse.
    v=approach(v,0,oppositeBrake*Math.abs(throttle)*dt);
   }else{
-   const accel=throttle>0?2.45:1.62; // pickup / gentle reverse gear
+   const accel=throttle>0?2.66:1.62; // pickup / gentle reverse gear
    v+=throttle*accel*dt;
   }
  }else v=approach(v,0,coast*dt);
