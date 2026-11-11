@@ -433,3 +433,8 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Galpón de mantenimiento pasa de 25 s a **60 s**, con barra del estilo Taller y MM:SS real en HUD, ficha en mundo y HSEC, usando únicamente el estado actual. Se preservan Galpones terminados y se extienden sólo trabajos antiguos aún en construcción.
 - Objetivo de camino vehicular ahora requiere **al menos 12 metros finalizados** (distancia en checklist + barra), sin conectividad invisible a puntos fijos. La ruta sugerida mide 13,85 m y lo satisface. Condición peatonal, cruces seguros y puntuación HSEC se mantienen.
 - Nuevos tests V72 y CI focal 13/13 OK, con V71 y M2 V16. Legacy `hsec.test.mjs` no se usa en gate porque presupone boosters iniciales y un presupuesto de mallas ya desactualizados. QA Android pendiente. Véase `CHANGES/2026-11-11_v72_shed-road-meters.md`.
+
+## 2026-11-11 — V73 Taller 90 segundos y 3 sondajes
+- Taller Nivel 1 pasa a 90 s; barra verde/porcentaje/MM:SS en HUD anclados a timestamps de la obra; ampliación L2 sigue 300 s, precio igual. Migración idempotente sólo para obras antiguas aún en curso.
+- Camila Reyes comunica 3 sondajes de 30 m en los 5 idiomas. El teléfono lee la cantidad real desde el contrato, sin fallback falso a 6.
+- CI focal de V73 + regresiones de contratos y narrativa completó con éxito. Diseño de Personal sigue pendiente de aprobación; auditoría navegación de 8 categorías será un cambio aparte.
