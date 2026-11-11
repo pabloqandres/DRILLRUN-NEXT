@@ -1,0 +1,21 @@
+name: V75 Catalog physical goods versus dedicated Personal screen
+on:
+  push:
+    branches: [chatgpt/v75-personnel-outside-catalog]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  v75-staff-separation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - run: |
+          node --check dist/chapter/construction-catalog.mjs
+          node --check dist/chapter/builder-ui.mjs
+      - run: |
+          node --test tests/v75-personnel-outside-catalog.test.mjs tests/v74-catalog-navigation-consistency.test.mjs tests/v71-m2-layout-galpon.test.mjs
