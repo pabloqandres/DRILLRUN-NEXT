@@ -4,6 +4,9 @@
 #builderPanel.catalogTray:not(.catalogCollapsed) .catalogHeader{
  gap:5px!important;
 }
+/* Collapsing the catalog must keep the slim one-line layout intact. */
+#builderPanel.catalogTray.catalogCollapsed .catalogCategoryStep{display:none!important}
+
 #builderPanel.catalogTray:not(.catalogCollapsed) .catalogCategoryStep{
  flex:0 0 33px!important;
  width:33px!important;
