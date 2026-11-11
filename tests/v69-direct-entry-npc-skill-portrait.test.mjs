@@ -34,7 +34,8 @@ test('V69: 2 independent starter metrics per category; only 1 bonus pip',()=>{
  assert(!ui.includes('Este personaje no tiene una bonificación adicional'));
  assert(!ui.includes('values.map(percent)'));
  assert(!ui.includes('Number(this.bonuses[k])!==0'));
- assert(ui.includes('El'));
+ assert(!ui.includes('Bonificación adicional en esta área'));
+ assert(ui.includes('MESSAGES[domain.id]'));
 });
 test('V69: login routes directly to character creation or saved gameplay',()=>{
  const html=source('dist/index.html'),game=source('dist/chapter/game.mjs');
