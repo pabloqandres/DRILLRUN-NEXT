@@ -253,3 +253,105 @@
  #faenaCenter .pvCandidates{grid-auto-columns:47%}
  #faenaCenter .pvTeamCount{flex-basis:75px}
 }
+
+
+/* V77 · Deliberate neutral placeholders while the 21 final portraits are in art review.
+   No image URLs or marks. Preserve the three-column landscape composition from V76. */
+#faenaCenter .pvEmptyPortrait{
+ position:relative;isolation:isolate;display:flex;align-items:center;
+ justify-content:center;flex-direction:column;width:100%;height:100%;
+ min-height:0;overflow:hidden;color:#7192a8;
+ background:radial-gradient(ellipse at 48% 33%,#2656768a,transparent 69%),
+ linear-gradient(150deg,#15364e,#081d31 78%);
+ border:1px solid #39647a77;border-radius:8px;box-sizing:border-box;
+}
+#faenaCenter .pvEmptyPortrait::before{
+ content:"";position:absolute;inset:8%;border:1px dashed #85b0c343;
+ border-radius:7px;pointer-events:none;
+}
+#faenaCenter .pvEmptyPortraitFigure{
+ position:relative;display:block;width:65px;height:73px;
+ opacity:.72;filter:drop-shadow(0 5px 12px #061827b0);
+}
+#faenaCenter .pvEmptyHead{
+ position:absolute;width:24px;height:24px;left:50%;top:12%;
+ transform:translateX(-50%);border-radius:50%;
+ background:linear-gradient(145deg,#5b7b90,#34576b);
+ border:1px solid #7996a8;
+}
+#faenaCenter .pvEmptyBody{
+ position:absolute;width:59px;height:40px;left:50%;bottom:0;
+ transform:translateX(-50%);border-radius:30px 30px 6px 6px;
+ background:linear-gradient(145deg,#456b81,#24455a 85%);
+ border:1px solid #6d8da1;
+}
+#faenaCenter .pvEmptyPortrait>small{
+ position:absolute;bottom:8px;left:4px;right:4px;
+ font-size:7px;letter-spacing:.09em;font-weight:850;
+ color:#b5c9d5;text-align:center;text-shadow:0 1px 4px #061526;
+}
+#faenaCenter .pvPortrait{flex:1 1 44%;min-height:48px}
+#faenaCenter .pvPortrait::after{display:none}
+#faenaCenter .pvPortrait>.pvEmptyPortrait{border:0;border-radius:9px 9px 0 0}
+#faenaCenter .pvCandidateMetrics{display:grid;gap:3px;padding:2px 6px 3px;
+ flex:0 0 auto;min-width:0}
+#faenaCenter .pvCandidateSkill{display:flex;align-items:center;
+ justify-content:space-between;gap:4px;min-width:0;font-size:8px;
+ color:#c8e2ee;line-height:1.15}
+#faenaCenter .pvCandidateSkill>span:first-child{
+ min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;
+}
+#faenaCenter .pvMiniPips{display:flex;gap:2px;flex:0 0 auto}
+#faenaCenter .pvMiniPips i{display:block;width:7px;height:5px;
+ background:#35556e;border-radius:2px}
+#faenaCenter .pvMiniPips i.on{background:#69d5e9;box-shadow:0 0 4px #4bc6da50}
+#faenaCenter .pvCandidateStars{line-height:1.1}
+#faenaCenter .pvCandidateCost{margin-top:auto}
+#faenaCenter .pvDetailHero .pvEmptyPortrait--detail{
+ align-self:stretch;width:74px;height:85px;flex:0 0 74px;
+ border-radius:8px 8px 0 0;
+}
+#faenaCenter .pvEmptyPortrait--detail .pvEmptyPortraitFigure{transform:scale(.77)}
+#faenaCenter .pvEmptyPortrait--detail>small{font-size:6px;bottom:3px}
+#faenaCenter .pvTeamSlot .pvEmptyPortrait--team{
+ width:37px;height:47px;min-width:37px;flex:0 0 37px;border-radius:5px;
+}
+#faenaCenter .pvEmptyPortrait--team .pvEmptyPortraitFigure{
+ transform:scale(.38);transform-origin:center center;
+}
+#faenaCenter .pvEmptyPortrait--team>small,
+#faenaCenter .pvEmptyPortrait--team::before{display:none}
+#faenaCenter .pvCandidate:focus-visible,#faenaCenter .pvRole:focus-visible,
+#faenaCenter .pvTeamSlot:focus-visible,#faenaCenter .pvHire:focus-visible,
+#faenaCenter .pvCarouselControls button:focus-visible{
+ outline:2px solid #fff1a0;outline-offset:2px;
+}
+#faenaCenter .pvRole,#faenaCenter .pvCandidate,#faenaCenter .pvTeamSlot{
+ transition:border-color .18s ease,box-shadow .18s ease,background .18s ease;
+}
+#faenaCenter .pvDetail{touch-action:pan-y}
+#faenaCenter .pvRoles{touch-action:pan-y}
+#faenaCenter .pvTeamList{touch-action:pan-x}
+@media(orientation:landscape) and (max-height:480px){
+ #faenaCenter .pvCandidateMetrics{gap:1px;padding:1px 4px}
+ #faenaCenter .pvCandidateSkill{font-size:7px;line-height:1.05}
+ #faenaCenter .pvMiniPips i{width:5px;height:4px}
+ #faenaCenter .pvPortrait{min-height:32px}
+ #faenaCenter .pvEmptyPortraitFigure{transform:scale(.68)}
+ #faenaCenter .pvEmptyPortrait>small{bottom:3px;font-size:6px}
+ #faenaCenter .pvDetailHero .pvEmptyPortrait--detail{height:58px;width:52px;flex-basis:52px}
+ #faenaCenter .pvEmptyPortrait--detail .pvEmptyPortraitFigure{transform:scale(.5)}
+ #faenaCenter .pvEmptyPortrait--detail>small{font-size:5px}
+ #faenaCenter .pvTeamSlot .pvEmptyPortrait--team{width:28px;min-width:28px;height:35px;flex-basis:28px}
+ #faenaCenter .pvEmptyPortrait--team .pvEmptyPortraitFigure{transform:scale(.27)}
+}
+@media(max-width:740px){
+ #faenaCenter .pvCandidateMetrics{padding-inline:3px}
+ #faenaCenter .pvCandidateSkill{font-size:7px}
+ #faenaCenter .pvMiniPips{gap:1px}
+ #faenaCenter .pvMiniPips i{width:5px}
+ #faenaCenter .pvDetailHero .pvEmptyPortrait--detail{width:47px;flex-basis:47px}
+}
+@media(prefers-reduced-motion:reduce){
+ #faenaCenter .pvRole,#faenaCenter .pvCandidate,#faenaCenter .pvTeamSlot{transition:none}
+}

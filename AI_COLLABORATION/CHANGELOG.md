@@ -456,3 +456,9 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - La contratación usa las acciones de M3/M5 originales y conserva el guardado, modelos GLB existentes y posiciones de NPC. Slots del UI crecen con el avance de misión; no hay bloqueo adicional.
 - Audio UI/selector ahora tiene control de volumen 0,5–3,5, valor inicial 2×, conserva mute y háptica mínima.
 - CI V76 focal y regresiones V75/V73/V70 aprobadas. Preview Vercel READY; revisar Android y aprobar calidad del arte antes de dar versión final. Ver `CHANGES/2026-11-11_v76_personnel-premium.md`.
+
+## 2026-11-11 — V77 Personal · placeholders neutros sin retratos finales
+- Se difiere el lote de 21 retratos definitivos según decisión del usuario; se mantiene identidad, rutas de arte en datos y retratos V76 almacenados, pero la interfaz muestra sólo placeholders CSS originales sin logotipos.
+- Cards incluyen tres habilidades 1–5 con pips informativos. La ficha y el Equipo activo muestran el mismo placeholder; al pulsar un contratado se abre su ID real y no el primer candidato de ese rol.
+- Conserva contratación M3/M5, costos, capacidad por misión, guardado/restore, GLB y misiones. Los atributos siguen sin bonificaciones gameplay (`effectsEnabled:false`).
+- Rama `chatgpt/v77-personnel-placeholders-ux`; QA automatizado focal y regresiones en CI, revisión visual Android pendiente. Registro detallado en `CHANGES/2026-11-11_v77_personnel-placeholders-ux.md`.

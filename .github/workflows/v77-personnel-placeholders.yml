@@ -1,0 +1,21 @@
+name: "V77 Personnel: neutral placeholders and roster identity"
+on:
+  push:
+    branches: [chatgpt/v77-personnel-placeholders-ux]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  personnel-v77:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Syntax and regression
+        run: |
+          node --check dist/chapter/personnel-premium-v76.mjs
+          node --check dist/chapter/faena-center.mjs
+          node --test tests/v77-personnel-placeholders.test.mjs tests/v76-personnel-premium.test.mjs tests/v75-personnel-outside-catalog.test.mjs

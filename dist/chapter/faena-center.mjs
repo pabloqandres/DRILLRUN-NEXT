@@ -245,7 +245,9 @@ export class FaenaCenterUI{
   }
   if(b.dataset.pvRoster){
    this.personnelRole=b.dataset.pvRoster;
-   this.personnelCandidate=candidatesForRole(this.personnelRole)[0]?.id||null;
+   const identity=b.dataset.pvPerson;
+   this.personnelCandidate=candidatesForRole(this.personnelRole).some(c=>c.id===identity)
+    ?identity:candidatesForRole(this.personnelRole)[0]?.id||null;
    this.onFeedback?.('skill');this.render();return;
   }
   if(b.hasAttribute('data-pv-hire')){
