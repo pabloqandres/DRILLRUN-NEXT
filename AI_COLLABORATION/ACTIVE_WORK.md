@@ -146,3 +146,5 @@ _Nothing blocked._
 
 
 - **2026-11-11 — ChatGPT V66 DrillTruck® 02 / regreso / conducción / NPC + HUD:** rama `chatgpt/v66-truck-return-drive-npc-ui`. Solicitud usuario: vehículo personal al P01 en próxima sesión, avatar frente oficina tras 3h30, dirección tipo bicycle y freno gradual, ruedas visuales, sonido menos tractor, mando freno separado, botones sin superposición en escritorio, JUGAR sin sombra blanca pero logo animado, guardia/técnica a escala adulta. Tocar `dist/mission5/personal-drilltruck.mjs` solo dinámica, `dist/chapter/game.mjs` solo hooks, `dist/audio/worksite-audio.mjs` solo canal personal; otros archivos visuales independientes. Sin M4, economía, HSEC ni cambios de misión. **Pendiente CI, preview y aceptación antes de producción.**
+
+- **2026-11-11 — V66 ampliación ruedas camioneta automática:** el usuario solicita explícitamente animación de ruedas para el vehículo M4 también. Rama `chatgpt/v66-truck-return-drive-npc-ui`, animador escucha recorrido M4 sin alterarlo, con test específico para confirmar que el visual no mueve ni despacha la unidad. Pendiente QA de GLB con pantalla real y aprobación de merge de esta versión.
