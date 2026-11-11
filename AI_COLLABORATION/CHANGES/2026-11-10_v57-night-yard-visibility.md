@@ -26,3 +26,14 @@
 
 ## HUD/UI
 - Se registró deuda visual para rediseño incremental posterior: reducir altura de franjas, translucidez, iconos, agrupación de comandos por contexto (modo caminar/conducir), y mantener targets táctiles. Sin cambios de interfaz en V57.
+
+## V57 integrated open-terrain scope (explicit user authorization, 2026-11-10)
+- `dist/chapter/navigation-areas.mjs`: canonical `isPlayableTerrain` bounds ±108 m (12 m in from 240×240 m desert).
+- `dist/scene.mjs`: remove three old invisible area/mission-phase rectangles and preserve actual HSEC/office/physical colliders.
+- `dist/chapter/state.mjs`: retain valid saved player poses anywhere on displayed terrain, independent of M4 gate; corrupt/outside mesh positions still return to spawn.
+- `dist/mission5/personal-drilltruck.mjs`: reuse canonical bound for paid truck location and pose recovery; old valid farther positions no longer forcibly returned to P01.
+- `tests/m5-office-patio-passability-v40.test.mjs`, `tests/m5-patio-navigation-v34.test.mjs`: update historical locked-area assertions per new user requirement.
+- `tests/v57-open-terrain-and-save.test.mjs`: new regression for traversal, solid collisions, P01 ownership, finance preservation, save restoration, vehicle travel and edge probes.
+- `.github/workflows/v57-open-terrain-and-night-visibility.yml`: dedicated CI to run V57 and linked V52/V56/movement regressions independently of an existing pre-V57 offline economy failure in generic tests.
+
+No changes to mission acceptance, HSEC scoring, balance, timing, purchase pipeline, automatic M4 vehicle, existing build footprints or third-party brands. PR #76 includes these changes, user authorized implementation and release contingent on checks.
