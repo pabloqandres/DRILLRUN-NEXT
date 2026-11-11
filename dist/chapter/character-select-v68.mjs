@@ -9,7 +9,7 @@ const DOMAINS=[
  {id:'construction',label:'CONSTRUCCIÓN',symbol:'build',keys:['constructionTime']}
 ];
 const FACTS={
- contractIncome:{title:'NEGOCIACIÓN DE CONTRATOS',text:value=>`Ingresos por contrato ${value>0?'+':''}${percent(value)}. Bonificación real de esta especialidad.`},
+ contractIncome:{title:'NEGOCIACIÓN DE CONTRATOS',text:value=>`Ingresos por contrato ${percent(value)}. Bonificación real de esta especialidad.`},
  maintenanceCost:{title:'MANTENIMIENTO EFICIENTE',text:value=>`Costo de mantenimiento ${percent(value)}.`},
  maintenanceTime:{title:'SERVICIO MÁS RÁPIDO',text:value=>`Tiempo de mantenimiento ${percent(value)}.`},
  geologyCost:{title:'ANÁLISIS GEOLÓGICO',text:value=>`Costo del análisis geológico ${percent(value)}.`},
