@@ -126,7 +126,7 @@ const wind=new DesertWind(getGameAudioContext);
 const worksiteAudio=new WorksiteAudio(getGameAudioContext);
 // V68: isolated feedback for the real-GLB character creator only.
 const selectorFeedback=new CharacterSelectFeedback({context:getGameAudioContext,enabled:()=>prefs.sound,haptics:()=>prefs.haptics!==false});
-let characterSelectorV68=null;
+let characterSelectorV68=null,selectorV68Zoom=0;
 document.documentElement.style.setProperty('--cover',`url('${new URL(CONFIG.cover,document.baseURI).href}')`);
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function setText(el,value){const text=String(value);if(el.textContent!==text)el.textContent=text;}
@@ -350,7 +350,7 @@ async function chooseCharacter(fresh=false){try{await ensureWorld(true);freshGam
 // Cards and visible 3D characters share exactly one selection flow.
 function selectAvatar(id){
  if(phase!=='character'||!avatars?.entries.has(id))return false;
- if(id!==selectedAvatar)selectorFeedback.play('select');
+ if(id!==selectedAvatar){selectorV68Zoom=1;selectorFeedback.play('select');}
  selectedAvatar=id;avatars.activate(id);renderCharacters();return true;
 }
 // The selector overlay is pointer-transparent by design. 3D avatar taps are handled
@@ -1792,7 +1792,8 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
   else if(phase==='character'){
    // V68: true playable GLB hero bust, close to the camera. Keep the
    // original 3D model, materials, rig, click detection and cinematic intro.
-   world.chapterCamera={target:new T.Vector3(-4.88,1.40,5.67),offset:new T.Vector3(0,.11,2.42)};
+   selectorV68Zoom=Math.max(0,selectorV68Zoom-dt*2.7);
+   world.chapterCamera={target:new T.Vector3(-4.88,1.40,5.67),offset:new T.Vector3(0,.11,2.42+selectorV68Zoom*.48)};
   }
  else if(phase==='play'&&builderOpen&&catalogConstructionCamera&&catalogBlueprint?.spec&&!modalOpen&&
   !hsecUI?.drawing&&!hsecUI?.coneZone){
