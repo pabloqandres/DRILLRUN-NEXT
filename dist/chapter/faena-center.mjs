@@ -209,6 +209,14 @@ export class FaenaCenterUI{
    '<button data-faena-route="logistics">'+icon('store')+' Logística</button>'+
    '<button data-faena-route="workshop">'+icon('wrench')+' Taller</button></footer>')+'</div>';
   const body=this.host.querySelector('.faenaBody');if(body)body.scrollTop=currentScroll;
+  if(isPersonnel){
+   const strip=this.host.querySelector('.pvCandidates'),choice=strip?.querySelector('.pvCandidate[aria-pressed="true"]');
+   // Keep selected candidate in frame on phone, where only two cards fit.
+   if(strip&&choice){
+    const start=choice.offsetLeft-strip.offsetLeft;
+    strip.scrollLeft=Math.max(0,start-(strip.clientWidth-choice.clientWidth)/2);
+   }
+  }
   this.lastKey=route+':'+this.view;
  }
  handle(e){
