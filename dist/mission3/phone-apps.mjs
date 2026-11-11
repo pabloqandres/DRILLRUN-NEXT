@@ -151,7 +151,7 @@ function renderContract(s,t,fmt,icon,cb){
   const pct=cp?Math.round(cp.progress*100):0;
   const deadline=contractDeadline(s);
   const timeLeft=deadline?Math.max(0,Math.ceil((deadline-Date.now())/60000)):null;
-  html+=`<div class="bankCard"><div class="bankBrand">${icon('build')}<span>PERFORACIÓN ACTIVA</span></div><small>Progreso de perforación</small><b>${Math.round(s.contract.metersCompleted)} / ${s.contract.totalMeters} m</b><div class="bankWallet"><span>Sondajes</span><strong>${cp?.boreholesDone||0} / ${cp?.totalBoreholes||6}</strong></div></div>`;
+  html+=`<div class="bankCard"><div class="bankBrand">${icon('build')}<span>PERFORACIÓN ACTIVA</span></div><small>Progreso de perforación</small><b>${Math.round(s.contract.metersCompleted)} / ${s.contract.totalMeters} m</b><div class="bankWallet"><span>Sondajes</span><strong>${cp?.boreholesDone||0} / ${cp?.totalBoreholes??s.boreholes?.length??0}</strong></div></div>`;
   html+=`<div style="background:var(--surface);border-radius:8px;padding:12px;margin:8px 0"><div style="height:8px;border-radius:4px;background:var(--border)"><div style="height:100%;border-radius:4px;background:var(--accent);width:${pct}%;transition:width .3s"></div></div><small style="display:flex;justify-content:space-between;margin-top:4px"><span>${pct}%</span>${timeLeft!==null?`<span>${timeLeft} min restantes</span>`:''}</small></div>`;
   // Boreholes detail
   if(s.boreholes?.length){
