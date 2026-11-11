@@ -1,0 +1,238 @@
+/* V71 · Misión 2: only UI layout and catalogue wayfinding.
+   Never alters cost, upgrades, HSEC logic, or save state. */
+
+/* HSEC: header and all 5 tabs stay outside the scrolling checklist.
+   V4 had a shrinkable flex nav that collapsed to a sliver on landscape. */
+#modal #modalCard.hsecModal{
+ box-sizing:border-box!important;
+ width:min(890px,calc(100vw - 26px))!important;
+ max-width:calc(100vw - 26px)!important;
+ max-height:calc(100dvh - 22px)!important;
+ padding:clamp(12px,1.6vw,22px)!important;
+ overflow:hidden!important;
+ display:flex!important;
+ flex-direction:column!important;
+}
+#modal #modalCard.hsecModal .hsecPanel{
+ flex:1 1 auto!important;
+ min-height:0!important;
+ min-width:0!important;
+ display:grid!important;
+ grid-template-columns:minmax(0,1fr)!important;
+ grid-template-rows:auto auto auto minmax(0,1fr)!important;
+ align-items:stretch!important;
+ gap:0!important;
+ overflow:hidden!important;
+}
+#modal #modalCard.hsecModal .hsecPanel>.eyebrow{
+ grid-row:1;
+ min-width:0;
+ margin:0 54px 2px 0!important;
+ white-space:normal;
+}
+#modal #modalCard.hsecModal .hsecHeading{
+ grid-row:2;
+ min-width:0;
+ min-height:44px;
+ padding-right:clamp(32px,3vw,48px)!important;
+ gap:10px;
+ margin-bottom:3px;
+}
+#modal #modalCard.hsecModal .hsecHeading h2{
+ margin:0!important;
+ padding:0!important;
+ min-width:0;
+ font-size:clamp(18px,2vw,26px)!important;
+ line-height:1.13!important;
+}
+#modal #modalCard.hsecModal .hsecScore{flex:0 0 auto;font-size:clamp(24px,2.7vw,38px);line-height:1.1}
+#modal #modalCard.hsecModal .hsecPanel>.hsecTabs{
+ grid-row:3;
+ flex:0 0 auto!important;
+ display:flex!important;
+ flex-direction:row!important;
+ flex-wrap:nowrap!important;
+ align-items:center!important;
+ justify-content:flex-start!important;
+ align-self:stretch!important;
+ min-width:0!important;
+ min-height:43px!important;
+ height:43px!important;
+ max-height:none!important;
+ padding:2px 1px 5px!important;
+ margin:1px 0 8px!important;
+ overflow-x:auto!important;
+ overflow-y:hidden!important;
+ overscroll-behavior-x:contain;
+ touch-action:pan-x!important;
+ scrollbar-width:thin;
+ border-bottom:1px solid #496b80;
+}
+#modal #modalCard.hsecModal .hsecTabs button{
+ display:inline-flex!important;
+ flex:1 0 auto!important;
+ align-items:center!important;
+ justify-content:center!important;
+ width:auto!important;
+ min-width:max-content!important;
+ height:35px!important;
+ min-height:35px!important;
+ max-height:35px!important;
+ margin:0!important;
+ padding:5px clamp(8px,.9vw,14px)!important;
+ white-space:nowrap!important;
+ font-size:clamp(10px,.9vw,13px)!important;
+ line-height:1.1!important;
+}
+#modal #modalCard.hsecModal .hsecPanel>.hsecBody{
+ grid-row:4;
+ flex:1 1 auto!important;
+ min-height:0!important;
+ min-width:0!important;
+ overflow-y:auto!important;
+ overflow-x:hidden!important;
+ overscroll-behavior:contain!important;
+ touch-action:pan-y!important;
+ -webkit-overflow-scrolling:touch;
+ padding:3px 2px 14px!important;
+}
+
+/* Office: return camera real estate to the worksite. The approved GLB
+   preview, title and both actions remain present; no new image is used. */
+#modal.officeQuick #modalCard{
+ box-sizing:border-box!important;
+ width:min(410px,43vw)!important;
+ min-width:0!important;
+ max-width:calc(100vw - 24px)!important;
+ height:auto!important;
+ max-height:calc(100dvh - 24px)!important;
+ top:max(12px,env(safe-area-inset-top,12px))!important;
+ bottom:auto!important;
+ right:max(12px,env(safe-area-inset-right,12px))!important;
+ left:auto!important;
+ transform:none!important;
+ padding:9px!important;
+ overflow-y:auto!important;
+ overflow-x:hidden!important;
+ overscroll-behavior:contain;
+ touch-action:pan-y;
+}
+#modal.officeQuick #modalCard .officeQuickLayout{
+ display:grid!important;
+ grid-template-columns:minmax(0,1fr)!important;
+ grid-template-rows:auto minmax(0,1fr)!important;
+ min-width:0!important;
+ min-height:0!important;
+ max-height:none!important;
+ gap:7px!important;
+}
+#modal.officeQuick #modalCard .officePanelPreview,
+#modal.officeQuick.upgradeSheet #modalCard .officePanelPreview{
+ display:block!important;
+ width:100%!important;
+ min-height:115px!important;
+ height:clamp(115px,27dvh,180px)!important;
+ max-height:180px!important;
+ align-self:stretch!important;
+ border-radius:10px!important;
+}
+#modal.officeQuick #modalCard .officeQuickDetails{
+ display:flex!important;
+ flex-direction:column!important;
+ gap:6px!important;
+ padding:0 2px 2px!important;
+ min-width:0!important;
+ min-height:0!important;
+}
+#modal.officeQuick #modalCard .officeQuickInfo{
+ padding:2px 4px 0!important;
+ flex:0 1 auto!important;
+ overflow-y:visible!important;
+ min-height:0!important;
+}
+#modal.officeQuick #modalCard .officeQuickInfo>.eyebrow{
+ margin:0 0 3px!important;
+ font-size:9px!important;
+}
+#modal.officeQuick #modalCard .officeQuickInfo>h2{
+ font-size:clamp(16px,1.6vw,22px)!important;
+ margin:0 0 5px!important;
+ line-height:1.15!important;
+}
+#modal.officeQuick #modalCard .officeQuickInfo>p{
+ margin:0 0 5px!important;
+ line-height:1.35!important;
+ font-size:11px!important;
+}
+#modal.officeQuick #modalCard .officeQuickActions{
+ display:grid!important;
+ grid-template-columns:minmax(0,1fr)!important;
+ gap:6px!important;
+ align-items:stretch!important;
+ padding:6px 0 0!important;
+}
+#modal.officeQuick #modalCard .officeQuickActions>button{
+ width:100%!important;
+ min-width:0!important;
+ min-height:37px!important;
+ font-size:clamp(10px,.9vw,12px)!important;
+ padding:6px 10px!important;
+}
+#modal.officeQuick #modalCard .modalDismiss{
+ top:12px!important;
+ right:12px!important;
+ width:32px!important;height:32px!important;min-height:32px!important;
+}
+
+/* For short landscape screens shrink the preview instead of pushing the
+   upgrade CTA below the visible area. Both can also scroll if necessary. */
+@media(orientation:landscape) and (max-height:520px){
+ #modal #modalCard.hsecModal{
+  padding:10px 12px!important;
+  max-height:calc(100dvh - 14px)!important;
+ }
+ #modal #modalCard.hsecModal .hsecHeading{
+  min-height:36px;
+  margin-bottom:2px;
+ }
+ #modal #modalCard.hsecModal .hsecHeading h2{font-size:clamp(17px,1.9vw,22px)!important}
+ #modal #modalCard.hsecModal .hsecPanel>.hsecTabs{
+  min-height:40px!important;
+  height:40px!important;
+  margin:0 0 5px!important;
+ }
+ #modal #modalCard.hsecModal .hsecTabs button{
+  height:33px!important;
+  min-height:33px!important;
+  max-height:33px!important;
+  padding:4px 9px!important;
+ }
+ #modal.officeQuick #modalCard{
+  width:min(360px,42vw)!important;
+  max-height:calc(100dvh - 14px)!important;
+  top:7px!important;
+  right:9px!important;
+  padding:7px!important;
+ }
+ #modal.officeQuick #modalCard .officePanelPreview,
+ #modal.officeQuick.upgradeSheet #modalCard .officePanelPreview{
+  min-height:100px!important;
+  height:clamp(100px,25dvh,135px)!important;
+  max-height:135px!important;
+ }
+ #modal.officeQuick #modalCard .officeQuickActions>button{
+  min-height:33px!important;
+ }
+}
+@media(max-width:650px){
+ #modal.officeQuick #modalCard{
+  width:min(350px,calc(100vw - 18px))!important;
+  right:9px!important;
+ }
+ #modal #modalCard.hsecModal{
+  width:calc(100vw - 14px)!important;
+  max-width:calc(100vw - 14px)!important;
+  padding:10px!important;
+ }
+ #modal #modalCard.hsecModal .hsecTabs button{flex:0 0 auto!important}
+}

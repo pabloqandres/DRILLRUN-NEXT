@@ -422,3 +422,9 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Rama `chatgpt/v70-immersive-entry-ui-feedback`; referencia captura Android con barra URL encima del selector. Solicita fullscreen desde los cuatro gestos de entrada, no después de promesas Google, y añade control manual de reintento en selección sólo si la API está disponible. El navegador puede denegar; PWA instalada mantiene modo fullscreen sin URL.
 - CSS V70 usa alto `100dvh`, márgenes inferiores y CTA compacto para que «Comenzar mi proyecto» permanezca visible aun con barra de navegación. Volumen de clicks y whoosh V68 aumenta ~2.5×, teclado tenue y preferencias Sonido/vibración respetadas.
 - Tests V70 + regresiones V69/V68/V64 superaron CI dedicada, preview Vercel READY. Sin Cloud Save, misiones, economía ni modelo 3D modificado. Ver `CHANGES/2026-11-11_v70-immersive-entry-ui-feedback.md`.
+
+## 2026-11-11 — V71 · Mejoras visuales de misión 2
+- Usuario confirmó M1 cerrada. En M2, pestañas de HSEC estaban cortadas por scroll, ficha de Oficina ocupaba mucho terreno y Galpón estaba detrás de Taller/Patio.
+- Nuevo `dist/chapter/m2-layout-v71.css` (cargado al final de `dist/index.html`): tabs HSEC siempre visibles en cabecera con desplazamiento horizontal cuando proceda; checklist con scroll vertical propio. Ficha de Oficina estrecha con preview real y acciones de mejora accesibles, sin tapar la construcción.
+- Catalog de Edificios muestra **Oficina → Galpón → Taller → Patio**; mueve la referencia existente `shed` sin cambiar datos, estado, economía ni condiciones.
+- Test V71 y regresiones V39/V16 pasaron en CI focal. Preview READY; QA visual móvil pendiente. Documentación `CHANGES/2026-11-11_v71_mission2-hsec-office-galpon.md`.
