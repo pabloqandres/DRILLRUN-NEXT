@@ -22,6 +22,8 @@ jobs:
           node --check dist/chapter/portrait.mjs
           node --check dist/chapter/selector-stage.mjs
           node --check dist/audio/character-select-feedback-v68.mjs
-      # Legacy avatars/cinematic tests assert one shared avatar01 MP4 and an old bottom navigation;\n      # main already uses four dedicated intros and a five-item catalog HUD.\n      - name: V68 UI + current touch/intro integration
+      # Legacy intro tests expect a shared avatar01 MP4; main uses four dedicated intros.
+      # Other old tests expect a retired bottom navigation and are excluded.
+      - name: V68 UI + current touch/intro integration
         run: |
           node --test tests/v68-cinematic-character-selector.test.mjs tests/avatar-touch-selection.test.mjs tests/v64-cinematic-welcome-flow.test.mjs
