@@ -12,3 +12,15 @@ export function isM5FreeWalkArea(x,z){
 export function canWalkM5Area(x,z,unlocked){
  return !!unlocked&&isM5FreeWalkArea(x,z);
 }
+
+// V57: One canonical playable area for walking, driving and save restoration.
+// The rendered desert is a 240 x 240 m mesh (±120 m). Maintain a 12 m safety
+// margin so the player and all vehicle-footprint probes remain on visible land.
+export const PLAYABLE_TERRAIN=Object.freeze({
+ halfSize:120,edgeMargin:12,bound:108
+});
+export function isPlayableTerrain(x,z,radius=0){
+ if(!Number.isFinite(x)||!Number.isFinite(z)||!Number.isFinite(radius))return false;
+ const limit=PLAYABLE_TERRAIN.bound-Math.max(0,radius);
+ return limit>=0&&Math.abs(x)<=limit&&Math.abs(z)<=limit;
+}
