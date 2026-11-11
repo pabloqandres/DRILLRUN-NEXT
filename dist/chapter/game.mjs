@@ -60,6 +60,8 @@ import {CameraDebug} from '../camera/debug.mjs';
 import {CinematicRecorder} from '../camera/recorder.mjs';
 import {DesertWind} from '../camera/ambient.mjs';
 import {WorksiteAudio} from '../audio/worksite-audio.mjs';
+import {CharacterSelectFeedback} from '../audio/character-select-feedback-v68.mjs';
+import {CinematicCharacterSelector} from './character-select-v68.mjs';
 import {SiteCinematics} from '../graphics/site-cinematics.mjs';
 import {installPersonalTruckHeadlights} from '../graphics/personal-drilltruck-headlights.mjs';
 import {PersonalTruckWheels} from '../graphics/personal-truck-wheels-v66.mjs';
@@ -96,7 +98,7 @@ import {unreadMessages,collectUIEvents} from './ui-state.mjs';
 import {pendingMessage,deliverMessage,acceptMission,confirmCompletion,isMissionAccepted,isMissionCollected,activeNarrativeMission,ensureNarrative,narrativeUnread,MISSION_NARRATIVES} from './narrative.mjs';
 import {resolveNarrativeText} from './narrative-ui.mjs';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],hidden=(el,v)=>el.classList.toggle('hidden',v);
-let prefs={lang:deviceLanguage(navigator.language),sound:true};try{prefs={...prefs,...JSON.parse(localStorage.getItem('drillrun-preferences')||'{}')};}catch{}
+let prefs={lang:deviceLanguage(navigator.language),sound:true,haptics:true};try{prefs={...prefs,...JSON.parse(localStorage.getItem('drillrun-preferences')||'{}')};}catch{}
 if(!LANGUAGES.some(([l])=>l===prefs.lang))prefs.lang='es';let t=translator(prefs.lang),s=null,hasSave=false;
 function readSave(){try{const raw=localStorage.getItem(CONFIG.saveKey),data=JSON.parse(raw||'null');if(data&&data.schema!=='modular-1'&&!localStorage.getItem(CONFIG.saveKey+'-before-modular'))localStorage.setItem(CONFIG.saveKey+'-before-modular',raw);const value=restore(data);if(value){restoreHsec(value);restoreMission3(value);reconcileDeliveredMachinery(value);restoreMission4(value);finishPatio(value);restoreMissingPersonalTruck(value);repairPersonalTruckPose(value);}return value;}catch{return null;}}
 s=readSave();hasSave=!!s;if(s)prefs.lang=s.lang;t=translator(prefs.lang);
@@ -122,6 +124,10 @@ function persistCamera(){try{localStorage.setItem(CAMERA_KEY,JSON.stringify(worl
 const getGameAudioContext=()=>{audioContext??=new (window.AudioContext||window.webkitAudioContext)();return audioContext;};
 const wind=new DesertWind(getGameAudioContext);
 const worksiteAudio=new WorksiteAudio(getGameAudioContext);
+// V68: isolated feedback for the real-GLB character creator only.
+const selectorFeedback=new CharacterSelectFeedback({context:getGameAudioContext,enabled:()=>prefs.sound,haptics:()=>prefs.haptics!==false});
+let characterSelectorV68=null,selectorV68Zoom=0;
+const selectorPreviewOnly=new URLSearchParams(location.search).has('selectorPreview');
 document.documentElement.style.setProperty('--cover',`url('${new URL(CONFIG.cover,document.baseURI).href}')`);
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function setText(el,value){const text=String(value);if(el.textContent!==text)el.textContent=text;}
@@ -195,7 +201,7 @@ function stop(){resetJoy();keys={};target=null;motion.vx=motion.vz=motion.speed=
 function closeModal(){if(hsecUI)hsecUI.panelOpen=false;$('#modalCard').classList.remove('hsecModal');officePanelPreview?.dispose();officePanelPreview=null;scene?.setUpgradePreview(null);managingOffice=false;hidden($('#modal'),true);$('#modal').classList.remove('buildPreview','moduleSheet','upgradeSheet','officeQuick');modalOpen=false;blueprint=builderOpen&&!!selectedBuildModule;}
 function modal(html){$('#modalCard').classList.remove('hsecModal');$('#modal').classList.remove('buildPreview');hsecWorld?.showAssetCard(null);stop();modalOpen=true;hidden($('#modal'),false);$('#modalCard').innerHTML=`<button id="modalDismiss" class="modalDismiss" aria-label="${esc(t('close'))}">${icon('close')}</button>`+html;$('#modalDismiss').onclick=closeModal;$('#modalCard').scrollTop=0;$('#modalCard').setAttribute('role','dialog');$('#modalCard').setAttribute('aria-modal','true');const heading=$('#modalCard h2');if(heading){heading.id='modalHeading';$('#modalCard').setAttribute('aria-labelledby','modalHeading');}}
 function button(key,id,primary=false){return `<button id="${id}" class="${primary?'primary':'secondary'}">${esc(t(key))}</button>`;}
-function showSettings(){const curLang=LANGUAGES.find(([l])=>l===prefs.lang);const curQ=loadQuality();const qLabels={low:t('quality_low'),balanced:t('quality_balanced'),high:t('quality_high')};modal(`<span class="eyebrow">${esc(t('settings'))}</span><h2>${esc(t('settings'))}</h2><div class="selectRow"><label for="profileName">${esc(t('yourName'))}</label><input id="profileName" maxlength="20" value="${esc(s?.playerName||'')}" placeholder="${esc(t('operatorName'))}"></div><div class="selectRow"><label>${esc(t('language'))}</label><div class="langDropdown" id="settingsLangDrop"><div class="langToggle" id="settingsLangToggle">${curLang?curLang[1]:'Español'}</div><div class="langOptions" id="settingsLangOpts">${LANGUAGES.map(([l,name])=>`<button data-lang="${l}" class="${l===prefs.lang?'active':''}">${name}</button>`).join('')}</div></div></div><div class="selectRow"><label>${esc(t('sound'))}</label><input id="soundToggle" type="checkbox" ${prefs.sound?'checked':''}></div><div class="selectRow"><label>${esc(t('graphicsQuality'))}</label><div class="langDropdown" id="settingsQualityDrop"><div class="langToggle" id="settingsQualityToggle">${esc(qLabels[curQ]||qLabels.balanced)}</div><div class="langOptions" id="settingsQualityOpts">${['low','balanced','high'].map(id=>`<button data-quality="${id}" class="${curQ===id?'active':''}">${esc(qLabels[id])}</button>`).join('')}</div></div></div><small class="qualityReadout">${esc(t('qualityHelp'))}</small><p>${esc(t('controls'))}</p><button id="recoverView3D" class="secondary" type="button">Restablecer vista 3D (conservar partida)</button><button id="resetCamera" class="textButton">${esc(t('home'))}</button><p>${esc(account?t('linked')+' · '+(account.email||''):t('guestNote'))}</p>${auth.configured?button('google','googleLink'): `<small>${esc(t('googleOff'))}</small>`}${account?'<button id="cloudSyncNow" class="secondary" type="button">Sincronizar partida ahora</button><small id="cloudSyncNowStatus"></small>':''}<div class="modalActions">${button('titleScreen','goTitle')}${button('close','closeSettings',true)}</div>`);$('#profileName').onchange=e=>{if(!s||phase!=='play')return;try{setPlayerIdentity(s,s.character,e.target.value);save();renderHUD();if(phoneOpen)renderPhone();}catch(err){toast(err.key);}};$('#settingsLangToggle').onclick=e=>{e.stopPropagation();$('#settingsLangDrop').classList.toggle('open');$('#settingsQualityDrop')?.classList.remove('open');};$('#settingsLangOpts').querySelectorAll('[data-lang]').forEach(b=>b.onclick=e=>{e.stopPropagation();language(b.dataset.lang);showSettings();});$('#settingsQualityToggle').onclick=e=>{e.stopPropagation();$('#settingsQualityDrop').classList.toggle('open');$('#settingsLangDrop')?.classList.remove('open');};$('#settingsQualityOpts').querySelectorAll('[data-quality]').forEach(b=>b.onclick=e=>{e.stopPropagation();if(world)applyQuality(world,b.dataset.quality);else try{localStorage.setItem('drillrun-graphics-v1',b.dataset.quality);}catch{}$('#settingsQualityDrop').classList.remove('open');$('#settingsQualityToggle').textContent=b.textContent;$('#settingsQualityOpts').querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');});$('#soundToggle').onchange=e=>{prefs.sound=e.target.checked;wind.set(prefs.sound&&phase==='play');worksiteAudio.set(prefs.sound&&phase==='play');if(s)s.sound=prefs.sound;persistPrefs();save();};$('#closeSettings').onclick=closeModal;$('#recoverView3D').onclick=restart3DView;$('#resetCamera').onclick=()=>{world&&(world.zoom=1,resetOrbit(world.orbit),world.cameraRig.reset(),persistCamera());closeModal();};$('#goTitle').onclick=()=>{closeModal();stop();save();phase='start';worksiteAudio.set(false);wind.set(false);closePhone();closeBuilder();hidden($('#hud'),true);hidden($('#startScreen'),false);applyText();};if($('#googleLink'))$('#googleLink').onclick=async()=>{try{await auth.signIn();showSettings();}catch(err){cloudStatus='Google: '+(err.code||err.message||'error');updateStartAccount();toast('authError');}};
+function showSettings(){const curLang=LANGUAGES.find(([l])=>l===prefs.lang);const curQ=loadQuality();const qLabels={low:t('quality_low'),balanced:t('quality_balanced'),high:t('quality_high')};modal(`<span class="eyebrow">${esc(t('settings'))}</span><h2>${esc(t('settings'))}</h2><div class="selectRow"><label for="profileName">${esc(t('yourName'))}</label><input id="profileName" maxlength="20" value="${esc(s?.playerName||'')}" placeholder="${esc(t('operatorName'))}"></div><div class="selectRow"><label>${esc(t('language'))}</label><div class="langDropdown" id="settingsLangDrop"><div class="langToggle" id="settingsLangToggle">${curLang?curLang[1]:'Español'}</div><div class="langOptions" id="settingsLangOpts">${LANGUAGES.map(([l,name])=>`<button data-lang="${l}" class="${l===prefs.lang?'active':''}">${name}</button>`).join('')}</div></div></div><div class="selectRow"><label>${esc(t('sound'))}</label><input id="soundToggle" type="checkbox" ${prefs.sound?'checked':''}></div><div class="selectRow"><label>Vibración discreta</label><input id="hapticsToggle" type="checkbox" ${prefs.haptics!==false?'checked':''}></div><div class="selectRow"><label>${esc(t('graphicsQuality'))}</label><div class="langDropdown" id="settingsQualityDrop"><div class="langToggle" id="settingsQualityToggle">${esc(qLabels[curQ]||qLabels.balanced)}</div><div class="langOptions" id="settingsQualityOpts">${['low','balanced','high'].map(id=>`<button data-quality="${id}" class="${curQ===id?'active':''}">${esc(qLabels[id])}</button>`).join('')}</div></div></div><small class="qualityReadout">${esc(t('qualityHelp'))}</small><p>${esc(t('controls'))}</p><button id="recoverView3D" class="secondary" type="button">Restablecer vista 3D (conservar partida)</button><button id="resetCamera" class="textButton">${esc(t('home'))}</button><p>${esc(account?t('linked')+' · '+(account.email||''):t('guestNote'))}</p>${auth.configured?button('google','googleLink'): `<small>${esc(t('googleOff'))}</small>`}${account?'<button id="cloudSyncNow" class="secondary" type="button">Sincronizar partida ahora</button><small id="cloudSyncNowStatus"></small>':''}<div class="modalActions">${button('titleScreen','goTitle')}${button('close','closeSettings',true)}</div>`);$('#profileName').onchange=e=>{if(!s||phase!=='play')return;try{setPlayerIdentity(s,s.character,e.target.value);save();renderHUD();if(phoneOpen)renderPhone();}catch(err){toast(err.key);}};$('#settingsLangToggle').onclick=e=>{e.stopPropagation();$('#settingsLangDrop').classList.toggle('open');$('#settingsQualityDrop')?.classList.remove('open');};$('#settingsLangOpts').querySelectorAll('[data-lang]').forEach(b=>b.onclick=e=>{e.stopPropagation();language(b.dataset.lang);showSettings();});$('#settingsQualityToggle').onclick=e=>{e.stopPropagation();$('#settingsQualityDrop').classList.toggle('open');$('#settingsLangDrop')?.classList.remove('open');};$('#settingsQualityOpts').querySelectorAll('[data-quality]').forEach(b=>b.onclick=e=>{e.stopPropagation();if(world)applyQuality(world,b.dataset.quality);else try{localStorage.setItem('drillrun-graphics-v1',b.dataset.quality);}catch{}$('#settingsQualityDrop').classList.remove('open');$('#settingsQualityToggle').textContent=b.textContent;$('#settingsQualityOpts').querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');});$('#soundToggle').onchange=e=>{prefs.sound=e.target.checked;wind.set(prefs.sound&&phase==='play');worksiteAudio.set(prefs.sound&&phase==='play');if(s)s.sound=prefs.sound;persistPrefs();save();};$('#hapticsToggle').onchange=e=>{prefs.haptics=e.target.checked;persistPrefs();};$('#closeSettings').onclick=closeModal;$('#recoverView3D').onclick=restart3DView;$('#resetCamera').onclick=()=>{world&&(world.zoom=1,resetOrbit(world.orbit),world.cameraRig.reset(),persistCamera());closeModal();};$('#goTitle').onclick=()=>{closeModal();stop();save();phase='start';worksiteAudio.set(false);wind.set(false);closePhone();closeBuilder();hidden($('#hud'),true);hidden($('#startScreen'),false);applyText();};if($('#googleLink'))$('#googleLink').onclick=async()=>{try{await auth.signIn();showSettings();}catch(err){cloudStatus='Google: '+(err.code||err.message||'error');updateStartAccount();toast('authError');}};
 if($('#cloudSyncNow'))$('#cloudSyncNow').onclick=async()=>{
  const status=$('#cloudSyncNowStatus');
  if(cloudSyncing||cloudLocked){if(status)status.textContent='Esta sesión todavía no puede guardar en la nube';return;}
@@ -345,12 +351,31 @@ async function chooseCharacter(fresh=false){try{await ensureWorld(true);freshGam
 // Cards and visible 3D characters share exactly one selection flow.
 function selectAvatar(id){
  if(phase!=='character'||!avatars?.entries.has(id))return false;
+ if(id!==selectedAvatar){selectorV68Zoom=1;selectorFeedback.play('select');}
  selectedAvatar=id;avatars.activate(id);renderCharacters();return true;
 }
 // The selector overlay is pointer-transparent by design. 3D avatar taps are handled
 // by the canvas gesture handler, while roster buttons call selectAvatar directly.
-function renderCharacters(){const node=$('#characterSlots');node.innerHTML=CONFIG.protagonists.map((p,i)=>`<button data-character="${p.id}" class="avatarChoice ${selectedAvatar===p.id?'selected':''}" aria-pressed="${selectedAvatar===p.id}"><span class="avatarThumb">${avatars.portrait(p.id)||icon('player')}</span><span><b>${esc(t(p.roleKey))}</b><small>${esc(t(p.labelKey))}</small></span><i>${String(i+1).padStart(2,'0')}</i></button>`).join('');node.querySelectorAll('button').forEach(b=>b.onclick=()=>selectAvatar(b.dataset.character));const p=avatarDefinition(selectedAvatar);setText($('#avatarTitle'),t(p.roleKey));setText($('#avatarDetail'),t(p.summaryKey));$('#avatarPerk').innerHTML=`<span class="perkSymbol">${icon(p.perkIcon)}</span><div><span class="perkHeading">${esc(t('specialtyBonus'))}</span><strong>${esc(t(p.perkKey))}</strong><small class="perkStatus">${icon(p.id==='operator04'?'check':'lock')}${esc(t(p.id==='operator04'?'bonusActive':'bonusFuture'))}</small></div>`;$('#startAdventure').disabled=!avatars.entries.has(p.id)||$('#playerNameInput').value.trim().length<2;hidden($('#provisionalNote'),true);}
-$('#playerNameInput').oninput=renderCharacters;
+function renderCharacters(){
+ const node=$('#characterSlots');
+ node.innerHTML=CONFIG.protagonists.map((p,i)=>`<button data-character="${p.id}" class="avatarChoice ${selectedAvatar===p.id?'selected':''}" aria-pressed="${selectedAvatar===p.id}"><span class="avatarThumb">${avatars.portrait(p.id)||icon('player')}</span><span><b>${esc(t(p.roleKey))}</b><small>${esc(t(p.labelKey))}</small></span><i>${String(i+1).padStart(2,'0')}</i></button>`).join('');
+ node.querySelectorAll('button').forEach(b=>b.onclick=()=>selectAvatar(b.dataset.character));
+ const p=avatarDefinition(selectedAvatar);
+ setText($('#avatarTitle'),t(p.roleKey));
+ setText($('#avatarDetail'),t(p.summaryKey));
+ // Legacy perk is hidden by V68. Keep game-owned metadata and IDs intact.
+ $('#avatarPerk').innerHTML=`<span class="perkSymbol">${icon(p.perkIcon)}</span><div><span class="perkHeading">${esc(t('specialtyBonus'))}</span><strong>${esc(t(p.perkKey))}</strong></div>`;
+ $('#startAdventure').disabled=!avatars.entries.has(p.id)||$('#playerNameInput').value.trim().length<2;
+ hidden($('#provisionalNote'),true);
+ characterSelectorV68??=new CinematicCharacterSelector($('#characterScreen'),{onInteraction:kind=>selectorFeedback.play(kind)});
+ characterSelectorV68.update({avatar:p,label:t(p.labelKey),description:t(p.summaryKey),figure:avatars.figure(p.id)});
+}
+$('#playerNameInput').oninput=()=>{
+ $('#startAdventure').disabled=!avatars?.entries.has(selectedAvatar)||$('#playerNameInput').value.trim().length<2;
+ selectorFeedback.play('type');
+};
+$('#playerNameInput').onfocus=()=>selectorFeedback.play('focus');
+
 // V64: the authenticated start screen still owns Google/Cloud Save.
  // After its existing world loading, a same-origin cinematic gate gives the
  // player one deliberate JUGAR before the ORIGINAL avatar/restore branches.
@@ -366,6 +391,13 @@ function displayWelcomeV64(){
 }
 $('#play').onclick=async()=>{
  if(cloudSyncing||cloudLocked||welcomeTransitionBusy)return;
+ if(selectorPreviewOnly){
+  // V68 safe QA: never overwrite the user's current Google/local game.
+  // chooseCharacter(false) creates only the temporary in-memory selector state.
+  selectorFeedback.play('confirm');
+  void chooseCharacter(false);
+  return;
+ }
  welcomeTransitionBusy=true;
  try{
   // Preload exactly what the destination would need. Nothing is saved here.
@@ -402,11 +434,21 @@ window.addEventListener('message',event=>{
  void acceptWelcomeV64();
 });
 $('#newGame').onclick=()=>{if(cloudSyncing||cloudLocked)return;modal(`<h2>${esc(t('newGame'))}</h2><p>${esc(t('resetAsk'))}</p><div class="modalActions">${button('cancel','keepSave')}${button('confirm','replaceSave',true)}</div>`);$('#keepSave').onclick=closeModal;$('#replaceSave').onclick=()=>{closeModal();void chooseCharacter(true);};};
-$('#backStart').onclick=()=>{freshGameRequested=false;phase='start';hidden($('#characterScreen'),true);hidden($('#startScreen'),false);s=readSave();hasSave=!!s;applyText();};
+$('#backStart').onclick=()=>{selectorFeedback.play('back');freshGameRequested=false;phase='start';hidden($('#characterScreen'),true);hidden($('#startScreen'),false);s=readSave();hasSave=!!s;applyText();};
 $('#startAdventure').onclick=async()=>{
  if(cloudSyncing||cloudLocked)return;
+ if(selectorPreviewOnly){
+  // Use the same name validation, but NEVER activate a new cloud generation.
+  try{setPlayerIdentity(s,selectedAvatar,$('#playerNameInput').value);}
+  catch(e){toast(e.key);return;}
+  selectorFeedback.play('confirm');
+  modal('<span class="eyebrow">PRUEBA VISUAL V68</span><h2>Personaje confirmado</h2><p>La selección, el nombre, el sonido y la vibración se han probado. No se ha creado ni reemplazado ninguna partida guardada.</p><button id="previewSelectorClose" class="primary">Seguir revisando personajes</button>');
+  $('#previewSelectorClose').onclick=closeModal;
+  return;
+ }
  try{setPlayerIdentity(s,selectedAvatar,$('#playerNameInput').value);}
  catch(e){toast(e.key);return;}
+ selectorFeedback.play('confirm');
  const button=$('#startAdventure');button.disabled=true;
  if(freshGameRequested){
   s.cloudGeneration=previousCloudGeneration+1;
@@ -1764,7 +1806,12 @@ function frame(now){if(!qa)requestAnimationFrame(frame);const dt=Math.min(.08,Ma
     offset:new T.Vector3(view.offset.x,view.offset.y,view.offset.z)
    };
   }
-  else if(phase==='character'){world.chapterCamera={target:new T.Vector3(-4.55+Math.max(0,Math.min(.5,(730-innerWidth)/324)),1.0,5.35),offset:new T.Vector3(0,.55,6.1)};}
+  else if(phase==='character'){
+   // V68: true playable GLB hero bust, close to the camera. Keep the
+   // original 3D model, materials, rig, click detection and cinematic intro.
+   selectorV68Zoom=Math.max(0,selectorV68Zoom-dt*2.7);
+   world.chapterCamera={target:new T.Vector3(-4.88,1.40,5.67),offset:new T.Vector3(0,.11,2.42+selectorV68Zoom*.48)};
+  }
  else if(phase==='play'&&builderOpen&&catalogConstructionCamera&&catalogBlueprint?.spec&&!modalOpen&&
   !hsecUI?.drawing&&!hsecUI?.coneZone){
   const view=catalogBlueprint.camera();

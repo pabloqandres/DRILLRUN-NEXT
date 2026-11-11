@@ -1,0 +1,29 @@
+name: V68 real-GLB cinematic character creator
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [chatgpt/v68-cinematic-real-avatar-selector]
+permissions:
+  contents: read
+jobs:
+  selector-v68:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Parse 3D selector, feedback and shared integration
+        run: |
+          node --check dist/chapter/game.mjs
+          node --check dist/chapter/character-select-v68.mjs
+          node --check dist/chapter/avatar-roster.mjs
+          node --check dist/chapter/portrait.mjs
+          node --check dist/chapter/selector-stage.mjs
+          node --check dist/audio/character-select-feedback-v68.mjs
+      # Legacy intro tests expect a shared avatar01 MP4; main uses four dedicated intros.
+      # Other old tests expect a retired bottom navigation and are excluded.
+      - name: V68 UI + current touch/intro integration
+        run: |
+          node --test tests/v68-cinematic-character-selector.test.mjs tests/avatar-touch-selection.test.mjs tests/v64-cinematic-welcome-flow.test.mjs
