@@ -429,9 +429,9 @@ $('#newGame').onclick=()=>{if(cloudSyncing||cloudLocked)return;modal(`<h2>${esc(
 $('#backStart').onclick=()=>{selectorFeedback.play('back');freshGameRequested=false;phase='start';hidden($('#characterScreen'),true);hidden($('#startScreen'),false);s=readSave();hasSave=!!s;applyText();};
 $('#startAdventure').onclick=async()=>{
  if(cloudSyncing||cloudLocked)return;
- selectorFeedback.play('confirm');
  try{setPlayerIdentity(s,selectedAvatar,$('#playerNameInput').value);}
  catch(e){toast(e.key);return;}
+ selectorFeedback.play('confirm');
  const button=$('#startAdventure');button.disabled=true;
  if(freshGameRequested){
   s.cloudGeneration=previousCloudGeneration+1;
