@@ -117,9 +117,9 @@ test('V50 real 3D driving integration, touch entry, brake and chase camera exist
  assert.match(game,/function stepPersonalTruck\(/);
  assert.match(game,/drivePersonalTruck\(s/);
  assert.match(game,/personalTruck\(s\)\?\.mode==='driving'/);
- assert.match(game,/truckFreeLook\\.view\\(pt\\.position,pt\\.heading\\)/,
+ assert.match(game,/truckFreeLook\.view\(pt\.position,pt\.heading\)/,
   'V58 chase camera still follows the truck while allowing independent orbit');
- assert.match(game,/world\\.chapterCamera=\\{[\\s\\S]*?target:new T\\.Vector3\\(view\\.target\\.x/,
+ assert.match(game,/world\.chapterCamera=\{[\s\S]*?target:new T\.Vector3\(view\.target\.x/,
   '3D scene still receives a camera target tracking personal vehicle');
  assert.match(game,/const personal=personalTruck\(s\)/);
  assert.match(game,/id="personalTruckEnter"/);
