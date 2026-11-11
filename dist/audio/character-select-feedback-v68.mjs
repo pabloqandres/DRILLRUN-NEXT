@@ -2,8 +2,8 @@
 // Original procedural Web Audio only, ~2.5× V68 amplitude; no samples or dependencies.
 // Uses an existing AudioContext and the user's current sound preference.
 export class CharacterSelectFeedback{
- constructor({context,enabled=()=>true,haptics=()=>true}={}){
-  this.context=context;this.enabled=enabled;this.haptics=haptics;
+ constructor({context,enabled=()=>true,haptics=()=>true,volume=()=>1.5}={}){
+  this.context=context;this.enabled=enabled;this.haptics=haptics;this.volume=volume;
   this.last=Object.create(null);this.noise=null;this.noiseRate=0;
  }
  pulse(milliseconds){
@@ -24,7 +24,7 @@ export class CharacterSelectFeedback{
   oscillator.frequency.exponentialRampToValueAtTime(Math.max(65,end),t+duration);
   filter.type='lowpass';filter.frequency.value=1850;
   gain.gain.setValueAtTime(.00001,t);
-  gain.gain.exponentialRampToValueAtTime(Math.min(.055,Math.max(.00001,level)),t+.011);
+  gain.gain.exponentialRampToValueAtTime(Math.min(.12,Math.max(.00001,level*Math.max(0,Math.min(2.5,Number(this.volume())||0)))),t+.011);
   gain.gain.exponentialRampToValueAtTime(.00001,t+duration);
   oscillator.connect(filter);filter.connect(gain);gain.connect(ctx.destination);
   oscillator.start(t);oscillator.stop(t+duration+.003);
@@ -38,7 +38,7 @@ export class CharacterSelectFeedback{
   filter.frequency.setValueAtTime(480,t);
   filter.frequency.exponentialRampToValueAtTime(1460,t+.12);
   gain.gain.setValueAtTime(.00001,t);
-  gain.gain.exponentialRampToValueAtTime(.023,t+.035);
+  gain.gain.exponentialRampToValueAtTime(Math.min(.10,Math.max(.00001,.023*Math.max(0,Math.min(2.5,Number(this.volume())||0)))),t+.035);
   gain.gain.exponentialRampToValueAtTime(.00001,t+.155);
   source.connect(filter);filter.connect(gain);gain.connect(ctx.destination);
   source.start(t);source.stop(t+.16);
