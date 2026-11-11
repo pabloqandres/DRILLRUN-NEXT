@@ -467,3 +467,9 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Camila/Matías/Sofía con retratos originales, CSS atlas optimizado y Ficha/Equipo activo sincronizados; 18 retratos restantes siguen pendientes con placeholders.
 - Mayor espacio en panels, roles, skills y cards donde cabe sin cortar Android horizontal.
 - Sin modificaciones de contratación, misiones, economía, GLB ni Cloud Save. Pruebas V78/V77/V76 sujetas a CI. Registro en CHANGES/2026-11-11_v78_personnel-admin-art.md.
+
+## 2026-11-11 — V79 · Personal Gestión de Equipo, habilidades base y propuesta salarial
+- Fondos de misión exclusivos SVG para M1, M2, M3, M4, M5 y juego libre (sin marcas).
+- Se ajustan las tres habilidades iniciales de cada uno de los 21 candidatos a 1–3; los contratados preexistentes mantienen su perfil guardado. `salaryPerShift` propuesto por candidato, sin activar débitos ni efectos en ingresos.
+- Vista de Gestión de Equipo con ficha del empleado, progresión registrada, reclutamiento, remuneración propuesta y total del equipo, todo informativo. Personal continúa independiente del Catálogo, con el primer lote de imágenes V78.
+- Contrataciones, costos reales, misiones y guardados se preservan. Pendiente aprobación de reglas económicas para el cobrador futuro.
