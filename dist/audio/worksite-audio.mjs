@@ -19,6 +19,23 @@ export function walkingSurface(s,p,walkSurfaces=[]){
  }
  return 'gravel';
 }
+// Distinct, low-fatigue pickup motor: softer harmonics and road/wind noise.
+// No third-party audio sample or licensing dependency; never touches M4.
+export function createSoftPickupMotor(ctx,master,noiseBuffer){
+ const out=ctx.createGain();out.gain.value=0;out.connect(master);
+ const toneFilter=ctx.createBiquadFilter();toneFilter.type='lowpass';toneFilter.frequency.value=250;
+ const body=ctx.createGain();body.gain.value=.16;toneFilter.connect(body);body.connect(out);
+ const lowOsc=ctx.createOscillator();lowOsc.type='triangle';lowOsc.frequency.value=59;
+ lowOsc.connect(toneFilter);lowOsc.start();
+ const harmonic=ctx.createOscillator();harmonic.type='sine';harmonic.frequency.value=118;
+ const smooth=ctx.createGain();smooth.gain.value=.055;
+ harmonic.connect(smooth);smooth.connect(toneFilter);harmonic.start();
+ const src=ctx.createBufferSource();src.buffer=noiseBuffer;src.loop=true;
+ const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=150;
+ const road=ctx.createGain();road.gain.value=.075;
+ src.connect(filter);filter.connect(road);road.connect(out);src.start();
+ return {out,lowOsc,harmonic,filter,src};
+}
 export class WorksiteAudio{
  constructor(getContext){
   this.getContext=getContext;this.enabled=false;this.ready=false;
@@ -50,7 +67,7 @@ export class WorksiteAudio{
   this.workshop=engine(68,240,680);
   this.drill=engine(48,540,1750);
   this.truck=engine(72,390,550);
-  this.personalTruck=engine(65,450,450); // audible RPM feedback in truck 02
+  this.personalTruck=createSoftPickupMotor(ctx,master,this.buffers.noise); // distinct low-fatigue pickup
   this.office=engine(90,170,160);
   this.ready=true;
  }
@@ -110,11 +127,14 @@ export class WorksiteAudio{
   this.fade(this.truck.out,truckGain*.40);
   // Distinct engine rumble for the driver's own vehicle; no walking SFX.
   const rpm=Math.min(1,Math.abs(Number(personalSpeed)||0)/8.3);
-  this.fade(this.personalTruck.out,personalDriving?.48:0);
+  this.fade(this.personalTruck.out,personalDriving?.36:0,.22);
+  const idleHz=59+rpm*67;
   if(this.personalTruck.lowOsc)this.personalTruck.lowOsc.frequency.setTargetAtTime(
-   68+rpm*105,this.ctx.currentTime,.11);
+   idleHz,this.ctx.currentTime,.22);
+  if(this.personalTruck.harmonic)this.personalTruck.harmonic.frequency.setTargetAtTime(
+   idleHz*2,this.ctx.currentTime,.21);
   if(this.personalTruck.filter)this.personalTruck.filter.frequency.setTargetAtTime(
-   280+rpm*570,this.ctx.currentTime,.15);
+   145+rpm*390,this.ctx.currentTime,.25);
   if(this.workshop.lowOsc)this.workshop.lowOsc.frequency.setTargetAtTime(66+Math.sin(this.time*1.2)*3,this.ctx.currentTime,.18);
   if(this.drill.lowOsc)this.drill.lowOsc.frequency.setTargetAtTime(51+Math.sin(this.time*17)*7,this.ctx.currentTime,.04);
   if(this.truck.lowOsc)this.truck.lowOsc.frequency.setTargetAtTime(67+Math.sin(this.time*3.2)*8,this.ctx.currentTime,.15);
@@ -137,7 +157,7 @@ export class WorksiteAudio{
  dispose(){
   if(!this.ready)return;
   for(const name of ['workshop','drill','truck','personalTruck','office']){
-   const c=this[name];try{c.lowOsc.stop();c.src.stop();c.lowOsc.disconnect();c.src.disconnect();c.out.disconnect()}catch{}
+   const c=this[name];try{c.lowOsc.stop();c.harmonic?.stop();c.src.stop();c.lowOsc.disconnect();c.harmonic?.disconnect();c.src.disconnect();c.out.disconnect()}catch{}
   }
   try{this.master.disconnect()}catch{}
   this.ready=false;this.enabled=false;
