@@ -16,9 +16,17 @@ export class CharacterStage{
   const batched=batchModel(set);this.group.add(batched);
   const ring=new T.Mesh(new T.RingGeometry(.52,.56,64),new T.MeshBasicMaterial({color:0xe5c28a,transparent:true,opacity:.7,side:T.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.y=.025;this.group.add(ring);this.selectionRing=ring;
   // V68: warm key + cool rim on the actual playable model, never new artwork.
-  const key=new T.PointLight(0xffdfad,4.4,6.5,1.6);key.position.set(-1.9,2.5,2.0);this.group.add(key);
-  const rim=new T.PointLight(0x53caf4,3.2,5.5,1.7);rim.position.set(1.55,2.1,-.9);this.group.add(rim);
+  const key=new T.PointLight(0xffe5bf,4.2,5.6,1.5);key.position.set(-1.9,2.5,2.0);this.group.add(key);this.keyLight=key;
+  const rim=new T.PointLight(0x74d9f4,2.4,5.6,1.6);rim.position.set(1.55,2.1,-.9);this.group.add(rim);this.rimLight=rim;
   this.dust=new T.Group();this.dust.userData.isWorker=true;this.group.add(this.dust);for(let i=0;i<8;i++){const p=new T.Mesh(new T.IcosahedronGeometry(.28,1),new T.MeshBasicMaterial({color:0xd5c5a1,transparent:true,opacity:.09,depthWrite:false}));p.position.set(i*.65-2.2,.3+(i%3)*.16,-2-i*.4);p.scale.set(1.7,.55,1.2);this.dust.add(p);}this.group.visible=false;
  }
- update(visible,time,avatar='operator01'){if(this.group.visible!==visible){this.group.visible=visible;this.world.renderer.staticFrame=null;}if(!visible)return;const index=Number(avatar.slice(-2))-1;this.selectionRing.position.x=0;this.selectionRing.position.z=.48;if(this.lastAvatar!==avatar){this.lastAvatar=avatar;this.world.renderer.staticFrame=null;}this.dust.children.forEach((p,i)=>{p.position.x=((time*.11+i*.8)%7)-3.5;p.position.y=.35+Math.sin(time*.4+i)*.13;});}
+ update(visible,time,avatar='operator01'){if(this.group.visible!==visible){this.group.visible=visible;this.world.renderer.staticFrame=null;}if(!visible)return;const index=Number(avatar.slice(-2))-1;this.selectionRing.position.x=0;this.selectionRing.position.z=.48;
+  // V69: stage illumination must FOLLOW the selected GLB at its hero
+  // showcase coordinates; static spawn-relative lights left it unlit.
+  const hero=this.world.player?.position;
+  if(hero&&this.keyLight&&this.rimLight){
+   const dx=hero.x-this.group.position.x,dz=hero.z-this.group.position.z;
+   this.keyLight.position.set(dx-1.05,2.35,dz+1.5);
+   this.rimLight.position.set(dx+1.1,2.65,dz-.65);
+  }if(this.lastAvatar!==avatar){this.lastAvatar=avatar;this.world.renderer.staticFrame=null;}this.dust.children.forEach((p,i)=>{p.position.x=((time*.11+i*.8)%7)-3.5;p.position.y=.35+Math.sin(time*.4+i)*.13;});}
 }
