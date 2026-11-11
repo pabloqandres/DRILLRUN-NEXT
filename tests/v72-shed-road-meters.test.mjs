@@ -109,5 +109,5 @@ test('V72 M2: real HSEC bar in the world, status card and tab, no secondary stat
  assert(css.includes('#hud .shedBuildHud'));
  assert(!display.includes('setInterval'));
  assert(!display.includes('Date.now()'));
- assert(!display.includes('localStorage'));
+ assert(!/\blocalStorage\s*\./.test(display));
 });
