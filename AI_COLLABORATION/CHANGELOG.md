@@ -1,5 +1,12 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-10 — V59 Patio: barrera lenta, DrillTruck® apoyada e iluminación real ampliada
+- Barrera HSEC: animación de 1.6 segundos independiente de FPS, 1.7 segundos de espera después de perder sensor y apertura anticipada con vehículo a 15 m. Mantiene la colisión física hasta posición segura.
+- DrillTruck® personal 02: altura visual calculada en función del asfalto bajo las ruedas y mínimo del GLB. Evita ruedas enterradas en Patio sin alterar física, guardados ni economía.
+- Patio L1: plafones funcionales bajo estacionamiento de camionetas, galpón logístico y combustible; halos por encima de losas y cobertura mejorada de maquinaria/P01, con pocas luces dinámicas adaptadas a móvil.
+- Tests específicos V59 y regresiones V50-V58. QA visual Android pendiente. Ver `CHANGES/2026-11-10_v59-patio-light-gate-grounding.md`.
+
+
 ## 2026-11-10 — V58 cámara libre de DrillTruck® personal (PR)
 - La cámara fija de conducción reemplazada por cámara exterior con órbita relativa al heading del vehículo. El arrastre desde mitad derecha rota visión horizontal/vertical y pinza/rueda cambia distancia; cámara hogar restablece vista trasera.
 - Joystick, freno, luces, movimiento físico, colisiones, economía, misiones, Cloud Save y control de DrillTruck® automática se mantienen idénticos.
