@@ -462,3 +462,8 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Cards incluyen tres habilidades 1–5 con pips informativos. La ficha y el Equipo activo muestran el mismo placeholder; al pulsar un contratado se abre su ID real y no el primer candidato de ese rol.
 - Conserva contratación M3/M5, costos, capacidad por misión, guardado/restore, GLB y misiones. Los atributos siguen sin bonificaciones gameplay (`effectsEnabled:false`).
 - Rama `chatgpt/v77-personnel-placeholders-ux`; QA automatizado focal y regresiones en CI, revisión visual Android pendiente. Registro detallado en `CHANGES/2026-11-11_v77_personnel-placeholders-ux.md`.
+
+## 2026-11-11 — V78 arte Personal: 3 administradores y UI más aireada
+- Camila/Matías/Sofía con retratos originales, CSS atlas optimizado y Ficha/Equipo activo sincronizados; 18 retratos restantes siguen pendientes con placeholders.
+- Mayor espacio en panels, roles, skills y cards donde cabe sin cortar Android horizontal.
+- Sin modificaciones de contratación, misiones, economía, GLB ni Cloud Save. Pruebas V78/V77/V76 sujetas a CI. Registro en CHANGES/2026-11-11_v78_personnel-admin-art.md.
