@@ -83,7 +83,8 @@ test('V56 game always has a temporary visual before the official GLB loads',()=>
  assert.match(game,/m5PersonalTruckFallback&&officialReady/);
  assert.match(game,/restoreMissingPersonalTruck\(value\);repairPersonalTruckPose\(value\);/);
  assert.match(game,/restoreMissingPersonalTruck\(s\);repairPersonalTruckPose\(s\);/);
- assert.match(game,/m5PersonalTruckModel\.position\.set\(truck\.position\.x,\.12,truck\.position\.z\)/);
+ assert.match(game,/visualTruckGroundHeight\(truck\.position,truck\.heading/);
+ assert.match(game,/m5PersonalTruckModel\.position\.set\(truck\.position\.x,visualY,truck\.position\.z\)/);
 });
 test('V56 both Fleet and Patio have an explicit locator and P01 retrieval',()=>{
  const s=state();deliverPersonalTruck(s,2000);
