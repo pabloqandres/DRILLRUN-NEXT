@@ -16,7 +16,7 @@ test('V65 keeps approved logo shine but removes ONLY the full-screen light sweep
 });
 test('V65 buildings are drawn in staged and staggered SVG segments, not video',()=>{
  assert.match(splash,/<svg id="buildLines" viewBox="0 0 1672 941"/);
- assert.equal((splash.match(/class="build-site"/g)||[]).length,3);
+ assert.equal((splash.match(/class="build-site(?: left-galpon)?"/g)||[]).length,3);
  assert((splash.match(/class="construct-line /g)||[]).length>=10);
  assert((splash.match(/class="construct-trace"/g)||[]).length>=3);
  assert((splash.match(/class="holo-node"/g)||[]).length>=5);
@@ -44,4 +44,30 @@ test('V65 welcome routes to existing login/cloud save and avatar/restore paths',
  assert.match(game, /await chooseCharacter\(true\)/);
  assert.match(game, /beginPlay\(true\)/);
  assert.match(game, /cloudStartNewGame\(s\)/);
+});
+
+test('V65.1 left hall hologram respects perspective and physical prefab occlusion',()=>{
+ assert.match(splash, /<mask id="galponDepthV65" maskUnits="userSpaceOnUse"/);
+ assert.match(splash, /M430 560 L441 550 L500 546 L527 562 L528 656 L427 654 Z/);
+ assert.match(splash, /class="build-site left-galpon" mask="url\(#galponDepthV65\)"/);
+ assert.match(splash, /data:image\/webp;base64,/);
+ assert.match(splash, /viewBox="0 0 1672 941"/);
+ assert.match(splash, /preserveAspectRatio="none"/);
+ assert.equal((splash.match(/class="build-site(?: left-galpon)?"/g)||[]).length,3);
+});
+test('V65.1 rolling ground dust travels behind JUGAR and stays low',()=>{
+ assert.match(splash, /id="groundDust" aria-hidden="true"/);
+ assert.match(splash, /#groundDust\{[^}]*z-index:7/);
+ assert.match(splash, /#playHero\{[^}]*z-index:20/);
+ assert.match(splash, /mask-image:linear-gradient\(to bottom,transparent 0%,transparent 67%/);
+ assert.match(splash, /const groundBands=\[/);
+ assert.match(splash, /const footLifts=\[/);
+ assert.match(splash, /className='dust-bank'/);
+ assert.match(splash, /className='ground-grit'/);
+ assert.match(splash, /className='foot-lift'/);
+ assert.match(splash, /@keyframes dustAcross/);
+ assert.match(splash, /@keyframes gritAcross/);
+ assert.match(splash, /@keyframes footDustRoll/);
+ assert.match(splash, /#groundDust \.dust-bank,#groundDust \.ground-grit,#groundDust \.foot-lift\{animation:none;opacity:0\}/);
+ assert.doesNotMatch(splash, /<video|canvas\.getContext\('webgl'\)/);
 });
