@@ -332,3 +332,15 @@ Tras confirmar que la V57 no estaba desplegada, el usuario solicitó explícitam
 - Vehículo: calcular mínimo vertical del modelo al crear o reemplazar GLB (antes de añadir luces), y al posicionarlo apoyar visualmente en altura máxima bajo la huella de ruedas; no guardar cambios de elevación ni alterar la física en X/Z.
 - Iluminación: nuevas luminarias de tarea bajo techumbres y proyección de luz en pavimento de P01, flota cubierta, herramientas/logística y pads de maquinaria; presupuesto de luces dinámicas adaptado a Android, sin sombras nuevas, sin cuerpos sólidos ni marcas externas.
 - QA: pruebas específicas de duración de barrera a FPS distintos, pausas, contact patch del vehículo, preservación de ruta/collider, cobertura nocturna y regresión M1-M5. Publicación sólo después de CI y comparación del commit Vercel `main`.
+
+## 2026-11-10 — V60: dos regresiones de conducción tras V59 (usuario, capturas Android)
+
+Se reportan **ruedas visiblemente elevadas sobre arena** y botón de salida que responde `No hay espacio libre para bajar` en un sector abierto del Patio. Usuario espera reparación directa como continuación de V59.
+
+**Hallazgos:** (1) `visualTruckGroundHeight` utiliza el **máximo** de suelo en cinco puntos sin nivelar la carrocería: un borde/relieve bajo una rueda eleva todos los contactos rígidos. (2) `togglePersonalTruck` ejecuta `world.isBlocked` con el **propio collider** de la camioneta aún registrado, y solo evalúa dos posiciones de salida, aun cuando puede haber espacio seguro detrás/delante. Ambas regresiones aparecieron después de cambios sucesivos visuales en modo de conducción.
+
+**Autorización excepcional acotada a reparación:** ChatGPT puede modificar el controlador visual `dist/graphics/personal-truck-grounding.mjs`, un módulo de selección segura de punto de bajada `dist/animation/personal-truck-exit.mjs` y el enlace en `dist/chapter/game.mjs`. No se modifica `dist/mission5/personal-drilltruck.mjs` (propiedad/velocidad/estado) ni el contenido de saves.
+- Altura basada principalmente en el terreno central y una estadística robusta de las cuatro ruedas; nunca elevar toda la camioneta para compensar un único punto alto. Mantener contacto correcto en superficies planas y pavimento.
+- Al bajar (detenido), excluir únicamente el collider físico de **su propia** DrillTruck® de la evaluación del punto de salida; mantener cercos, equipos, otras camionetas, portones, HSEC y límites de terreno. Reponer exactamente el collider con `try/finally`.
+- Buscar posiciones seguras laterales y, si están bloqueadas, alternativas alrededor del vehículo dentro de una distancia peatonal acotada. No teletransportar a través de cercos ni permitir salir si realmente no existe espacio.
+- Pruebas específicas contra terreno irregular, autocolisión y colisiones reales; PR y validación automática antes de integrar. Los reportes de los testers en Android siguen siendo necesarios, sin afirmarlos antes de verlos.
