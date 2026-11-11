@@ -59,7 +59,7 @@ function createNamedPivot(mesh,root){
 // V67: physical axle proportions rather than the small V66 decorative points.
 export function fallbackWheelPose(size,center,minY,side,front){
  const x=center.x+side*clamp(size.x*.49,.82,1.23);
- const z=center.z+(front?1:-1)*clamp(size.z*(front?.31:.34),1.35,1.90);
+ const z=center.z+(front?1:-1)*clamp(size.z*(front ? .31 : .34),1.35,1.90);
  const y=minY+clamp(size.z*.10,.43,.54);
  const radius=clamp(size.z*.097,.40,.53);
  return {x,y,z,radius};
