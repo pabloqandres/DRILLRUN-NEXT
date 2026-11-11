@@ -102,7 +102,7 @@ import {pendingMessage,deliverMessage,acceptMission,confirmCompletion,isMissionA
 import {resolveNarrativeText} from './narrative-ui.mjs';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],hidden=(el,v)=>el.classList.toggle('hidden',v);
 let prefs={lang:deviceLanguage(navigator.language),sound:true,haptics:true,uiVolume:1.5};try{prefs={...prefs,...JSON.parse(localStorage.getItem('drillrun-preferences')||'{}')};}catch{}
-prefs.uiVolume=Math.max(0,Math.min(2,Number(prefs.uiVolume)??1.5));
+prefs.uiVolume=Number.isFinite(Number(prefs.uiVolume))?Math.max(0,Math.min(2,Number(prefs.uiVolume))):1.5;
 if(!LANGUAGES.some(([l])=>l===prefs.lang))prefs.lang='es';let t=translator(prefs.lang),s=null,hasSave=false;
 function readSave(){try{const raw=localStorage.getItem(CONFIG.saveKey),data=JSON.parse(raw||'null');if(data&&data.schema!=='modular-1'&&!localStorage.getItem(CONFIG.saveKey+'-before-modular'))localStorage.setItem(CONFIG.saveKey+'-before-modular',raw);const value=restore(data);if(value){restoreHsec(value);restoreMission3(value);reconcileDeliveredMachinery(value);restoreMission4(value);finishPatio(value);restoreMissingPersonalTruck(value);repairPersonalTruckPose(value);}return value;}catch{return null;}}
 s=readSave();hasSave=!!s;if(s)prefs.lang=s.lang;t=translator(prefs.lang);
