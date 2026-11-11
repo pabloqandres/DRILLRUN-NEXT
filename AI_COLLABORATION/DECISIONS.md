@@ -1,5 +1,8 @@
 # Decisions Log — DRILL RUN NEXT GENERATION
 
+**2026-11-10 · Decisión usuario:** Rechazada la calidad de previews/modelos Wave 01. Retirar completamente su catálogo visual en V58 y cerrar PRs de integración no fusionados (#72, #67). No borrar GLB que el usuario subió a su rama V55; no entraron a main. Proteger categorías HSEC, compras, economía, guardado, M1–M5 y trabajo paralelo V57. Detalles: `CHANGES/2026-11-10_wave01-catalog-rollback-v58.md`.
+
+
 ## 2026-11-10 — V50 Segundo DrillTruck® conducible y M5 de seis objetivos
 
 El usuario pidió una segunda unidad para manejo personal con joystick,
