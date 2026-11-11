@@ -5,6 +5,7 @@ import * as T from '../vendor/three.module.js';
 import {ConstructionHologram} from '../chapter/construction-hologram.mjs';
 import {PATIO_L1,patioProgress,patioState} from './patio-state.mjs';
 import {gateShouldOpen,barrierBlocksPlayer} from './gate-control.mjs';
+import {createPatioGateMotion,advancePatioGateMotion} from '../animation/patio-gate-motion.mjs';
 
 // PUMA wine-red: shared with existing DRILLCO corporate structures, no neon red.
 const C={red:0x701e30,redBright:0x96364a,ink:0x172e40,dark:0x243b4a,
@@ -101,6 +102,19 @@ function spotlight(g,x,z,h=6){
  light.name='Patio L1 · luminaria real';light.castShadow=false;
  light.position.set(x+.62,h-.06,z);g.add(light);
  const pool=patioLightPool(x+.62,z,27);g.add(pool);
+ return {x,z,lens,light,pool};
+}
+// Economical roof worklight: luminous fixture, real light near the player,
+// and a surface-height-corrected floor wash for distant mobile view.
+function canopyWorklight(g,x,z,y=4.1,surface=.295){
+ const lens=new T.Mesh(new T.BoxGeometry(1.65,.045,.38),
+  new T.MeshBasicMaterial({color:0x55554f}));
+ lens.position.set(x,y+.20,z);lens.name='Patio · plafón de trabajo';g.add(lens);
+ const light=new T.PointLight(0xffedc1,0,17,2);
+ light.name='Patio · iluminación interior funcional';light.castShadow=false;
+ light.position.set(x,y-.35,z);g.add(light);
+ const pool=patioLightPool(x,z,13);
+ pool.position.y=surface;g.add(pool);
  return {x,z,lens,light,pool};
 }
 function fences(g){
@@ -355,19 +369,36 @@ export function createPatioWorld(w){
  const access=buildAccess(w,structures);
  const final=new T.Group();root.add(final);const yardLamps=operationalDetails(w,final);
  // Task lighting underneath roofs, at logistics and at the single HSEC gate.
- const taskLights=[[-14.4,14.1],[-19,-11.2],[1.5,14.3],[24,2.5]].map(([x,z])=>{
+ const taskLights=[[-14.4,14.1,.295],[-19,-11.2,.525],[1.5,14.3,.525],[24,2.5,.295]].map(([x,z,floorY])=>{
   const light=new T.PointLight(0xffe9c6,0,19,2);
   light.name='Patio L1 · luz de trabajo';light.castShadow=false;
   light.position.set(x,3.65,z);final.add(light);
-  const pool=patioLightPool(x,z,16);final.add(pool);
+  const pool=patioLightPool(x,z,16);
+  // The logistics and fuel concrete slabs rise to .48 m. The old .295 m
+  // glow was hidden BELOW these surfaces even when lights were switched on.
+  pool.position.y=floorY;
+  final.add(pool);
   return {x,z,light,pool};
  });
+ // Genuine fixtures under covered parking, logistics/tool storage and fuel.
+ // Most lamps are visual-only at a distance; only the closest lamps consume
+ // the mobile GPU dynamic-light budget.
+ const canopyLights=[
+  [-23,14.1,4.15,.295],[-17,14.1,4.15,.295],
+  [-11,14.1,4.15,.295],[-5,14.1,4.15,.295],
+  [-23,-11.2,4.55,.525],[-16,-11.2,4.55,.525],
+  [1.5,14.3,4.10,.525]
+ ].map(([x,z,height,floorY])=>canopyWorklight(final,x,z,height,floorY));
  // Broad pools on open heavy-machinery bays and the personal P01 stall.
  // These are inexpensive ground-lit passes from nearby perimeter floodlights,
  // not extra point lights or collision/mission objects.
- const bayPools=[[-7,-13,18],[5,-13,18],[17,-13,18],[20,-3.2,14]]
-  .map(([x,z,size])=>{
-   const pool=patioLightPool(x,z,size);final.add(pool);return pool;
+ const bayPools=[
+  [-7,-13,18,.295],[5,-13,18,.295],[17,-13,18,.295],
+  [20,-3.2,14,.295],[-20,13.5,17,.295],[-7,13.5,15,.295],
+  [-19,-10.8,13,.525],[1.5,14.3,9,.525]
+ ].map(([x,z,size,floorY])=>{
+   const pool=patioLightPool(x,z,size);
+   pool.position.y=floorY;final.add(pool);return pool;
   });
  const future=futurePlots(w);
  // The structural source is an exact clone of the final prefab modules,
@@ -380,6 +411,7 @@ export function createPatioWorld(w){
  const barrier={x:PATIO_L1.gate.x,z:PATIO_L1.gate.z,w:.34,d:9.2,
   maxY:1.35,_patio:true,_patioBarrier:true};
  let barrierOpen=false;
+ const gateMotion=createPatioGateMotion();
  function setBarrierBlocking(blocked){
   const i=w.colliders.indexOf(barrier);
   if(blocked&&i<0)w.colliders.push(barrier);
@@ -441,7 +473,18 @@ export function createPatioWorld(w){
     lamp.light.intensity=selected?(w.quality==='low'?17:24):0;
     lamp.pool.material.opacity=night?(selected?.48:.20):0;
    }
-   for(const pool of bayPools)pool.material.opacity=night?.27:0;
+   const canopyBudget=w.quality==='low'?1:w.quality==='high'?4:2;
+   const closestCanopy=night?new Set([...canopyLights]
+    .sort((a,b)=>distance(a)-distance(b)).slice(0,canopyBudget)):new Set();
+   for(const lamp of canopyLights){
+    const selected=closestCanopy.has(lamp);
+    lamp.light.intensity=selected?(w.quality==='low'?19:32):0;
+    lamp.lens.material.color.setHex(night?0xfff1cb:0x55554f);
+    lamp.pool.material.opacity=night?(selected?.55:.31):0;
+   }
+   // The full surface is visibly lit even in low-quality Android mode,
+   // while only nearby fixtures add real expensive per-pixel lighting.
+   for(const pool of bayPools)pool.material.opacity=night?.39:0;
    const stateKey=status+':'+info.phase;
    if(stateKey!==previousState){
     previousState=stateKey;
@@ -508,18 +551,19 @@ export function createPatioWorld(w){
    // sensor opens the boom on approach from either side and closes on exit.
    const truck=s.mission4?.drillTruck;
    const truckNear=!!truck?.position&&
-    Math.hypot(truck.position.x-PATIO_L1.gate.x,truck.position.z-PATIO_L1.gate.z)<12;
+    Math.hypot(truck.position.x-PATIO_L1.gate.x,truck.position.z-PATIO_L1.gate.z)<15;
    const driverTruck=s.mission5?.personalTruck;
    const personalNear=driverTruck?.mode==='driving'&&
     Math.hypot(driverTruck.position.x-PATIO_L1.gate.x,
-     driverTruck.position.z-PATIO_L1.gate.z)<10;
+     driverTruck.position.z-PATIO_L1.gate.z)<15;
    barrierOpen=gateShouldOpen({
     position:status==='operational'&&!s.inside?s.position:null,
     wasOpen:barrierOpen,vehicleNear:truckNear||personalNear,
     routeInUse:!!w.fleetGateInUse
    })&&status==='operational';
-   const desired=barrierOpen?-Math.PI/2:0;
-   access.rotation.x+=(desired-access.rotation.x)*.18;
+   // V59: full boom travel is 1.6 seconds at any frame rate, with a short
+   // open hold after the sensors release; collision stays until clearance.
+   access.rotation.x=advancePatioGateMotion(gateMotion,barrierOpen,now);
    if(registered)setBarrierBlocking(barrierBlocksPlayer(access.rotation.x));
   },
   dispose(){

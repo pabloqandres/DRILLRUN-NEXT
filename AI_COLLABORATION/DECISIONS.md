@@ -320,3 +320,15 @@ Tras confirmar que la V57 no estaba desplegada, el usuario solicitó explícitam
 - El zoom táctil opcional de pinza y rueda actúa sobre cámara de vehículo, manteniendo distancia mínima/ máxima razonable.
 - Tests sintéticos deben verificar vista predeterminada, giro libre, seguimiento dinámico al vehículo, retorno a inicio, límites de inclinación/zoom y código acoplado.
 - Trabajo en rama `chatgpt/v58-personal-drilltruck-free-look`, PR antes de merge. Solicitud del usuario es para activar la función; validación de despliegue y cámara real Android deben informarse sin asumirlas.
+
+
+## 2026-11-10 — V59: Corrección visual integral Patio, barrera y DrillTruck® personal
+
+**Autorización directa:** el usuario compartió una captura nocturna del Patio y pidió «Hazlo todo» sobre tres fallos: barrera motorizada de apertura antinatural, DrillTruck® personal enterrada en asfalto, iluminación insuficiente de herramienta/vehículos/maquinaria.
+
+**Ownership y alcance coordinado:** ChatGPT asume visuales y animación en `dist/mission5/patio-world.mjs`, nuevo módulo de animación de barrera y de corrección visual de contacto vehicular. Se autoriza la excepción **exclusivamente visual** en `dist/chapter/game.mjs` para alinear la altura del GLB personal con `World.sampleGround`, sin modificar `drivePersonalTruck`, sensores, collider, heading, guardados, stock, economía, misiones ni M4 automática.
+
+- Barrera: interpolación 18%/frame se reemplaza por movimiento de 1.6 s dependiente de tiempo, con pausa segura antes de cerrar; la activación sigue leyendo el sensor y `barrierBlocksPlayer` existentes. No desbloquear colisión prematuramente.
+- Vehículo: calcular mínimo vertical del modelo al crear o reemplazar GLB (antes de añadir luces), y al posicionarlo apoyar visualmente en altura máxima bajo la huella de ruedas; no guardar cambios de elevación ni alterar la física en X/Z.
+- Iluminación: nuevas luminarias de tarea bajo techumbres y proyección de luz en pavimento de P01, flota cubierta, herramientas/logística y pads de maquinaria; presupuesto de luces dinámicas adaptado a Android, sin sombras nuevas, sin cuerpos sólidos ni marcas externas.
+- QA: pruebas específicas de duración de barrera a FPS distintos, pausas, contact patch del vehículo, preservación de ruta/collider, cobertura nocturna y regresión M1-M5. Publicación sólo después de CI y comparación del commit Vercel `main`.
