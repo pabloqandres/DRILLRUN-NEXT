@@ -47,7 +47,8 @@ test('V75: actual admin hiring and staff roster remain accessible from independe
  assert(html.includes('Contratar'));
  const faena=read('dist/chapter/faena-center.mjs'),game=read('dist/chapter/game.mjs');
  assert(faena.includes("case 'personnel':"));
- assert(faena.includes("m3('m3-personnel')"));
+ assert(faena.includes('renderPersonnelPremium(s,this.personnelRole'));
+ assert(faena.includes("onAppAction?.(role.startsWith('m5-')?'m5':'m3','hire',role+'|'+candidateId)"));
  assert(faena.includes("['hire','hire']"));
  assert(game.includes("if(nav==='m3-personnel'){openFaena('personnel');return;}"));
  assert(game.includes("phoneUI.onM3Action?.(type,value)"));
