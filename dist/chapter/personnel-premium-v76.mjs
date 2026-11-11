@@ -86,7 +86,8 @@ const navRole=(s,g,role,ico)=>{
  return `<button type="button" class="pvRole ${g.id===role?'selected':''} ${unlocked?'':'locked'}" data-pv-role="${g.id}" aria-pressed="${g.id===role}" title="${unlocked?g.description:'Se habilita en misión '+g.unlock}">
  <span class="pvRoleIcon">${ico(icons[g.id]||'personnel')}</span><span class="pvRoleLabel">${esc(g.label)}</span><b class="pvRoleCounter">${unlocked?n:'M'+g.unlock}</b></button>`;
 };
-export function renderPersonnelPremium(s,selectedRole,selectedId,icon){
+export function renderPersonnelPremium(s,selectedRole,selectedId,icon,view='recruit'){
+ if(view==='team')return renderPersonnelManagement(s,selectedId,icon);
  const role=roleById(selectedRole)||PERSONNEL_GROUPS[0];
  const team=activePersonnel(s),count=activePersonnelCount(s),capacity=Math.max(count,personnelCapacity(s));
  const mission=personnelUnlockMission(s),required=nextRequiredRole(s),requiredDef=roleById(required);
@@ -96,6 +97,9 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon){
  const warning=blocked==='missionLocked'?'Se habilita en misión '+role.unlock:reasons[blocked]||blocked;
  const step=role.id===required&&mission>=role.unlock;
  const countTxt=`${Math.min(count,capacity)} / ${capacity}`;
+ const free=!!(s?.mission5?.commissionedAt&&s?.narrative?.rewardsCollected?.includes('m5'));
+ const missionArt=free?'free':'m'+mission;
+ const missionTitle=free?'Juego libre':mission===5?'Una base para crecer':mission===4?'Operación productiva':mission===3?'Tu primer contrato':'Seguridad de tu operación';
  const entryCards=entries.map((c,i)=>{
   const busy=!!team.find(p=>p.candidateId===c.id);
   const isSelected=c.id===selected.id;
@@ -108,7 +112,7 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon){
    <span class="pvCandidateState">${busy?'CONTRATADO':locked?'BLOQUEADO':'DISPONIBLE'}</span>
   </button>`;
  }).join('');
- const slots=Array.from({length:Math.min(capacity,8)},(_,i)=>{
+ const slots=Array.from({length:Math.max(capacity,team.length)},(_,i)=>{
   const p=team[i];
   if(p){const c=candidateById(p.candidateId);return `<button class="pvTeamSlot occupied" type="button" data-pv-roster="${esc(p.role)}" data-pv-person="${esc(p.candidateId||'')}" aria-label="Ver ${esc(p.name||roleById(p.role)?.label||'contratado')}">
    ${c?`${portraitIllustration(c,'team')}`:`<span class="pvTeamFallback">${icon('personnel')}</span>`}
@@ -118,8 +122,8 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon){
  return `<section class="pvRoot" aria-label="Personal, contratación y equipo">
  <div class="pvMain">
   <aside class="pvSidebar" aria-label="Roles y requerimientos">
-   <button class="pvMission" data-pv-requirement type="button" title="Ir a la siguiente contratación">
-    <span class="pvMissionBadge">MISIÓN ${mission}</span><b>${mission===5?'Una base para crecer':mission===4?'Operación productiva':mission===3?'Tu primer contrato':'Seguridad de tu operación'}</b>
+   <button class="pvMission" data-pv-requirement data-pv-mission="${missionArt}" type="button" title="Ir a la siguiente contratación">
+    <span class="pvMissionBadge">${free?'FAENA ACTIVA':'MISIÓN '+mission}</span><b>${missionTitle}</b>
     <small>${hiredRole(s,required)?'Contratación completada':'Siguiente contratación requerida:'}</small>
     <span class="pvMissionTarget"><span>${icon(icons[required]||'personnel')}</span>${esc(requiredDef.label)}<b>${roleCount(s,required)}/1</b></span>
    </button>
@@ -137,7 +141,8 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon){
    <p class="pvBio">${esc(selected.description)}</p>
    <div class="pvSkillsHeader">HABILIDADES <span>REGISTRADAS</span></div>
    <div class="pvSkills">${skillRows(selected)}</div>
-   <div class="pvFutureNote">${icon('zap')} Preparadas para evolución; sin bonos de ingresos activos.</div>
+   <div class="pvFutureNote">${icon('zap')} Habilidades iniciales. Progresión aún no activada.</div>
+   <div class="pvProposedSalary"><span>Salario por turno · propuesto</span><strong>${money(selected.salaryPerShift)}</strong><small>Sin cobro activo</small></div>
    <div class="pvHireActions"><span class="pvHirePrice"><small>COSTO ÚNICO</small><b>${money(selected.hireCost)}</b></span>
     <button class="pvHire ${blocked?'blocked':''}" data-pv-hire type="button" ${blocked?'disabled':''}>${icon(blocked?'lock':'personnel')} ${employed?'Contratado':blocked?'No disponible':'Contratar'}</button></div>
    ${blocked?`<small class="pvHireReason">${esc(warning)}</small>`:''}
@@ -145,6 +150,51 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon){
  </div>
  <footer class="pvTeam"><div class="pvTeamCount"><span>${icon('dock-users')}</span><span>Equipo activo<strong>${countTxt}</strong></span></div>
  <div class="pvTeamList" aria-label="Personal contratado y plazas">${slots}</div>
- <div class="pvTeamHelp">Las plazas se amplían automáticamente con nuevas misiones.</div></footer>
+ <button class="pvTeamManage" data-pv-team-open type="button">${icon('dock-users')} Gestionar equipo</button></footer>
  </section>`;
+}
+
+
+/** Read-only roster management. No cash, ledger or skill mutations. */
+export function renderPersonnelManagement(s,selectedId,icon){
+ const members=activePersonnel(s);
+ const chosen=members.find(p=>p.candidateId===selectedId||p.id===selectedId)||members[0]||null;
+ const candidate=candidateById(chosen?.candidateId);
+ const salary=p=>candidateById(p?.candidateId)?.salaryPerShift||0;
+ const payroll=members.reduce((n,p)=>n+salary(p),0);
+ const profile=chosen?.skillProfile;
+ const skillData=profile?.skills||candidate?.skills||{};
+ const roster=members.map(p=>{
+  const c=candidateById(p.candidateId);
+  return '<button type="button" class="pvManagedMember '+(p===chosen?'selected':'')+
+   '" data-pv-team-person="'+esc(p.candidateId||p.id)+'" aria-pressed="'+(p===chosen)+'">'+
+   portraitIllustration(c,'team')+'<span><b>'+esc(p.name||c?.name||roleById(p.role)?.label||'Personal')+'</b>'+
+   '<small>'+esc(roleById(p.role)?.short||p.role)+'</small><small>'+money(salary(p))+' / turno sugerido</small></span></button>';
+ }).join('');
+ const skills=Object.entries(skillData).map(([key,v])=>
+  '<div class="pvManageSkill"><span>'+esc(PERSONNEL_SKILL_LABELS[key]||key)+'</span>'+
+  '<span class="pvPips">'+Array.from({length:5},(_,i)=>'<i class="'+(i<Number(v)?'on':'')+'"></i>').join('')+
+  '</span><b>'+esc(v)+'/5</b></div>'
+ ).join('');
+ const details=chosen?'<div class="pvManagementHero">'+portraitIllustration(candidate,'detail')+
+  '<div><small>'+esc(roleById(chosen.role)?.label||chosen.role)+'</small><h3>'+esc(chosen.name||candidate?.name||'Personal')+'</h3>'+
+  '<p>'+esc(candidate?.description||'Trabajador de la faena')+'</p></div></div>'+
+  '<div class="pvManagementFacts">'+
+   '<div><small>Costo de contratación</small><b>'+money(candidate?.hireCost||0)+'</b></div>'+
+   '<div><small>Salario por turno · sugerido</small><b>'+money(salary(chosen))+'</b></div>'+
+   '<div><small>Estado de nómina</small><b>Sin cobros activos</b></div>'+
+   '<div><small>Historial de pagos</small><b>Pendiente de activación</b></div></div>'+
+  '<div class="pvManagementSkillsHead"><b>Desarrollo de habilidades</b><span>Nivel '+(Number(profile?.skillLevel)||1)+
+  ' · '+Math.max(0,Number(profile?.skillPoints)||0)+' puntos</span></div>'+
+  '<div class="pvManagementSkills">'+(skills||'<p>Perfil antiguo sin habilidades guardadas.</p>')+'</div>'+
+  '<p class="pvManagementLocked">Mejoras y pagos por turno: preparados, todavía desactivados para proteger el balance.</p>'
+  :'<p class="pvManageEmpty">Aún no hay personal contratado. Puedes volver a Contratación.</p>';
+ return '<section class="pvRoot pvManagementRoot" aria-label="Gestión del personal contratado">'+
+  '<div class="pvManagementTop"><button type="button" data-pv-team-back>'+icon('back')+' Contratación</button>'+
+  '<div><strong>Gestión de equipo</strong><small>'+members.length+' integrantes</small></div></div>'+
+  '<div class="pvManagementGrid"><aside class="pvManagementRoster"><h3>Equipo activo</h3>'+
+  '<div class="pvManagedMembers">'+(roster||'<p class="pvManageEmpty">Equipo vacío</p>')+'</div></aside>'+
+  '<section class="pvManagementDetail">'+details+'</section></div>'+
+  '<footer class="pvManagementFoot"><span>Nómina proyectada por turno: <b>'+money(payroll)+
+  '</b></span><small>Valor informativo, sin descuentos automáticos.</small></footer></section>';
 }

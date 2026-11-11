@@ -55,7 +55,7 @@ export class FaenaCenterUI{
  constructor({host,state,translate,format,icon,onClose,onAppAction,onKitOrder,onRecovery,onHsec,onLocate,onLocatePersonalTruck,onRecoverPersonalTruck,onFeedback}){
   Object.assign(this,{host,state,translate,format,icon,onClose,onAppAction,onKitOrder,onRecovery,onHsec,onLocate,onLocatePersonalTruck,onRecoverPersonalTruck,onFeedback});
   this.route='overview';this.view='';this.lastKey='';
-  this.personnelRole=null;this.personnelCandidate=null;
+  this.personnelRole=null;this.personnelCandidate=null;this.personnelView='recruit';
   host.addEventListener('click',event=>this.handle(event));
   host.addEventListener('input',event=>{
    if(!event.target.matches('[data-pv-volume]'))return;
@@ -69,6 +69,7 @@ export class FaenaCenterUI{
   const previous=this.route;
   this.route=routes[route]?route:faenaRouteForApp(route);
   if(this.route==='personnel'&&previous!=='personnel'){
+   this.personnelView='recruit';
    this.personnelRole=nextRequiredRole(this.state());
    this.personnelCandidate=candidatesForRole(this.personnelRole)[0]?.id||null;
   }
@@ -164,7 +165,7 @@ export class FaenaCenterUI{
      '<nav class="faenaQuickLinks">'+button('production','Ir a Producción')+button('logistics','Pedidos y materiales')+'</nav>'+m3('m3-contract');
    case 'personnel':
     if(!s.mission3||s.mission3.phase==='inactive')return '<p class="faenaHint">El personal operativo se habilita en Misión 3.</p>';
-    return renderPersonnelPremium(s,this.personnelRole||nextRequiredRole(s),this.personnelCandidate,icon);
+    return renderPersonnelPremium(s,this.personnelRole||nextRequiredRole(s),this.personnelCandidate,icon,this.personnelView);
    case 'headquarters':
     if(!s.mission3||s.mission3.phase==='inactive')return '<p class="faenaHint">Casa Matriz se habilita con tu primer contrato de perforación.</p>';
     return '<p class="faenaLead">Todos los productos DRILLCO® se solicitan a Casa Matriz. No se compran herramientas dentro del Taller ni de la Bodega.</p>'+
@@ -222,6 +223,9 @@ export class FaenaCenterUI{
  handle(e){
   const b=e.target.closest('button');
   if(!b||b.disabled||!this.host.contains(b))return;
+  if(b.hasAttribute('data-pv-team-open')){this.personnelView='team';this.onFeedback?.('select');this.render();return;}
+  if(b.hasAttribute('data-pv-team-back')){this.personnelView='recruit';this.onFeedback?.('select');this.render();return;}
+  if(b.dataset.pvTeamPerson){this.personnelCandidate=b.dataset.pvTeamPerson;this.onFeedback?.('select');this.render();return;}
   if(b.dataset.pvRole){
    this.personnelRole=b.dataset.pvRole;
    this.personnelCandidate=candidatesForRole(this.personnelRole)[0]?.id||null;
@@ -245,6 +249,7 @@ export class FaenaCenterUI{
   }
   if(b.dataset.pvRoster){
    this.personnelRole=b.dataset.pvRoster;
+   this.personnelView='team';
    const identity=b.dataset.pvPerson;
    this.personnelCandidate=candidatesForRole(this.personnelRole).some(c=>c.id===identity)
     ?identity:candidatesForRole(this.personnelRole)[0]?.id||null;
