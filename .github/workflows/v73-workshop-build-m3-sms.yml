@@ -1,0 +1,23 @@
+name: V73 workshop 90 seconds and correct Mission 3 SMS
+on:
+  push:
+    branches: [chatgpt/v73-workshop-90sec-progress-m3-sms]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  v73:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - run: |
+          node --check dist/chapter/game.mjs
+          node --check dist/mission3/inventory.mjs
+          node --check dist/chapter/workshop-build-hud-v73.mjs
+          node --check dist/chapter/narrative-strings.mjs
+      - run: |
+          node --test tests/v73-workshop-build-m3-sms.test.mjs tests/short-contract-narrative.test.mjs tests/narrative-message-focus-v45.test.mjs tests/workshop-card-v37.test.mjs
