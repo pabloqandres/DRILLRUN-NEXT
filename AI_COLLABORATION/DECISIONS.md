@@ -360,3 +360,15 @@ Se reportan **ruedas visiblemente elevadas sobre arena** y botón de salida que 
 **Control compartido:** `dist/chapter/game.mjs` podrá recibir exclusivamente un enlace visual desde la camioneta al proyector de faros; no cambios en estado/guardados/flujo de misión. `dist/graphics/personal-drilltruck-headlights.mjs` y `dist/mission5/patio-world.mjs` se modifican únicamente para iluminación más perceptible en suelo y trabajo nocturno, sin sombras nuevas en Android.
 
 **Pruebas y release:** tests dedicados de barrera fina, paso rápido sin túnel, terreno despejado, recuperación de P01, proyección de luz y visibilidad del Patio; CI específica + regresiones anteriores. Integración/despliegue únicamente después de revisión. No afirmar comprobación visual Android no realizada.
+
+## 2026-11-11 — V62: reversión estética de faros V61 y apoyo visual de botas en Patio
+
+**Usuario:** rechaza el efecto de franja blanca («parece un sable láser») y señala que la luz cálida anterior se veía mejor. También adjunta captura del avatar con botas hundidas unos centímetros en Patio. Reitera que **ChatGPT es responsable de implementar**, no entregar prompts a Claude Code.
+
+**Causa identificada:** V61 introdujo `makeRoadProjection` (mesh de 21 m, material `AdditiveBlending`) que sobreilumina en forma de franja artificial sobre asfalto. Para el avatar, `World.update` coloca los pies en `sampleGround` (Patio nivel .19 m), mientras algunas capas visibles del pavimento llegan a .21–.315 m y el modelo skinned tiene tolerancias de suela.
+
+**Alcance visual acordado:** se revierte `dist/graphics/personal-drilltruck-headlights.mjs` al diseño de focos cálidos V60 (sin proyector/decal). Ajuste visual exclusivo en `dist/scene.mjs` de consulta de apoyo del avatar: aplicar una pequeña compensación solo dentro de Patio pavimentado y transiciones suaves de borde, usando helper `dist/animation/avatar-pavement-clearance.mjs`; alinear root/IK/cámara con el mismo soporte. No cambiar posición de guardado `state.position` ni colisiones, economías, conducción, materiales GLB, HUD, misiones ni su lógica.
+
+**Excepción de archivo compartido:** `scene.mjs` es renderer/animación propiedad visual de ChatGPT, `game.mjs` solo retira el hook de V61 que llamaba a `project`; no se cambia tick, entrada, guardado ni controles. Regresiones V52/V61 actualizadas por la reversión; V62 con comprobación de altura sobre pavimento/arena y sin franja proyectada.
+
+**Publicación:** branch `chatgpt/v62-natural-headlights-avatar-boot-support`, PR y CI antes de merge; no afirmar QA visual Android sin captura del usuario.
