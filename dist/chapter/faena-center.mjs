@@ -55,22 +55,16 @@ export class FaenaCenterUI{
  constructor({host,state,translate,format,icon,onClose,onAppAction,onKitOrder,onRecovery,onHsec,onLocate,onLocatePersonalTruck,onRecoverPersonalTruck,onFeedback}){
   Object.assign(this,{host,state,translate,format,icon,onClose,onAppAction,onKitOrder,onRecovery,onHsec,onLocate,onLocatePersonalTruck,onRecoverPersonalTruck,onFeedback});
   this.route='overview';this.view='';this.lastKey='';
-  this.personnelRole=null;this.personnelCandidate=null;this.personnelView='recruit';
+  this.personnelRole=null;this.personnelCandidate=null;this.personnelView='recruit';this.personnelDetailTab='ficha';
   host.addEventListener('click',event=>this.handle(event));
-  host.addEventListener('input',event=>{
-   if(!event.target.matches('[data-pv-volume]'))return;
-   const value=Math.max(.5,Math.min(3.5,Number(event.target.value)||1.7));
-   try{localStorage.setItem('drillrun-ui-volume-v76',String(value));}catch{}
-   this.onFeedback?.('skill');
-  });
  }
  get visible(){return !this.host.classList.contains('hidden');}
  open(route='overview'){
   const previous=this.route;
   this.route=routes[route]?route:faenaRouteForApp(route);
   if(this.route==='personnel'&&previous!=='personnel'){
-   this.personnelView='recruit';
-   this.personnelRole=nextRequiredRole(this.state());
+   this.personnelView='recruit';this.personnelDetailTab='ficha';
+   this.personnelRole=nextRequiredRole(this.state());this.personnelDetailTab='ficha';
    this.personnelCandidate=candidatesForRole(this.personnelRole)[0]?.id||null;
   }
   this.view=route.startsWith('m3-')||route.startsWith('m4-')?route:'';
@@ -165,7 +159,7 @@ export class FaenaCenterUI{
      '<nav class="faenaQuickLinks">'+button('production','Ir a Producción')+button('logistics','Pedidos y materiales')+'</nav>'+m3('m3-contract');
    case 'personnel':
     if(!s.mission3||s.mission3.phase==='inactive')return '<p class="faenaHint">El personal operativo se habilita en Misión 3.</p>';
-    return renderPersonnelPremium(s,this.personnelRole||nextRequiredRole(s),this.personnelCandidate,icon,this.personnelView);
+    return renderPersonnelPremium(s,this.personnelRole||nextRequiredRole(s),this.personnelCandidate,icon,this.personnelView,this.personnelDetailTab);
    case 'headquarters':
     if(!s.mission3||s.mission3.phase==='inactive')return '<p class="faenaHint">Casa Matriz se habilita con tu primer contrato de perforación.</p>';
     return '<p class="faenaLead">Todos los productos DRILLCO® se solicitan a Casa Matriz. No se compran herramientas dentro del Taller ni de la Bodega.</p>'+
@@ -198,11 +192,11 @@ export class FaenaCenterUI{
   const prev=this.view?route:route==='overview'?'': 'overview';
   const currentScroll=this.lastKey===route+':'+this.view?this.host.querySelector('.faenaBody')?.scrollTop||0:0;
   const isPersonnel=route==='personnel'&&!this.view;
-  let pvVolume=1.7;try{pvVolume=Math.max(.5,Math.min(3.5,Number(localStorage.getItem('drillrun-ui-volume-v76'))||1.7));}catch{}
-  const volumeControl=isPersonnel?'<label class="pvVolume" title="Volumen de interacción"><span>Sonido UI</span><input data-pv-volume type="range" min="0.5" max="3.5" step="0.1" value="'+pvVolume+'" aria-label="Volumen de interacciones"/></label>':'';
+  const personnelTitle=isPersonnel?'<div class="pvScreenIdentity"><span class="pvScreenGlyph">'+icon('dock-users')+'</span><div><h2>Personal</h2><small>CONTRATACIÓN Y GESTIÓN DEL EQUIPO</small></div></div>':'<div><small>DRILL RUN · OPERACIÓN</small><h2>'+esc(title||'Centro de Faena')+'</h2></div>';
+  const personnelCash=isPersonnel?'<span class="pvHeaderFunds" aria-label="Saldo actual">'+money(s.cash)+'</span>':'';
   this.host.innerHTML='<div class="faenaDialog '+(isPersonnel?'pvDialog':'')+'" role="dialog" aria-modal="true" aria-label="Centro de Faena">'+
-   '<header class="faenaHeader"><div><small>DRILL RUN · OPERACIÓN</small><h2>'+esc(title||'Centro de Faena')+'</h2></div>'+
-   '<div class="faenaHeaderActions">'+volumeControl+(prev?'<button data-faena-back aria-label="Volver">‹ Volver</button>':'')+
+   '<header class="faenaHeader">'+personnelTitle+
+   '<div class="faenaHeaderActions">'+personnelCash+(prev?'<button data-faena-back aria-label="Volver">‹ Volver</button>':'')+
    '<button data-faena-close aria-label="Cerrar Centro de Faena">✕</button></div></header>'+
    '<div class="faenaBody"><div class="faenaContent">'+this.pageHtml(s,t,fmt,icon)+'</div></div>'+
    (isPersonnel?'':'<footer class="faenaFooter"><button data-faena-route="overview">'+icon('inventory')+' Centro de Faena</button>'+
@@ -223,23 +217,24 @@ export class FaenaCenterUI{
  handle(e){
   const b=e.target.closest('button');
   if(!b||b.disabled||!this.host.contains(b))return;
+  if(b.dataset.pvDetailTab){this.personnelDetailTab=b.dataset.pvDetailTab;this.onFeedback?.('select');this.render();return;}
   if(b.hasAttribute('data-pv-team-open')){this.personnelView='team';this.onFeedback?.('select');this.render();return;}
   if(b.hasAttribute('data-pv-team-back')){this.personnelView='recruit';this.onFeedback?.('select');this.render();return;}
   if(b.dataset.pvTeamPerson){this.personnelCandidate=b.dataset.pvTeamPerson;this.onFeedback?.('select');this.render();return;}
   if(b.dataset.pvRole){
-   this.personnelRole=b.dataset.pvRole;
+   this.personnelRole=b.dataset.pvRole;this.personnelDetailTab='ficha';
    this.personnelCandidate=candidatesForRole(this.personnelRole)[0]?.id||null;
    this.onFeedback?.('select');this.render();return;
   }
   if(b.dataset.pvCandidate){
-   this.personnelCandidate=b.dataset.pvCandidate;
+   this.personnelCandidate=b.dataset.pvCandidate;this.personnelDetailTab='ficha';
    this.onFeedback?.('select');this.render();return;
   }
   if(b.hasAttribute('data-pv-prev')||b.hasAttribute('data-pv-next')){
    const entries=candidatesForRole(this.personnelRole);
    const current=entries.findIndex(x=>x.id===this.personnelCandidate);
    const direction=b.hasAttribute('data-pv-next')?1:-1;
-   this.personnelCandidate=entries[(current+direction+entries.length)%entries.length]?.id||null;
+   this.personnelCandidate=entries[(current+direction+entries.length)%entries.length]?.id||null;this.personnelDetailTab='ficha';
    this.onFeedback?.('select');this.render();return;
   }
   if(b.hasAttribute('data-pv-requirement')){

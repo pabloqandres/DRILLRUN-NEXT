@@ -32,7 +32,7 @@ test('V77: roster selects stored candidate ID without changing original hiring',
  assert(html.includes('data-pv-person="adm-matias-torres"'));
  assert(html.includes('pvEmptyPortrait--team'));
  assert(html.includes('pvArtPortrait--detail'));
- assert(!/<img\b/i.test(html));
+ assert(html.includes('npc-portraits-v80/adm-matias-torres.svg'));
  const handler=read('dist/chapter/faena-center.mjs');
  assert(handler.includes('const identity=b.dataset.pvPerson'));
  assert(handler.includes('candidatesForRole(this.personnelRole).some(c=>c.id===identity)'));
