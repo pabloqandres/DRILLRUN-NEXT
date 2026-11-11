@@ -1,4 +1,5 @@
-// V66 · visual-only wheels of the paid DrillTruck® personal (never M4).
+// V66 · visual-only wheels for personal M5 AND automatic M4 DrillTruck®.
+// M4 animation reads rendered displacement only: NO writes to route/state/economy.
 // Try the four dedicated GLB wheel objects first; some exported GLBs are a
 // single fused mesh, so use understated moving hub overlays as a safe fallback.
 import * as T from '../vendor/three.module.js';
@@ -29,7 +30,9 @@ function createNamedPivot(mesh,root){
  steer.position.copy(localCenter);parent.add(steer);steer.add(spin);
  spin.attach(mesh);
  const modelBox=new T.Box3().setFromObject(root),modelCenter=modelBox.getCenter(new T.Vector3());
- return {steer,spin,front:center.z>modelCenter.z,radius:.39,generated:false};
+ const front=center.z>modelCenter.z;
+ steer.userData.v66Front=front;spin.userData.v66WheelRadius=.39;
+ return {steer,spin,front,radius:.39,generated:false};
 }
 function createHubOverlay(root,side,front,bounds){
  const size=bounds.getSize(new T.Vector3()),center=bounds.getCenter(new T.Vector3());
@@ -37,7 +40,7 @@ function createHubOverlay(root,side,front,bounds){
  const z=center.z+(front?1:-1)*clamp(size.z*.285,1.0,1.6);
  const y=bounds.min.y+clamp(size.y*.20,.29,.48);
  const steer=new T.Group(),spin=new T.Group();
- steer.name='Personal truck rim steer';spin.name='Personal truck rim rotation';
+ steer.name='Wheel-steer-V66';spin.name='Wheel-spin-V66';
  steer.position.set(x,y,z);root.add(steer);steer.add(spin);
  const graphite=new T.MeshStandardMaterial({color:0x34424b,roughness:.68,metalness:.25,
   depthWrite:false,transparent:true,opacity:.90});
@@ -55,23 +58,42 @@ function createHubOverlay(root,side,front,bounds){
  }
  const hub=new T.Mesh(new T.CylinderGeometry(r*.18,r*.18,.045,12),graphite);
  hub.rotation.z=Math.PI/2;hub.position.x=side*.032;spin.add(hub);
- return {steer,spin,front,radius:clamp(size.y*.245,.33,.48),generated:true,
+ const radius=clamp(size.y*.245,.33,.48);
+ steer.userData.v66Front=front;spin.userData.v66WheelRadius=radius;
+ return {steer,spin,front,radius,generated:true,
   dispose:()=>{rim.geometry.dispose();hub.geometry.dispose();graphite.dispose();steel.dispose();
    spin.children.forEach(x=>{if(x!==rim&&x!==hub)x.geometry.dispose();});steer.removeFromParent();}};
 }
 export class PersonalTruckWheels{
  constructor(root){
-  this.root=root;this.wheels=[];
+  this.root=root;this.wheels=[];this.lastAutoPose=null;
   root.updateWorldMatrix(true,true);
-  const matched=namedWheels(root);
-  if(matched.length===4){
-   for(const mesh of matched)this.wheels.push(createNamedPivot(mesh,root));
-   this.mode='named';
+  // M5 clones the already-decorated M4 model. Reuse the four rigs instead
+  // of creating duplicated wheels or destroying any actual imported meshes.
+  const inherited=[];
+  root.traverse(node=>{
+   if(node.name==='Wheel-spin-V66'&&node.parent?.name==='Wheel-steer-V66')
+    inherited.push({steer:node.parent,spin:node,
+     front:!!node.parent.userData.v66Front,
+     radius:Math.max(.1,Number(node.userData.v66WheelRadius)||.39),
+     generated:false,inherited:true});
+  });
+  if(inherited.length===4){
+   this.wheels=inherited;this.mode='inherited';
   }else{
-   const bounds=new T.Box3().setFromObject(root);
-   if(!bounds.isEmpty())for(const front of [true,false])for(const side of [-1,1])
-    this.wheels.push(createHubOverlay(root,side,front,bounds));
-   this.mode='hubs';
+   const matched=namedWheels(root);
+   if(matched.length===4){
+    for(const mesh of matched)this.wheels.push(createNamedPivot(mesh,root));
+    this.mode='named';
+   }else{
+    // All coordinates must be LOCAL to the model. World AABBs cannot
+    // be used as node positions when the car is already at a remote bay.
+    const bounds=new T.Box3().setFromObject(root);
+    if(!bounds.isEmpty())bounds.applyMatrix4(root.matrixWorld.clone().invert());
+    if(!bounds.isEmpty())for(const front of [true,false])for(const side of [-1,1])
+     this.wheels.push(createHubOverlay(root,side,front,bounds));
+    this.mode='hubs';
+   }
   }
  }
  update(speed=0,steerAngle=0,dt=0){
@@ -83,9 +105,27 @@ export class PersonalTruckWheels{
    w.steer.rotation.y=w.front?clamp(Number(steerAngle)||0,-.60,.60):0;
   }
  }
+ // Automatic M4 is animated by the already-existing route. Never sets the
+ // route position/heading; simply converts its actual 2D displacement to
+ // wheel revolutions and a bounded visual front-wheel angle.
+ updateFromPose(dt,active=true){
+  const model=this.root;
+  if(!model)return;
+  const pos={x:model.position.x,z:model.position.z,heading:model.rotation.y};
+  const prev=this.lastAutoPose;
+  this.lastAutoPose=pos;
+  if(!prev||!active){this.update(0,0,dt);return;}
+  const dx=pos.x-prev.x,dz=pos.z-prev.z;
+  const distance=Math.hypot(dx,dz);
+  // Ignore discontinuous route initialization / teleportation on load.
+  if(distance<.0001||distance>1.3){this.update(0,0,dt);return;}
+  const direction=Math.sign(dx*Math.sin(pos.heading)+dz*Math.cos(pos.heading))||1;
+  const yaw=Math.atan2(Math.sin(pos.heading-prev.heading),Math.cos(pos.heading-prev.heading));
+  const visualSteer=clamp(Math.atan2(2.85*yaw,Math.max(.01,distance)),-.46,.46);
+  this.update(direction*distance/Math.max(.001,dt),visualSteer,dt);
+ }
  dispose(){
-  for(const wheel of this.wheels)wheel.dispose?.();
-  this.wheels=[];
-  this.root=null;
+  for(const wheel of this.wheels)if(!wheel.inherited)wheel.dispose?.();
+  this.wheels=[];this.lastAutoPose=null;this.root=null;
  }
 }
