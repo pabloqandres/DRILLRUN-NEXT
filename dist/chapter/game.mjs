@@ -366,6 +366,8 @@ function displayWelcomeV64(){
 }
 $('#play').onclick=async()=>{
  if(cloudSyncing||cloudLocked||welcomeTransitionBusy)return;
+ // V67: user gesture is required by mobile browsers; request BEFORE await.
+ requestImmersive();
  welcomeTransitionBusy=true;
  try{
   // Preload exactly what the destination would need. Nothing is saved here.

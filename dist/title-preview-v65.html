@@ -46,7 +46,7 @@ body.embedded #modeTools,body.embedded #watermark,body.embedded #entryBurst .ent
 .loginCard p{color:#bdc8db;font-size:clamp(10px,1.45vw,14px)}
 .loginCard button{padding:10px 22px;border:1px solid #dbe4f4bd;background:#f6f7f8;color:#263449;border-radius:8px;font-size:clamp(11px,1.5vw,16px);font-weight:750}
 .loginCard small{font-size:10px;opacity:.62;margin-top:1rem}
-@media(min-aspect-ratio: 1.9){#art{width:100vw;height:100vh;max-height:none;aspect-ratio:auto}}
+/* V67: maintain the approved 1672:941 art ratio on ultrawide landscape phones. The blurred edgeFill letterboxes without stretching figures or logos. */
 @media(max-height:520px){#watermark{bottom:1%}.loginCard{padding:8px 20px}.loginCard img{width:min(72%,320px)}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}#land{transform:none}#blueprint{opacity:.78}}
 @keyframes sceneDrift{0%{transform:scale(1.019) translate3d(-.28%,.13%,0)}100%{transform:scale(1.045) translate3d(.32%,-.24%,0)}}
@@ -195,7 +195,16 @@ body.embedded #modeTools,body.embedded #watermark,body.embedded #entryBurst .ent
  document.body.classList.toggle('embedded',embedded);
  $('playHero').addEventListener('click',()=>{
    $('entryBurst').classList.add('active');$('playHero').disabled=true;
-   if(embedded&&window.parent!==window)window.parent.postMessage({type:'drillrun-welcome-enter-v64'},window.location.origin);
+   if(embedded&&window.parent!==window){
+     // V67: fallback fullscreen directly on JUGAR's user gesture. The parent
+     // message is asynchronous, so requesting it after postMessage is too late.
+     try{
+       const parentDoc=window.parent.document;
+       if(!parentDoc.fullscreenElement&&parentDoc.documentElement.requestFullscreen)
+         parentDoc.documentElement.requestFullscreen({navigationUI:'hide'}).catch(()=>{});
+     }catch{}
+     window.parent.postMessage({type:'drillrun-welcome-enter-v64'},window.location.origin);
+   }
    loaded=true;
  });
  $('returnBtn').addEventListener('click',()=>{$('entryBurst').classList.remove('active');$('playHero').disabled=false;});

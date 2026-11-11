@@ -145,7 +145,9 @@ export function drivePersonalTruck(s,{throttle=0,steer=0,brake=false}={},dt=0,bl
   }
  }else v=approach(v,0,coast*dt);
  v=clamp(v,-PERSONAL_TRUCK_MAX_REVERSE,PERSONAL_TRUCK_MAX_SPEED);
- if(Math.abs(v)<.035)v=0;
+ // V67: never discard the first reverse tick at 60fps: 1.62/60 is below .035.
+ // Apply idle dead zone only after releasing throttle or braking.
+ if(Math.abs(v)<.035&&(brake||Math.abs(throttle)<=.075))v=0;
  let heading=Number.isFinite(truck.heading)?truck.heading:0;
  // Wheelbase ~2.85m, road pickup max ~32° near stop, reduced at speed.
  const wheelbase=2.85;

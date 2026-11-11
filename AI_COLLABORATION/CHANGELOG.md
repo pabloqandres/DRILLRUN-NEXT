@@ -408,3 +408,9 @@ Corregido margen vehicular y movimiento en estrechamientos; unificación de cont
 
 ## 2026-11-10 — V56 Recuperación DrillTruck® personal 02
 Modelo visual independiente de carga M4, localizador de flota y recuperación en P01 sin compra extra, reparación de pose inválida en partidas guardadas, CI para propiedad y M5. Sin cambios en ingresos/misiones.
+
+## 2026-11-11 — ChatGPT V67 · Welcome responsive + rueda/reversa
+- Rama `chatgpt/v67-responsive-entry-wheel-axles` desde `main` e9393305. Sin publicación en producción.
+- Portada V65 conserva relación 1672:941 en Android ultrawide; mantiene arte, partículas y hologramas. Solicitud fullscreen al pulsar Continuar/JUGAR (API sujeta a permisos). Iframe autoriza fullscreen.
+- Reversa personal desde cero a 60 FPS: elimina cancelación de aceleración por deadzone, sin cambiar dinámica base ni M4. Ruedas: autoidentificación geométrica o aros proporcionalmente más grandes y axles corregidos.
+- Pruebas regresión V67 y workflow dedicado; QA con GLB real/Android pendiente. Detalle en `CHANGES/2026-11-11_v67-responsive-title-reverse-wheel-axles.md`.
