@@ -473,3 +473,9 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Se ajustan las tres habilidades iniciales de cada uno de los 21 candidatos a 1–3; los contratados preexistentes mantienen su perfil guardado. `salaryPerShift` propuesto por candidato, sin activar débitos ni efectos en ingresos.
 - Vista de Gestión de Equipo con ficha del empleado, progresión registrada, reclutamiento, remuneración propuesta y total del equipo, todo informativo. Personal continúa independiente del Catálogo, con el primer lote de imágenes V78.
 - Contrataciones, costos reales, misiones y guardados se preservan. Pendiente aprobación de reglas económicas para el cobrador futuro.
+
+## 2026-11-11 — V80 · Rediseño visual de Personal según referencia aprobada
+- Revisión a fondo a partir de cuatro capturas reales del usuario y referencia visual. Panel Personal pasa a estilo cinematográfico: cabecera propia, misión ilustrada, tarjetas altas con ilustración dominante, bordes marcados, seleccionado dorado, pestañas funcionales de información y barra de equipo.
+- Corrección del aspecto de tres retratos V78 (Camila Rojas, Matías Torres, Sofía Ibarra) mediante recortes individuales SVG autocontenidos del WebP original, mostrados sin deformación (`object-fit:cover`).
+- Slider «Volumen de interfaz» trasladado a Configuración, manteniendo persistencia anterior. Inicio/carga: alineación izquierda de logo, rótulo y texto.
+- Sin cambios a contratación, economía, misiones ni Cloud Save. Incluye pruebas focales y documentación de QA.

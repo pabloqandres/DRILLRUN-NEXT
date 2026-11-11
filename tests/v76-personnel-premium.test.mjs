@@ -102,7 +102,7 @@ test('V76: active roster includes HSEC and M5 without double count, mission bann
  assert(html.includes('data-pv-hire'));
  assert(html.includes('pvTeamSlot occupied'));
  assert(html.includes('MISIÓN 3'));
- assert(html.includes('pvFutureNote'));
+ assert(html.includes('pvDetailTabs'));
  hirePersonnel(s,'admin',candidatesForRole('admin')[0].id,123);
  assert.equal(nextRequiredRole(s),'driller');
  const late=m5();assert.equal(nextRequiredRole(late),'m5-gate-security');
@@ -118,7 +118,8 @@ test('V76: integration has event delegation and shared adjustable selector/UI vo
  assert(faena.includes("renderPersonnelPremium(s,this.personnelRole"));
  assert(faena.includes("b.hasAttribute('data-pv-hire')"));
  assert(faena.includes("this.onAppAction?.(role.startsWith('m5-')?'m5':'m3','hire',role+'|'+candidateId)"));
- assert(faena.includes('data-pv-volume'));
+ assert(!faena.includes('data-pv-volume'));
+ assert(game.includes('id="uiVolumeSetting"'));
  assert(game.includes('onFeedback:kind=>selectorFeedback.play(kind)'));
  assert(game.includes("const [staffId,candidateId]=String(id||'').split('|')"));
  assert(game.includes("const [roleId,chosenId]=String(data||'').split('|')"));
