@@ -378,3 +378,8 @@ Se reportan **ruedas visiblemente elevadas sobre arena** y botón de salida que 
 
 **Cambio exclusivo visual:** en `dist/graphics/personal-drilltruck-headlights.mjs` ajustar los colores de ambos `SpotLight`, del `PointLight` de proximidad y del material emisivo de lentes a una paleta cálida 2900–3200 K aproximada, sin añadir nuevos meshes/decal ni reintroducir V61.
 Se mantiene distancia, cono, dispersión, intensidad, encendido/apagado, calidad móvil, dirección del vehículo, memoria, M1–M5 y colisiones. Pruebas verifican color aprobado y no láser. Rama `chatgpt/v63-warm-amber-personal-headlights`; verificación CI antes de integrar. QA cromática Android queda pendiente del usuario.
+
+### V63 — alcance ampliado por captura de reflejo en pavimento (usuario, mismo hilo)
+El usuario aclara que no basta cambiar el color: **la luz no se refleja en el pavimento**. Esta precisión autoriza una iluminación de rebote sutil y localizada sobre la superficie del camino.
+
+ChatGPT implementa en el módulo visual de faros dos manchas ovales muy difuminadas de 3–8 m, RGBA con borde 100% transparente y mezcla normal; no se autoriza retornar al proyector trapezoidal de 21m ni usar `AdditiveBlending`. Geometría de bajo costo adaptada al suelo por `world.sampleGround`, material visual dependiente de si es noche y faros encendidos. Se permite en `game.mjs` únicamente pasar el estado de noche y actualizar posición/heading del rebote. No se altera steering, velocidad, costo, lógica o guardados.
