@@ -25,7 +25,7 @@ test('Personal vehicle headlights cast light forward and follow yaw',()=>{
  assert.doesNotMatch(headlights,/AdditiveBlending/);
  assert.match(headlights,/root\.add\(lights\)/);
  assert.match(headlights,/lamp\.castShadow=false/);
- assert.match(game,/installPersonalTruckHeadlights\(m5PersonalTruckModel\)/);
+ assert.match(game,/installPersonalTruckHeadlights\(m5PersonalTruckModel,world\)/);
  assert.match(game,/m5TruckLighting\?\.set\(truck\.mode==='driving'/);
  assert.match(game,/truck\.headlightsOn=!truck\.headlightsOn/);
  assert.match(html,/id="personalTruckLights"/);

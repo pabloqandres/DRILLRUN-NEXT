@@ -60,17 +60,20 @@ test('V61 existing rail overlap can back out but not plow deeper into it',()=>{
  assert(result.position.z<0,'existing penetration must not trap reverse');
  assert.equal(result.blocked,true);
 });
-test('V62 headlights use the original soft, warm lighting without V61 laser decal',()=>{
+test('V63 headlights preserve soft cone and add limited amber bounce, not V61 laser',()=>{
  const headlights=source('dist/graphics/personal-drilltruck-headlights.mjs');
  const game=source('dist/chapter/game.mjs');
- assert.match(headlights,/new T\.SpotLight\(0xfff2d4,0,35/);
+ assert.match(headlights,/const WARM_BEAM=0xffd19a/);
  assert.match(headlights,/lamp\.castShadow=false/);
- assert.match(headlights,/frontFill\.intensity=on\?3:0/);
+ assert.match(headlights,/frontFill\.intensity=isOn\?3:0/);
  assert.match(headlights,/root\.add\(lights\)/);
- assert.doesNotMatch(headlights,/makeRoadProjection|projectPersonalTruckRoadLight|AdditiveBlending|new T\.PlaneGeometry/);
- assert.match(game,/installPersonalTruckHeadlights\(m5PersonalTruckModel\)/);
+ assert.doesNotMatch(headlights,/makeRoadProjection|projectPersonalTruckRoadLight|AdditiveBlending|PROJECTION_LENGTH/);
+ assert.match(headlights,/T\.NormalBlending/);
+ assert.match(headlights,/new T\.PlaneGeometry\(1,1,GRID,GRID\)/);
+ assert.match(game,/installPersonalTruckHeadlights\(m5PersonalTruckModel,world\)/);
  assert.match(game,/m5TruckLighting\?\.set\(truck\.mode==='driving'/);
  assert.doesNotMatch(game,/m5TruckLighting\?\.project\(/);
+ assert.match(game,/m5TruckLighting\?\.updateGround\(truck\.position,truck\.heading/);
 });
 test('V61 patio working areas receive continuous visible illumination even on mobile',()=>{
  const patio=source('dist/mission5/patio-world.mjs');
