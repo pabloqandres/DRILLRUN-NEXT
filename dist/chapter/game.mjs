@@ -234,7 +234,7 @@ function cloudLock(){
  if(cloudLocked)return;
  cloudLocked=true;cloudSyncing=false;cloudStatus='Partida activa en otro dispositivo';
  // V65: a cloud lease conflict must never leave the cinematic above recovery.
- if(phase==='welcome'){hidden($('#welcomeScreen'),true);$('#welcomeFrame')?.removeAttribute('src');}
+ // V69: no intermediary welcome overlay can block the session.
  stop();
  if(phase==='play'){closePhone();closeBuilder();hidden($('#hud'),true);}
  phase='cloud-locked';hidden($('#startScreen'),false);
@@ -261,7 +261,7 @@ async function reconcileGoogleSave(){
  if(attempt!==cloudEpoch)return;
  if(result.status!=='ready'){
   cloudSyncing=false;cloudLocked=true;cloudStatus='No se pudo sincronizar · No se sobrescribió la partida';
-  if(phase==='welcome'){hidden($('#welcomeScreen'),true);$('#welcomeFrame')?.removeAttribute('src');}
+  // V69: no intermediary welcome overlay can block the session.
   phase='cloud-locked';hidden($('#startScreen'),false);hidden($('#hud'),true);showCloudLock();updateStartAccount();return;
  }
  const changed=(result.source==='cloud'||result.source==='new-game')&&!!result.state;
