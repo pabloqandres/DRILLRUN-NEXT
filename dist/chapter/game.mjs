@@ -127,6 +127,7 @@ const worksiteAudio=new WorksiteAudio(getGameAudioContext);
 // V68: isolated feedback for the real-GLB character creator only.
 const selectorFeedback=new CharacterSelectFeedback({context:getGameAudioContext,enabled:()=>prefs.sound,haptics:()=>prefs.haptics!==false});
 let characterSelectorV68=null,selectorV68Zoom=0;
+const selectorPreviewOnly=new URLSearchParams(location.search).has('selectorPreview');
 document.documentElement.style.setProperty('--cover',`url('${new URL(CONFIG.cover,document.baseURI).href}')`);
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function setText(el,value){const text=String(value);if(el.textContent!==text)el.textContent=text;}
@@ -390,6 +391,13 @@ function displayWelcomeV64(){
 }
 $('#play').onclick=async()=>{
  if(cloudSyncing||cloudLocked||welcomeTransitionBusy)return;
+ if(selectorPreviewOnly){
+  // V68 safe QA: never overwrite the user's current Google/local game.
+  // chooseCharacter(false) creates only the temporary in-memory selector state.
+  selectorFeedback.play('confirm');
+  void chooseCharacter(false);
+  return;
+ }
  welcomeTransitionBusy=true;
  try{
   // Preload exactly what the destination would need. Nothing is saved here.
@@ -429,6 +437,15 @@ $('#newGame').onclick=()=>{if(cloudSyncing||cloudLocked)return;modal(`<h2>${esc(
 $('#backStart').onclick=()=>{selectorFeedback.play('back');freshGameRequested=false;phase='start';hidden($('#characterScreen'),true);hidden($('#startScreen'),false);s=readSave();hasSave=!!s;applyText();};
 $('#startAdventure').onclick=async()=>{
  if(cloudSyncing||cloudLocked)return;
+ if(selectorPreviewOnly){
+  // Use the same name validation, but NEVER activate a new cloud generation.
+  try{setPlayerIdentity(s,selectedAvatar,$('#playerNameInput').value);}
+  catch(e){toast(e.key);return;}
+  selectorFeedback.play('confirm');
+  modal('<span class="eyebrow">PRUEBA VISUAL V68</span><h2>Personaje confirmado</h2><p>La selección, el nombre, el sonido y la vibración se han probado. No se ha creado ni reemplazado ninguna partida guardada.</p><button id="previewSelectorClose" class="primary">Seguir revisando personajes</button>');
+  $('#previewSelectorClose').onclick=closeModal;
+  return;
+ }
  try{setPlayerIdentity(s,selectedAvatar,$('#playerNameInput').value);}
  catch(e){toast(e.key);return;}
  selectorFeedback.play('confirm');
