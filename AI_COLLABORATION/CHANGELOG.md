@@ -1,5 +1,12 @@
 # Changelog — DRILL RUN NEXT GENERATION
 
+## 2026-11-11 — V65.1 Galpón holográfico respetando profundidad y polvo ambiental
+- Mantiene barrido **exclusivamente sobre logo**, no sobre toda la pantalla. Construcción blueprint progresiva en 3 zonas con fases desfasadas, energía de líneas y nodos de instalación.
+- Se recorta el galpón posterior izquierdo usando la silueta del módulo real de primer plano, tanto en trazos animados SVG como en brillo azul WebP, para impedir transparencias poco creíbles.
+- Se añaden bancos de polvo y granos a ras del suelo que cruzan la parte baja y los pies de los personajes **detrás de JUGAR**, con movimiento reducido respetado; sin video ni costo WebGL.
+- Prototipo sólo en rama de revisión; auth/guardados/M1–M5 sin modificaciones. Validación en Chromium 1280×720 y 832×384; pendiente Android. Ver `CHANGES/2026-11-11_v65-animated-blueprints-depth-dust.md`.
+
+
 ## 2026-11-11 — V64 Pantalla cinematográfica de bienvenida y logo aprobado
 - Base visual aprobada: paisaje de faena en Atacama, dos operadores con casco/EPP, edificios reales y blueprints azules, DrillTruck® genérica y logo metálico DRILL RUN NEXT GENERATION extraído de los píxeles originales.
 - Nueva vista liviana de entrada con parallax, polvo, escaneo/pulso hologramas, neón de botón JUGAR real, brillo del logo, accesibilidad para movimiento reducido; WebP + CSS, sin MP4 pesado.
