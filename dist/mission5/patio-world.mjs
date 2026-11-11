@@ -101,7 +101,7 @@ function spotlight(g,x,z,h=6){
  const light=new T.PointLight(0xffe6b2,0,34,2);
  light.name='Patio L1 · luminaria real';light.castShadow=false;
  light.position.set(x+.62,h-.06,z);g.add(light);
- const pool=patioLightPool(x+.62,z,27);g.add(pool);
+ const pool=patioLightPool(x+.62,z,31);g.add(pool);
  return {x,z,lens,light,pool};
 }
 // Economical roof worklight: luminous fixture, real light near the player,
@@ -393,8 +393,9 @@ export function createPatioWorld(w){
  // These are inexpensive ground-lit passes from nearby perimeter floodlights,
  // not extra point lights or collision/mission objects.
  const bayPools=[
-  [-7,-13,18,.295],[5,-13,18,.295],[17,-13,18,.295],
-  [20,-3.2,14,.295],[-20,13.5,17,.295],[-7,13.5,15,.295],
+  [-7,-13,20,.295],[5,-13,20,.295],[17,-13,20,.295],
+  [-17,3.2,18,.295],[0,3.2,21,.295],[16,3.2,20,.295],
+  [20,-3.2,17,.295],[-20,13.5,17,.295],[-7,13.5,15,.295],
   [-19,-10.8,13,.525],[1.5,14.3,9,.525]
  ].map(([x,z,size,floorY])=>{
    const pool=patioLightPool(x,z,size);
@@ -462,29 +463,29 @@ export function createPatioWorld(w){
     const selected=nearest.has(lamp);
     // Real local illumination on the nearest fixtures; all night fixtures
     // retain a faint baked pool so unselected lights never look dead.
-    lamp.light.intensity=selected?(w.quality==='low'?34:48):0;
+    lamp.light.intensity=night?(selected?(w.quality==='low'?40:56):(w.quality==='low'?0:11)):0;
     lamp.lens.material.color.setHex(night?0xffebba:0x77746b);
-    lamp.pool.material.opacity=night?(selected?.56:.23):0;
+    lamp.pool.material.opacity=night?(selected?.76:.47):0;
    }
    const taskBudget=w.quality==='low'?1:2;
    const closestTasks=night?new Set([...taskLights].sort((a,b)=>distance(a)-distance(b)).slice(0,taskBudget)):new Set();
    for(const lamp of taskLights){
     const selected=closestTasks.has(lamp);
-    lamp.light.intensity=selected?(w.quality==='low'?17:24):0;
-    lamp.pool.material.opacity=night?(selected?.48:.20):0;
+    lamp.light.intensity=night?(selected?(w.quality==='low'?24:33):(w.quality==='low'?0:7)):0;
+    lamp.pool.material.opacity=night?(selected?.68:.45):0;
    }
    const canopyBudget=w.quality==='low'?1:w.quality==='high'?4:2;
    const closestCanopy=night?new Set([...canopyLights]
     .sort((a,b)=>distance(a)-distance(b)).slice(0,canopyBudget)):new Set();
    for(const lamp of canopyLights){
     const selected=closestCanopy.has(lamp);
-    lamp.light.intensity=selected?(w.quality==='low'?19:32):0;
+    lamp.light.intensity=night?(selected?(w.quality==='low'?28:41):(w.quality==='low'?0:8)):0;
     lamp.lens.material.color.setHex(night?0xfff1cb:0x55554f);
-    lamp.pool.material.opacity=night?(selected?.55:.31):0;
+    lamp.pool.material.opacity=night?(selected?.72:.50):0;
    }
    // The full surface is visibly lit even in low-quality Android mode,
    // while only nearby fixtures add real expensive per-pixel lighting.
-   for(const pool of bayPools)pool.material.opacity=night?.39:0;
+   for(const pool of bayPools)pool.material.opacity=night?.62:0;
    const stateKey=status+':'+info.phase;
    if(stateKey!==previousState){
     previousState=stateKey;
