@@ -354,7 +354,7 @@ function displayWelcomeV64(){
  hidden($('#loading'),true);
  hidden($('#welcomeScreen'),false);
  const frame=$('#welcomeFrame');
- if(frame&&!frame.getAttribute('src'))frame.src='./title-preview-v64.html?embedded=1';
+ if(frame&&!frame.getAttribute('src'))frame.src='./title-preview-v65.html?embedded=1';
 }
 $('#play').onclick=async()=>{
  if(cloudSyncing||cloudLocked||welcomeTransitionBusy)return;
