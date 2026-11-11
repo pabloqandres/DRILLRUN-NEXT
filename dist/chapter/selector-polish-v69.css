@@ -1,0 +1,64 @@
+/* V69 · Corrective premium character selector.
+   Enlarges the actual selected live GLB; transparent hero corridor,
+   not an image composite. Stats are display-only starter profiles. */
+#characterScreen[data-selector-v68="true"]{
+ background:
+  linear-gradient(90deg,#041523e5 0%,#0526375c 13%,transparent 19% 48%,#071c2c9c 57%,#06182df0 100%),
+  linear-gradient(0deg,#061a288c 0%,transparent 22%,#07192d34 100%)!important;
+}
+#characterScreen[data-selector-v68="true"] .v68Stat>b{color:#829aa6;font-size:clamp(9px,.87vw,16px)}
+#characterScreen[data-selector-v68="true"] .v68Stat.hasBonus>b{color:#ffe08b;text-shadow:0 0 10px #fca52e80}
+#characterScreen[data-selector-v68="true"] .v68StatBars i{
+ width:clamp(5px,.78vw,13px);height:clamp(6px,.68vw,12px);
+ border-radius:2px;transform:skewX(-10deg);
+}
+#characterScreen[data-selector-v68="true"] .v68StatBars .bonusPip,
+#characterScreen[data-selector-v68="true"] .v69Pips .bonusPip{
+ background:linear-gradient(150deg,#fff2af,#ffb01a)!important;
+ box-shadow:0 0 11px #ffbd4099,0 0 3px #fff6!important;
+}
+#characterScreen[data-selector-v68="true"] .v68SkillCard{justify-content:space-between;gap:clamp(2px,.38vh,7px)}
+#characterScreen[data-selector-v68="true"] .v69SkillDescription{
+ font-size:clamp(7px,.7vw,12px);line-height:1.2;color:#dcecf0;
+ margin:0;max-width:none;
+}
+#characterScreen[data-selector-v68="true"] .v69SkillMetrics{
+ display:grid;grid-template-columns:1fr;gap:clamp(2px,.25vh,5px);
+ margin-top:auto;min-width:0;
+}
+#characterScreen[data-selector-v68="true"] .v69SkillMetric{
+ display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;
+ gap:5px;min-width:0;
+}
+#characterScreen[data-selector-v68="true"] .v69SkillMetric>span:first-child{
+ color:#e3eff3;font-weight:750;letter-spacing:.035em;
+ font-size:clamp(7px,.67vw,12px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#characterScreen[data-selector-v68="true"] .v69Pips{display:flex;gap:clamp(2px,.2vw,4px)}
+#characterScreen[data-selector-v68="true"] .v69Pips i{
+ width:clamp(6px,.76vw,12px);height:clamp(6px,.76vw,12px);
+ display:block;border-radius:2px;transform:skewX(-9deg);
+ background:#5164778d;box-shadow:inset 0 0 0 1px #8cb4bd40;
+}
+#characterScreen[data-selector-v68="true"] .v69Pips i.lit{
+ background:linear-gradient(150deg,#ffd982,#d9a541);box-shadow:0 0 3px #d8a33b5a;
+}
+#characterScreen[data-selector-v68="true"] .v68SkillRail button.unlocked{
+ border-color:#e0bc6a;box-shadow:inset 0 1px #fff2,0 0 8px #f8be344d;
+}
+#characterScreen[data-selector-v68="true"] .v68SkillRail button.unlocked.active{
+ box-shadow:inset 0 1px #fff5,0 0 16px #ffc43a99;
+}
+@media(max-height:520px){
+ #characterScreen[data-selector-v68="true"] .v68SkillCard{padding:clamp(5px,.7vw,11px)}
+ #characterScreen[data-selector-v68="true"] .v69SkillDescription{font-size:clamp(7px,.7vw,10px)}
+ #characterScreen[data-selector-v68="true"] .v69SkillMetric>span:first-child{font-size:clamp(7px,.62vw,10px)}
+ #characterScreen[data-selector-v68="true"] .v69Pips i{height:6px;width:clamp(5px,.7vw,9px)}
+}
+@media(max-height:360px){
+ #characterScreen[data-selector-v68="true"] .v69SkillDescription{
+  overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;
+ }
+ #characterScreen[data-selector-v68="true"] .v69Pips i{height:5px;width:6px}
+ #characterScreen[data-selector-v68="true"] .v69SkillMetric>span:first-child{font-size:7px}
+}

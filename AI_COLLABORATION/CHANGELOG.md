@@ -411,3 +411,9 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 
 ## 2026-11-11 — V68 selector cinematográfico real
 - Rama `chatgpt/v68-cinematic-real-avatar-selector` desde main e9393305. Reencuadre cercano del GLB real, retratos/figura fuente del mismo asset, diseño responsive, bonos auténticos y campo de nombre, click/whoosh y vibración discreta. Ajustes acotados shared hooks con coordinación en DECISIONS. CI focal y preview, QA usuario pendiente; no producción.
+
+## 2026-11-11 — V69 · Acceso directo, NPC de tamaño adulto y selector con bono real
+- Corrige UI solicitada tras revisión de V68: elimina segundo botón JUGAR y portada intermedia; login -> selector (sin partida) o partida restaurada (con save), preservando Cloud Save e introducción de personaje.
+- Guardia y técnica dejan de calibrarse con AABB skinned transitoria y usan la estatura adulta nominal del avatar. Sin rutas/compra/misiones modificadas.
+- Selector: corrige detección `Number(undefined)!==0`, abre bono de cada avatar, reemplaza +/- porcentajes por barras de 4 áreas con 2 atributos visuales y +1 a especialidad. Primer plano GLB más cercano y key/rim siguen al personaje; gradiente central transparente.
+- Tests V64/V66/V68 actualizados, nuevos V69 y workflow focal. Rama `chatgpt/v69-direct-entry-npc-selector-polish`. Ver CHANGES/2026-11-11_v69-direct-entry-npc-selector-polish.md.
