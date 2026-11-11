@@ -383,3 +383,14 @@ Se mantiene distancia, cono, dispersión, intensidad, encendido/apagado, calidad
 El usuario aclara que no basta cambiar el color: **la luz no se refleja en el pavimento**. Esta precisión autoriza una iluminación de rebote sutil y localizada sobre la superficie del camino.
 
 ChatGPT implementa en el módulo visual de faros dos manchas ovales muy difuminadas de 3–8 m, RGBA con borde 100% transparente y mezcla normal; no se autoriza retornar al proyector trapezoidal de 21m ni usar `AdditiveBlending`. Geometría de bajo costo adaptada al suelo por `world.sampleGround`, material visual dependiente de si es noche y faros encendidos. Se permite en `game.mjs` únicamente pasar el estado de noche y actualizar posición/heading del rebote. No se altera steering, velocidad, costo, lógica o guardados.
+
+## 2026-11-11 — V64: portada cinematográfica aprobada, branding reutilizable y puerta de bienvenida
+**Aprobación del usuario:** última ilustración 16:9 de DRILL RUN NEXT GENERATION, personajes de cuerpo completo con cascos/EPP, DRILLTRUCK® sin marcas externas, faena construida y blueprints azules. **El título ilustrado de DRILL RUN queda aprobado como logotipo del juego**, reutilizable en login, carga y portada. El botón neón estilizado JUGAR se conserva.
+
+**Diseño y optimización:** ChatGPT extrajo los píxeles exactos del logo (no lo redibujó), comprimió el arte a WebP y generó un prototipo HTML interactivo con microanimación de desplazamiento/zoom, destello controlado en logo, hologramas azules pulsantes, polvo ambiental y neón táctil. Animaciones CSS con `prefers-reduced-motion`, sin loop de video pesado y sin bibliotecas externas.
+
+**Integración explícitamente acotada:** flujo **login actual → carga actual → bienvenida V64 → selector o partida guardada**, sin reemplazar autenticación ni Cloud Save. La nueva vista se presenta como iframe mismo-origen cargado bajo demanda cuando termina `ensureWorld`; su CTA envía solo un `postMessage` same-origin `drillrun-welcome-enter-v64` al parent; el parent ejecuta exactamente las ramas previas `chooseCharacter` / `beginPlay`. No se alteran `state.mjs`, Firebase, saves, avatares, misiones, economía ni cámara. La instancia del mundo no vuelve a crearse para entrar.
+
+**Archivos compartidos:** `dist/index.html` recibe sección mínima de bienvenida y referencia CSS; `dist/chapter/game.mjs` solo encapsula la transición visual anterior y el evento del iframe (excepción exclusiva de continuidad de UX solicitada por usuario). No tocar otros handlers de navegación, ni renderizado M1–M5. Los estilos visuales son exclusivos de ChatGPT. El prototipo directo `dist/title-preview-v64.html` puede abrirse sin autenticar para revisar en Android.
+
+**Release gate:** rama `chatgpt/v64-cinematic-welcome-concept` → PR preview. **No publicar en main/producción hasta la aprobación explícita del usuario del comportamiento implementado.** Tests de estructura, eventos y no-regresión primero.
