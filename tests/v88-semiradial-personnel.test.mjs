@@ -22,7 +22,8 @@ test('V88 · one semiradial perimeter with no redundant decorative inner rim',()
  assert(css.includes('top:54%!important'));
  assert(css.includes('width:min(400px'));
  assert(css.includes('height:130px'));
- assert(html.indexOf('semi-radial-layout-v88.css')>html.indexOf('semi-radial-premium-v86.css'));
+ assert(html.includes('semi-radial-command-v90.css'));
+ assert(!html.includes('semi-radial-layout-v88.css'));
  for(let selected=0;selected<SEMI_RADIAL_ITEMS.length;selected++){
   const steps=SEMI_RADIAL_ITEMS.map((_,i)=>semiRadialStep(i,selected,SEMI_RADIAL_ITEMS.length));
   assert.equal(steps.filter(x=>['-1','0','1'].includes(x)).length,3);

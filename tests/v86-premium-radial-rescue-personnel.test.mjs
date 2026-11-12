@@ -21,7 +21,9 @@ test('V86: preserve new navigation with one continuous ribbon and slower easing'
  assert(css.includes('.drSemiItem .drSemiWedge'));
  assert(css.includes('display:none!important'));
  assert(css.includes('filter:blur(1px)!important'));
- assert(html.indexOf('semi-radial-premium-v86.css')>html.indexOf('semi-radial-geometry-v84.css'));
+ assert(html.includes('semi-radial-command-v90.css'));
+ assert(!html.includes('semi-radial-premium-v86.css'));
+ assert(game.includes('semi-radial-dock-v90.mjs'));
  assert.equal(SEMI_RADIAL_ITEMS.length,10);
  for(let n=0;n<10;n++){
   const positions=SEMI_RADIAL_ITEMS.map((_,i)=>semiRadialStep(i,n,10));

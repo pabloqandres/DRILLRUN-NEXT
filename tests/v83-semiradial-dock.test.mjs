@@ -95,12 +95,13 @@ test('V83 · dock assets are scoped, shallow, sound obeys shared preferences',()
  assert(css.includes('height:112px!important'));
  assert(css.includes('@media(prefers-reduced-motion:reduce)'));
  assert(css.includes('#bottomNav:not(.hidden)+#semiRadialDock'));
- assert(game.includes("import {installSemiRadialDock} from './semi-radial-dock-v83.mjs'"));
+ assert(game.includes("import {installSemiRadialDock} from './semi-radial-dock-v90.mjs'"));
  assert(game.includes('installSemiRadialDock({'));
  assert(game.includes("onFeedback:kind=>selectorFeedback.play(kind)"));
  assert(game.includes("original.click()"));
  assert(game.includes("openFaena(id)"));
- assert(html.indexOf('semi-radial-dock-v83.css')>html.indexOf('faena-hub-v82.css'));
+ assert(html.indexOf('semi-radial-command-v90.css')>html.indexOf('faena-hub-v82.css'));
+ assert(!html.includes('semi-radial-dock-v83.css'));
  assert(sound.includes("if(!this.enabled())return"));
  assert(sound.includes("drillrun-ui-volume-v76"));
 });

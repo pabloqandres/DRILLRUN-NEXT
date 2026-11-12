@@ -534,3 +534,9 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Navegación PC visible mediante flechas y leyenda «10 secciones», sin perder soporte táctil ni sonido.
 - Personal muestra retratos originales individuales para 21 candidatos, no placeholders en 18; mantiene datos y permisos originales. CSS de PC + Android con pie no cortado.
 - Regresiones focales y CI; no alterar Cloud Save ni misiones.
+
+## 2026-11-12 — V90 · Rueda radial de geometría real
+- Sectores definidos por un mismo centro y radios precisos, bordes finos, núcleo con profundidad y margen inferior.
+- Botones orbitan realmente en curva y mantienen sus íconos/textos derechos por contrarrotación. 3 destinos definidos + 2 difusos, flechas y sonido preservados, contador eliminado.
+- Eliminados los cuatro CSS radiales anteriores de la carga; un CSS V90 único. Sólo cambió el import correspondiente en `game.mjs`.
+- CI V90 y regresiones de Google/inicio, Personal y Centro de Faena; QA visual Android/PC posterior.
