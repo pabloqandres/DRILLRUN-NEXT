@@ -9,7 +9,7 @@ const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const icon=x=>'<i class="uiIcon">'+x+'</i>';
 const state=()=>{const s=newGame('es','operator01');s.cash=37708;s.office={status:'built',level:2};s.mission3={phase:'setup'};s.hsec={employee:{id:'hsec01',level:1},assets:[]};return s;};
 test('V81: pictograms and leading role planilla are real markup for all candidates',()=>{
- const s=state(),a=renderPersonnelPremium(s,'admin','adm-camila-rojas',icon);
+ const s=state(),snapshot=JSON.stringify(s),a=renderPersonnelPremium(s,'admin','adm-camila-rojas',icon);
  assert(a.includes('class="pvRoleTitleIcon"'));
  assert(a.includes('dock-clipboard'));
  assert.equal((a.match(/class="pvCandidateSkill"/g)||[]).length,9);
@@ -22,7 +22,7 @@ test('V81: pictograms and leading role planilla are real markup for all candidat
  assert(a.includes('loading="eager"'));
  assert(a.includes('width="230" height="260"'));
  assert.equal((a.match(/class="pvPortraitImage"/g)||[]).length,4);
- assert.equal(JSON.stringify(s),JSON.stringify(state()));
+ assert.equal(JSON.stringify(s),snapshot);
 });
 test('V81: all seven roles render pictograms without changing any data',()=>{
  const s=state();
