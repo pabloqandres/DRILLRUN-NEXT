@@ -65,7 +65,7 @@ test('V94: finger drag follows actual polar angle, snaps without inertia',()=>{
  try{
   x.hub.emit('click');
   assert.equal(x.api.isOpen,true);
-  assert.equal(x.orbits.filter(n=>n.querySelector('button').tabIndex===0).length,4);
+  assert.equal(x.orbits.filter(n=>n.querySelector('button').tabIndex===0).length,6);
   x.stage.emit('pointerdown',{target:x.sector});
   x.world.emit('pointermove',{clientX:292,clientY:145});
   assert.equal(x.api.selected,'overview');
@@ -123,12 +123,30 @@ test('V94: whole painted sector is tappable without dragging its label',()=>{
  }finally{x.restore();}
 });
 
+
+test('V95: six initial buttons match the approved order and all are direct actions',()=>{
+ const x=gestureHarness();
+ try{
+  x.hub.emit('click');
+  const visible=x.orbits.filter(n=>n.querySelector('button').tabIndex===0)
+   .sort((a,b)=>Number(a.dataset.step)-Number(b.dataset.step));
+  assert.deepEqual(visible.map(n=>n.querySelector('button').dataset.semiId),
+   ['overview','catalog','production','logistics','personnel','safety']);
+  assert.equal(visible.length,6);
+  x.choices.emit('click',{target:x.orbits[4].querySelector('button')});
+  assert.deepEqual(x.chosen,['personnel'],'a single click on a noncentral button navigates');
+  assert.equal(x.api.isOpen,false);
+ }finally{x.restore();}
+});
+
 test('V94: responsive safe margins, absence of arrows, event handler cleanup',()=>{
  const x=gestureHarness();
  try{
   assert(x.root.style['--dr94-dock-width']);
   assert(x.root.style['--dr94-dock-height']);
   assert.equal(x.orbits.filter(n=>n.dataset.step==='2').length,1);
+  assert.equal(x.orbits.filter(n=>n.dataset.step==='3').length,1);
+  assert.equal(x.orbits.filter(n=>n.dataset.step==='4').length,1);
   assert.equal(x.orbits.filter(n=>n.dataset.step==='-1').length,1);
   assert.equal(x.orbits.filter(n=>n.dataset.step==='0').length,1);
   const src=read('dist/chapter/semi-radial-dock-v90.mjs');
