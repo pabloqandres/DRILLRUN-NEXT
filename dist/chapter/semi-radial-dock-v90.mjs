@@ -80,7 +80,9 @@ function wheelSvg(){
   '<path class="dr96FadeTail dr96FadeTail--lower" mask="url(#dr96TailLower)" d="'+radialSegmentPath(-103,-90)+'"/>'+
   '<path class="dr96FadeTail dr96FadeTail--upper" mask="url(#dr96TailUpper)" d="'+radialSegmentPath(0,17)+'"/>'+
   sectors+glass+rims+
-  '<path class="dr92InnerRim" d="'+arcPath(-90,0,g.innerRadius+3.5)+'"/>'+
+  '<path class="dr92InnerRim" mask="url(#dr96FadeLower)" d="'+arcPath(-90,-75,g.innerRadius+3.5)+'"/>'+
+  '<path class="dr92InnerRim" d="'+arcPath(-75,-15,g.innerRadius+3.5)+'"/>'+
+  '<path class="dr92InnerRim" mask="url(#dr96FadeUpper)" d="'+arcPath(-15,0,g.innerRadius+3.5)+'"/>'+
   '<path class="dr90CenterAccent" d="'+arcPath(-71,-64,g.outerRadius-6)+'"/>'+
   '</svg>';
 }
