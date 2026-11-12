@@ -80,37 +80,60 @@ test('V94: unrelated missions and saved-state systems stay wired',()=>{
  ])assert(game.includes(term),term);
 });
 
-test('V96: only the two radial endpoints fade, and the endless extensions remain inert',()=>{
+test('V97: open-ended wheel is only glowing rim traces, never filled blocks',()=>{
  const js=read('dist/chapter/semi-radial-dock-v90.mjs');
  const css=read('dist/chapter/semi-radial-command-v90.css');
  for(const key of [
-  "radialSegmentPath(-103,-90)",
-  "radialSegmentPath(0,17)",
+  "arcPath(-107,-90,g.outerRadius)",
+  "arcPath(-107,-90,g.innerRadius)",
+  "arcPath(0,21,g.outerRadius)",
+  "arcPath(0,21,g.innerRadius)",
   'dr96TailLower','dr96TailUpper',
   'dr96FadeLower','dr96FadeUpper',
-  'dr96FadeTail--lower','dr96FadeTail--upper',
+  'dr97TailTraces--lower','dr97TailTraces--upper',
+  'dr97TailHalo','dr97TailOuter','dr97TailInner',
   "arcPath(-90,-75,g.innerRadius+3.5)",
   "arcPath(-15,0,g.innerRadius+3.5)"
  ])assert(js.includes(key),key);
+ assert(!js.includes("radialSegmentPath(-103,-90)"));
+ assert(!js.includes("radialSegmentPath(0,17)"));
  for(const key of [
-  '#hud #semiRadialDock .dr96FadeTail{',
+  '#hud #semiRadialDock .dr97TailTraces{',
+  '.dr97TailTraces path{',
+  'fill:none!important',
   'pointer-events:none!important',
-  'overflow:visible!important',
+  'stroke-width:1.5px!important',
   '.dr90Orbit[data-step="-1"] .dr90Option',
   '.dr90Orbit[data-step="4"] .dr90Option',
   '.dr90Orbit[data-step="2"] .dr90Option',
-  'filter:none!important',
-  'left:263px!important;top:350px!important',
-  'width:84px!important;height:84px!important',
-  '--dr96-action-half:clamp(35px,5.8dvh,59px)',
-  'right:calc(var(--dr94-safe-right) + var(--dr94-action-half) - var(--dr96-action-half))',
-  'bottom:calc(var(--dr94-control-line) - var(--dr96-action-half))'
+  'filter:none!important'
  ])assert(css.includes(key),key);
  assert.equal(RADIAL_GEOMETRY.outerRadius,365);
  assert.equal(RADIAL_GEOMETRY.innerRadius,244);
  assert.equal(RADIAL_GEOMETRY.slotBounds.length,6);
- // Masks/glows change only paint, never ID routing or gesture logic.
  assert(js.includes("onNavigate(element.dataset.semiId)"));
  assert(js.includes("window.addEventListener('pointermove',moveDrag"));
  assert(!js.includes('dr90Prev'));
+});
+
+test('V97: both buttons smaller, visually contained inside the 244px inner radius',()=>{
+ const css=read('dist/chapter/semi-radial-command-v90.css');
+ for(const key of [
+  'left:298px!important;top:358px!important',
+  'width:68px!important;height:68px!important',
+  'left:290px!important;top:352px!important',
+  'width:248px!important;height:111px!important',
+  '--dr97-action-half:clamp(32px,5dvh,54px)',
+  'width:clamp(64px,10dvh,108px)!important',
+  'right:calc(var(--dr94-safe-right) + var(--dr94-action-half) - var(--dr97-action-half))',
+  'bottom:calc(var(--dr94-control-line) - var(--dr97-action-half))'
+ ])assert(css.includes(key),key);
+ const g=RADIAL_GEOMETRY;
+ const hub={x:298+68/2,y:358+68/2};
+ const corner={x:290,y:352};
+ const hubDist=Math.hypot(hub.x-g.cx,hub.y-g.cy);
+ const baseCornerDist=Math.hypot(corner.x-g.cx,corner.y-g.cy);
+ assert(hubDist+68/2<g.innerRadius,'hub fully contained inside annular hole');
+ assert(baseCornerDist<g.innerRadius,'plinth upper-left corner is inside annular hole');
+ assert.equal(hub.y,392,'aligned with action centreline at local y=392');
 });
