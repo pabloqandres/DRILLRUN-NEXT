@@ -29,7 +29,7 @@ test('V83 · actual gesture/display rotation and SFX connect without game mutati
     preventDefault(){this.defaultPrevented=true;},target:this,...values};
    for(const fn of this.handlers[name]??[])fn(e);return e;}
  });
- const items=SEMI_RADIAL_ITEMS.map(make),trigger=make(),fan=make(),progress={textContent:''};
+ const items=SEMI_RADIAL_ITEMS.map(item=>Object.assign(make(),{dataset:{semiId:item.id}})),trigger=make(),fan=make(),progress={textContent:''};
  const root=Object.assign(make(),{
   id:'',innerHTML:'',style:{setProperty(){}},
   classList:{list:new Set(),add(x){this.list.add(x);},remove(x){this.list.delete(x);},toggle(x,on){on?this.add(x):this.remove(x);},contains(x){return this.list.has(x);}},
