@@ -1,0 +1,22 @@
+name: "V88 · Semiradial and Personnel audit"
+on:
+  push:
+    branches: [chatgpt/v88-semiradial-geometric-alignment]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  v88-layout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Verify radial, illustrated hires, startup and regressions
+        run: |
+          node --check dist/chapter/semi-radial-dock-v83.mjs
+          node --check dist/chapter/personnel-premium-v76.mjs
+          node --check dist/chapter/game.mjs
+          node --test tests/v88-semiradial-personnel.test.mjs tests/v77-personnel-placeholders.test.mjs tests/v78-personnel-admin-portraits.test.mjs tests/v80-personnel-visual-redesign.test.mjs tests/v81-personnel-no-jitter.test.mjs tests/v83-semiradial-dock.test.mjs tests/v84-true-semiradial-arc.test.mjs tests/v86-premium-radial-rescue-personnel.test.mjs tests/v86-1-startup-continue.test.mjs tests/v87-classic-brand.test.mjs
