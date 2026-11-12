@@ -62,6 +62,7 @@ import {CinematicRecorder} from '../camera/recorder.mjs';
 import {DesertWind} from '../camera/ambient.mjs';
 import {WorksiteAudio} from '../audio/worksite-audio.mjs';
 import {CharacterSelectFeedback} from '../audio/character-select-feedback-v68.mjs';
+import {installSemiRadialDock} from './semi-radial-dock-v83.mjs';
 import {tryImmersive,canRequestImmersive,isImmersive} from './immersive-entry-v70.mjs';
 import {CinematicCharacterSelector} from './character-select-v68.mjs';
 import {SiteCinematics} from '../graphics/site-cinematics.mjs';
@@ -1659,7 +1660,28 @@ $('#patioBuildHud')?.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===
   if(nav==='m3-inventory'){openFaena('fleet');return;}
   if(nav==='m3-personnel'){openFaena('personnel');return;}
   openPhone(nav);
- });$('#phoneButton').onclick=()=>{if(phoneOpen)closePhone();else if(!showPendingMissionMessage())openPhone();};$('#closePhone').onclick=$('#phoneShade').onclick=closePhone;$('#phoneBack').onclick=()=>phoneUI.backApp();$('#money').onclick=()=>notices.push({title:t('cash'),detail:money(s.cash),symbol:'wallet'});
+ });
+ // V83: compact semi-radial is purely a HUD navigation skin. Reuse legacy
+ // click handlers wherever available, preserving HSEC mission gating and
+ // Catálogo's existing driving restriction. New destinations reuse FaenaCenter.
+ installSemiRadialDock({
+  anchor:$('#bottomNav'),
+  onFeedback:kind=>selectorFeedback.play(kind),
+  onNavigate:id=>{
+   const existing={catalog:'builder',contracts:'m3-contract',fleet:'m3-inventory',
+    personnel:'m3-personnel',safety:'hsec',overview:'m4-operations'}[id];
+   if(existing){
+    const original=$('#bottomNav [data-nav="'+existing+'"]');
+    if(!original||original.disabled)return false;
+    original.click();
+    return true;
+   }
+   if(!['production','logistics','workshop','headquarters'].includes(id))return false;
+   openFaena(id);
+   return true;
+  }
+ });
+ $('#phoneButton').onclick=()=>{if(phoneOpen)closePhone();else if(!showPendingMissionMessage())openPhone();};$('#closePhone').onclick=$('#phoneShade').onclick=closePhone;$('#phoneBack').onclick=()=>phoneUI.backApp();$('#money').onclick=()=>notices.push({title:t('cash'),detail:money(s.cash),symbol:'wallet'});
 $('#objective').onclick=e=>{if(e.target.closest('#objToggle'))return;showMission();};$('#objective').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showMission();}};
 $('#objToggle').onclick=e=>{e.stopPropagation();$('#objective').classList.toggle('collapsed');const gc=$('#geoCard');if(gc&&gc._shown===false)gc.classList.add('hidden');};
 $('#geoDismiss').onclick=e=>{e.stopPropagation();if(s?.geoAnalysis){s.geoAnalysis.cardDismissed=true;save();renderHUD();}};
