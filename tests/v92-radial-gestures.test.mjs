@@ -25,7 +25,7 @@ function gestureHarness(){
  root.contains=()=>true;
  root.remove=()=>{root.removed=true;};
  stage.getBoundingClientRect=()=>({left:0,top:0,width:550,height:470});
- const names=['catalog','production','logistics','workshop','fleet','contracts','personnel','safety','headquarters','overview'];
+ const names=['overview','catalog','production','logistics','personnel','safety','workshop','fleet','contracts','headquarters'];
  const orbits=names.map((id,i)=>{
   const n=make('orbit'+i),button=make('option'+i);
   button.dataset.semiId=id;
@@ -103,7 +103,7 @@ test('V94: direct tap stays selectable; cancelled gesture does not move category
   x.stage.emit('pointerdown',{target:x.orbits[0].querySelector('button')});
   x.world.emit('pointerup',{clientX:183,clientY:251});
   x.choices.emit('click',{target:x.orbits[0].querySelector('button')});
-  assert.deepEqual(x.chosen,['catalog']);
+  assert.deepEqual(x.chosen,['overview']);
   x.hub.emit('click');
   x.stage.emit('pointerdown',{target:x.sector});
   x.world.emit('pointercancel',{clientX:183,clientY:251});
