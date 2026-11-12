@@ -517,3 +517,8 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Configuración: nueva acción `Desatascar jugador`. Emplea la función pura `officeRescueTarget` y comprobaciones de colisión en oficina/acceso, resetea movimiento/cámara y guarda solo la posición; al bajarse del DrillTruck personal, queda estacionado en su posición.
 - Personal: filas main/roster con altura garantizada; fija el pie visible y desplazamiento horizontal de plazas, más contención vertical del panel derecho y jerarquía visual.
 - Tests V86 y regresiones V83/V84/V82/V81 en Actions; dos fallos legados de economía offline M4 ajenos al cambio persisten en workflow genérico.
+
+## 2026-11-12 — V86.1 arreglo de inicio y botón Continuar
+- Fix crítico: referencia a `cameraHome` inexistente tras V86 causaba excepción al cargar `applyText()`; retirado de etiquetas y añadido encadenamiento opcional para elementos UI opcionales.
+- Recupera flujo normal de actualización de `Continuar` y estados de sincronización Google (sin modificar políticas de Cloud Save).
+- Prueba inicialización de accesibilidad / IDs, regresiones de Personal, Faena y semirradial.
