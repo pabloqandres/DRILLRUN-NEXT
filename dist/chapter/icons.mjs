@@ -2,6 +2,7 @@ import {hsecSymbol} from '../hsec/icons.mjs';
 // DRILL RUN visual iconography V3: one consistent 24px, rounded-line pictogram set.
 // Keep all keys, signatures and semantics. No third-party font/assets or scripts.
 const paths={
+ "interact-focus":'<path d="M12 3.3v3.2m0 11v3.2M3.3 12h3.2m11 0h3.2"/><path d="M7 7a7 7 0 0 1 10 0m0 10a7 7 0 0 1-10 0"/><circle cx="12" cy="12" r="3.1"/><circle cx="12" cy="12" r=".8" fill="currentColor" stroke="none"/>',
  // Unified five-item gameplay dock icon set (24px rounded-line)
  "dock-package":'<path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="M3 7v10l9 5 9-5V7M12 12v10"/>',
  "dock-clipboard":'<rect x="5.5" y="4" width="13" height="18" rx="2"/><path d="M9 4V2h6v2M9 10h6M9 14h6M9 18h4"/>',
