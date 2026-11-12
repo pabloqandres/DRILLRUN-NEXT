@@ -1,0 +1,65 @@
+/* V85 · Purposeful reset-view icon and joystick clearance.
+   Game behavior unchanged. The button's inline SVG communicates
+   camera/orbit recenter (circular arrow + sight), not photography. */
+#hud #cameraHome{
+ position:absolute!important;
+ left:calc(max(16px,var(--safe-l,16px)) + clamp(164px,13.5vw,202px))!important;
+ right:auto!important;
+ bottom:calc(max(17px,var(--safe-b,17px)) + 33px)!important;
+ width:46px!important;
+ height:46px!important;
+ min-height:46px!important;
+ display:grid!important;
+ place-items:center!important;
+ padding:9px!important;
+ border:1.5px solid #66d8e8c7!important;
+ border-radius:14px!important;
+ background:linear-gradient(150deg,#173e57ec,#092639f1)!important;
+ color:#bdf2ff!important;
+ box-shadow:0 3px 12px #031421ba,inset 0 1px #b3faff4b!important;
+ pointer-events:auto!important;
+ z-index:24!important;
+ touch-action:manipulation;
+ -webkit-tap-highlight-color:transparent;
+ transition:border-color .18s ease,box-shadow .18s ease,background .18s ease!important;
+}
+#hud #cameraHome .cameraResetGlyph{
+ display:block!important;
+ width:28px!important;height:28px!important;
+ color:inherit!important;fill:none!important;
+ stroke-width:2.1!important;
+ stroke-linecap:round;stroke-linejoin:round;
+ filter:drop-shadow(0 0 3px #71ecff48);
+ transform:none!important;
+}
+#hud #cameraHome:focus-visible{
+ outline:2px solid #f8dc85!important;
+ outline-offset:3px!important;
+}
+#hud #cameraHome:active{
+ border-color:#ffe398!important;
+ color:#fff1b1!important;
+ box-shadow:0 0 9px #e8c7606f,inset 0 1px #fff2b69c!important;
+}
+/* Android / compact landscape: a gap of at least ~32px from joystick. */
+@media(max-height:540px),(max-width:900px){
+ #hud #cameraHome{
+  left:calc(max(12px,var(--safe-l,12px)) + 140px)!important;
+  bottom:calc(max(10px,var(--safe-b,10px)) + 27px)!important;
+  width:42px!important;height:42px!important;min-height:42px!important;
+  padding:8px!important;border-radius:13px!important;
+ }
+ #hud #cameraHome .cameraResetGlyph{width:25px!important;height:25px!important}
+}
+@media(max-width:670px){
+ #hud #cameraHome{
+  left:calc(max(10px,var(--safe-l,10px)) + 116px)!important;
+  bottom:calc(max(8px,var(--safe-b,8px)) + 25px)!important;
+  width:38px!important;height:38px!important;min-height:38px!important;
+  padding:7px!important;border-radius:11px!important;
+ }
+ #hud #cameraHome .cameraResetGlyph{width:23px!important;height:23px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ #hud #cameraHome{transition:none!important}
+}

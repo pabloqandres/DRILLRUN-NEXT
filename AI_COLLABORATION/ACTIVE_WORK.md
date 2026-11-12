@@ -180,3 +180,5 @@ _Nothing blocked._
 - **2026-11-12 · V83 menú inferior semirradial animado** — rama `chatgpt/v83-semiradial-dock`. Solo sustituye presentación/navegación inferior; 3 accesos, 2 difuminados, toque y hold, rotación táctil, audio del sistema existente y 10 destinos reutilizados. Los botones del dock original permanecen con sus handlers y condiciones como fuente de verdad. `game.mjs` intervención mínima. CI focal y QA en Android antes de cierre.
 
 - **2026-11-12 · V84 geometría real de semirradial** — rama `chatgpt/v84-true-semiradial-arc`. Rehacer solo las piezas visuales del dock V83 porque la captura en Android muestra tarjetas cuadradas en lugar de 3 sectores curvos y 2 anticipos radiales. No modificar sonido, misiones ni pantallas del juego. CI y revisión Android pendientes.
+
+- **2026-11-12 · V85 restablecer vista:** rama `chatgpt/v85-reset-view-control`. Ícono actual de foto se reemplaza por retorno orbital/mira y se aleja del joystick en Android landscape. Archivos únicamente `dist/index.html`, `dist/chapter/reset-view-control-v85.css`, tests y documentación; sin modificar `game.mjs`. Validación CI y captura Android pendientes.
