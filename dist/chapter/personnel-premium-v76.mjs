@@ -154,7 +154,7 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon,view='recr
   .sort((a,b)=>primaryIds.indexOf(a.id)-primaryIds.indexOf(b.id));
  const moreRoles=PERSONNEL_GROUPS.filter(g=>!primaryIds.includes(g.id));
  const slotCount=Math.max(capacity,team.length);
- const slots=Array.from({length:slotCount},(_,i)=>{
+ const slots=Array.from({length:Math.max(capacity,team.length)},(_,i)=>{
   const p=team[i];
   if(p){const c=candidateById(p.candidateId);return `<button class="pvTeamSlot occupied" type="button" data-pv-roster="${esc(p.role)}" data-pv-person="${esc(p.candidateId||'')}" aria-label="Ver ${esc(p.name||roleById(p.role)?.label||'contratado')}">
    ${c?`${portraitIllustration(c,'team')}`:`<span class="pvTeamFallback">${icon('personnel')}</span>`}
