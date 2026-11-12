@@ -302,3 +302,46 @@ body:not([data-phase="play"]) #hud #semiRadialDock{display:none!important}
  box-shadow:0 0 6px #59c9db35;
  pointer-events:none!important;
 }
+
+/* V93 - immersive corner dock. Quarter-ring opens exclusively inward/upward.
+   Keep an independent hit box from the action button, camera and joystick. */
+#hud #semiRadialDock{
+ left:auto!important;right:clamp(96px,9vw,128px)!important;
+ bottom:max(24px,env(safe-area-inset-bottom,0px) + 18px)!important;
+ width:min(400px,calc(100vw - 215px))!important;
+ height:calc(165px * var(--dr90-scale))!important;
+ transform:none!important;
+}
+#hud #semiRadialDock .dr90Stage{
+ left:auto!important;right:0!important;bottom:0!important;
+ transform:scale(var(--dr90-scale))!important;
+ transform-origin:right bottom!important;
+}
+#hud #semiRadialDock .dr90Ring{transform-origin:350px 164px!important}
+#hud #semiRadialDock .dr90Orbit{left:350px!important;top:164px!important}
+#hud #semiRadialDock .dr90Hub{left:322px!important;top:108px!important}
+#hud #semiRadialDock .dr90Prev{left:208px!important;right:auto!important;top:125px!important}
+#hud #semiRadialDock .dr90Next{left:255px!important;right:auto!important;top:125px!important}
+@media (orientation:landscape) and (max-height:510px){
+ #hud #semiRadialDock{right:96px!important;bottom:max(19px,env(safe-area-inset-bottom,0px) + 14px)!important;width:min(400px,calc(100vw - 207px))!important}
+}
+@media(max-width:670px){
+ #hud #semiRadialDock{right:91px!important;bottom:max(18px,env(safe-area-inset-bottom,0px) + 13px)!important;width:min(400px,calc(100vw - 193px))!important;max-width:none!important}
+}
+/* Match the main hub finish without modifying the interaction action itself. */
+#hud #handButton{
+ border:1.5px solid #78cfdf!important;border-radius:50%!important;
+ background:radial-gradient(circle at 30% 20%,#456e80 0%,#193e54 30%,#0b2438 64%,#061726 100%)!important;
+ box-shadow:inset 0 2px 1px #d9f7ff65,inset 0 -7px 12px #00111ec9,0 0 0 3px #061e30e8,0 5px 15px #000a,0 0 13px #56cbd94a!important;
+ color:#e2f8ff!important;transition:border-color .2s ease,box-shadow .2s ease,filter .2s ease!important;
+}
+#hud #handButton::before{
+ content:"";position:absolute;inset:6px;border-radius:50%;
+ border:1px solid #bbf0fc70;box-shadow:inset 0 1px #e3faff33;
+ pointer-events:none!important;
+}
+#hud #handButton svg{width:34px!important;height:34px!important;stroke:#e8f9ff!important;stroke-width:1.9!important;filter:drop-shadow(0 0 3px #67dced76)!important}
+#hud #handButton.available{border-color:#f3d18d!important;box-shadow:inset 0 2px #e0f9ff6e,inset 0 -7px 12px #00121ec7,0 0 0 3px #061e30e8,0 5px 15px #000a,0 0 15px #e8bb6f7d!important}
+#hud #handButton.available svg{stroke:#ffe2a5!important;filter:drop-shadow(0 0 4px #ffd28485)!important}
+#hud #handButton:disabled{filter:saturate(.67);opacity:.74}
+#hud #handButton:focus-visible{outline:2px solid #ffe2a5!important;outline-offset:5px}
