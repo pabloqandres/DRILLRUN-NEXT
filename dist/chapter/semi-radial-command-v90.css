@@ -346,102 +346,106 @@ body:not([data-phase="play"]) #hud #semiRadialDock{display:none!important}
 #hud #handButton:disabled{filter:saturate(.67);opacity:.74}
 #hud #handButton:focus-visible{outline:2px solid #ffe2a5!important;outline-offset:5px}
 
-/* V94 · FINAL approved corner composition.
-   The arc contains both visually independent lower controls, respects Android
-   safe areas, and shares one horizontal centerline with the joystick.
-   Existing navigation and action callbacks are not changed. */
+/* V94 visual correction · match the explicitly approved corner reference.
+   Polar geometry: stage 550 × 470; center (500,465), radius 465/296.
+   Controls keep a common centerline; only the annular arc rotates. */
 #hud{
- --dr94-safe-bottom:max(24px, env(safe-area-inset-bottom,0px) + 18px);
- --dr94-safe-right:max(22px, env(safe-area-inset-right,0px) + 16px);
- --dr94-safe-left:max(22px, env(safe-area-inset-left,0px) + 16px);
- --dr94-joy-half:clamp(44px,8dvh,56px);
- --dr94-action-half:clamp(38px,6dvh,44px);
+ --dr94-safe-bottom:max(20px,env(safe-area-inset-bottom,0px) + 16px);
+ --dr94-safe-right:max(22px,env(safe-area-inset-right,0px) + 15px);
+ --dr94-safe-left:max(22px,env(safe-area-inset-left,0px) + 15px);
+ --dr94-control-line:clamp(67px,11dvh,106px);
+ --dr94-joy-half:clamp(46px,8dvh,87px);
+ --dr94-action-half:clamp(42px,7dvh,70px);
 }
 #hud #joystick{
  left:var(--dr94-safe-left)!important;
- bottom:var(--dr94-safe-bottom)!important;
- width:clamp(88px,16dvh,112px)!important;
- height:clamp(88px,16dvh,112px)!important;
+ bottom:calc(var(--dr94-control-line) - var(--dr94-joy-half))!important;
+ width:clamp(92px,16dvh,174px)!important;
+ height:clamp(92px,16dvh,174px)!important;
 }
 #hud #handButton{
  right:var(--dr94-safe-right)!important;
- bottom:calc(var(--dr94-safe-bottom) + var(--dr94-joy-half) - var(--dr94-action-half))!important;
- width:clamp(76px,12dvh,88px)!important;
- height:clamp(76px,12dvh,88px)!important;
- min-height:clamp(76px,12dvh,88px)!important;
+ bottom:calc(var(--dr94-control-line) - var(--dr94-action-half))!important;
+ width:clamp(84px,14dvh,140px)!important;
+ height:clamp(84px,14dvh,140px)!important;
+ min-height:clamp(84px,14dvh,140px)!important;
  z-index:41!important;
- border:2px solid #edcf91!important;
- background:radial-gradient(circle at 31% 21%,#497c92 0%,#1b5066 23%,#0b304b 56%,#051a2c 91%)!important;
- box-shadow:inset 0 2px 2px #e2fbff8e,inset 0 -9px 11px #001320de,
-  0 0 0 3px #081c2deb,0 0 0 4px #a5d9e58c,
-  0 6px 16px #000c,0 0 16px #edc57a68!important;
+ border:2.5px solid #efcf88!important;border-radius:50%!important;
+ background:radial-gradient(circle at 31% 20%,#54889b 0%,#22536b 27%,#0b314c 58%,#03182c 100%)!important;
+ box-shadow:inset 0 2px 2px #e9fbffd0,inset 0 -9px 13px #001222e5,
+  0 0 0 3px #071c2e,0 0 0 5px #9acddb80,
+  0 7px 18px #00101fd9,0 0 18px #f0c57996!important;
 }
 #hud #handButton::before{
- inset:5px!important;border:1.7px solid #e9d399c9!important;
- box-shadow:0 0 5px #eac47758,inset 0 1px #fff6b74b!important;
+ inset:6px!important;border:2px solid #f6db9cdd!important;
+ box-shadow:0 0 5px #f1cf8a9c,inset 0 1px #fff3a66b!important;
 }
 #hud #handButton svg,
 #hud #handButton .uiIcon{
- width:clamp(30px,5.2dvh,39px)!important;
- height:clamp(30px,5.2dvh,39px)!important;
- color:#ffe4a8!important;stroke:#ffe4a8!important;stroke-width:2.05!important;
- filter:drop-shadow(0 0 5px #f3c97d9e)!important;
+ width:clamp(36px,6.2dvh,54px)!important;
+ height:clamp(36px,6.2dvh,54px)!important;
+ color:#ffe0a1!important;stroke:#ffe0a1!important;stroke-width:2.05!important;
+ filter:drop-shadow(0 0 5px #f6c671b0)!important;
 }
 #hud #handButton.available{
- border-color:#ffeab4!important;
- box-shadow:inset 0 2px #f3ffffa3,inset 0 -9px 11px #001320dc,
-  0 0 0 3px #081c2def,0 0 0 4px #e6bb72ad,
-  0 6px 16px #000c,0 0 19px #f6cc8588!important;
+ border-color:#ffe6a7!important;
+ box-shadow:inset 0 2px #f0faffd0,inset 0 -9px 14px #00111fe5,
+  0 0 0 3px #071c2e,0 0 0 5px #efc87b9e,
+  0 7px 18px #000d,0 0 22px #fbd78bc0!important;
 }
-/* No giant flat disc: only a transparent-bottom quarter annulus. */
 #hud #semiRadialDock{
- --dr94-scale:1;
  left:auto!important;
- right:calc(var(--dr94-safe-right) + var(--dr94-action-half) - var(--dr94-center-offset,45px))!important;
- bottom:calc(var(--dr94-safe-bottom) + var(--dr94-joy-half) - var(--dr94-bottom-offset,38px))!important;
- width:var(--dr94-dock-width,440px)!important;
- height:var(--dr94-dock-height,285px)!important;
+ right:calc(var(--dr94-safe-right) + var(--dr94-action-half) - var(--dr94-center-offset,95px))!important;
+ bottom:calc(var(--dr94-control-line) - var(--dr94-bottom-offset,78px))!important;
+ width:var(--dr94-dock-width,550px)!important;
+ height:var(--dr94-dock-height,470px)!important;
  max-width:none!important;
  transform:none!important;
- z-index:36!important;
- pointer-events:none!important;
+ pointer-events:none!important;z-index:36!important;
 }
 #hud #semiRadialDock .dr90Stage{
- left:auto!important;right:0!important;bottom:0!important;
- width:440px!important;height:285px!important;
- transform:scale(var(--dr94-scale))!important;
+ position:absolute!important;right:0!important;left:auto!important;bottom:0!important;
+ width:550px!important;height:470px!important;
+ transform:scale(var(--dr94-scale,1))!important;
  transform-origin:right bottom!important;
  pointer-events:none!important;
 }
 #hud #semiRadialDock .dr90Ring{
+ width:550px!important;height:470px!important;
  left:0!important;top:0!important;
- width:440px!important;height:285px!important;
- transform-origin:395px 247px!important;
+ transform-origin:500px 465px!important;
 }
-#hud #semiRadialDock .dr90Choices{width:440px!important;height:285px!important}
-#hud #semiRadialDock .dr90Orbit{left:395px!important;top:247px!important}
-#hud #semiRadialDock .dr90Option{
- left:-46px!important;top:-198px!important;
- width:92px!important;height:54px!important;
- transform-origin:46px 27px!important;
- gap:3px!important;padding:0 2px!important;
- transition:transform .29s cubic-bezier(.21,.75,.27,1),
-            color .21s ease!important;
-}
+#hud #semiRadialDock .dr90Choices{width:550px!important;height:470px!important}
 #hud #semiRadialDock .dr90Orbit{
- transition:transform .31s cubic-bezier(.21,.75,.27,1),
-            opacity .23s ease,visibility .23s ease!important;
+ left:500px!important;top:465px!important;
+ transition:transform .32s cubic-bezier(.20,.74,.27,1),
+  opacity .24s ease,visibility .24s ease!important;
+}
+#hud #semiRadialDock .dr90Option{
+ left:-68px!important;top:-415px!important;
+ width:136px!important;height:66px!important;
+ transform-origin:68px 33px!important;
+ padding:0 3px!important;gap:4px!important;
+ transition:transform .32s cubic-bezier(.20,.74,.27,1),
+  color .2s ease!important;
 }
 #hud #semiRadialDock.is-dragging .dr90Orbit,
 #hud #semiRadialDock.is-dragging .dr90Option{transition:none!important}
-#hud #semiRadialDock .dr90Label{
- width:90px!important;max-width:90px!important;
- max-height:30px!important;
- font:850 10.6px/1.08 system-ui,sans-serif!important;
- text-shadow:0 1px 3px #00121fe8!important;
+#hud #semiRadialDock .dr90Icon{
+ width:38px!important;height:38px!important;flex-basis:38px!important;
+ filter:drop-shadow(0 0 4px #9adbf48c)!important;
 }
-#hud #semiRadialDock .dr90Icon{width:27px!important;height:27px!important;flex-basis:27px!important}
-#hud #semiRadialDock .dr90Icon .uiIcon{width:26px!important;height:26px!important}
+#hud #semiRadialDock .dr90Icon .uiIcon{
+ width:37px!important;height:37px!important;stroke-width:1.85!important;
+}
+#hud #semiRadialDock .dr90Label{
+ width:136px!important;max-width:136px!important;
+ max-height:37px!important;
+ font:850 18px/1.06 system-ui,sans-serif!important;
+ letter-spacing:-.04em!important;
+ color:#f1f9ff!important;
+ text-shadow:0 2px 4px #00101eea!important;
+}
 #hud #semiRadialDock .dr90Orbit[data-step="2"]{
  opacity:1!important;visibility:visible!important;pointer-events:auto!important;
 }
@@ -454,46 +458,65 @@ body:not([data-phase="play"]) #hud #semiRadialDock{display:none!important}
  opacity:0!important;visibility:hidden!important;pointer-events:none!important;
 }
 #hud #semiRadialDock .dr94Sector--far{
- fill:url(#dr90Side)!important;stroke:#78d8ed9c!important;
- filter:drop-shadow(0 2px 2px #061926a3);
+ fill:url(#dr90Side)!important;stroke:#78d8eda8!important;
+ filter:drop-shadow(0 2px 3px #031421b9);
 }
+#hud #semiRadialDock .dr90Sector{
+ stroke-width:1.4!important;touch-action:none!important;
+}
+#hud #semiRadialDock .dr90Sector--center{
+ stroke:#ffe0a7ed!important;stroke-width:1.9!important;
+ filter:drop-shadow(0 0 9px #e7b96897)!important;
+}
+#hud #semiRadialDock .dr92OuterRim{
+ stroke-width:1.3!important;opacity:.87!important;
+}
+#hud #semiRadialDock .dr92OuterRim--selected{
+ stroke-width:1.65!important;opacity:1!important;
+ filter:drop-shadow(0 0 4px #ffd18cce)!important;
+}
+#hud #semiRadialDock .dr92InnerRim{stroke-width:1.05!important;opacity:.73!important}
 #hud #semiRadialDock .dr90Hub{
- left:259px!important;top:216px!important;
- width:62px!important;height:62px!important;min-height:62px!important;
- z-index:6!important;
- background:radial-gradient(circle at 31% 20%,#3b7088 0%,#19475e 29%,#0b293f 66%,#06192b 100%)!important;
- border:1.8px solid #e8bd71!important;
- box-shadow:inset 0 2px #e4fcff7d,inset 0 -7px 11px #00101fc7,
-  0 0 0 3px #071e30f0,0 5px 14px #000c,0 0 14px #68d6ef6b!important;
+ left:255px!important;top:342px!important;
+ width:100px!important;height:100px!important;min-height:100px!important;
+ border:2px solid #e3b66b!important;
+ background:radial-gradient(circle at 31% 21%,#477a92 0%,#20536a 27%,#0a2e47 64%,#051628 100%)!important;
+ box-shadow:inset 0 2px 2px #e5fbffaf,inset 0 -9px 15px #00111fe0,
+  0 0 0 3px #061c2ded,0 0 0 5px #6bc3dc82,
+  0 7px 18px #000d,0 0 15px #5bcced69!important;
+ z-index:7!important;
 }
-#hud #semiRadialDock .dr90HubGlyph{width:32px!important;height:32px!important}
+#hud #semiRadialDock .dr90Hub::before{
+ inset:8px!important;border:1.5px solid #9ee5f6bd!important;
+ box-shadow:0 0 6px #67cde17d,inset 0 1px #eafaff58!important;
+}
+#hud #semiRadialDock .dr90HubGlyph{
+ width:52px!important;height:52px!important;color:#fff1c4!important;
+ filter:drop-shadow(0 0 5px #e4c57d6a)!important;
+}
+#hud #semiRadialDock .dr90HubNotch{display:none!important}
 #hud #semiRadialDock .dr94Base{
- position:absolute!important;left:251px!important;top:201px!important;
- width:189px!important;height:84px!important;
- border:1px solid #a9dbec77!important;
- border-bottom:0!important;
- border-radius:56px 56px 19px 19px!important;
- background:linear-gradient(160deg,#1b43599e 0%,#0a2337dd 58%,#061726ad 100%)!important;
- box-shadow:inset 0 1px #ddf9ff68,0 -2px 14px #04304444,0 8px 17px #0005!important;
+ position:absolute!important;
+ left:244px!important;top:330px!important;
+ width:296px!important;height:133px!important;
+ border:1.5px solid #a0d9e5b4!important;
+ border-bottom-color:#c6a46f94!important;
+ border-radius:80px 84px 42px 42px!important;
+ background:linear-gradient(156deg,#174d6592 0%,#092d4492 42%,#061a2ba8 76%,#021121b9 100%)!important;
+ box-shadow:inset 0 2px #dbfaff73,0 -3px 12px #1a61754b,0 8px 18px #0005!important;
  pointer-events:none!important;
 }
 #hud #semiRadialDock .dr94Base::before{
- content:"";position:absolute;inset:9px 8px 13px;
- border-top:1px solid #efd08c70;border-radius:55px 55px 25px 25px;
- box-shadow:inset 0 2px #66d1e420;pointer-events:none;
+ content:"";position:absolute;inset:9px 12px 12px;
+ border-top:1px solid #f4d08b85;border-radius:75px 75px 30px 30px;
+ pointer-events:none;
 }
 #hud #semiRadialDock .dr90Arrows{display:none!important}
-#hud #semiRadialDock .dr90Sector{touch-action:none!important}
 #hud #semiRadialDock.is-open .dr90Sector{pointer-events:visiblePainted!important}
 #hud #semiRadialDock .dr90Option{touch-action:none!important}
-/* Align the centers, not just the bottom edges, in mobile landscape. */
-@media (orientation:landscape) and (max-height:510px){
- #hud{--dr94-safe-bottom:max(21px,env(safe-area-inset-bottom,0px) + 16px)}
- #hud #semiRadialDock{max-width:none!important}
-}
-@media(max-width:670px){
- #hud{--dr94-safe-bottom:max(19px,env(safe-area-inset-bottom,0px) + 15px);
-  --dr94-safe-right:max(19px,env(safe-area-inset-right,0px) + 13px)}
+@media(orientation:landscape) and (max-height:510px){
+ #hud{--dr94-safe-bottom:max(20px,env(safe-area-inset-bottom,0px) + 16px);
+      --dr94-safe-right:max(19px,env(safe-area-inset-right,0px) + 14px)}
  #hud #semiRadialDock{max-width:none!important}
 }
 @media(prefers-reduced-motion:reduce){
