@@ -1,4 +1,4 @@
-// V95 · Six compact precision annular controls on the SAME polar circle.
+// V96 · Six-sector exact polar wheel with endless, softly fading endpoints.
 // Navigation handlers remain the original game's source of truth.
 import {icon} from './icons.mjs';
 
@@ -51,19 +51,35 @@ function wheelSvg(){
  const g=RADIAL_GEOMETRY;
  const classes=['dr90Sector--left','dr90Sector--center','dr90Sector--right','dr94Sector--far','dr95Sector--fifth','dr95Sector--sixth'];
  const sectors=g.slotBounds.map(([a,b],i)=>
-  '<path class="dr90Sector '+classes[i]+'" d="'+radialSegmentPath(a,b)+'"/>').join('');
+  '<path class="dr90Sector '+classes[i]+'" '+
+  (i===0?'mask="url(#dr96FadeLower)" ':i===5?'mask="url(#dr96FadeUpper)" ':'')+
+  'd="'+radialSegmentPath(a,b)+'"/>').join('');
  const glass=g.slotBounds.map(([a,b],i)=>
-  '<path class="dr92Glass '+(i===1?'dr92Glass--center':'')+'" d="'+radialSegmentPath(a,b)+'"/>').join('');
+  '<path class="dr92Glass '+(i===1?'dr92Glass--center':'')+'" '+
+  (i===0?'mask="url(#dr96FadeLower)" ':i===5?'mask="url(#dr96FadeUpper)" ':'')+
+  'd="'+radialSegmentPath(a,b)+'"/>').join('');
  const rims=g.slotBounds.map(([a,b],i)=>
-  '<path class="dr92OuterRim '+(i===1?'dr92OuterRim--selected':'')+
-  '" d="'+arcPath(a+.8,b-.8,g.outerRadius-3)+'"/>').join('');
+  '<path class="dr92OuterRim '+(i===1?'dr92OuterRim--selected':'')+'" '+
+  (i===0?'mask="url(#dr96FadeLower)" ':i===5?'mask="url(#dr96FadeUpper)" ':'')+
+  'd="'+arcPath(a+.8,b-.8,g.outerRadius-3)+'"/>').join('');
  return '<svg class="dr90Ring" viewBox="0 0 550 470" aria-hidden="true" fill="none">'+
   '<defs>'+
   '<linearGradient id="dr90Side" x1="0" y1="0" x2=".1" y2="1"><stop stop-color="#21465b"/><stop offset=".53" stop-color="#102e43"/><stop offset="1" stop-color="#091c30"/></linearGradient>'+
   '<linearGradient id="dr90Selected" x1="0" y1="0" x2=".2" y2="1"><stop stop-color="#74603e"/><stop offset=".46" stop-color="#3a4d60"/><stop offset="1" stop-color="#0b263a"/></linearGradient>'+
   '<linearGradient id="dr92Glass" x1="0" y1="0" x2=".28" y2="1"><stop stop-color="#c5f4fb" stop-opacity=".20"/><stop offset=".36" stop-color="#65bdd4" stop-opacity=".045"/><stop offset=".85" stop-color="#041c29" stop-opacity=".09"/><stop offset="1" stop-color="#00131c" stop-opacity=".35"/></linearGradient>'+
   '<linearGradient id="dr92Rim" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#dcf8fb" stop-opacity=".92"/><stop offset="1" stop-color="#4c9fb6" stop-opacity=".4"/></linearGradient>'+
-  '</defs>'+sectors+glass+rims+
+  '<linearGradient id="dr96FadeLowerGradient" gradientUnits="userSpaceOnUse" x1="0" y1="350" x2="0" y2="493"><stop stop-color="white"/><stop offset=".40" stop-color="white"/><stop offset="1" stop-color="black"/></linearGradient>'+
+  '<linearGradient id="dr96FadeUpperGradient" gradientUnits="userSpaceOnUse" x1="394" y1="0" x2="535" y2="0"><stop stop-color="white"/><stop offset=".40" stop-color="white"/><stop offset="1" stop-color="black"/></linearGradient>'+
+  '<linearGradient id="dr96TailLowerGradient" gradientUnits="userSpaceOnUse" x1="0" y1="450" x2="0" y2="561"><stop stop-color="white"/><stop offset=".15" stop-color="white" stop-opacity=".78"/><stop offset="1" stop-color="black"/></linearGradient>'+
+  '<linearGradient id="dr96TailUpperGradient" gradientUnits="userSpaceOnUse" x1="489" y1="0" x2="620" y2="0"><stop stop-color="white"/><stop offset=".20" stop-color="white" stop-opacity=".7"/><stop offset="1" stop-color="black"/></linearGradient>'+
+  '<mask id="dr96FadeLower" maskUnits="userSpaceOnUse" x="0" y="0" width="680" height="630"><rect x="0" y="0" width="680" height="630" fill="url(#dr96FadeLowerGradient)"/></mask>'+
+  '<mask id="dr96FadeUpper" maskUnits="userSpaceOnUse" x="0" y="0" width="680" height="630"><rect x="0" y="0" width="680" height="630" fill="url(#dr96FadeUpperGradient)"/></mask>'+
+  '<mask id="dr96TailLower" maskUnits="userSpaceOnUse" x="0" y="0" width="680" height="630"><rect x="0" y="0" width="680" height="630" fill="url(#dr96TailLowerGradient)"/></mask>'+
+  '<mask id="dr96TailUpper" maskUnits="userSpaceOnUse" x="0" y="0" width="680" height="630"><rect x="0" y="0" width="680" height="630" fill="url(#dr96TailUpperGradient)"/></mask>'+
+  '</defs>'+
+  '<path class="dr96FadeTail dr96FadeTail--lower" mask="url(#dr96TailLower)" d="'+radialSegmentPath(-103,-90)+'"/>'+
+  '<path class="dr96FadeTail dr96FadeTail--upper" mask="url(#dr96TailUpper)" d="'+radialSegmentPath(0,17)+'"/>'+
+  sectors+glass+rims+
   '<path class="dr92InnerRim" d="'+arcPath(-90,0,g.innerRadius+3.5)+'"/>'+
   '<path class="dr90CenterAccent" d="'+arcPath(-71,-64,g.outerRadius-6)+'"/>'+
   '</svg>';
