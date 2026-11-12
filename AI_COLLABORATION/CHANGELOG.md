@@ -576,3 +576,10 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Base inferior más discreta (x290, y352, 248×111) contenida dentro del agujero circular. Hub 68×68 centrado en (332,392) sin sobresalir sobre ningún gajo; botón de acción reducido a 10dvh y recentrado manteniendo su propio icono dorado.
 - Los seis gajos V95, giro infinito V95/V96, joystick, panel de misión y lógica de juego permanecen sin cambios.
 - PR de V97 con tests estructurales V90; el usuario ordenó subir a main siempre tras las pruebas.
+
+## 2026-11-12 — V98 · Burbuja dual del HUD y cierre automático al moverse
+- Se sustituyó la placa decorativa rectangular detrás de los dos controles por un único SVG ondulado con lóbulo circular para menú y otro para acción, unión suave y contorno de 3,6px más borde de vidrio interior; ambos botones mantienen identidad independiente.
+- Se mantiene visible y por encima el botón de acción aunque el juego establezca su opacidad inline en .45 al no haber acciones disponibles; el estado `disabled` no se altera.
+- Al detectar intención de marcha por joystick (umbral al salir del centro) o WASD/flechas, se cierra radial y se aplica el colapso existente a `#objective`, conservando la pestaña manual. No se vuelve a abrir automáticamente al detenerse. No se cierra por tocar el centro del joystick ni por escribir en un formulario o consultar el teléfono.
+- Transición de acordeón de misión respetando prefers-reduced-motion. Ningún cambio a `game.mjs`, estado, misiones, Cloud Save ni geometría de los seis sectores.
+- Pruebas V90/V92 extendidas; rama `chatgpt/v98-bubble-dock-auto-hud` para validar antes de integrar a main.
