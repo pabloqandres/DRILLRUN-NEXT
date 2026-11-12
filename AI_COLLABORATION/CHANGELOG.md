@@ -493,3 +493,10 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - `faena-hub-v82.css` presenta marcos pronunciados, brillos cian/amarillo, fondo de faena, desplazamiento táctil y layout para Android apaisado; no afecta a Personal.
 - Vista estable en actualizaciones periódicas sin cambios del contenido. Sin modificar compras, contratos, dinero, XP, HSEC, misiones, GLB ni Cloud Save.
 - Proceso: rama `chatgpt/v82-faena-command-center`, PR y CI focal; QA visual Android a cargo del usuario después del autodeploy a producción.
+
+## 2026-11-12 — V83 · Dock semirradial interactivo
+- Un botón circular inferior reemplaza visualmente la botonera extensa. Tocar abre/cierra; mantener abre tras 290 ms; arrastrar horizontalmente, tocar los laterales o usar flechas gira un ícono por paso.
+- Arco deliberadamente bajo, 3 accesos destacados y 2 anticipo difuminado con gradiente radial; transición de rotación por transform/opacity, sin recalcular el DOM ni refrescos periódicos, responsive Android landscape.
+- Diez rutas reales conectadas a menús existentes, sin duplicación de acciones, economía ni misión. Compatibilidad: los botones legados permanecen en DOM para gatillos/permiso de catálogo/HSEC.
+- Feedback de audio y háptico ya existente; volumen y estado de sonido desde Configuración, sin muestras externas ni efectos en bucle.
+- `semi-radial-dock-v83.mjs`, `semi-radial-dock-v83.css`, import/call acotados en `game.mjs`, link en `index.html`, pruebas focales. Validación visual en Android tras desplegar.
