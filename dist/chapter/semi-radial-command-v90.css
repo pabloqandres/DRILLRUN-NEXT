@@ -655,3 +655,76 @@ body:not([data-phase="play"]) #hud #semiRadialDock{display:none!important}
  width:280px!important;height:124px!important;
 }
 /* End of V96 visual-only overrides. */
+
+
+/* V97 · Infinite wheel = outline traces, NEVER solid extension segments.
+   Keep V95 six wedges exactly unchanged; keep action control independent. */
+#hud #semiRadialDock .dr97TailTraces{
+ pointer-events:none!important;
+ fill:none!important;
+ opacity:.82!important;
+}
+#hud #semiRadialDock .dr97TailTraces path{
+ fill:none!important;
+ pointer-events:none!important;
+ stroke-linecap:round!important;
+ vector-effect:non-scaling-stroke;
+}
+#hud #semiRadialDock .dr97TailOuter{
+ stroke:#79c9dc9c!important;
+ stroke-width:1.5px!important;
+}
+#hud #semiRadialDock .dr97TailInner{
+ stroke:#7cb3c260!important;
+ stroke-width:1.1px!important;
+}
+#hud #semiRadialDock .dr97TailHalo{
+ stroke:#5fe3eb36!important;
+ stroke-width:4px!important;
+ filter:blur(2px)!important;
+}
+#hud #semiRadialDock .dr96FadeTail{
+ display:none!important;fill:none!important;
+}
+/* Place the two buttons INSIDE the clear inner circle rather than covering
+   its six wedges. Their centreline stays at local SVG y=392. */
+#hud #semiRadialDock .dr90Hub{
+ left:298px!important;top:358px!important;
+ width:68px!important;height:68px!important;min-height:68px!important;
+ border-width:1.8px!important;
+}
+#hud #semiRadialDock .dr90Hub::before{inset:6px!important}
+#hud #semiRadialDock .dr90HubGlyph{
+ width:38px!important;height:38px!important;
+}
+#hud #semiRadialDock .dr94Base{
+ left:290px!important;top:352px!important;
+ width:248px!important;height:111px!important;
+ border-radius:58px 65px 27px 27px!important;
+ border-color:#8fc8d28b!important;
+ background:linear-gradient(158deg,#16405675 0%,#0c293e84 52%,#0517279b 100%)!important;
+ box-shadow:inset 0 1px #dcf9ff5a,0 4px 13px #0004!important;
+}
+#hud #semiRadialDock .dr94Base::before{
+ inset:8px 10px 11px!important;
+ border-top-color:#f3d0925e!important;
+}
+/* Action button remains gold and visually dominant, but no longer protrudes
+   over the shared base / radial content. Centre fixed by compensated offsets. */
+#hud{--dr97-action-half:clamp(32px,5dvh,54px)}
+#hud #handButton,
+#hud #handButton.available{
+ width:clamp(64px,10dvh,108px)!important;
+ height:clamp(64px,10dvh,108px)!important;
+ min-height:clamp(64px,10dvh,108px)!important;
+ right:calc(var(--dr94-safe-right) + var(--dr94-action-half) - var(--dr97-action-half))!important;
+ bottom:calc(var(--dr94-control-line) - var(--dr97-action-half))!important;
+ border-width:2px!important;
+}
+#hud #handButton::before{inset:5px!important}
+#hud #handButton svg,
+#hud #handButton .uiIcon{
+ width:clamp(27px,4.3dvh,39px)!important;
+ height:clamp(27px,4.3dvh,39px)!important;
+}
+/* V97 ends: no changed joystick, ring radii or HUD mission layout. */
