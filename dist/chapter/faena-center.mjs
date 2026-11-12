@@ -2,7 +2,7 @@
 // Renders EXISTING M3/M4/M5 controllers; no duplicate spending/progression.
 import {renderM3App} from '../mission3/phone-apps.mjs';
 import {renderPersonnelPremium,nextRequiredRole,personnelAvailability} from './personnel-premium-v76.mjs';
-import {candidatesForRole,candidateById} from './personnel-candidates-v76.mjs';
+import {candidatesForRole,candidateById,activePersonnelCount} from './personnel-candidates-v76.mjs';
 import {renderM4App} from '../mission4/phone-apps.mjs';
 import {renderPatioApp} from '../mission5/patio-ui.mjs';
 import {mission5Readout} from '../mission5/mission-readout.mjs';
@@ -167,20 +167,84 @@ export class FaenaCenterUI{
      m3('m3-catalog');
    case 'patio':return s.mission5?.status&&s.mission5.status!=='locked'?personalTruckActions(s)+renderPatioApp(s,fmt,icon):'<p class="faenaHint">El Patio se habilita en Misión 5.</p>';
    default:{
+    // V82: worksite command center is a visual dashboard over existing routes,
+    // not a second economic/mission/controller implementation.
     const readout=mission5Readout(s);
-    const cards=[
-     ['production','geology','Producción y zonas','Análisis geológico, sondajes, conversión y DTH'],
-     ['logistics','inventory','Galpón logístico','Stock real, Casa Matriz, kits y pedidos'],
-     ['workshop','wrench','Taller técnico','Reafiliado, reparación y recambios'],
-     ['fleet','machine','Patio y flota','Plazas, DrillTruck® y circulación'],
-     ['safety','lock','Seguridad HSEC','Inspecciones y barreras'],
-     ['contracts','objectives','Contratos','Objetivos, etapas y recompensas']
+    const isM5=!!(s.mission5?.status&&s.mission5.status!=='locked');
+    const isM4=!!(s.mission4?.phase&&s.mission4.phase!=='inactive');
+    const isM3=!!(s.mission3?.phase&&s.mission3.phase!=='inactive');
+    const free=!!(s.mission5?.commissionedAt&&s.narrative?.rewardsCollected?.includes('m5'));
+    const stage=isM5?5:isM4?4:isM3?3:s.hsec?.completedAt?2:1;
+    const titles={1:'Un nuevo comienzo',2:'Seguridad HSEC',3:'Tu primer contrato',4:'Operación productiva',5:'Patio y flota'};
+    const captions={
+     1:'Prepara la infraestructura de tu faena.',
+     2:'Revisa las condiciones de seguridad.',
+     3:'Gestiona el contrato y prepara los sondajes.',
+     4:'Controla los sondajes y equipos DTH.',
+     5:'Administra el patio y sus nuevas unidades.'
+    };
+    const missionRoute=free?'production':stage===5?'patio':stage===4?'production':stage===3?'contracts':stage===2?'safety':null;
+    const missionCaption=free?'La faena sigue operando. Continúa expandiéndola.':captions[stage];
+    const nextStep=stage===5&&readout.pending?readout.pending.label:stage===3?'Consulta los objetivos de tu contrato.':stage===4?'Consulta producción y zonas.':stage===2?'Revisa tu panel HSEC.':'Revisa los módulos disponibles.';
+    const pendingOrders=(s.orders||[]).filter(o=>o.status==='dispatched').length;
+    const crew=activePersonnelCount(s);
+    const workshopLvl=workshopLevel(s);
+    const trucks=Number(!!s.mission4?.drillTruck)+Number(!!s.mission5?.personalTruck);
+    const fcIcon=(name,alt='')=>'<img class="fcIcon" width="64" height="64" loading="eager" draggable="false" alt="'+esc(alt)+'" src="./assets/faena-v82/icons/'+name+'.svg">';
+    const operational=[
+     ['production','Producción y zonas','Geología, sondajes y avance DTH',isM3?'Operación disponible':'Desde misión 3'],
+     ['logistics','Galpón logístico','Inventario, entregas y kits','Pedidos activos: '+pendingOrders],
+     ['workshop','Taller técnico','Reafilado, reparaciones y recambios',workshopLvl?'Taller nivel '+workshopLvl:'Taller pendiente'],
+     ['fleet','Patio y flota','Vehículos, estacionamientos y acceso',trucks?trucks+' unidad(es) registrada(s)':'Ver vehículos']
     ];
-    return '<p class="faenaLead">Toda la operación de la faena en una pantalla. Toca un módulo; desde el edificio real abres exactamente la misma interfaz.</p>'+
-     '<div class="faenaMetrics">'+small('Saldo',money(s.cash))+small('Misión',s.mission5?.status&&s.mission5.status!=='locked'?'M5 · '+readout.done+'/'+readout.total:s.mission4?.phase&&s.mission4.phase!=='inactive'?'M4':s.mission3?.phase&&s.mission3.phase!=='inactive'?'M3':'Base')+small('Pedidos activos',(s.orders||[]).filter(o=>o.status==='dispatched').length)+'</div>'+
-     '<div class="faenaGrid">'+cards.map(([id,ico,title,description])=>'<button class="faenaTile" data-faena-route="'+id+'"><span class="faenaTileIcon">'+icon(ico)+'</span><b>'+title+'</b><small>'+description+'</small><span class="faenaTileArrow">›</span></button>').join('')+'</div>'+
-     '<nav class="faenaQuickLinks">'+button('personnel','Personal')+button('headquarters','Casa Matriz')+button('patio','Misión 5 · Patio completo')+'</nav>'+
-     (readout.pending?section('Siguiente objetivo de Misión 5','<p><b>'+esc(readout.pending.label)+'</b></p><p>'+esc(readout.pending.hint)+'</p>'):'');
+    const management=[
+     ['contracts','Contratos','Objetivos y recompensas','Ver contratos'],
+     ['personnel','Personal','Contratación y equipo',crew+' integrante(s)'],
+     ['safety','Seguridad HSEC','Inspecciones y controles','Ver seguridad'],
+     ['headquarters','Casa Matriz','Productos y suministros','Solicitar productos']
+    ];
+    const renderTile=(tile,kind)=>{
+     const [id,label,description,meta]=tile;
+     const feature=(id===missionRoute||(stage===3&&id==='personnel'&&crew===0))?' fcTile--featured':'';
+     return '<button type="button" class="fcTile fcTile--'+kind+feature+'" data-faena-route="'+id+'" data-fc-art="'+id+'" aria-label="Abrir '+esc(label)+'">'+
+      '<span class="fcTilePhoto" aria-hidden="true"></span>'+
+      '<span class="fcTileCopy"><span class="fcTileBadge">'+fcIcon(id)+'</span>'+
+      '<span class="fcTileWords"><b>'+esc(label)+'</b><small>'+esc(description)+'</small></span>'+
+      '<span class="fcTileArrow" aria-hidden="true">›</span></span>'+
+      '<span class="fcTileStatus">'+esc(meta)+'</span></button>';
+    };
+    const missionAction=missionRoute?'data-faena-route="'+missionRoute+'"':'data-faena-close';
+    const metrics=[
+     ['team','Personal activo',crew],
+     ['orders','Pedidos en camino',pendingOrders],
+     ['workshop','Taller técnico',workshopLvl?'Nivel '+workshopLvl:'Pendiente'],
+     ['safety','Seguridad HSEC','Ver panel']
+    ];
+    return '<section class="fcHub" aria-label="Centro de mando de la faena">'+
+     '<div class="fcHubWorkspace">'+
+      '<aside class="fcHubRail" aria-label="Estado y misión">'+
+       '<button class="fcMission" type="button" '+missionAction+' data-fc-stage="'+stage+'" aria-label="Continuar misión actual">'+
+        '<span class="fcMissionArt" aria-hidden="true"></span>'+
+        '<span class="fcMissionBadge">'+(free?'JUEGO LIBRE':'MISIÓN '+stage)+'</span>'+
+        '<strong>'+esc(free?'Faena en operación':titles[stage])+'</strong>'+
+        '<small>'+esc(missionCaption)+'</small>'+
+        '<span class="fcMissionAction">Continuar <span aria-hidden="true">›</span></span>'+
+       '</button>'+
+       '<div class="fcRailTitle">RESUMEN OPERATIVO</div>'+
+       '<div class="fcRailMetrics">'+metrics.map(([id,title,value])=>
+        '<div class="fcRailMetric">'+fcIcon(id)+'<span>'+esc(title)+'</span><b>'+esc(value)+'</b></div>'
+       ).join('')+'</div>'+
+       '<button type="button" class="fcNextStep" '+missionAction+'><span class="fcNextLabel">SIGUIENTE ACCIÓN</span>'+
+        '<b>'+esc(readout.pending&&stage===5?readout.pending.label:nextStep)+'</b>'+
+        '<span>Ir a '+esc(missionRoute?routes[missionRoute]:'la faena')+' <span aria-hidden="true">›</span></span></button>'+
+      '</aside>'+
+      '<div class="fcHubBoard" aria-label="Accesos de operación y gestión">'+
+       '<div class="fcGroupTitle"><span>OPERACIONES</span><small>Instalaciones y equipos</small></div>'+
+       '<div class="fcOperationGrid">'+operational.map(x=>renderTile(x,'operation')).join('')+'</div>'+
+       '<div class="fcGroupTitle fcGroupTitle--management"><span>GESTIÓN Y APOYO</span><small>Servicios de faena</small></div>'+
+       '<div class="fcManagementGrid">'+management.map(x=>renderTile(x,'management')).join('')+'</div>'+
+      '</div>'+
+     '</div></section>';
    }
   }
  }
@@ -192,7 +256,16 @@ export class FaenaCenterUI{
   const prev=this.view?route:route==='overview'?'': 'overview';
   const currentScroll=this.lastKey===route+':'+this.view?this.host.querySelector('.faenaBody')?.scrollTop||0:0;
   const isPersonnel=route==='personnel'&&!this.view;
+  const isHub=route==='overview'&&!this.view;
   const pageMarkup=this.pageHtml(s,t,fmt,icon);
+  if(isHub&&this._lastHubPage===pageMarkup&&this.host.querySelector('.fcHub')){
+   const cash=this.host.querySelector('.fcHeaderCash strong');
+   const energy=this.host.querySelector('.fcHeaderEnergy strong');
+   if(cash)cash.textContent=money(s.cash);
+   if(energy)energy.textContent=Math.round(s.energy||0)+'/20';
+   return;
+  }
+  this._lastHubPage=isHub?pageMarkup:null;
   if(isPersonnel&&this._lastPersonnelPage===pageMarkup&&this.host.querySelector('.pvRoot')){
    const badge=this.host.querySelector('.pvHeaderFunds');
    if(badge&&badge.textContent!==money(s.cash))badge.textContent=money(s.cash);
@@ -201,12 +274,14 @@ export class FaenaCenterUI{
   this._lastPersonnelPage=isPersonnel?pageMarkup:null;
   const personnelTitle=isPersonnel?'<div class="pvScreenIdentity"><span class="pvScreenGlyph">'+icon('dock-users')+'</span><div><h2>Personal</h2><small>CONTRATACIÓN Y GESTIÓN DEL EQUIPO</small></div></div>':'<div><small>DRILL RUN · OPERACIÓN</small><h2>'+esc(title||'Centro de Faena')+'</h2></div>';
   const personnelCash=isPersonnel?'<span class="pvHeaderFunds" aria-label="Saldo actual">'+money(s.cash)+'</span>':'';
-  this.host.innerHTML='<div class="faenaDialog '+(isPersonnel?'pvDialog':'')+'" role="dialog" aria-modal="true" aria-label="Centro de Faena">'+
-   '<header class="faenaHeader">'+personnelTitle+
-   '<div class="faenaHeaderActions">'+personnelCash+(prev?'<button data-faena-back aria-label="Volver">‹ Volver</button>':'')+
+  const hubTitle=isHub?'<div class="fcHeaderIdentity"><span class="fcHeaderEmblem"><img src="./assets/faena-v82/icons/hub.svg" alt="" width="64" height="64"></span><span><small>OPERACIÓN DEL PROYECTO</small><h2>Centro de Faena</h2></span></div>':null;
+  const hubResources=isHub?'<span class="fcHeaderCash"><span>Saldo</span><strong>'+money(s.cash)+'</strong></span><span class="fcHeaderEnergy"><span>'+icon('energy')+'</span><strong>'+Math.round(s.energy||0)+'/20'+'</strong></span>':'';
+  this.host.innerHTML='<div class="faenaDialog '+(isPersonnel?'pvDialog':isHub?'fcOverviewDialog':'')+'" role="dialog" aria-modal="true" aria-label="Centro de Faena">'+
+   '<header class="faenaHeader">'+(hubTitle||personnelTitle)+
+   '<div class="faenaHeaderActions">'+(isHub?hubResources:personnelCash)+(prev?'<button data-faena-back aria-label="Volver">‹ Volver</button>':'')+
    '<button data-faena-close aria-label="Cerrar Centro de Faena">✕</button></div></header>'+
    '<div class="faenaBody"><div class="faenaContent">'+pageMarkup+'</div></div>'+
-   (isPersonnel?'':'<footer class="faenaFooter"><button data-faena-route="overview">'+icon('inventory')+' Centro de Faena</button>'+
+   (isPersonnel||isHub?'':'<footer class="faenaFooter"><button data-faena-route="overview">'+icon('inventory')+' Centro de Faena</button>'+
    '<button data-faena-route="production">'+icon('geology')+' Producción</button>'+
    '<button data-faena-route="logistics">'+icon('store')+' Logística</button>'+
    '<button data-faena-route="workshop">'+icon('wrench')+' Taller</button></footer>')+'</div>';
