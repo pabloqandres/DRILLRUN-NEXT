@@ -1,0 +1,246 @@
+/* V101 · Approved Personnel polish: concise skill rows and centred pager.
+   Scoped to Personal only; no portrait, candidate, mission or economy changes. */
+
+/* Three oversized skill cards become a compact, readable three-row list.
+   Keep exactly the same skill icons, labels and 5-point values. */
+#faenaCenter .pvDetail{
+ gap:clamp(3px,.4dvh,6px)!important;
+}
+#faenaCenter .pvSkillsHeader{
+ flex:0 0 auto!important;
+ min-height:17px!important;
+ padding:2px 0!important;
+}
+#faenaCenter .pvQuickSkills{
+ display:grid!important;
+ grid-template-columns:minmax(0,1fr)!important;
+ grid-auto-flow:row!important;
+ grid-template-rows:repeat(3,26px)!important;
+ gap:3px!important;
+ padding:0!important;
+ width:100%!important;
+ min-width:0!important;
+ min-height:0!important;
+ flex:0 0 auto!important;
+}
+#faenaCenter .pvQuickSkill{
+ display:grid!important;
+ grid-template-columns:22px minmax(0,1fr) auto!important;
+ grid-template-rows:minmax(0,1fr)!important;
+ gap:7px!important;
+ align-items:center!important;
+ justify-items:stretch!important;
+ justify-content:initial!important;
+ width:100%!important;
+ height:26px!important;
+ min-height:26px!important;
+ max-height:26px!important;
+ min-width:0!important;
+ padding:2px 9px!important;
+ margin:0!important;
+ box-sizing:border-box!important;
+ background:linear-gradient(90deg,#174056b3,#0f3045a8)!important;
+ border:0!important;
+ border-bottom:1px solid #499bb28f!important;
+ border-radius:5px!important;
+ box-shadow:none!important;
+}
+#faenaCenter .pvQuickSkill .pvSkillGlyph{
+ display:flex!important;
+ grid-column:1!important;
+ grid-row:1!important;
+ justify-self:center!important;
+ align-items:center!important;
+ justify-content:center!important;
+ width:17px!important;
+ height:17px!important;
+ min-width:17px!important;
+ min-height:17px!important;
+ flex:none!important;
+ color:#8ce6f2!important;
+}
+#faenaCenter .pvQuickSkill .pvSkillGlyph svg,
+#faenaCenter .pvQuickSkill .pvSkillGlyph .uiIcon{
+ display:block!important;
+ width:17px!important;
+ height:17px!important;
+ max-width:17px!important;
+ max-height:17px!important;
+}
+#faenaCenter .pvQuickSkillLabel{
+ display:block!important;
+ grid-column:2!important;
+ grid-row:1!important;
+ width:auto!important;
+ min-width:0!important;
+ max-width:100%!important;
+ margin:0!important;
+ padding:0!important;
+ font-size:clamp(10px,.84vw,12px)!important;
+ font-weight:650!important;
+ line-height:1.05!important;
+ white-space:nowrap!important;
+ overflow:hidden!important;
+ text-overflow:ellipsis!important;
+ text-align:left!important;
+}
+#faenaCenter .pvQuickSkill .pvMiniPips{
+ grid-column:3!important;
+ grid-row:1!important;
+ align-self:center!important;
+ justify-self:end!important;
+ justify-content:flex-end!important;
+ display:flex!important;
+ flex:0 0 auto!important;
+ gap:4px!important;
+ margin:0!important;
+ padding:0!important;
+ min-width:0!important;
+ line-height:0!important;
+}
+#faenaCenter .pvQuickSkill .pvMiniPips i{
+ display:block!important;
+ width:7px!important;
+ height:7px!important;
+ min-width:7px!important;
+ min-height:7px!important;
+ border-radius:50%!important;
+}
+#faenaCenter .pvMoreDetails{
+ margin-top:1px!important;
+}
+
+/* Staff pagination: both controls use equal boxes with symmetric SVG
+   chevrons (never text glyphs with inconsistent font baselines). */
+#faenaCenter .pvTeamPager{
+ flex:0 0 auto!important;
+ display:grid!important;
+ grid-template-columns:32px minmax(34px,auto) 32px!important;
+ grid-template-rows:minmax(0,1fr)!important;
+ justify-content:center!important;
+ justify-items:center!important;
+ align-items:center!important;
+ align-content:center!important;
+ align-self:stretch!important;
+ height:100%!important;
+ min-height:0!important;
+ gap:5px!important;
+ padding:0 2px!important;
+ margin:0!important;
+ box-sizing:border-box!important;
+}
+#faenaCenter .pvTeamPager button{
+ display:flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+ flex:0 0 32px!important;
+ position:static!important;
+ transform:none!important;
+ inset:auto!important;
+ vertical-align:middle!important;
+ width:32px!important;
+ height:36px!important;
+ min-width:32px!important;
+ max-width:32px!important;
+ min-height:36px!important;
+ max-height:36px!important;
+ padding:0!important;
+ margin:0!important;
+ box-sizing:border-box!important;
+ line-height:0!important;
+ border-radius:9px!important;
+ background:linear-gradient(150deg,#174960,#103147)!important;
+ border:1.3px solid #5cabc6!important;
+ color:#e7f8ff!important;
+ box-shadow:inset 0 1px #ffffff26!important;
+ cursor:pointer!important;
+}
+#faenaCenter .pvTeamPager button:disabled{
+ opacity:.62!important;
+ color:#b5d2dc!important;
+ border-color:#5a899b!important;
+ cursor:default!important;
+ filter:none!important;
+}
+#faenaCenter .pvTeamPager button .pvTeamChevron{
+ position:static!important;
+ display:block!important;
+ flex:0 0 17px!important;
+ width:17px!important;
+ height:17px!important;
+ min-width:17px!important;
+ min-height:17px!important;
+ margin:0!important;
+ padding:0!important;
+ transform:none!important;
+ fill:none!important;
+ stroke:currentColor!important;
+ stroke-width:2.5!important;
+ stroke-linecap:round!important;
+ stroke-linejoin:round!important;
+ pointer-events:none!important;
+}
+#faenaCenter .pvTeamPage{
+ display:grid!important;
+ place-items:center!important;
+ align-self:center!important;
+ justify-self:center!important;
+ min-width:34px!important;
+ min-height:36px!important;
+ width:auto!important;
+ margin:0!important;
+ padding:0!important;
+ box-sizing:border-box!important;
+ color:#f5ca71!important;
+ font-size:clamp(11px,1vw,14px)!important;
+ line-height:1!important;
+ font-weight:900!important;
+ font-variant-numeric:tabular-nums!important;
+ white-space:nowrap!important;
+ text-align:center!important;
+}
+
+/* Short mobile landscape retains rows and an identically centred pager. */
+@media(orientation:landscape) and (max-height:560px){
+ #faenaCenter .pvQuickSkills{
+  grid-template-rows:repeat(3,23px)!important;
+  gap:2px!important;
+ }
+ #faenaCenter .pvQuickSkill{
+  height:23px!important;
+  min-height:23px!important;
+  max-height:23px!important;
+  padding:1px 6px!important;
+  grid-template-columns:19px minmax(0,1fr) auto!important;
+  gap:5px!important;
+ }
+ #faenaCenter .pvQuickSkill .pvSkillGlyph,
+ #faenaCenter .pvQuickSkill .pvSkillGlyph svg,
+ #faenaCenter .pvQuickSkill .pvSkillGlyph .uiIcon{
+  width:15px!important;height:15px!important;
+  min-width:15px!important;min-height:15px!important;
+ }
+ #faenaCenter .pvQuickSkillLabel{font-size:clamp(9px,.95vw,11px)!important}
+ #faenaCenter .pvQuickSkill .pvMiniPips{gap:3px!important}
+ #faenaCenter .pvQuickSkill .pvMiniPips i{
+  width:6px!important;height:6px!important;
+  min-width:6px!important;min-height:6px!important;
+ }
+ #faenaCenter .pvTeamPager{
+  grid-template-columns:26px minmax(29px,auto) 26px!important;
+  gap:3px!important;
+ }
+ #faenaCenter .pvTeamPager button{
+  width:26px!important;height:30px!important;
+  min-width:26px!important;max-width:26px!important;
+  min-height:30px!important;max-height:30px!important;
+ }
+ #faenaCenter .pvTeamPager button .pvTeamChevron{
+  width:15px!important;height:15px!important;
+  min-width:15px!important;min-height:15px!important;
+ }
+ #faenaCenter .pvTeamPage{
+  min-width:29px!important;min-height:30px!important;
+  font-size:11px!important;
+ }
+}
