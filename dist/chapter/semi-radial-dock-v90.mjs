@@ -201,7 +201,12 @@ export function installSemiRadialDock({
   if(!open||(event.pointerType==='mouse'&&event.button!==0))return;
   if(event.target.closest('.dr90Hub'))return;
   if(!event.target.closest('.dr90Sector,.dr90Option'))return;
-  drag={id:event.pointerId,lastAngle:angleAt(event),offset:0,
+  const sector=event.target.closest('.dr90Sector');
+  const sectorStep=sector?.classList?.contains('dr90Sector--left')?-1:
+   sector?.classList?.contains('dr90Sector--center')?0:
+   sector?.classList?.contains('dr90Sector--right')?1:
+   sector?.classList?.contains('dr94Sector--far')?2:null;
+  drag={id:event.pointerId,lastAngle:angleAt(event),offset:0,sectorStep,
    moved:false,lastShiftAt:Date.now()-DRAG_MIN_STEP_MS};
   root.classList.add('is-dragging');
  });
@@ -232,6 +237,14 @@ export function installSemiRadialDock({
     centerIndex=semiRadialWrap(centerIndex-Math.sign(delta),SEMI_RADIAL_ITEMS.length);
     feedback('skill');drag.moved=true;
    }
+  }
+  if(!cancelled&&!drag.moved&&drag.sectorStep!==null){
+   // Whole painted wedge is a target, not only the small icon.
+   const index=semiRadialWrap(centerIndex+drag.sectorStep,SEMI_RADIAL_ITEMS.length);
+   const option=nodes[index].querySelector('button');
+   drag=null;root.classList.remove('is-dragging');render();
+   select(option);
+   return;
   }
   if(drag.moved)suppressChoiceClickUntil=Date.now()+440;
   drag=null;root.classList.remove('is-dragging');render();
