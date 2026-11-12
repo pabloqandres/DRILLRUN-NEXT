@@ -485,3 +485,11 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Iconografía incorporada a Administrador de Contrato en encabezado y 22 habilidades (11 trazados semánticos compartidos) en tarjetas/ficha. El retrato se muestra como imagen con relación nativa, `object-fit:cover`, sin animación ni transiciones de dimensiones.
 - CSS V81 cargado al final: tres tarjetas más angostas con seleccionado dorado, jerarquía compacta, ficha derecha sin overflow horizontal ni pestañas cortadas, retrato y descripción de personaje reordenados y adaptabilidad a Android apaisado.
 - Ningún cambio en producción, misiones, contratación, economía, salario, Cloud Save o assets GLB. PR/CI focal y revisión visual Android pendientes.
+
+## 2026-11-11 — V82 · Centro de Faena cinematográfico
+- Vista overview completamente rediseñada, no un mockup: misión con escena propia, resumen operativo real, 4 operaciones con fotos, 4 accesos de gestión, recursos en cabecera, sin texto redundante ni dock inferior repetido.
+- Ocho imágenes WebP independientes optimizadas (~116 KiB), más 14 pictogramas vectoriales originales sin marcas, bajo `dist/assets/faena-v82/`.
+- Cada botón abre la ruta original: producción, logística, taller, patio/flota, contratos, Personal V81, seguridad HSEC, Casa Matriz. Misión 5 Patio continúa accesible desde Patio/Flota; no desaparecen funciones.
+- `faena-hub-v82.css` presenta marcos pronunciados, brillos cian/amarillo, fondo de faena, desplazamiento táctil y layout para Android apaisado; no afecta a Personal.
+- Vista estable en actualizaciones periódicas sin cambios del contenido. Sin modificar compras, contratos, dinero, XP, HSEC, misiones, GLB ni Cloud Save.
+- Proceso: rama `chatgpt/v82-faena-command-center`, PR y CI focal; QA visual Android a cargo del usuario después del autodeploy a producción.
