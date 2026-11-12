@@ -175,7 +175,7 @@
 }
 /* Critical: the frame has fixed aspect ratio, and CSS only clips/crops.
    No "scaleX/Y", stretched background atlas, cover + independent transforms,
-   or image-rendering:pixelated. Scalable v76 SVG keeps perfect sharp edges. */
+   or low-quality nearest-neighbor scaling. Scalable vector illustrations stay sharp. */
 #faenaCenter .pvArtPortrait{
  background-image:none!important;
  background-color:#17384c!important;
