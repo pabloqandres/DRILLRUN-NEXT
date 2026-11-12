@@ -360,15 +360,15 @@ body:not([data-phase="play"]) #hud #semiRadialDock{display:none!important}
 #hud #joystick{
  left:var(--dr94-safe-left)!important;
  bottom:var(--dr94-safe-bottom)!important;
- width:calc(2 * var(--dr94-joy-half))!important;
- height:calc(2 * var(--dr94-joy-half))!important;
+ width:clamp(88px,16dvh,112px)!important;
+ height:clamp(88px,16dvh,112px)!important;
 }
 #hud #handButton{
  right:var(--dr94-safe-right)!important;
  bottom:calc(var(--dr94-safe-bottom) + var(--dr94-joy-half) - var(--dr94-action-half))!important;
- width:calc(2 * var(--dr94-action-half))!important;
- height:calc(2 * var(--dr94-action-half))!important;
- min-height:calc(2 * var(--dr94-action-half))!important;
+ width:clamp(76px,12dvh,88px)!important;
+ height:clamp(76px,12dvh,88px)!important;
+ min-height:clamp(76px,12dvh,88px)!important;
  z-index:41!important;
  border:2px solid #edcf91!important;
  background:radial-gradient(circle at 31% 21%,#497c92 0%,#1b5066 23%,#0b304b 56%,#051a2c 91%)!important;
@@ -397,10 +397,10 @@ body:not([data-phase="play"]) #hud #semiRadialDock{display:none!important}
 #hud #semiRadialDock{
  --dr94-scale:1;
  left:auto!important;
- right:calc(var(--dr94-safe-right) + var(--dr94-action-half) - 45px * var(--dr94-scale))!important;
- bottom:calc(var(--dr94-safe-bottom) + var(--dr94-joy-half) - 38px * var(--dr94-scale))!important;
- width:calc(440px * var(--dr94-scale))!important;
- height:calc(285px * var(--dr94-scale))!important;
+ right:calc(var(--dr94-safe-right) + var(--dr94-action-half) - var(--dr94-center-offset,45px))!important;
+ bottom:calc(var(--dr94-safe-bottom) + var(--dr94-joy-half) - var(--dr94-bottom-offset,38px))!important;
+ width:var(--dr94-dock-width,440px)!important;
+ height:var(--dr94-dock-height,285px)!important;
  max-width:none!important;
  transform:none!important;
  z-index:36!important;
