@@ -65,11 +65,16 @@ function wheelSvg(){
   '<path class="dr90CenterAccent" d="'+arcPath(-63,-49,g.outerRadius-6)+'"/>'+
   '</svg>';
 }
-const hubSvg='<svg class="dr90HubGlyph" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+
- '<circle cx="24" cy="24" r="15.5" stroke-width="1.6" opacity=".9"/>'+
- '<path d="M24 5.5v7m0 23v7M5.5 24h7m23 0h7" stroke-width="2"/>'+
- '<path d="M24 16.5 31.5 24 24 31.5 16.5 24Z" stroke-width="2"/>'+
- '<circle cx="24" cy="24" r="2.5" fill="currentColor" stroke="none"/></svg>';
+const hubSvg='<svg class="dr90HubGlyph" viewBox="0 0 48 48" fill="currentColor" aria-hidden="true">'+
+ '<rect x="10" y="10" width="7" height="7" rx="1.5"/>'+
+ '<rect x="20.5" y="10" width="7" height="7" rx="1.5"/>'+
+ '<rect x="31" y="10" width="7" height="7" rx="1.5"/>'+
+ '<rect x="10" y="20.5" width="7" height="7" rx="1.5"/>'+
+ '<rect x="20.5" y="20.5" width="7" height="7" rx="1.5"/>'+
+ '<rect x="31" y="20.5" width="7" height="7" rx="1.5"/>'+
+ '<rect x="10" y="31" width="7" height="7" rx="1.5"/>'+
+ '<rect x="20.5" y="31" width="7" height="7" rx="1.5"/>'+
+ '<rect x="31" y="31" width="7" height="7" rx="1.5"/></svg>';
 
 export function installSemiRadialDock({
  anchor=typeof document!=='undefined'?document.getElementById('bottomNav'):null,
@@ -118,6 +123,10 @@ export function installSemiRadialDock({
   const scale=clamp(Math.min(1,(vh-103)/285,(vw-190)/440),.77,1);
   root.style.setProperty('--dr94-scale',scale.toFixed(4));
   root.style.setProperty('--dr90-scale',scale.toFixed(4));
+  root.style.setProperty('--dr94-dock-width',(440*scale).toFixed(2)+'px');
+  root.style.setProperty('--dr94-dock-height',(285*scale).toFixed(2)+'px');
+  root.style.setProperty('--dr94-center-offset',(45*scale).toFixed(2)+'px');
+  root.style.setProperty('--dr94-bottom-offset',(38*scale).toFixed(2)+'px');
  };
  const render=(fractionalAngle=0)=>{
   for(let i=0;i<nodes.length;i++){
