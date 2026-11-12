@@ -6,7 +6,7 @@ const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 
 function gestureHarness(){
  const make=(name='node')=>({
-  name,attrs:{},dataset:{},style:{setProperty(){}},handlers:{},tabIndex:-1,
+  name,attrs:{},dataset:{},style:{setProperty(k,v){this[k]=v;}},handlers:{},tabIndex:-1,
   addEventListener(k,fn){(this.handlers[k]??=[]).push(fn);},
   removeEventListener(k,fn){this.handlers[k]=(this.handlers[k]||[]).filter(f=>f!==fn);},
   setAttribute(k,v){this.attrs[k]=v;},
