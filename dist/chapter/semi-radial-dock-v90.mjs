@@ -1,4 +1,4 @@
-// V96 · Six-sector exact polar wheel with endless, softly fading endpoints.
+// V97 · Six-sector exact polar wheel with delicate rim-only infinity traces.
 // Navigation handlers remain the original game's source of truth.
 import {icon} from './icons.mjs';
 
@@ -77,8 +77,17 @@ function wheelSvg(){
   '<mask id="dr96TailLower" maskUnits="userSpaceOnUse" x="0" y="0" width="680" height="630"><rect x="0" y="0" width="680" height="630" fill="url(#dr96TailLowerGradient)"/></mask>'+
   '<mask id="dr96TailUpper" maskUnits="userSpaceOnUse" x="0" y="0" width="680" height="630"><rect x="0" y="0" width="680" height="630" fill="url(#dr96TailUpperGradient)"/></mask>'+
   '</defs>'+
-  '<path class="dr96FadeTail dr96FadeTail--lower" mask="url(#dr96TailLower)" d="'+radialSegmentPath(-103,-90)+'"/>'+
-  '<path class="dr96FadeTail dr96FadeTail--upper" mask="url(#dr96TailUpper)" d="'+radialSegmentPath(0,17)+'"/>'+
+  // V97: only thin concentric rim traces, not solid annular extension panels.
+  '<g class="dr97TailTraces dr97TailTraces--lower" mask="url(#dr96TailLower)" aria-hidden="true">'+
+   '<path class="dr97TailHalo" d="'+arcPath(-107,-90,g.outerRadius)+'"/>'+
+   '<path class="dr97TailOuter" d="'+arcPath(-107,-90,g.outerRadius)+'"/>'+
+   '<path class="dr97TailInner" d="'+arcPath(-107,-90,g.innerRadius)+'"/>'+
+  '</g>'+
+  '<g class="dr97TailTraces dr97TailTraces--upper" mask="url(#dr96TailUpper)" aria-hidden="true">'+
+   '<path class="dr97TailHalo" d="'+arcPath(0,21,g.outerRadius)+'"/>'+
+   '<path class="dr97TailOuter" d="'+arcPath(0,21,g.outerRadius)+'"/>'+
+   '<path class="dr97TailInner" d="'+arcPath(0,21,g.innerRadius)+'"/>'+
+  '</g>'+
   sectors+glass+rims+
   '<path class="dr92InnerRim" mask="url(#dr96FadeLower)" d="'+arcPath(-90,-75,g.innerRadius+3.5)+'"/>'+
   '<path class="dr92InnerRim" d="'+arcPath(-75,-15,g.innerRadius+3.5)+'"/>'+
