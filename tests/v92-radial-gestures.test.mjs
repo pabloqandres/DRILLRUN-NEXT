@@ -30,7 +30,7 @@ function gestureHarness(){
   const node=make('orbit-'+i),button=make('option-'+i);
   button.dataset.semiId=['catalog','production','logistics','workshop','fleet','contracts','personnel','safety','headquarters','overview'][i];
   node.querySelector=()=>button;
-  button.closest=q=>q==='.dr90Orbit'?node:q==='.dr90Option'?button:null;
+  button.closest=q=>q.split(',').some(part=>part.trim()==='.dr90Orbit')?node:q.split(',').some(part=>part.trim()==='.dr90Option')?button:null;
   return node;
  });
  const options=orbits.map(n=>n.querySelector('button'));
