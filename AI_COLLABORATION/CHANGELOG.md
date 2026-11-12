@@ -505,3 +505,8 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Captura de usuario V83 contradijo su referencia: secciones cuadradas flotantes, no una rueda. V84 reemplaza cada sección por path SVG curvo, simetría central gold / segmentos cyan inclinados, guías sin fondo gris.
 - Dos sectores fantasma laterales con blur/gradiente radial; botón inferior pictograma excavadora. Forma adaptativa paisaje Android, más baja que tarjetas anteriores.
 - CSS aislado al final; la lógica de rotación, navegación, sonidos y hápticos V83 permanece sin modificaciones. Tests de estructura SVG 3+2 y regressiones V83–V81.
+
+## 2026-11-12 — V85 · Icono Restablecer vista y espacio al joystick
+- Cambiado solo ícono de `#cameraHome`: flecha circular más retícula (no cámara fotográfica); accesibilidad `Restablecer vista`.
+- Nuevo `reset-view-control-v85.css` posterior a V84: botón independiente con mayor distancia horizontal del joystick, dimensión táctil de 46 px escritorio / 42 px landscape / 38 px estrecho, contraste cian y foco visible, sin animación ociosa.
+- Función JS original de reinicio de cámara intacta. Ningún cambio de lógica, navegación, misiones, saldo o Cloud Save. Test focal V85 y regresión UI.

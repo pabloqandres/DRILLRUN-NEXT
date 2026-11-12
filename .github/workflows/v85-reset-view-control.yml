@@ -1,0 +1,20 @@
+name: "V85 · Reset view icon and joystick clearance"
+on:
+  push:
+    branches: [chatgpt/v85-reset-view-control]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  camera-home-v85:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Reset-view icon and UI regressions
+        run: |
+          node --check dist/chapter/game.mjs
+          node --test tests/v85-reset-view-control.test.mjs tests/v84-true-semiradial-arc.test.mjs tests/v83-semiradial-dock.test.mjs tests/v82-faena-command-center.test.mjs
