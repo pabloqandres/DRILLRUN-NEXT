@@ -546,3 +546,9 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Centro de Faena añade acceso «Historial financiero»; tocar el saldo HUD abre la consulta. Filtros Todos, Ingresos, Gastos, Transferencias, Eventos.
 - Historial conservado limitado a 100 registros y posibles operaciones antiguas faltantes, informados dentro de la pantalla. Módulo exportable para futuras apps.
 - Tests de pureza, filtros, clasificación y arranque. Producción sujeta a verificación.
+
+## 2026-11-12 — V92 · Radial touch y detalle premium
+- Corregido swipe sobre superficies SVG circulares, continuado por window pointermove y fallback en pointerup; ahora el dedo puede recorrer el arco fuera del icono. Menor umbral con detents controlados; flechas/tap/sonido siguen operativos.
+- Menú desplazado hacia arriba, con margen visible respecto al borde del teléfono, sin cambiar la forma del arco.
+- Tres gajos con glass/reflejos de borde precisos, centro resaltado y hub con aro más trabajado, sin incorporar capas CSS extra o pictogramas nuevos.
+- Solo `semi-radial-dock-v90.mjs`, `semi-radial-command-v90.css`, pruebas y documentación; código financiero y de misión intactos.
