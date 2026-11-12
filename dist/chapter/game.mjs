@@ -62,7 +62,7 @@ import {CinematicRecorder} from '../camera/recorder.mjs';
 import {DesertWind} from '../camera/ambient.mjs';
 import {WorksiteAudio} from '../audio/worksite-audio.mjs';
 import {CharacterSelectFeedback} from '../audio/character-select-feedback-v68.mjs';
-import {installSemiRadialDock} from './semi-radial-dock-v83.mjs';
+import {installSemiRadialDock} from './semi-radial-dock-v90.mjs';
 import {officeRescueTarget} from './player-rescue-v86.mjs';
 import {tryImmersive,canRequestImmersive,isImmersive} from './immersive-entry-v70.mjs';
 import {CinematicCharacterSelector} from './character-select-v68.mjs';
