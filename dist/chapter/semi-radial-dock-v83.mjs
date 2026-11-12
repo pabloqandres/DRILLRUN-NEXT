@@ -45,6 +45,13 @@ export function installSemiRadialDock({
  root.setAttribute('aria-label','Accesos rápidos de la faena');
  root.innerHTML='<div class="drSemiFan" role="group" aria-label="Rueda semirradial de navegación">'+
   '<div class="drSemiArc" aria-hidden="true"></div>'+
+  '<svg class="drSemiRibbon" viewBox="0 0 400 116" preserveAspectRatio="none" aria-hidden="true">'+
+   '<defs><linearGradient id="drSemiSideFill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#133e55" stop-opacity=".96"/><stop offset="1" stop-color="#071c2d" stop-opacity=".96"/></linearGradient><linearGradient id="drSemiCenterFill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#6a4b22" stop-opacity=".97"/><stop offset="1" stop-color="#1d3142" stop-opacity=".97"/></linearGradient></defs>'+
+   '<path class="drSemiSegment drSemiSegmentLeft" d="M40 88 Q85 42 145 24 L149 77 Q99 83 65 107 Z"/>'+
+   '<path class="drSemiSegment drSemiSegmentActive" d="M145 24 Q200 5 255 24 L251 77 Q200 61 149 77 Z"/>'+
+   '<path class="drSemiSegment drSemiSegmentRight" d="M255 24 Q315 42 360 88 L335 107 Q301 83 251 77 Z"/>'+
+   '<path class="drSemiRim" d="M40 88 Q200 -27 360 88"/>'+
+   '</svg>'+
   SEMI_RADIAL_ITEMS.map(item=>
    '<button class="drSemiItem" type="button" data-semi-id="'+item.id+
    '" data-step="off" tabindex="-1" aria-hidden="true">'+
@@ -57,11 +64,9 @@ export function installSemiRadialDock({
   '<div class="drSemiProgress" aria-hidden="true"></div>'+
   '</div>'+
   '<button class="drSemiTrigger" type="button" aria-expanded="false" aria-label="Abrir menú semirradial" title="Menú de la faena">'+
-  '<svg class="drSemiExcavator" viewBox="0 0 64 58" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">'+
-   '<path d="M8 40h31l-4-13H17l-4 13zM23 27v-9h10v9M6 46h34"/>'+
-   '<path d="M31 22 41 7l10-3 7 14-13 9M45 27l9 5-6 8-8-4"/>'+
-   '<rect x="4" y="42" width="39" height="11" rx="5.5"/>'+
-   '<circle cx="12" cy="47.5" r="2"/><circle cx="22" cy="47.5" r="2"/><circle cx="33" cy="47.5" r="2"/>'+
+  '<svg class="drSemiHubIcon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+
+   '<circle cx="24" cy="24" r="17"/><path d="M24 7v5m0 24v5M7 24h5m24 0h5"/>'+
+   '<path d="M24 15l9 9-9 9-9-9 9-9z"/><circle cx="24" cy="24" r="3.2"/>'+
    '</svg>'+
   '<span class="drSemiTriggerMark" aria-hidden="true">⌃</span></button>';
  anchor.insertAdjacentElement('afterend',root);
@@ -70,9 +75,9 @@ export function installSemiRadialDock({
  const fan=root.querySelector('.drSemiFan');
  const items=Array.from(root.querySelectorAll('.drSemiItem'));
  const progress=root.querySelector('.drSemiProgress');
- let centerIndex=2,open=false,closed=false;
+ let centerIndex=0,open=false,closed=false;
  let triggerDown=false,triggerLong=false,triggerDragged=false;
- let touchX=0,longTimer=null,suppressTriggerClick=false,fanDrag=null,suppressItemClickUntil=0;
+ let touchX=0,longTimer=null,suppressTriggerClick=false,fanDrag=null,suppressItemClickUntil=0,lastDragRotationAt=0;
  const feedback=kind=>{try{onFeedback(kind);}catch{}};
  const render=()=>{
   const total=SEMI_RADIAL_ITEMS.length;
@@ -124,12 +129,13 @@ export function installSemiRadialDock({
    if(!triggerDown)return;
    triggerLong=true;
    setOpen(true);
-  },290);
+  },320);
  });
  trigger.addEventListener('pointermove',event=>{
   if(!triggerDown)return;
   const dx=event.clientX-touchX;
-  if(Math.abs(dx)>=38){
+  if(Math.abs(dx)>=58&&Date.now()-lastDragRotationAt>=190){
+   lastDragRotationAt=Date.now();
    clearTimeout(longTimer);
    triggerDragged=true;
    if(!open)setOpen(true);
@@ -159,7 +165,8 @@ export function installSemiRadialDock({
  fan.addEventListener('pointermove',event=>{
   if(!open||!fanDrag)return;
   const dx=event.clientX-fanDrag.x;
-  if(Math.abs(dx)>=38){
+  if(Math.abs(dx)>=58&&Date.now()-lastDragRotationAt>=190){
+   lastDragRotationAt=Date.now();
    fanDrag.dragged=true;
    suppressItemClickUntil=Date.now()+270;
    rotate(dx<0?1:-1);
