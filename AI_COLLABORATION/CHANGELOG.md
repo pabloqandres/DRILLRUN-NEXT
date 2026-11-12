@@ -510,3 +510,10 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Cambiado solo ícono de `#cameraHome`: flecha circular más retícula (no cámara fotográfica); accesibilidad `Restablecer vista`.
 - Nuevo `reset-view-control-v85.css` posterior a V84: botón independiente con mayor distancia horizontal del joystick, dimensión táctil de 46 px escritorio / 42 px landscape / 38 px estrecho, contraste cian y foco visible, sin animación ociosa.
 - Función JS original de reinicio de cámara intacta. Ningún cambio de lógica, navegación, misiones, saldo o Cloud Save. Test focal V85 y regresión UI.
+
+## 2026-11-12 · V86 · Semirradial continuo, rescate seguro y Personal sin recorte
+- **No se restaura el menú viejo**: se mantiene `installSemiRadialDock` y los diez destinos V83. Sustituido visualmente el montaje tosco por una sola cinta SVG de tres sectores, seleccionador central dorado, bordes cian discretos, dos anticipos difuminados, icono abstracto de comando, giro ~.58 s con desaceleración y límites de frecuencia de arrastre.
+- Eliminado completamente el control HUD `cameraHome` demasiado cercano al joystick, incluido el CSS V85 y pruebas exclusivas ya obsoletas.
+- Configuración: nueva acción `Desatascar jugador`. Emplea la función pura `officeRescueTarget` y comprobaciones de colisión en oficina/acceso, resetea movimiento/cámara y guarda solo la posición; al bajarse del DrillTruck personal, queda estacionado en su posición.
+- Personal: filas main/roster con altura garantizada; fija el pie visible y desplazamiento horizontal de plazas, más contención vertical del panel derecho y jerarquía visual.
+- Tests V86 y regresiones V83/V84/V82/V81 en Actions; dos fallos legados de economía offline M4 ajenos al cambio persisten en workflow genérico.

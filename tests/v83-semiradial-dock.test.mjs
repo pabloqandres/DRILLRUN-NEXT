@@ -49,30 +49,30 @@ test('V83 · actual gesture/display rotation and SFX connect without game mutati
   const api=installSemiRadialDock({anchor,onNavigate:id=>{chosen.push(id);return true;},onFeedback:x=>sound.push(x)});
   assert(api);
   assert.equal(api.isOpen,false);
-  assert.equal(api.selected,'logistics');
+  assert.equal(api.selected,'catalog');
   trigger.emit('click');
   assert.equal(api.isOpen,true);
   assert.equal(items.filter(x=>x.tabIndex===0).length,3);
   assert.equal(items.filter(x=>x.dataset.step==='-2'||x.dataset.step==='2').length,2);
   assert.equal(items.filter(x=>x.attrs['aria-hidden']==='false').length,3);
   api.rotate(1);
-  assert.equal(api.selected,'workshop');
+  assert.equal(api.selected,'production');
   // Swipe left on button opens and rotates to the next entry; synthesized click cannot close it.
   trigger.emit('pointerdown',{clientX:100});
   trigger.emit('pointermove',{clientX:40});
   trigger.emit('pointerup',{clientX:40});
   trigger.emit('click');
   assert.equal(api.isOpen,true);
-  assert.equal(api.selected,'fleet');
+  assert.equal(api.selected,'logistics');
   api.select();
   assert.equal(api.isOpen,false);
-  assert.deepEqual(chosen,['fleet']);
+  assert.deepEqual(chosen,['logistics']);
   assert(sound.includes('select')&&sound.includes('skill')&&sound.includes('confirm'));
   // A normal click reopens without needing a long hold.
   trigger.emit('click');
   assert.equal(api.isOpen,true);
   api.rotate(-1);
-  assert.equal(api.selected,'workshop');
+  assert.equal(api.selected,'production');
   api.close();
   assert(sound.includes('back'));
   api.destroy();
@@ -85,7 +85,7 @@ test('V83 · dock assets are scoped, shallow, sound obeys shared preferences',()
  const game=read('dist/chapter/game.mjs');
  const html=read('dist/index.html');
  const sound=read('dist/audio/character-select-feedback-v68.mjs');
- assert(js.includes('setTimeout(()=>')&&js.includes('},290)'));
+ assert(js.includes('setTimeout(()=>')&&js.includes('},320)'));
  assert(js.includes('touchX')&&js.includes('pointermove'));
  assert(js.includes("feedback(open?'select':'back')"));
  assert(js.includes("feedback('skill')"));

@@ -1,0 +1,228 @@
+/* V86 · Personal: fixed three-level layout.
+   Main content, footer roster, and candidate detail must share available
+   mobile viewport height without clipping; tabs and skills scroll internally. */
+#faenaCenter .faenaDialog.pvDialog{
+ box-sizing:border-box!important;
+ display:grid!important;
+ grid-template-rows:auto minmax(0,1fr)!important;
+ width:min(1450px,calc(100vw - 10px))!important;
+ height:min(860px,calc(100dvh - 9px))!important;
+ max-height:calc(100dvh - 9px)!important;
+ min-height:0!important;
+ overflow:hidden!important;
+ border:1.5px solid #68b9d8!important;
+}
+#faenaCenter .pvDialog .faenaHeader{
+ flex:0 0 auto!important;
+ box-sizing:border-box!important;
+ min-width:0!important;
+ min-height:clamp(37px,8.6dvh,55px)!important;
+ padding:clamp(3px,.65dvh,7px) clamp(8px,.85vw,14px)!important;
+ overflow:hidden!important;
+ background-image:linear-gradient(96deg,#072b44e8,#071e33de 74%,#113a4db9),
+ url('../assets/faena-v82/personnel.webp')!important;
+ background-position:center,center 50%!important;
+ background-size:cover!important;
+ border-bottom:2px solid #4dcbe7!important;
+}
+#faenaCenter .pvDialog .faenaHeaderActions{min-width:0;flex:0 0 auto}
+#faenaCenter .pvDialog .faenaBody,
+#faenaCenter .pvDialog .faenaContent{
+ min-height:0!important;
+ min-width:0!important;
+ height:100%!important;
+ max-height:100%!important;
+ padding:0!important;
+ box-sizing:border-box!important;
+ overflow:hidden!important;
+}
+#faenaCenter .pvRoot{
+ width:100%!important;height:100%!important;
+ min-height:0!important;max-height:100%!important;
+ display:grid!important;
+ grid-template-rows:minmax(0,1fr) clamp(59px,12dvh,84px)!important;
+ overflow:hidden!important;
+ box-sizing:border-box!important;
+}
+#faenaCenter .pvMain{
+ min-height:0!important;min-width:0!important;
+ overflow:hidden!important;
+ box-sizing:border-box!important;
+ display:grid!important;
+ grid-template-columns:minmax(0,23%) minmax(0,1fr) minmax(0,30%)!important;
+ gap:clamp(4px,.55vw,8px)!important;
+ padding:clamp(4px,.65vw,8px)!important;
+}
+#faenaCenter .pvSidebar,
+#faenaCenter .pvCenter,
+#faenaCenter .pvDetail{min-height:0!important;min-width:0!important;overflow:hidden!important}
+#faenaCenter .pvCenter{display:flex!important;flex-direction:column!important}
+#faenaCenter .pvSectionHead{
+ flex:0 0 auto!important;
+ min-height:clamp(32px,7dvh,66px)!important;
+ padding:0 0 3px!important;
+}
+#faenaCenter .pvCandidates{
+ min-height:0!important;flex:1 1 0!important;
+ overflow-x:auto!important;overflow-y:hidden!important;
+ overscroll-behavior-x:contain!important;
+}
+#faenaCenter .pvDetail{
+ display:flex!important;flex-direction:column!important;
+ overflow:hidden!important;
+}
+#faenaCenter .pvDetailHero{
+ min-height:0!important;
+ flex:0 0 clamp(65px,20dvh,148px)!important;
+}
+#faenaCenter .pvDetailTabs{
+ flex:0 0 auto!important;min-height:0!important;
+ display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+ max-width:100%!important;overflow:hidden!important;
+}
+#faenaCenter .pvDetailBody{
+ min-height:0!important;
+ flex:1 1 0!important;
+ overflow-y:auto!important;overflow-x:hidden!important;
+ scrollbar-width:thin!important;overscroll-behavior:contain!important;
+}
+#faenaCenter .pvHireActions{flex:0 0 auto!important}
+#faenaCenter .pvTeam{
+ position:relative!important;
+ display:flex!important;
+ align-items:stretch!important;
+ justify-content:flex-start!important;
+ min-width:0!important;
+ width:100%!important;
+ height:100%!important;
+ min-height:0!important;
+ max-height:100%!important;
+ padding:clamp(4px,.55dvh,8px) clamp(6px,.65vw,10px)!important;
+ gap:clamp(4px,.6vw,9px)!important;
+ overflow:hidden!important;
+ box-sizing:border-box!important;
+ background:linear-gradient(100deg,#0c304b,#071d31 70%)!important;
+ border-top:2px solid #56c9e8!important;
+ box-shadow:0 -3px 12px #06121da8!important;
+}
+#faenaCenter .pvTeamCount{
+ min-width:0!important;
+ flex:0 0 clamp(82px,11.4vw,150px)!important;
+ display:flex!important;align-items:center!important;
+ gap:5px!important;padding-right:5px!important;
+ font-size:clamp(9px,1.05vw,13px)!important;
+}
+#faenaCenter .pvTeamCount .uiIcon{
+ width:clamp(19px,2.2vw,28px)!important;
+ height:clamp(19px,2.2vw,28px)!important;
+ flex:0 0 auto!important;
+}
+#faenaCenter .pvTeamCount strong{
+ font-size:clamp(14px,1.7vw,21px)!important;
+ line-height:1.05!important;
+}
+#faenaCenter .pvTeamList{
+ min-width:0!important;
+ flex:1 1 0!important;
+ height:100%!important;max-height:100%!important;
+ display:flex!important;align-items:stretch!important;
+ overflow-x:auto!important;overflow-y:hidden!important;
+ gap:clamp(4px,.5vw,7px)!important;
+ scrollbar-width:thin!important;
+ scroll-snap-type:x proximity!important;
+ touch-action:pan-x!important;
+}
+#faenaCenter .pvTeamSlot{
+ flex:0 0 clamp(83px,11.4vw,152px)!important;
+ width:auto!important;min-width:0!important;
+ height:100%!important;max-height:100%!important;
+ padding:3px clamp(3px,.44vw,7px)!important;
+ display:flex!important;align-items:center!important;
+ justify-content:center!important;
+ gap:4px!important;
+ border-radius:9px!important;
+ box-sizing:border-box!important;
+ font-size:clamp(8px,.93vw,11px)!important;
+ overflow:hidden!important;
+}
+#faenaCenter .pvTeamSlot .pvPlus{
+ width:clamp(20px,2.1vw,28px)!important;height:clamp(20px,2.1vw,28px)!important;
+ flex:0 0 auto!important;font-size:clamp(15px,1.7vw,23px)!important;
+}
+#faenaCenter .pvTeamSlot .pvArtPortrait--team,
+#faenaCenter .pvTeamSlot .pvEmptyPortrait--team{
+ width:clamp(22px,3vw,42px)!important;
+ height:clamp(31px,4dvh,48px)!important;
+ min-width:0!important;min-height:0!important;
+ flex:0 0 clamp(22px,3vw,42px)!important;
+ border-radius:5px!important;
+}
+#faenaCenter .pvTeamSlot>span:nth-of-type(1){min-width:0!important;overflow:hidden!important}
+#faenaCenter .pvTeamSlot b{
+ font-size:clamp(8px,.92vw,11px)!important;
+ white-space:nowrap!important;overflow:hidden!important;
+ text-overflow:ellipsis!important;
+}
+#faenaCenter .pvTeamSlot small{font-size:clamp(7px,.75vw,9px)!important}
+#faenaCenter .pvTeamManage{
+ flex:0 0 clamp(98px,11.5vw,148px)!important;
+ min-width:0!important;
+ width:auto!important;height:100%!important;
+ min-height:0!important;
+ padding:4px 6px!important;
+ gap:4px!important;
+ font-size:clamp(9px,1vw,12px)!important;
+ line-height:1.15!important;font-weight:900!important;
+ border-radius:9px!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ white-space:normal!important;overflow:hidden!important;
+}
+#faenaCenter .pvTeamManage .uiIcon{
+ width:clamp(17px,2vw,23px)!important;height:clamp(17px,2vw,23px)!important;
+ flex:0 0 auto!important;
+}
+@media(orientation:landscape) and (max-height:520px){
+ #faenaCenter .faenaDialog.pvDialog{
+  height:calc(100dvh - 6px)!important;
+  max-height:calc(100dvh - 6px)!important;
+  width:calc(100vw - 8px)!important;
+ }
+ #faenaCenter .pvDialog .faenaHeader{
+  min-height:38px!important;height:38px!important;
+  padding:3px 8px!important;
+ }
+ #faenaCenter .pvRoot{
+  grid-template-rows:minmax(0,1fr) 57px!important;
+ }
+ #faenaCenter .pvTeam{height:100%!important;min-height:0!important;max-height:100%!important;padding:4px 6px!important}
+ #faenaCenter .pvTeamSlot{height:100%!important;min-height:0!important;max-height:100%!important}
+ #faenaCenter .pvSectionHead{min-height:34px!important;padding-bottom:2px!important}
+ #faenaCenter .pvDetailHero{flex:0 0 clamp(59px,19dvh,86px)!important}
+ #faenaCenter .pvMain{padding:4px!important;gap:4px!important}
+ #faenaCenter .pvCenter,#faenaCenter .pvDetail{padding:4px!important;gap:3px!important}
+ #faenaCenter .pvTeamCount{flex-basis:80px!important;gap:3px!important}
+ #faenaCenter .pvTeamManage{flex-basis:103px!important;font-size:9px!important}
+ #faenaCenter .pvTeamSlot{flex-basis:clamp(80px,11vw,119px)!important}
+ #faenaCenter .pvTeamSlot .pvArtPortrait--team,
+ #faenaCenter .pvTeamSlot .pvEmptyPortrait--team{
+  height:38px!important;width:28px!important;flex-basis:28px!important;
+ }
+}
+@media(orientation:landscape) and (max-height:360px){
+ #faenaCenter .pvRoot{grid-template-rows:minmax(0,1fr) 51px!important}
+ #faenaCenter .pvDialog .faenaHeader{height:34px!important;min-height:34px!important}
+ #faenaCenter .pvDetailHero{flex-basis:56px!important}
+ #faenaCenter .pvTeamSlot .pvArtPortrait--team,
+ #faenaCenter .pvTeamSlot .pvEmptyPortrait--team{height:31px!important;width:23px!important;flex-basis:23px!important}
+ #faenaCenter .pvTeamManage{font-size:8px!important}
+}
+@media(orientation:portrait){
+ #faenaCenter .pvRoot{grid-template-rows:minmax(0,1fr) 66px!important}
+ #faenaCenter .pvMain{
+  grid-template-columns:118px minmax(0,1fr)!important;
+  grid-template-rows:48% minmax(0,1fr)!important;
+ }
+ #faenaCenter .pvSidebar{grid-row:1/span 2!important}
+ #faenaCenter .pvCenter{grid-column:2;grid-row:1}
+ #faenaCenter .pvDetail{grid-column:2;grid-row:2}
+}
