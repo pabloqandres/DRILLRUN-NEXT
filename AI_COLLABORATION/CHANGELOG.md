@@ -558,3 +558,9 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Sin flechas visibles: drag angular continuo con freno intencional (145 ms por categoría), ciclo infinito de diez destinos y snap preciso al soltar, sin inercia. Cuadrícula en hub independiente de retícula de acción.
 - Sin cambios a `game.mjs`, misiones, HSEC, economía, modelos, Google o Cloud Save. JS/geométrico y DOM simulado comprobados; CI y QA visual Android pendientes.
 - Rama `chatgpt/v94-corner-radial-safe-touch`, registro `CHANGES/2026-11-12_v94_corner-radial-safe-touch.md`.
+
+## 2026-11-12 — V95 · Seis accesos radiales compactos, círculo matemáticamente correcto
+- Revisión solicitada tras captura V94 y referencia de seis iconos: radio exterior de 465 a 365, interior de 296 a 244, con seis sectores polares de 15° en el mismo centro (500,465), sin módulos rectangulares ni reubicar botones base.
+- Orden inicial visible: Centro de Faena, Catálogo, Producción, Inventario, Personal, HSEC. Taller, Patio y flota, Contratos y Casa Matriz siguen en los 10 accesos mediante giro infinito, sin crear rutas nuevas.
+- Íconos y etiquetas adaptados a sectores más estrechos; giro con ajuste a 15° y freno intencional, clic/touch directo sobre cualquier gajo. Fondo y botón de acción permanecen independientes y alineados, sin cambios de joystick, misiones, economía, Cloud Save ni game.mjs.
+- Rama `chatgpt/v95-compact-six-radial`; pruebas focales V90/V92 actualizadas, QA en navegador/Android pendiente.
