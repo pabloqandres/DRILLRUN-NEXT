@@ -75,6 +75,8 @@ const portraitIllustration=(c,mode='card')=>{
  const art=V78_ADMIN_ART[c.id];
  const src=art?'./assets/npc-portraits-v80/'+esc(c.id)+'.svg':esc(c.portrait);
  const width=art?230:300,height=art?260:370;
+ // Preserve native source ratio. Never stretch the underlying illustrated art.
+ // Three approved admin frames are 230x260; other roles are scalable SVG.
  // All 21 fictional characters already have their own locally bundled SVGs.
  // Keep the higher-detail V80 illustrations for the three admin candidates.
  return `<span class="pvArtPortrait pvArtPortrait--${mode} ${art?'pvArtPortrait--'+art:'pvArtPortrait--classic'}" role="img" aria-label="Retrato ilustrado de ${esc(c.name)}"><img class="pvPortraitImage" src="${src}" alt="" draggable="false" loading="eager" decoding="async" width="${width}" height="${height}"></span>`;
@@ -175,7 +177,16 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon,view='recr
   </section>
   <aside class="pvDetail" aria-label="Ficha del candidato seleccionado">
    <div class="pvDetailHero">${portraitIllustration(selected,'detail')}<div class="pvDetailHeroCopy"><h3>${esc(selected.name)}</h3><span class="pvRoleBadge">${esc(role.short)}</span><span class="pvCandidateStars">${'★'.repeat(selected.grade)}<span>${'★'.repeat(5-selected.grade)}</span></span><p class="pvDetailSummary">${esc(selected.description)}</p></div></div>
-   <nav class="pvDetailTabs" aria-label="Datos del candidato">${[['ficha','Ficha'],['desarrollo','Desarrollo'],['salario','Salario'],['historial','Historial']].map(([id,label])=>`<button type="button" data-pv-detail-tab="${id}" class="${activeTab===id?'active':''}" aria-pressed="${activeTab===id}">${tabIcon(id)}<span>${label}</span></button>`).join('')}</nav>
+   <div class="pvSkillsHeader">HABILIDADES CLAVE <span>NIVEL 1–5</span></div>
+   <div class="pvQuickSkills" aria-label="Tres habilidades principales">
+   ${Object.entries(selected.skills||{}).slice(0,3).map(([name,val])=>`<div class="pvQuickSkill" title="${esc(PERSONNEL_SKILL_LABELS[name]||name)}: ${val}/5">
+     <span class="pvSkillGlyph">${statIcon(name)}</span><span class="pvQuickSkillLabel">${esc(PERSONNEL_SKILL_LABELS[name]||name)}</span>
+     <span class="pvMiniPips" aria-label="${val} de 5">${Array.from({length:5},(_,i)=>`<i class="${i<val?'on':''}"></i>`).join('')}</span>
+    </div>`).join('')}
+   </div>
+   <details class="pvMoreDetails" ${activeTab!=='ficha'?'open':''}>
+    <summary>Más detalles <span>Desarrollo · Salario · Historial</span></summary>
+    <nav class="pvDetailTabs" aria-label="Datos del candidato">${[['ficha','Ficha'],['desarrollo','Desarrollo'],['salario','Salario'],['historial','Historial']].map(([id,label])=>`<button type="button" data-pv-detail-tab="${id}" class="${activeTab===id?'active':''}" aria-pressed="${activeTab===id}">${tabIcon(id)}<span>${label}</span></button>`).join('')}</nav>
    <div class="pvDetailBody">
    ${activeTab==='ficha'? `<div class="pvSkillsHeader">HABILIDADES <span>NIVEL INICIAL</span></div>
     <div class="pvSkills">${skillRows(selected)}</div>
@@ -184,6 +195,7 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon,view='recr
     activeTab==='salario'? `<div class="pvTabTitle">Condiciones económicas</div><div class="pvDetailMetric"><span>Contratación única</span><b>${money(selected.hireCost)}</b></div><div class="pvDetailMetric"><span>Salario propuesto por turno</span><b>${money(selected.salaryPerShift)}</b></div><p class="pvTabNote">Información de referencia: no existen cargos salariales automáticos.</p>`:
     `<div class="pvTabTitle">Historial del personaje</div><p class="pvTabNote">${employed?'Ya forma parte de tu equipo.':'Aún no has contratado a este candidato.'} Los pagos y mejoras se registrarán cuando estén disponibles.</p>`}
    </div>
+   </details>
    <div class="pvHireActions"><span class="pvHirePrice"><small>COSTO ÚNICO</small><b>${money(selected.hireCost)}</b></span>
     <button class="pvHire ${blocked?'blocked':''}" data-pv-hire type="button" ${blocked?'disabled':''}>${icon(blocked?'lock':'personnel')} ${employed?'Contratado':blocked?'No disponible':'Contratar'}</button></div>
    ${blocked?`<small class="pvHireReason">${esc(warning)}</small>`:''}
