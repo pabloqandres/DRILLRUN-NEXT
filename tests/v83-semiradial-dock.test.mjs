@@ -48,10 +48,10 @@ test('V83 · actual gesture/display rotation and SFX connect without game mutati
  try{
   const api=installSemiRadialDock({anchor,onNavigate:id=>{chosen.push(id);return true;},onFeedback:x=>sound.push(x)});
   assert(api);
-  assert.equal(api.open,false);
+  assert.equal(api.isOpen,false);
   assert.equal(api.selected,'logistics');
   trigger.emit('click');
-  assert.equal(api.open,true);
+  assert.equal(api.isOpen,true);
   assert.equal(items.filter(x=>x.tabIndex===0).length,3);
   assert.equal(items.filter(x=>x.dataset.step==='-2'||x.dataset.step==='2').length,2);
   assert.equal(items.filter(x=>x.attrs['aria-hidden']==='false').length,3);
@@ -62,15 +62,15 @@ test('V83 · actual gesture/display rotation and SFX connect without game mutati
   trigger.emit('pointermove',{clientX:40});
   trigger.emit('pointerup',{clientX:40});
   trigger.emit('click');
-  assert.equal(api.open,true);
+  assert.equal(api.isOpen,true);
   assert.equal(api.selected,'fleet');
   api.select();
-  assert.equal(api.open,false);
+  assert.equal(api.isOpen,false);
   assert.deepEqual(chosen,['fleet']);
   assert(sound.includes('select')&&sound.includes('skill')&&sound.includes('confirm'));
   // A normal click reopens without needing a long hold.
   trigger.emit('click');
-  assert.equal(api.open,true);
+  assert.equal(api.isOpen,true);
   api.rotate(-1);
   assert.equal(api.selected,'workshop');
   api.close();
