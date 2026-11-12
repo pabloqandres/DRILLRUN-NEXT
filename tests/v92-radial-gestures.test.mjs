@@ -11,7 +11,7 @@ function gestureHarness(){
   removeEventListener(k,fn){this.handlers[k]=(this.handlers[k]||[]).filter(f=>f!==fn);},
   setAttribute(k,v){this.attrs[k]=v;},
   emit(k,p={}){
-   const e={pointerId:7,pointerType:'touch',button:0,clientX:253,clientY:152,
+   const e={pointerId:7,pointerType:'touch',button:0,clientX:183,clientY:251,
     cancelable:true,preventDefault(){this.defaultPrevented=true;},target:this,...p};
    for(const fn of this.handlers[k]||[])fn(e);
    return e;
@@ -24,7 +24,7 @@ function gestureHarness(){
   contains(k){return this.set.has(k);}};
  root.contains=()=>true;
  root.remove=()=>{root.removed=true;};
- stage.getBoundingClientRect=()=>({left:0,top:0,width:440,height:285});
+ stage.getBoundingClientRect=()=>({left:0,top:0,width:550,height:470});
  const names=['catalog','production','logistics','workshop','fleet','contracts','personnel','safety','headquarters','overview'];
  const orbits=names.map((id,i)=>{
   const n=make('orbit'+i),button=make('option'+i);
@@ -66,10 +66,10 @@ test('V94: finger drag follows actual polar angle, snaps without inertia',()=>{
   assert.equal(x.api.isOpen,true);
   assert.equal(x.orbits.filter(n=>n.querySelector('button').tabIndex===0).length,4);
   x.stage.emit('pointerdown',{target:x.sector});
-  x.world.emit('pointermove',{clientX:282,clientY:118});
+  x.world.emit('pointermove',{clientX:292,clientY:145});
   assert.equal(x.api.selected,'overview');
   assert.equal(x.root.classList.contains('is-dragging'),true);
-  x.world.emit('pointerup',{clientX:282,clientY:118});
+  x.world.emit('pointerup',{clientX:292,clientY:145});
   assert.equal(x.root.classList.contains('is-dragging'),false);
   assert.equal(x.api.selected,'overview');
   assert.equal(x.api.isOpen,true);
@@ -83,7 +83,7 @@ test('V94: quick swipe, tap, and full revolution preserve ten original routes',(
  try{
   x.hub.emit('click');
   x.stage.emit('pointerdown',{target:x.sector});
-  x.world.emit('pointerup',{clientX:282,clientY:118});
+  x.world.emit('pointerup',{clientX:292,clientY:145});
   assert.equal(x.api.selected,'overview');
   x.api.rotate(1);
   assert.equal(x.api.selected,'catalog');
@@ -100,12 +100,12 @@ test('V94: direct tap stays selectable; cancelled gesture does not move category
  try{
   x.hub.emit('click');
   x.stage.emit('pointerdown',{target:x.orbits[0].querySelector('button')});
-  x.world.emit('pointerup',{clientX:253,clientY:152});
+  x.world.emit('pointerup',{clientX:183,clientY:251});
   x.choices.emit('click',{target:x.orbits[0].querySelector('button')});
   assert.deepEqual(x.chosen,['catalog']);
   x.hub.emit('click');
   x.stage.emit('pointerdown',{target:x.sector});
-  x.world.emit('pointercancel',{clientX:253,clientY:152});
+  x.world.emit('pointercancel',{clientX:183,clientY:251});
   assert.equal(x.api.selected,'catalog');
   assert.equal(x.api.isOpen,true);
  }finally{x.restore();}
