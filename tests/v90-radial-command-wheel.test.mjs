@@ -6,18 +6,18 @@ const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
 test('V94: approved corner annulus uses four concentric segments with safe geometry',()=>{
  const g=RADIAL_GEOMETRY;
- assert.equal(g.cx,395);
- assert.equal(g.cy,247);
- assert.equal(g.outerRadius,211);
- assert.equal(g.innerRadius,132);
- assert.deepEqual(g.slotBounds,[[-90,-68],[-67,-45],[-44,-22],[-21,1]]);
+ assert.equal(g.cx,500);
+ assert.equal(g.cy,465);
+ assert.equal(g.outerRadius,465);
+ assert.equal(g.innerRadius,296);
+ assert.deepEqual(g.slotBounds,[[-89,-68],[-67,-45],[-44,-22],[-21,0]]);
  assert.equal(g.slotAngles.length,4);
  for(const [a,b] of g.slotBounds){
   const path=radialSegmentPath(a,b);
-  assert.match(path,/^M.+ A211 211 0 0 1 .+ L.+ A132 132 0 0 0 .+ Z$/);
+  assert.match(path,/^M.+ A465 465 0 0 1 .+ L.+ A296 296 0 0 0 .+ Z$/);
   assert(!path.includes('NaN'));
  }
- for(const angle of [-90,-56,-33,-10,1]){
+ for(const angle of [-89,-56,-33,-10,0]){
   for(const r of [g.outerRadius,g.innerRadius,g.itemRadius]){
    const p=radialPoint(angle,r);
    assert(Math.abs(Math.hypot(p.x-g.cx,p.y-g.cy)-r)<.00001);
@@ -36,7 +36,7 @@ test('V94: original ten distinct routes remain cyclic and preserve gameplay auth
  const game=read('dist/chapter/game.mjs');
  assert(src.includes('data-semi-id'));
  assert(src.includes('dr94Base'));
- assert(src.includes('viewBox="0 0 440 285"'));
+ assert(src.includes('viewBox="0 0 550 470"'));
  assert(src.includes('render(drag.offset)'));
  assert(src.includes('render();')&&src.includes('root.classList.remove(\'is-dragging\')'));
  assert(!src.includes('dr90Prev')&&!src.includes('dr90Next'));
@@ -53,8 +53,8 @@ test('V94: visually distinct action control, safe-area alignment and no arrow UI
  assert(css.includes('--dr94-safe-right'));
  assert(css.includes('--dr94-joy-half'));
  assert(css.includes('--dr94-action-half'));
- assert(css.includes('var(--dr94-center-offset,45px)'));
- assert(css.includes('var(--dr94-bottom-offset,38px)'));
+ assert(css.includes('var(--dr94-center-offset,95px)'));
+ assert(css.includes('var(--dr94-bottom-offset,78px)'));
  assert(css.includes('.dr94Base'));
  assert(css.includes('.dr94Sector--far'));
  assert(css.includes('#hud #handButton.available'));
