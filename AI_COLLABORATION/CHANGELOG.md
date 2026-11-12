@@ -479,3 +479,9 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Corrección del aspecto de tres retratos V78 (Camila Rojas, Matías Torres, Sofía Ibarra) mediante recortes individuales SVG autocontenidos del WebP original, mostrados sin deformación (`object-fit:cover`).
 - Slider «Volumen de interfaz» trasladado a Configuración, manteniendo persistencia anterior. Inicio/carga: alineación izquierda de logo, rótulo y texto.
 - Sin cambios a contratación, economía, misiones ni Cloud Save. Incluye pruebas focales y documentación de QA.
+
+## 2026-11-11 · V81 · Personal sin microparpadeo; layout compacto de referencia
+- Diagnóstico exacto: render automático cada 2,6 s reconstruía completamente el DOM de Personal. La comparación de markup ahora omite el reemplazo cuando nada cambia y puede refrescar saldo in situ.
+- Iconografía incorporada a Administrador de Contrato en encabezado y 22 habilidades (11 trazados semánticos compartidos) en tarjetas/ficha. El retrato se muestra como imagen con relación nativa, `object-fit:cover`, sin animación ni transiciones de dimensiones.
+- CSS V81 cargado al final: tres tarjetas más angostas con seleccionado dorado, jerarquía compacta, ficha derecha sin overflow horizontal ni pestañas cortadas, retrato y descripción de personaje reordenados y adaptabilidad a Android apaisado.
+- Ningún cambio en producción, misiones, contratación, economía, salario, Cloud Save o assets GLB. PR/CI focal y revisión visual Android pendientes.
