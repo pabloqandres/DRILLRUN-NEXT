@@ -123,7 +123,7 @@ export function installSemiRadialDock({
   if(destroyed)return;
   const vw=window.innerWidth||document.documentElement?.clientWidth||1280;
   const vh=window.innerHeight||document.documentElement?.clientHeight||720;
-  const scale=clamp(Math.min(1.16,vh/870,(vw-225)/550),.52,1.16);
+  const scale=clamp(Math.min(1.16,vh/870,(vw-225)/550),.65,1.16);
   root.style.setProperty('--dr94-scale',scale.toFixed(4));
   root.style.setProperty('--dr90-scale',scale.toFixed(4));
   root.style.setProperty('--dr94-dock-width',(550*scale).toFixed(2)+'px');
