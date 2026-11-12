@@ -45,13 +45,17 @@ export function installSemiRadialDock({
  root.setAttribute('aria-label','Accesos rápidos de la faena');
  root.innerHTML='<div class="drSemiFan" role="group" aria-label="Rueda semirradial de navegación">'+
   '<div class="drSemiArc" aria-hidden="true"></div>'+
-  '<svg class="drSemiRibbon" viewBox="0 0 400 116" preserveAspectRatio="none" aria-hidden="true">'+
-   '<defs><linearGradient id="drSemiSideFill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#133e55" stop-opacity=".96"/><stop offset="1" stop-color="#071c2d" stop-opacity=".96"/></linearGradient><linearGradient id="drSemiCenterFill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#6a4b22" stop-opacity=".97"/><stop offset="1" stop-color="#1d3142" stop-opacity=".97"/></linearGradient></defs>'+
-   '<path class="drSemiSegment drSemiSegmentLeft" d="M40 88 Q85 42 145 24 L149 77 Q99 83 65 107 Z"/>'+
-   '<path class="drSemiSegment drSemiSegmentActive" d="M145 24 Q200 5 255 24 L251 77 Q200 61 149 77 Z"/>'+
-   '<path class="drSemiSegment drSemiSegmentRight" d="M255 24 Q315 42 360 88 L335 107 Q301 83 251 77 Z"/>'+
-   '<path class="drSemiRim" d="M40 88 Q200 -27 360 88"/>'+
-   '</svg>'+
+  // V88: one perimeter and two joins; do not overlay an inner guide stroke.
+  '<svg class="drSemiRibbon" viewBox="0 0 400 112" preserveAspectRatio="none" aria-hidden="true">'+
+   '<defs><linearGradient id="drSemiSideFill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#193c50"/><stop offset="1" stop-color="#0d2537"/></linearGradient><linearGradient id="drSemiCenterFill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#56432e"/><stop offset="1" stop-color="#263744"/></linearGradient></defs>'+
+   '<path class="drSemiSegment drSemiSegmentLeft" d="M18 82 Q77 39 143 21 L153 72 Q95 80 40 105 Z"/>'+
+   '<path class="drSemiSegment drSemiSegmentActive" d="M143 21 Q200 5 257 21 L247 72 Q200 59 153 72 Z"/>'+
+   '<path class="drSemiSegment drSemiSegmentRight" d="M257 21 Q323 39 382 82 L360 105 Q305 80 247 72 Z"/>'+
+   '<path class="drSemiOutline" d="M18 82 Q77 39 143 21 Q200 5 257 21 Q323 39 382 82"/>'+
+   '<path class="drSemiBottom" d="M40 105 Q95 80 153 72 Q200 59 247 72 Q305 80 360 105"/>'+
+   '<path class="drSemiCaps" d="M18 82 40 105 M382 82 360 105"/>'+
+   '<path class="drSemiDividers" d="M143 21 153 72 M257 21 247 72"/>'+
+   '</svg>'+ 
   SEMI_RADIAL_ITEMS.map(item=>
    '<button class="drSemiItem" type="button" data-semi-id="'+item.id+
    '" data-step="off" tabindex="-1" aria-hidden="true">'+
@@ -63,6 +67,11 @@ export function installSemiRadialDock({
    '<span class="drSemiLabel">'+item.label+'</span></button>').join('')+
   '<div class="drSemiProgress" aria-hidden="true"></div>'+
   '</div>'+
+  '<div class="drSemiBrowse" role="group" aria-label="Explorar diez secciones">'+
+   '<button class="drSemiPrev" type="button" aria-label="Sección anterior">‹</button>'+
+   '<span class="drSemiCount" aria-live="polite">1 / 10</span>'+
+   '<button class="drSemiNext" type="button" aria-label="Sección siguiente">›</button>'+
+   '</div>'+
   '<button class="drSemiTrigger" type="button" aria-expanded="false" aria-label="Abrir menú semirradial" title="Menú de la faena">'+
   '<svg class="drSemiHubIcon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+
    '<circle cx="24" cy="24" r="17"/><path d="M24 7v5m0 24v5M7 24h5m24 0h5"/>'+
@@ -75,9 +84,10 @@ export function installSemiRadialDock({
  const fan=root.querySelector('.drSemiFan');
  const items=Array.from(root.querySelectorAll('.drSemiItem'));
  const progress=root.querySelector('.drSemiProgress');
+ const prev=root.querySelector('.drSemiPrev'),next=root.querySelector('.drSemiNext'),count=root.querySelector('.drSemiCount');
  let centerIndex=0,open=false,closed=false;
  let triggerDown=false,triggerLong=false,triggerDragged=false;
- let touchX=0,longTimer=null,suppressTriggerClick=false,fanDrag=null,suppressItemClickUntil=0,lastDragRotationAt=0;
+ let touchX=0,longTimer=null,suppressTriggerClick=false,fanDrag=null,suppressItemClickUntil=0,lastDragRotationAt=0,lastWheelAt=0;
  const feedback=kind=>{try{onFeedback(kind);}catch{}};
  const render=()=>{
   const total=SEMI_RADIAL_ITEMS.length;
@@ -91,6 +101,7 @@ export function installSemiRadialDock({
    el.setAttribute('aria-label',step==='0'?'Abrir '+SEMI_RADIAL_ITEMS[i].label:'Girar hacia '+SEMI_RADIAL_ITEMS[i].label);
   }
   progress.textContent=(centerIndex+1)+' / '+total;
+  if(count)count.textContent=(centerIndex+1)+' / '+total;
   root.style.setProperty('--dr-semi-index',String(centerIndex));
  };
  const setOpen=(next,quiet=false)=>{
@@ -157,6 +168,8 @@ export function installSemiRadialDock({
   setOpen(!open);
  });
 
+ prev?.addEventListener('click',()=>rotate(-1));
+ next?.addEventListener('click',()=>rotate(1));
  // Swipe on the fan; each detent rotates one destination.
  fan.addEventListener('pointerdown',event=>{
   if(!open)return;
@@ -185,6 +198,8 @@ export function installSemiRadialDock({
  fan.addEventListener('wheel',event=>{
   if(!open)return;
   event.preventDefault();
+  if(Date.now()-lastWheelAt<270)return;
+  lastWheelAt=Date.now();
   const direction=event.deltaY>0||event.deltaX>0?1:-1;
   rotate(direction);
  },{passive:false});
