@@ -1,4 +1,4 @@
-// V98 · Six-sector polar wheel: continuous bubble base and movement-clean HUD.
+// V99 · Independent mission/radial panels with PUMA burgundy contextual action.
 // Navigation handlers remain the original game's source of truth.
 import {icon} from './icons.mjs';
 
@@ -149,6 +149,11 @@ export function installSemiRadialDock({
  const stage=root.querySelector('.dr90Stage');
  const hub=root.querySelector('.dr90Hub');
  const choices=root.querySelector('.dr90Choices');
+ // V99: clear tactile action symbol replaces the ambiguous crosshair.
+ // Only its existing icon markup changes; the game's action click/disabled
+ // logic stays owned by the original game controller and is never modified.
+ const actionSymbol=document.querySelector?.('#handButton [data-icon]');
+ if(actionSymbol){actionSymbol.dataset.icon='hand';actionSymbol.innerHTML=icon('hand');}
  const nodes=Array.from(root.querySelectorAll('.dr90Orbit'));
  let centerIndex=1,open=false,destroyed=false,drag=null;
  let holdTimer=null,holding=false,longPressed=false,skipHubClick=false;
@@ -315,7 +320,14 @@ export function installSemiRadialDock({
   lastWheelAt=Date.now();
   rotate(event.deltaY>0||event.deltaX>0?1:-1);
  },{passive:false});
- const outside=event=>{if(open&&!root.contains(event.target))setOpen(false,true);};
+ // V99: objective card is a peer HUD widget, not an outside dismiss target.
+ // Keep the radial independent when opening/collapsing the mission accordion.
+ const outside=event=>{
+  if(!open||root.contains(event.target))return;
+  const mission=document.getElementById('objective');
+  if(mission?.contains?.(event.target))return;
+  setOpen(false,true);
+ };
  const keydown=event=>{
   if(!open)return;
   if(event.key==='Escape'){event.preventDefault();setOpen(false);hub.focus();return;}

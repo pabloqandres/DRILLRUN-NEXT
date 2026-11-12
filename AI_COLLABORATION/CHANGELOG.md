@@ -583,3 +583,10 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Al detectar intención de marcha por joystick (umbral al salir del centro) o WASD/flechas, se cierra radial y se aplica el colapso existente a `#objective`, conservando la pestaña manual. No se vuelve a abrir automáticamente al detenerse. No se cierra por tocar el centro del joystick ni por escribir en un formulario o consultar el teléfono.
 - Transición de acordeón de misión respetando prefers-reduced-motion. Ningún cambio a `game.mjs`, estado, misiones, Cloud Save ni geometría de los seis sectores.
 - Pruebas V90/V92 extendidas; rama `chatgpt/v98-bubble-dock-auto-hud` para validar antes de integrar a main.
+
+## 2026-11-12 — V99 · Panel de misión independiente y botón de acción burdeo PUMA
+- Se corrigió el handler de clic exterior del menú radial para excluir tanto el contenedor `#objective` como sus hijos (incluido `#objToggle`). Expandir/retraer manualmente la misión ya no cierra la rueda, pero tocar otra zona externa sí conserva el cierre preexistente.
+- El movimiento con joystick o WASD/flechas conserva íntegra la V98: cierra rueda y retrae misión por presentación, sin auto-reapertura al detenerse.
+- El ícono de acción anterior `interact-focus` se sustituyó por la mano del set original, en el mismo botón y sin modificar listeners de juego.
+- Diseño de botón en burdeo PUMA sólido con gradiente 3D, inactivo oscuro y legible, disponible luminoso con brillo; `disabled` se mantiene controlado por game.mjs.
+- Pruebas V92 ampliadas para independencia de panel, movimiento, selección de icono y estilos. No cambia rueda de seis segmentos, plinto de doble burbuja, misiones, save, estado ni HUD restante.

@@ -19,6 +19,8 @@ function gestureHarness(){
  });
  const root=make('root'),stage=make('stage'),hub=make('hub'),choices=make('choices');
  const joystick=make('joystick'),objective=make('objective'),doc=make('document');
+ const actionSymbol={dataset:{icon:'interact-focus'},innerHTML:'',name:'actionSymbol'};
+ doc.querySelector=query=>query==='#handButton [data-icon]'?actionSymbol:null;
  joystick.getBoundingClientRect=()=>({left:0,top:0,width:100,height:100});
  objective.classList={set:new Set(),add(k){this.set.add(k);},remove(k){this.set.delete(k);},contains(k){return this.set.has(k);}};
  root.classList={set:new Set(),add(k){this.set.add(k);},
@@ -59,7 +61,7 @@ function gestureHarness(){
  const api=installSemiRadialDock({anchor,onNavigate:id=>{chosen.push(id);return true;},
   onFeedback:id=>sounds.push(id)});
  const restore=()=>{api.destroy();Object.assign(globalThis,old);};
- return {root,stage,hub,choices,orbits,sector,world,document:doc,joystick,objective,chosen,sounds,api,restore};
+ return {root,stage,hub,choices,orbits,sector,world,document:doc,joystick,objective,actionSymbol,chosen,sounds,api,restore};
 }
 
 test('V94: finger drag follows actual polar angle, snaps without inertia',()=>{
@@ -208,3 +210,57 @@ test('V98: movement listeners are cleaned up when radial is destroyed',()=>{
  assert.equal((x.document.handlers.keydown||[]).length,0);
 });
 
+test('V99: mission accordion opens and closes independently while radial stays open',()=>{
+ const x=gestureHarness();
+ try{
+  const toggle={name:'objToggle'};
+  x.objective.contains=target=>target===x.objective||target===toggle;
+  x.root.contains=target=>target===x.root||target===x.hub;
+  x.hub.emit('click');
+  assert.equal(x.api.isOpen,true);
+  x.objective.classList.add('collapsed');
+  x.document.emit('pointerdown',{target:toggle});
+  x.objective.classList.remove('collapsed');
+  assert.equal(x.api.isOpen,true,'mission opening must not dismiss radial');
+  x.document.emit('pointerdown',{target:x.objective});
+  x.objective.classList.add('collapsed');
+  assert.equal(x.api.isOpen,true,'mission collapsing must not dismiss radial');
+  // The existing outside-dismiss rule still applies elsewhere.
+  x.document.emit('pointerdown',{target:{name:'otherHUD'}});
+  assert.equal(x.api.isOpen,false,'unrelated outside click still dismisses radial');
+ }finally{x.restore();}
+});
+
+test('V99: after manual accordion open, joystick movement still closes both',()=>{
+ const x=gestureHarness();
+ try{
+  const toggle={name:'objToggle'};
+  x.objective.contains=target=>target===x.objective||target===toggle;
+  x.root.contains=target=>target===x.root||target===x.hub;
+  x.hub.emit('click');
+  x.objective.classList.remove('collapsed');
+  x.document.emit('pointerdown',{target:toggle});
+  assert.equal(x.api.isOpen,true);
+  x.joystick.emit('pointerdown',{clientX:50,clientY:50});
+  assert.equal(x.api.isOpen,true,'neutral touch does not hide panels');
+  x.joystick.emit('pointermove',{clientX:77,clientY:52});
+  assert.equal(x.api.isOpen,false,'movement still closes the wheel');
+  assert.equal(x.objective.classList.contains('collapsed'),true,'movement still retracts mission');
+ }finally{x.restore();}
+});
+
+test('V99: action glyph swaps crosshair for simple hand, but keeps original host button',()=>{
+ const x=gestureHarness();
+ try{
+  assert.equal(x.actionSymbol.dataset.icon,'hand');
+  assert.match(x.actionSymbol.innerHTML,/<svg/);
+  assert.match(x.actionSymbol.innerHTML,/<path/);
+  const css=read('dist/chapter/semi-radial-command-v90.css');
+  assert(css.includes('V99 · PUMA burgundy 3D contextual action'));
+  assert(css.includes('#hud #handButton.available:not(:disabled)'));
+  assert(css.includes('#hud #handButton:disabled'));
+  assert(css.includes('opacity:1!important'));
+  assert(css.includes('#b72948'));
+  assert(css.includes('#501e32'));
+ }finally{x.restore();}
+});
