@@ -6,7 +6,7 @@
  --dr90-scale:1;
  position:absolute!important;
  left:50%!important;
- bottom:clamp(13px,2.4dvh,23px)!important;
+ bottom:clamp(46px,7dvh,66px)!important;
  transform:translateX(-50%)!important;
  width:min(400px,calc(100vw - 252px))!important;
  height:calc(165px * var(--dr90-scale))!important;
@@ -42,24 +42,24 @@ body:not([data-phase="play"]) #hud #semiRadialDock{display:none!important}
  transform:translateY(8px) scale(.965)!important;
  transform-origin:200px 145px!important;
  transition:transform .51s cubic-bezier(.19,.73,.25,1),opacity .4s ease,visibility .4s ease!important;
- filter:drop-shadow(0 6px 10px #00101ab8)!important;
+ filter:drop-shadow(0 5px 11px #00101bbb) drop-shadow(0 0 5px #42bcd32f)!important;
 }
 #hud #semiRadialDock.is-open .dr90Ring{
  opacity:1;visibility:visible;
  transform:translateY(0) scale(1)!important;
 }
 #hud #semiRadialDock .dr90Sector{
- stroke-width:1.45;stroke-linejoin:round;
+ stroke-width:1.15;stroke-linejoin:round;
  vector-effect:non-scaling-stroke;
 }
 #hud #semiRadialDock .dr90Sector--left,
 #hud #semiRadialDock .dr90Sector--right{
- fill:url(#dr90Side)!important;stroke:#66c8dfbd!important;
+ fill:url(#dr90Side)!important;stroke:#78d8ed9c!important;
 }
 #hud #semiRadialDock .dr90Sector--center{
- fill:url(#dr90Selected)!important;stroke:#f8cb78e6!important;
- stroke-width:1.8;
- filter:drop-shadow(0 0 3px #d6a7566b);
+ fill:url(#dr90Selected)!important;stroke:#ffdb92d8!important;
+ stroke-width:1.45;
+ filter:drop-shadow(0 0 6px #e7bd7353);
 }
 #hud #semiRadialDock .dr90CenterAccent{
  stroke:#ffe4a4c9;stroke-width:1;fill:none;
@@ -80,13 +80,13 @@ body:not([data-phase="play"]) #hud #semiRadialDock{display:none!important}
  opacity:0;visibility:hidden;
  pointer-events:none!important;
  transform-origin:center center!important;
- transition:transform .61s cubic-bezier(.19,.70,.22,1),
+ transition:transform .59s cubic-bezier(.19,.70,.22,1),
             opacity .36s ease,visibility .36s ease!important;
  will-change:transform;
 }
 #hud #semiRadialDock .dr90Option{
  position:absolute!important;
- left:-47px!important;top:-145px!important;
+ left:-47px!important;top:-148px!important;
  width:94px!important;height:48px!important;min-height:0!important;
  display:flex!important;flex-flow:column nowrap!important;
  align-items:center!important;justify-content:center!important;
@@ -98,7 +98,7 @@ body:not([data-phase="play"]) #hud #semiRadialDock{display:none!important}
  text-shadow:0 1px 3px #001a2bdc!important;
  pointer-events:none!important;
  transform-origin:47px 24px!important;
- transition:transform .61s cubic-bezier(.19,.70,.22,1),
+ transition:transform .59s cubic-bezier(.19,.70,.22,1),
             color .22s ease!important;
  outline-offset:1px!important;
  cursor:pointer!important;
@@ -157,15 +157,15 @@ body:not([data-phase="play"]) #hud #semiRadialDock{display:none!important}
    Three rings, engineered reticle; no giant cartoon mining machine. */
 #hud #semiRadialDock .dr90Hub{
  position:absolute!important;
- left:174px!important;top:112px!important;
- width:52px!important;height:52px!important;min-height:52px!important;
+ left:172px!important;top:108px!important;
+ width:56px!important;height:56px!important;min-height:56px!important;
  border-radius:50%!important;
  display:grid!important;place-items:center!important;
  padding:7px!important;margin:0!important;
- background:radial-gradient(circle at 34% 23%,#2f5a6c,#0e3048 52%,#081c30 85%)!important;
- border:1.5px solid #e7bf72!important;
- box-shadow:inset 0 2px #d0fbff42,inset 0 -5px 8px #001725a8,
- 0 0 0 3px #061e30e8,0 3px 9px #000c,0 0 9px #86dcf233!important;
+ background:radial-gradient(circle at 32% 20%,#426f83 0%,#1b4a60 27%,#102f44 53%,#071b2d 81%)!important;
+ border:1.35px solid #e7bf72!important;
+ box-shadow:inset 0 2px 1px #e5fcff65,inset 0 -6px 8px #001624bb,
+ 0 0 0 3px #061e30f0,0 6px 12px #000c,0 0 10px #86dcf237!important;
  z-index:6!important;
  color:#ffdc9b!important;
  cursor:pointer!important;pointer-events:auto!important;
@@ -175,23 +175,24 @@ body:not([data-phase="play"]) #hud #semiRadialDock{display:none!important}
 }
 #hud #semiRadialDock .dr90Hub::before{
  content:"";position:absolute;inset:4px;
- border:1px solid #93dff15c;border-radius:50%;
+ border:1px solid #b0edfc78;border-radius:50%;
+ box-shadow:inset 0 1px #e7faff48,inset 0 -2px 3px #02101cae;
  pointer-events:none!important;
 }
 #hud #semiRadialDock .dr90HubGlyph{
  width:32px!important;height:32px!important;
- color:#ffdda1!important;filter:drop-shadow(0 0 3px #ffd2873b)!important;
+ color:#ffe3a7!important;filter:drop-shadow(0 0 3px #ffd28770)!important;
 }
 #hud #semiRadialDock .dr90HubNotch{
- position:absolute;top:-7px;left:50%;transform:translateX(-50%);
+ position:absolute;top:-8px;left:50%;transform:translateX(-50%);
  width:12px;height:2px;border-radius:3px;
  background:#57ccdf;box-shadow:0 0 5px #68d7ef70;
  opacity:.72;pointer-events:none!important;
 }
 #hud #semiRadialDock.is-open .dr90Hub{
- border-color:#f5d489!important;
- box-shadow:inset 0 2px #f0fcff69,inset 0 -5px 8px #001725a8,
- 0 0 0 3px #061e30e8,0 3px 10px #000c,0 0 12px #e7bd7450!important;
+ border-color:#f6d997!important;
+ box-shadow:inset 0 2px #f0fcff72,inset 0 -6px 8px #001725b5,
+ 0 0 0 3px #061e30e8,0 4px 13px #000c,0 0 14px #e7bd7465!important;
 }
 #hud #semiRadialDock .dr90Hub:focus-visible{
  outline:2px solid #ffe6aa!important;outline-offset:5px!important;
@@ -226,14 +227,78 @@ body:not([data-phase="play"]) #hud #semiRadialDock{display:none!important}
 /* Portrait/landscape scaling is driven by ResizeObserver without changing
    the polar geometry, preserving actual circular paths on all viewports. */
 @media(orientation:landscape) and (max-height:510px){
- #hud #semiRadialDock{bottom:max(10px,env(safe-area-inset-bottom,0px))!important;width:min(365px,calc(100vw - 188px))!important}
+ #hud #semiRadialDock{bottom:max(38px,env(safe-area-inset-bottom,0px))!important;width:min(365px,calc(100vw - 188px))!important}
 }
 @media(max-width:670px){
- #hud #semiRadialDock{width:calc(100vw - 145px)!important;max-width:350px!important;bottom:11px!important}
+ #hud #semiRadialDock{width:calc(100vw - 145px)!important;max-width:350px!important;bottom:34px!important}
 }
 @media(prefers-reduced-motion:reduce){
  #hud #semiRadialDock .dr90Ring,
  #hud #semiRadialDock .dr90Orbit,
  #hud #semiRadialDock .dr90Option,
  #hud #semiRadialDock .dr90Arrows{transition:none!important;animation:none!important}
+}
+
+/* V92: touch zones follow PAINTED annular sectors, never a world-obscuring box.
+   Glass and bevel decoration cannot intercept hit testing. */
+#hud #semiRadialDock .dr90Ring,
+#hud #semiRadialDock .dr90Choices,
+#hud #semiRadialDock .dr90Option,
+#hud #semiRadialDock .dr90Sector{
+ touch-action:none!important;
+ -webkit-user-select:none!important;
+ user-select:none!important;
+}
+#hud #semiRadialDock .dr90Ring{pointer-events:none!important}
+#hud #semiRadialDock.is-open .dr90Sector{
+ pointer-events:visiblePainted!important;
+ cursor:grab!important;
+}
+#hud #semiRadialDock .dr92Glass,
+#hud #semiRadialDock .dr92OuterRim,
+#hud #semiRadialDock .dr92InnerRim,
+#hud #semiRadialDock .dr90CenterAccent{pointer-events:none!important}
+#hud #semiRadialDock .dr92Glass{
+ fill:url(#dr92Glass)!important;
+ stroke:none!important;
+ opacity:.86;
+}
+#hud #semiRadialDock .dr92Glass--center{opacity:.95}
+#hud #semiRadialDock .dr92OuterRim{
+ fill:none!important;
+ stroke:url(#dr92Rim)!important;
+ stroke-width:.75!important;
+ stroke-linecap:round!important;
+ vector-effect:non-scaling-stroke!important;
+ opacity:.70;
+}
+#hud #semiRadialDock .dr92OuterRim--selected{
+ stroke:#ffe3a6!important;
+ opacity:.87;
+ filter:drop-shadow(0 0 2px #eacb87a0);
+}
+#hud #semiRadialDock .dr92InnerRim{
+ fill:none!important;
+ stroke:#91d3df90!important;
+ stroke-width:.70!important;
+ vector-effect:non-scaling-stroke!important;
+ opacity:.45;
+}
+#hud #semiRadialDock .dr90Sector--left,
+#hud #semiRadialDock .dr90Sector--right{
+ filter:drop-shadow(0 2px 2px #061926a3);
+}
+#hud #semiRadialDock .dr90Icon{
+ filter:drop-shadow(0 0 4px #7ad9ee4c)!important;
+}
+#hud #semiRadialDock .dr90Orbit[data-step="0"] .dr90Icon{
+ filter:drop-shadow(0 0 5px #f1bf6c9a)!important;
+}
+#hud #semiRadialDock .dr90Hub::after{
+ content:"";position:absolute;inset:-5px;
+ border-radius:50%;
+ border:1px solid #6bd3e363;
+ border-bottom-color:#eec57882;
+ box-shadow:0 0 6px #59c9db35;
+ pointer-events:none!important;
 }

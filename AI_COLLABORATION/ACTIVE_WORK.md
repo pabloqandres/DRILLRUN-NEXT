@@ -190,3 +190,5 @@ _Nothing blocked._
 - **2026-11-12 — V90 radial command wheel:** `chatgpt/v90-radial-command-wheel`. Reemplazo completo de V83/V88 como UI (nuevo módulo+CSS único), import compartido de `game.mjs` y enlace `dist/index.html`, sin cambios económicos. Pruebas y previsualización pendientes antes de publicar. **Finanzas V89** es una tarea separada, rama `chatgpt/v89-financial-history`, no mezclar estados ni tocar saldo.
 
 - **2026-11-12 — V91 historial financiero:** `chatgpt/v91-financial-history`. Read-model central sobre `s.ledger` + vista Centro Faena y saldo, sin pagos nuevos ni mutaciones de `state.mjs`. CI propio y QA de producción pendientes.
+
+- **2026-11-12 — V92 radial touch y acabado:** rama `chatgpt/v92-radial-touch-finish`. Cambio focal al JS/CSS V90, sin tocar import, HUD, economía ni financiera V91. Resolver bloqueo gestual sobre sectores SVG, altura y terminación de gajos + hub. CI gesto touch real simulado y regresiones; revisar capturas Android después de publicar.

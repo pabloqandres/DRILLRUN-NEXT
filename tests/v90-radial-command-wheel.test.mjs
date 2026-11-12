@@ -70,9 +70,9 @@ test('V90: no counter, thin segment strokes, layered hub and view-safe margins',
  assert(src.includes('class="dr90Next"'));
  assert(src.includes('class="dr90Hub"'));
  assert(css.includes('border-radius:50%!important'));
+ assert(css.includes('stroke-width:1.15'));
  assert(css.includes('stroke-width:1.45'));
- assert(css.includes('stroke-width:1.8'));
- assert(css.includes('bottom:clamp(13px,2.4dvh,23px)'));
+ assert(css.includes('bottom:clamp(46px,7dvh,66px)'));
  assert(css.includes('.dr90Hub::before'));
  assert(css.includes('.dr90CenterAccent'));
  assert(css.includes('font:850 10.4px/1.07'));
@@ -95,9 +95,9 @@ test('V90: real orbit (not linear interpolation) with keyboard, pointer, wheel a
   "new MutationObserver"
  ])assert(src.includes(key),key);
  assert(css.includes('.dr90Orbit{'));
- assert(css.includes('transition:transform .61s cubic-bezier(.19,.70,.22,1)'));
+ assert(css.includes('transition:transform .59s cubic-bezier(.19,.70,.22,1)'));
  assert(css.includes('transform-origin:47px 24px'));
- assert(css.includes('top:-145px'));
+ assert(css.includes('top:-148px'));
  assert(css.includes('top:164px'));
  assert(css.includes('touch-action:none!important'));
 });
