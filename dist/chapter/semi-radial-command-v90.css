@@ -532,9 +532,9 @@ body:not([data-phase="play"]) #hud #semiRadialDock{display:none!important}
  filter:drop-shadow(0 2px 3px #031421b9)!important;
 }
 #hud #semiRadialDock .dr90Option{
- left:-46px!important;top:-339px!important;
- width:92px!important;height:70px!important;
- transform-origin:46px 35px!important;
+ left:-41px!important;top:-339px!important;
+ width:82px!important;height:70px!important;
+ transform-origin:41px 35px!important;
  gap:3px!important;padding:0 2px!important;
 }
 #hud #semiRadialDock .dr90Icon{
@@ -544,7 +544,7 @@ body:not([data-phase="play"]) #hud #semiRadialDock{display:none!important}
  width:31px!important;height:31px!important;stroke-width:1.85!important;
 }
 #hud #semiRadialDock .dr90Label{
- width:92px!important;max-width:92px!important;max-height:34px!important;
+ width:82px!important;max-width:82px!important;max-height:34px!important;
  font:850 14.2px/1.04 system-ui,sans-serif!important;
  letter-spacing:-.035em!important;overflow-wrap:break-word!important;
  text-align:center!important;
