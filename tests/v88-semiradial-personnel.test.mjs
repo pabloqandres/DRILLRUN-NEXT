@@ -19,7 +19,7 @@ test('V88 · one semiradial perimeter with no redundant decorative inner rim',()
  assert.equal((src.match(/class="drSemiSegment drSemiSegment(?:Left|Active|Right)"/g)||[]).length,3);
  assert(css.includes('.drSemiRim{display:none!important}'));
  assert(css.includes('top:36%!important'));
- assert(css.includes('top:56%!important'));
+ assert(css.includes('top:54%!important'));
  assert(css.includes('width:min(400px'));
  assert(css.includes('height:130px'));
  assert(html.indexOf('semi-radial-layout-v88.css')>html.indexOf('semi-radial-premium-v86.css'));
