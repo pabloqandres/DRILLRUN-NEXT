@@ -1,6 +1,7 @@
 // V53 · One operational workspace with contextual entry points.
 // Renders EXISTING M3/M4/M5 controllers; no duplicate spending/progression.
 import {renderM3App} from '../mission3/phone-apps.mjs';
+import {renderFinancialHistory} from './finance-view-v91.mjs';
 import {renderPersonnelPremium,nextRequiredRole,personnelAvailability} from './personnel-premium-v76.mjs';
 import {candidatesForRole,candidateById,activePersonnelCount} from './personnel-candidates-v76.mjs';
 import {renderM4App} from '../mission4/phone-apps.mjs';
@@ -18,7 +19,7 @@ const routes=Object.freeze({
  overview:'Centro de Faena',production:'Producción y zonas',logistics:'Galpón logístico',
  workshop:'Taller técnico',fleet:'Patio y flota',safety:'Seguridad HSEC',
  contracts:'Contratos',personnel:'Personal',headquarters:'Casa Matriz',
- patio:'Patio de Maquinarias',geology:'Geología',zones:'Zonas'
+ patio:'Patio de Maquinarias',geology:'Geología',zones:'Zonas',finances:'Finanzas'
 });
 export const FAENA_ROUTES=routes;
 export const faenaRouteForApp=app=>({
@@ -55,7 +56,7 @@ export class FaenaCenterUI{
  constructor({host,state,translate,format,icon,onClose,onAppAction,onKitOrder,onRecovery,onHsec,onLocate,onLocatePersonalTruck,onRecoverPersonalTruck,onFeedback}){
   Object.assign(this,{host,state,translate,format,icon,onClose,onAppAction,onKitOrder,onRecovery,onHsec,onLocate,onLocatePersonalTruck,onRecoverPersonalTruck,onFeedback});
   this.route='overview';this.view='';this.lastKey='';
-  this.personnelRole=null;this.personnelCandidate=null;this.personnelView='recruit';this.personnelDetailTab='ficha';
+  this.personnelRole=null;this.personnelCandidate=null;this.personnelView='recruit';this.personnelDetailTab='ficha';this.financialFilter='all';
   host.addEventListener('click',event=>this.handle(event));
  }
  get visible(){return !this.host.classList.contains('hidden');}
@@ -88,6 +89,7 @@ export class FaenaCenterUI{
   if(this.view==='m4-drilltruck')return m4('m4-drilltruck');
   function m3or4(app){return app.startsWith('m3-')?m3(app):m4(app);}
   switch(this.route){
+   case 'finances':return renderFinancialHistory(s,this.financialFilter);
    case 'production':{
     if(!s.mission3||s.mission3.phase==='inactive')return '<p class="faenaHint">La geología operativa se desbloquea en Misión 3.</p>';
     const before=section('01 · Estudio geológico',m3('m3-geology'));
@@ -234,6 +236,7 @@ export class FaenaCenterUI{
        '<div class="fcRailMetrics">'+metrics.map(([id,title,value])=>
         '<div class="fcRailMetric">'+fcIcon(id)+'<span>'+esc(title)+'</span><b>'+esc(value)+'</b></div>'
        ).join('')+'</div>'+
+       '<button class="fcFinanceLink" type="button" data-faena-route="finances" aria-label="Consultar historial financiero">Historial financiero <small aria-hidden="true">›</small></button>'+
        '<button type="button" class="fcNextStep" '+missionAction+'><span class="fcNextLabel">SIGUIENTE ACCIÓN</span>'+
         '<b>'+esc(readout.pending&&stage===5?readout.pending.label:nextStep)+'</b>'+
         '<span>Ir a '+esc(missionRoute?routes[missionRoute]:'la faena')+' <span aria-hidden="true">›</span></span></button>'+
@@ -299,7 +302,8 @@ export class FaenaCenterUI{
  handle(e){
   const b=e.target.closest('button');
   if(!b||b.disabled||!this.host.contains(b))return;
-  if(b.dataset.pvDetailTab){this.personnelDetailTab=b.dataset.pvDetailTab;this.onFeedback?.('select');this.render();return;}
+  if(b.dataset.financeFilter){this.financialFilter=b.dataset.financeFilter;this.onFeedback?.('select');this.render();return;}
+   if(b.dataset.pvDetailTab){this.personnelDetailTab=b.dataset.pvDetailTab;this.onFeedback?.('select');this.render();return;}
   if(b.hasAttribute('data-pv-team-open')){this.personnelView='team';this.onFeedback?.('select');this.render();return;}
   if(b.hasAttribute('data-pv-team-back')){this.personnelView='recruit';this.onFeedback?.('select');this.render();return;}
   if(b.dataset.pvTeamPerson){this.personnelCandidate=b.dataset.pvTeamPerson;this.onFeedback?.('select');this.render();return;}

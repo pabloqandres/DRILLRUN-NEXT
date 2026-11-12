@@ -1723,7 +1723,7 @@ $('#patioBuildHud')?.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===
    return true;
   }
  });
- $('#phoneButton').onclick=()=>{if(phoneOpen)closePhone();else if(!showPendingMissionMessage())openPhone();};$('#closePhone').onclick=$('#phoneShade').onclick=closePhone;$('#phoneBack').onclick=()=>phoneUI.backApp();$('#money').onclick=()=>notices.push({title:t('cash'),detail:money(s.cash),symbol:'wallet'});
+ $('#phoneButton').onclick=()=>{if(phoneOpen)closePhone();else if(!showPendingMissionMessage())openPhone();};$('#closePhone').onclick=$('#phoneShade').onclick=closePhone;$('#phoneBack').onclick=()=>phoneUI.backApp();$('#money').onclick=()=>openFaena('finances');
 $('#objective').onclick=e=>{if(e.target.closest('#objToggle'))return;showMission();};$('#objective').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showMission();}};
 $('#objToggle').onclick=e=>{e.stopPropagation();$('#objective').classList.toggle('collapsed');const gc=$('#geoCard');if(gc&&gc._shown===false)gc.classList.add('hidden');};
 $('#geoDismiss').onclick=e=>{e.stopPropagation();if(s?.geoAnalysis){s.geoAnalysis.cardDismissed=true;save();renderHUD();}};
