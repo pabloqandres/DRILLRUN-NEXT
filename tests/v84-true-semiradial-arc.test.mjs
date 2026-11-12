@@ -12,7 +12,9 @@ test('V84 · renders a coherent curved three-sector arc, not rectangular floatin
  assert(module.includes('drSemiShapeSide'));
  assert(module.includes('M12 29 Q60 1 108 29'));
  assert(module.includes('M9 42 Q54 12 110 19'));
- assert(module.includes('drSemiExcavator'));
+ assert(module.includes('drSemiHubIcon'));
+ assert(module.includes('drSemiRibbon'));
+ assert(module.includes('drSemiSegmentActive'));
  for(const expected of [
   '.drSemiItem[data-step="0"] .drSemiShapeCenter',
   '.drSemiItem[data-step="0"] .drSemiShapeSide',

@@ -134,7 +134,7 @@ export function installSemiRadialDock({
  trigger.addEventListener('pointermove',event=>{
   if(!triggerDown)return;
   const dx=event.clientX-touchX;
-  if(Math.abs(dx)>=58&&Date.now()-lastDragRotationAt>=190){
+  if(Math.abs(dx)>=58&&Date.now()-lastDragRotationAt>=310){
    lastDragRotationAt=Date.now();
    clearTimeout(longTimer);
    triggerDragged=true;
@@ -165,7 +165,7 @@ export function installSemiRadialDock({
  fan.addEventListener('pointermove',event=>{
   if(!open||!fanDrag)return;
   const dx=event.clientX-fanDrag.x;
-  if(Math.abs(dx)>=58&&Date.now()-lastDragRotationAt>=190){
+  if(Math.abs(dx)>=58&&Date.now()-lastDragRotationAt>=310){
    lastDragRotationAt=Date.now();
    fanDrag.dragged=true;
    suppressItemClickUntil=Date.now()+270;
