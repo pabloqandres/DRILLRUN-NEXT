@@ -590,3 +590,11 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - El ícono de acción anterior `interact-focus` se sustituyó por la mano del set original, en el mismo botón y sin modificar listeners de juego.
 - Diseño de botón en burdeo PUMA sólido con gradiente 3D, inactivo oscuro y legible, disponible luminoso con brillo; `disabled` se mantiene controlado por game.mjs.
 - Pruebas V92 ampliadas para independencia de panel, movimiento, selección de icono y estilos. No cambia rueda de seis segmentos, plinto de doble burbuja, misiones, save, estado ni HUD restante.
+
+## 2026-11-12 — V100 · Personal compacto aprobado, retratos sin estiramiento
+- Ventana desktop al 85vw × 84dvh (responsive en celular), encabezado minimalista, cuatro roles principales con divulgador de restantes; se conserva acceso a los 7 roles y sus bloqueos existentes por misión.
+- Centro: 3 candidatos, retrato, nombre, estrellas, 3 habilidades con pictogramas y puntos, costo y estado; sin duplicar Contratar. Ficha derecha: cabecera breve, 3 habilidades y botón único; «Más detalles» incluye Ficha/Desarrollo/Salario/Historial sin pérdida de datos.
+- Staff inferior: solo 3 plazas visibles, nombres de dos líneas y retratos circulares sin corte, desplazamiento horizontal nativo por touch/ratón, flechas pequeñas con contador 1/n, acceso a Gestionar; capacidad y empleados reales provenientes del estado original.
+- Las ilustraciones utilizan su ratio intrínseco, object-fit:contain y image-rendering:auto, sin transformar ni estirar. Las 3 imágenes V80 de Administración son 230×260 raster por persona; no se inventa un nuevo diseño facial ni se promete recuperar resolución ausente. El resto se basa en SVG vectoriales.
+- Archivos: renderer `personnel-premium-v76.mjs` (solo presentación), `personnel-v100-interactions.mjs` (pager), CSS nuevo `personnel-compact-v100.css`, carga última en `dist/index.html`, tests V100/V81 y workflow V100. Se mantiene V81 no redraw, se preservan hires, roles, economía, M1–M5 y Cloud Save.
+- **Fase funcional de vacantes por misión/recompensas pendiente:** para no inventar premios ni romper saves, se conserva `personnelCapacity` y se deberá acordar el nuevo contrato de progreso con el propietario del estado antes de escribirlo.
