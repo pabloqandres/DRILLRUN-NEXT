@@ -192,13 +192,20 @@ export class FaenaCenterUI{
   const prev=this.view?route:route==='overview'?'': 'overview';
   const currentScroll=this.lastKey===route+':'+this.view?this.host.querySelector('.faenaBody')?.scrollTop||0:0;
   const isPersonnel=route==='personnel'&&!this.view;
+  const pageMarkup=this.pageHtml(s,t,fmt,icon);
+  if(isPersonnel&&this._lastPersonnelPage===pageMarkup&&this.host.querySelector('.pvRoot')){
+   const badge=this.host.querySelector('.pvHeaderFunds');
+   if(badge&&badge.textContent!==money(s.cash))badge.textContent=money(s.cash);
+   return;
+  }
+  this._lastPersonnelPage=isPersonnel?pageMarkup:null;
   const personnelTitle=isPersonnel?'<div class="pvScreenIdentity"><span class="pvScreenGlyph">'+icon('dock-users')+'</span><div><h2>Personal</h2><small>CONTRATACIÓN Y GESTIÓN DEL EQUIPO</small></div></div>':'<div><small>DRILL RUN · OPERACIÓN</small><h2>'+esc(title||'Centro de Faena')+'</h2></div>';
   const personnelCash=isPersonnel?'<span class="pvHeaderFunds" aria-label="Saldo actual">'+money(s.cash)+'</span>':'';
   this.host.innerHTML='<div class="faenaDialog '+(isPersonnel?'pvDialog':'')+'" role="dialog" aria-modal="true" aria-label="Centro de Faena">'+
    '<header class="faenaHeader">'+personnelTitle+
    '<div class="faenaHeaderActions">'+personnelCash+(prev?'<button data-faena-back aria-label="Volver">‹ Volver</button>':'')+
    '<button data-faena-close aria-label="Cerrar Centro de Faena">✕</button></div></header>'+
-   '<div class="faenaBody"><div class="faenaContent">'+this.pageHtml(s,t,fmt,icon)+'</div></div>'+
+   '<div class="faenaBody"><div class="faenaContent">'+pageMarkup+'</div></div>'+
    (isPersonnel?'':'<footer class="faenaFooter"><button data-faena-route="overview">'+icon('inventory')+' Centro de Faena</button>'+
    '<button data-faena-route="production">'+icon('geology')+' Producción</button>'+
    '<button data-faena-route="logistics">'+icon('store')+' Logística</button>'+

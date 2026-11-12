@@ -73,13 +73,36 @@ const V78_ADMIN_ART=Object.freeze({
 const portraitIllustration=(c,mode='card')=>{
  const art=V78_ADMIN_ART[c?.id];
  return art
-  ? `<span class="pvArtPortrait pvArtPortrait--${mode} pvArtPortrait--${art}" role="img" aria-label="Retrato ilustrado de ${esc(c.name)}"><img class="pvPortraitImage" src="./assets/npc-portraits-v80/${esc(c.id)}.svg" alt="" draggable="false" loading="lazy"></span>`
+  ? `<span class="pvArtPortrait pvArtPortrait--${mode} pvArtPortrait--${art}" role="img" aria-label="Retrato ilustrado de ${esc(c.name)}"><img class="pvPortraitImage" src="./assets/npc-portraits-v80/${esc(c.id)}.svg" alt="" draggable="false" loading="eager" decoding="async" width="230" height="260"></span>`
   : placeholder(c,mode);
 };
 const placeholder=(c,mode='card')=>`<span class="pvEmptyPortrait pvEmptyPortrait--${mode}" role="img" aria-label="Retrato pendiente de ${esc(c?.name||'personal')}"><span class="pvEmptyPortraitFigure" aria-hidden="true"><span class="pvEmptyHead"></span><span class="pvEmptyBody"></span></span><small>RETRATO PENDIENTE</small></span>`;
-const candidateSkillRows=c=>Object.entries(c?.skills||{}).map(([name,val])=>`<span class="pvCandidateSkill"><span>${esc(PERSONNEL_SKILL_LABELS[name]||name)}</span><span class="pvMiniPips" aria-label="${val} de 5">${Array.from({length:5},(_,i)=>`<i class="${i<val?'on':''}"></i>`).join('')}</span></span>`).join('');
+
+const statShapes=Object.freeze({
+ handshake:'<path d="M2 12l5-4 3 2 4-2 8 6-5 5-4-3-2 2-4-3-2 1z"/><path d="M9 11l7 5"/>',
+ bars:'<rect x="3" y="14" width="4" height="7"/><rect x="10" y="9" width="4" height="12"/><rect x="17" y="3" width="4" height="18"/>',
+ calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18M7 14h3m3 0h3M7 18h4"/>',
+ clipboard:'<rect x="5" y="4" width="14" height="18" rx="2"/><path d="M9 4V2h6v2M9 10h6M9 14h6M9 18h4"/>',
+ people:'<circle cx="9" cy="7" r="3"/><circle cx="17.5" cy="8" r="2.5"/><path d="M3 21v-4a6 6 0 0 1 12 0v4m2-9a5 5 0 0 1 5 5v4"/>',
+ target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>',
+ shield:'<path d="M12 2L3 6v6c0 5 3.5 8.5 9 10 5.5-1.5 9-5 9-10V6z"/><path d="M8 12l3 3 5-6"/>',
+ wrench:'<path d="M21 5a6 6 0 0 1-7 7L6 20a3 3 0 0 1-4-4l8-8a6 6 0 0 1 7-7l-4 4 5 5z"/>',
+ eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+ truck:'<rect x="2" y="8" width="14" height="10"/><path d="M16 11h4l2 4v3h-6"/><circle cx="6" cy="19" r="2"/><circle cx="19" cy="19" r="2"/>',
+ analysis:'<path d="M3 21V3m0 18h18M7 16l4-5 4 2 5-8"/>'
+});
+const statTypes=Object.freeze({
+ negotiation:'handshake',efficiency:'bars',planning:'calendar',reporting:'clipboard',
+ coordination:'people',teamwork:'people',support:'people',drilling:'target',precision:'target',
+ rigging:'wrench',safety:'shield',inspection:'eye',compliance:'shield',
+ maintenance:'wrench',automation:'wrench',repair:'wrench',vigilance:'eye',response:'shield',
+ logistics:'truck',inventory:'clipboard',fleet:'truck',analysis:'analysis'
+});
+const statIcon=key=>'<svg class="pvStatGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+statShapes[statTypes[key]||'analysis']+'</svg>';
+const tabIcon=key=>statIcon(({ficha:'reporting',desarrollo:'analysis',salario:'planning',historial:'response'})[key]||'reporting');
+const candidateSkillRows=c=>Object.entries(c?.skills||{}).map(([name,val])=>`<span class="pvCandidateSkill"><span class="pvSkillGlyph">${statIcon(name)}</span><span class="pvSkillLabel">${esc(PERSONNEL_SKILL_LABELS[name]||name)}</span><span class="pvMiniPips" aria-label="${val} de 5">${Array.from({length:5},(_,i)=>`<i class="${i<val?'on':''}"></i>`).join('')}</span></span>`).join('');
 const skillRows=c=>Object.entries(c?.skills||{}).map(([name,val])=>
- `<div class="pvSkill" title="Habilidad registrada para progresión futura, sin bono económico activo"><span>${esc(PERSONNEL_SKILL_LABELS[name]||name)}</span><span class="pvPips" aria-label="${val} de 5">${Array.from({length:5},(_,i)=>`<i class="${i<val?'on':''}"></i>`).join('')}</span><b>${val}/5</b></div>`
+ `<div class="pvSkill" title="Habilidad registrada para progresión futura, sin bono económico activo"><span class="pvSkillGlyph">${statIcon(name)}</span><span class="pvSkillLabel">${esc(PERSONNEL_SKILL_LABELS[name]||name)}</span><span class="pvPips" aria-label="${val} de 5">${Array.from({length:5},(_,i)=>`<i class="${i<val?'on':''}"></i>`).join('')}</span><b>${val}/5</b></div>`
 ).join('');
 const navRole=(s,g,role,ico)=>{
  const n=roleCount(s,g.id),unlocked=personnelUnlockMission(s)>=g.unlock;
@@ -132,17 +155,15 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon,view='recr
    <nav class="pvRoles" aria-label="Categorías de contratación">${PERSONNEL_GROUPS.map(g=>navRole(s,g,role.id,icon)).join('')}</nav>
   </aside>
   <section class="pvCenter" aria-label="Candidatos">
-   <div class="pvSectionHead"><div><span class="pvEyebrow">${step?'OBJETIVO ACTUAL':'SELECCIÓN DE PERSONAL'}</span><h3>${esc(role.label)}</h3><p>${esc(role.description)}</p></div>
+   <div class="pvSectionHead"><div class="pvRoleTitle"><span class="pvRoleTitleIcon">${icon(icons[role.id]||'dock-clipboard')}</span><div class="pvRoleTitleCopy"><span class="pvEyebrow">${step?'OBJETIVO ACTUAL':'SELECCIÓN DE PERSONAL'}</span><h3>${esc(role.label)}</h3><p>${esc(role.description)}</p></div></div>
    <div class="pvCarouselControls"><button type="button" data-pv-prev aria-label="Candidato anterior">‹</button><span>${entries.findIndex(x=>x.id===selected.id)+1} / 3</span><button type="button" data-pv-next aria-label="Siguiente candidato">›</button></div></div>
    <div class="pvCandidates">${entryCards}</div>
   </section>
   <aside class="pvDetail" aria-label="Ficha del candidato seleccionado">
-   <div class="pvDetailHero"><div><span class="pvEyebrow">CANDIDATO SELECCIONADO</span><h3>${esc(selected.name)}</h3><span class="pvCandidateStars">${'★'.repeat(selected.grade)}<span>${'★'.repeat(5-selected.grade)}</span></span></div>
-   ${portraitIllustration(selected,'detail')}</div>
-   <nav class="pvDetailTabs" aria-label="Datos del candidato">${[['ficha','Ficha'],['desarrollo','Desarrollo'],['salario','Salario'],['historial','Historial']].map(([id,label])=>`<button type="button" data-pv-detail-tab="${id}" class="${activeTab===id?'active':''}" aria-pressed="${activeTab===id}">${label}</button>`).join('')}</nav>
+   <div class="pvDetailHero">${portraitIllustration(selected,'detail')}<div class="pvDetailHeroCopy"><h3>${esc(selected.name)}</h3><span class="pvRoleBadge">${esc(role.short)}</span><span class="pvCandidateStars">${'★'.repeat(selected.grade)}<span>${'★'.repeat(5-selected.grade)}</span></span><p class="pvDetailSummary">${esc(selected.description)}</p></div></div>
+   <nav class="pvDetailTabs" aria-label="Datos del candidato">${[['ficha','Ficha'],['desarrollo','Desarrollo'],['salario','Salario'],['historial','Historial']].map(([id,label])=>`<button type="button" data-pv-detail-tab="${id}" class="${activeTab===id?'active':''}" aria-pressed="${activeTab===id}">${tabIcon(id)}<span>${label}</span></button>`).join('')}</nav>
    <div class="pvDetailBody">
-   ${activeTab==='ficha'? `<p class="pvBio">${esc(selected.description)}</p>
-    <div class="pvSkillsHeader">HABILIDADES <span>NIVEL INICIAL</span></div>
+   ${activeTab==='ficha'? `<div class="pvSkillsHeader">HABILIDADES <span>NIVEL INICIAL</span></div>
     <div class="pvSkills">${skillRows(selected)}</div>
     <div class="pvProposedSalary"><span>Salario por turno · propuesto</span><strong>${money(selected.salaryPerShift)}</strong><small>Sin cobro activo</small></div>`:
     activeTab==='desarrollo'? `<div class="pvTabTitle">Desarrollo de habilidades</div><div class="pvSkills">${skillRows(selected)}</div><p class="pvTabNote">La progresión aún no está activada. Los empleados contratados conservan sus perfiles guardados.</p>`:
