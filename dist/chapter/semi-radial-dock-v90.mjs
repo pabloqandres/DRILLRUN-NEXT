@@ -151,7 +151,7 @@ export function installSemiRadialDock({
  const choices=root.querySelector('.dr90Choices');
  // V99: clear tactile action symbol replaces the ambiguous crosshair.
  // Only its existing icon markup changes; the game's action click/disabled
- // logic stays owned by game.mjs and is never modified here.
+ // logic stays owned by the original game controller and is never modified.
  const actionSymbol=document.querySelector?.('#handButton [data-icon]');
  if(actionSymbol){actionSymbol.dataset.icon='hand';actionSymbol.innerHTML=icon('hand');}
  const nodes=Array.from(root.querySelectorAll('.dr90Orbit'));
