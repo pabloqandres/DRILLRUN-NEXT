@@ -500,3 +500,8 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Diez rutas reales conectadas a menús existentes, sin duplicación de acciones, economía ni misión. Compatibilidad: los botones legados permanecen en DOM para gatillos/permiso de catálogo/HSEC.
 - Feedback de audio y háptico ya existente; volumen y estado de sonido desde Configuración, sin muestras externas ni efectos en bucle.
 - `semi-radial-dock-v83.mjs`, `semi-radial-dock-v83.css`, import/call acotados en `game.mjs`, link en `index.html`, pruebas focales. Validación visual en Android tras desplegar.
+
+## 2026-11-12 — V84 · Arco semirradial de geometría real
+- Captura de usuario V83 contradijo su referencia: secciones cuadradas flotantes, no una rueda. V84 reemplaza cada sección por path SVG curvo, simetría central gold / segmentos cyan inclinados, guías sin fondo gris.
+- Dos sectores fantasma laterales con blur/gradiente radial; botón inferior pictograma excavadora. Forma adaptativa paisaje Android, más baja que tarjetas anteriores.
+- CSS aislado al final; la lógica de rotación, navegación, sonidos y hápticos V83 permanece sin modificaciones. Tests de estructura SVG 3+2 y regressiones V83–V81.

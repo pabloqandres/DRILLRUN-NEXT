@@ -178,3 +178,5 @@ _Nothing blocked._
 - **2026-11-11 · V82 Centro de Faena — implementación total:** rama `chatgpt/v82-faena-command-center`. 8 WebP categoría + 14 SVG pictogramas, home sin duplicación y CSS scoped. No afecta lógica M1–M5 ni economía/guardados; tests de overview/rutas/estabilidad y regresiones V53/V81 en CI. Pendiente verificación de deploy Git main Vercel y QA visual Android.
 
 - **2026-11-12 · V83 menú inferior semirradial animado** — rama `chatgpt/v83-semiradial-dock`. Solo sustituye presentación/navegación inferior; 3 accesos, 2 difuminados, toque y hold, rotación táctil, audio del sistema existente y 10 destinos reutilizados. Los botones del dock original permanecen con sus handlers y condiciones como fuente de verdad. `game.mjs` intervención mínima. CI focal y QA en Android antes de cierre.
+
+- **2026-11-12 · V84 geometría real de semirradial** — rama `chatgpt/v84-true-semiradial-arc`. Rehacer solo las piezas visuales del dock V83 porque la captura en Android muestra tarjetas cuadradas en lugar de 3 sectores curvos y 2 anticipos radiales. No modificar sonido, misiones ni pantallas del juego. CI y revisión Android pendientes.

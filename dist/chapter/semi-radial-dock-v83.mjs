@@ -48,12 +48,21 @@ export function installSemiRadialDock({
   SEMI_RADIAL_ITEMS.map(item=>
    '<button class="drSemiItem" type="button" data-semi-id="'+item.id+
    '" data-step="off" tabindex="-1" aria-hidden="true">'+
-   '<span class="drSemiGlyph">'+icon(item.symbol)+'</span>'+
+   '<svg class="drSemiWedge" viewBox="0 0 120 94" preserveAspectRatio="none" aria-hidden="true">'+
+   '<path class="drSemiShape drSemiShapeCenter" d="M12 29 Q60 1 108 29 Q115 35 109 46 L92 81 Q60 94 28 81 L11 46 Q5 35 12 29 Z"/>'+
+   '<path class="drSemiShape drSemiShapeSide" d="M9 42 Q54 12 110 19 L116 43 L94 86 Q47 82 9 70 Q2 66 9 42 Z"/>'+
+   '</svg>'+ 
+  '<span class="drSemiGlyph">'+icon(item.symbol)+'</span>'+
    '<span class="drSemiLabel">'+item.label+'</span></button>').join('')+
   '<div class="drSemiProgress" aria-hidden="true"></div>'+
   '</div>'+
   '<button class="drSemiTrigger" type="button" aria-expanded="false" aria-label="Abrir menú semirradial" title="Menú de la faena">'+
-  icon('dock-gauge')+
+  '<svg class="drSemiExcavator" viewBox="0 0 64 58" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">'+
+   '<path d="M8 40h31l-4-13H17l-4 13zM23 27v-9h10v9M6 46h34"/>'+
+   '<path d="M31 22 41 7l10-3 7 14-13 9M45 27l9 5-6 8-8-4"/>'+
+   '<rect x="4" y="42" width="39" height="11" rx="5.5"/>'+
+   '<circle cx="12" cy="47.5" r="2"/><circle cx="22" cy="47.5" r="2"/><circle cx="33" cy="47.5" r="2"/>'+
+   '</svg>'+
   '<span class="drSemiTriggerMark" aria-hidden="true">⌃</span></button>';
  anchor.insertAdjacentElement('afterend',root);
 
