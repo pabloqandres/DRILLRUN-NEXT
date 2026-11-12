@@ -37,6 +37,7 @@ function gestureHarness(){
  root.querySelectorAll=q=>q==='.dr90Orbit'?orbits:[];
  const sector=make('sector');
  sector.closest=q=>q.includes('.dr90Sector')?sector:null;
+ sector.classList={contains:k=>k==='dr90Sector--center'};
  const anchor=make('bottomNav');
  anchor.classList={contains:()=>false};
  anchor.insertAdjacentElement=(where,element)=>{assert.equal(where,'afterend');assert.equal(element,root);};
@@ -108,6 +109,17 @@ test('V94: direct tap stays selectable; cancelled gesture does not move category
   x.world.emit('pointercancel',{clientX:183,clientY:251});
   assert.equal(x.api.selected,'catalog');
   assert.equal(x.api.isOpen,true);
+ }finally{x.restore();}
+});
+
+test('V94: whole painted sector is tappable without dragging its label',()=>{
+ const x=gestureHarness();
+ try{
+  x.hub.emit('click');
+  x.stage.emit('pointerdown',{target:x.sector});
+  x.world.emit('pointerup');
+  assert.deepEqual(x.chosen,['catalog']);
+  assert.equal(x.api.isOpen,false);
  }finally{x.restore();}
 });
 
