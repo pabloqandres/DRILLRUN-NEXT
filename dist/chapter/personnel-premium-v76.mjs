@@ -139,12 +139,20 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon,view='recr
    <span class="pvCandidateState">${busy?'CONTRATADO':locked?'BLOQUEADO':'DISPONIBLE'}</span>
   </button>`;
  }).join('');
- const slots=Array.from({length:Math.max(capacity,team.length)},(_,i)=>{
+ // V100: four mission-relevant shortcuts; all other roles remain accessible.
+ const preferred=['admin','driller','tecnicoDrillco','hsec','helper','m5-gate-security','m5-warehouse-tech'];
+ const primaryIds=[...new Set([required,role.id,...preferred])]
+  .filter(id=>PERSONNEL_GROUPS.some(g=>g.id===id)).slice(0,4);
+ const primaryRoles=PERSONNEL_GROUPS.filter(g=>primaryIds.includes(g.id))
+  .sort((a,b)=>primaryIds.indexOf(a.id)-primaryIds.indexOf(b.id));
+ const moreRoles=PERSONNEL_GROUPS.filter(g=>!primaryIds.includes(g.id));
+ const slotCount=Math.max(capacity,team.length);
+ const slots=Array.from({length:slotCount},(_,i)=>{
   const p=team[i];
   if(p){const c=candidateById(p.candidateId);return `<button class="pvTeamSlot occupied" type="button" data-pv-roster="${esc(p.role)}" data-pv-person="${esc(p.candidateId||'')}" aria-label="Ver ${esc(p.name||roleById(p.role)?.label||'contratado')}">
    ${c?`${portraitIllustration(c,'team')}`:`<span class="pvTeamFallback">${icon('personnel')}</span>`}
-   <span><b>${esc(p.name||roleById(p.role)?.label||'Contratado')}</b><small>${esc(roleById(p.role)?.short||p.role)}</small></span><span class="pvHiredCheck">${icon('check')}</span></button>`;}
-  return `<span class="pvTeamSlot vacant"><span class="pvPlus">+</span><span>Disponible</span></span>`;
+   <span class="pvTeamIdentity"><b>${esc(p.name||roleById(p.role)?.label||'Contratado')}</b><small>${esc(roleById(p.role)?.short||p.role)}</small></span><span class="pvHiredCheck">${icon('check')}</span></button>`;}
+  return `<span class="pvTeamSlot vacant" role="listitem" aria-label="Vacante disponible"><span class="pvPlus">+</span><span>Disponible</span></span>`;
  }).join('');
  return `<section class="pvRoot" aria-label="Personal, contratación y equipo">
  <div class="pvMain">
@@ -154,11 +162,14 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon,view='recr
     <small>${hiredRole(s,required)?'Contratación completada':'Siguiente contratación requerida:'}</small>
     <span class="pvMissionTarget"><span>${icon(icons[required]||'personnel')}</span>${esc(requiredDef.label)}<b>${roleCount(s,required)}/1</b></span>
    </button>
-   <div class="pvRoleHeading">ROLES DISPONIBLES <span>${PERSONNEL_GROUPS.length}</span></div>
-   <nav class="pvRoles" aria-label="Categorías de contratación">${PERSONNEL_GROUPS.map(g=>navRole(s,g,role.id,icon)).join('')}</nav>
+   <div class="pvRoleHeading">ROLES PRINCIPALES <span>${primaryRoles.length}</span></div>
+   <nav class="pvRoles" aria-label="Roles principales por misión">${primaryRoles.map(g=>navRole(s,g,role.id,icon)).join('')}</nav>
+   <details class="pvRolesMore"><summary>Ver todos los roles <b>${PERSONNEL_GROUPS.length}</b></summary>
+    <nav class="pvRoles pvRolesExtra" aria-label="Otros roles disponibles">${moreRoles.map(g=>navRole(s,g,role.id,icon)).join('')}</nav>
+   </details>
   </aside>
   <section class="pvCenter" aria-label="Candidatos">
-   <div class="pvSectionHead"><div class="pvRoleTitle"><span class="pvRoleTitleIcon">${icon(icons[role.id]||'dock-clipboard')}</span><div class="pvRoleTitleCopy"><span class="pvEyebrow">${step?'OBJETIVO ACTUAL':'SELECCIÓN DE PERSONAL'}</span><h3>${esc(role.label)}</h3><p>${esc(role.description)}</p></div></div>
+   <div class="pvSectionHead"><div class="pvRoleTitle"><span class="pvRoleTitleIcon">${icon(icons[role.id]||'dock-clipboard')}</span><div class="pvRoleTitleCopy"><span class="pvEyebrow">${step?'CONTRATACIÓN PRIORITARIA':'CANDIDATOS DISPONIBLES'}</span><h3>${esc(role.short||role.label)} <small>· ${entries.length} candidatos</small></h3></div></div>
    <div class="pvCarouselControls"><button type="button" data-pv-prev aria-label="Candidato anterior">‹</button><span>${entries.findIndex(x=>x.id===selected.id)+1} / 3</span><button type="button" data-pv-next aria-label="Siguiente candidato">›</button></div></div>
    <div class="pvCandidates">${entryCards}</div>
   </section>
@@ -178,9 +189,16 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon,view='recr
    ${blocked?`<small class="pvHireReason">${esc(warning)}</small>`:''}
   </aside>
  </div>
- <footer class="pvTeam"><div class="pvTeamCount"><span>${icon('dock-users')}</span><span>Equipo activo<strong>${countTxt}</strong></span></div>
- <div class="pvTeamList" aria-label="Personal contratado y plazas">${slots}</div>
- <button class="pvTeamManage" data-pv-team-open type="button">${icon('dock-users')} Gestionar equipo</button></footer>
+ <footer class="pvTeam pvTeam--v100">
+  <div class="pvTeamCount"><span>${icon('dock-users')}</span><span>Equipo activo<strong>${countTxt}</strong></span></div>
+  <div class="pvTeamViewport"><div class="pvTeamList" aria-label="Personal contratado y plazas" tabindex="0">${slots}</div></div>
+  <div class="pvTeamPager" role="group" aria-label="Desplazar plazas del equipo">
+   <button type="button" data-pv-team-scroll="-1" aria-label="Tres plazas anteriores">‹</button>
+   <span class="pvTeamPage" aria-live="polite">1 / ${Math.max(1,Math.ceil(slotCount/3))}</span>
+   <button type="button" data-pv-team-scroll="1" aria-label="Tres plazas siguientes">›</button>
+  </div>
+  <button class="pvTeamManage" data-pv-team-open type="button" aria-label="Gestionar equipo" title="Gestionar equipo">${icon('dock-users')}<span>Gestionar</span></button>
+ </footer>
  </section>`;
 }
 
