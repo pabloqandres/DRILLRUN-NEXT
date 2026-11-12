@@ -4,6 +4,8 @@
 
 ## Currently Active
 
+- **ChatGPT — V95 (2026-11-12):** `chatgpt/v95-compact-six-radial`. Compacta el menú V94 a seis gajos de 15° en el **mismo círculo** (radios 365/244), conservando el eje de los dos botones y la ubicación junto al joystick. Seis accesos visibles en orden referencia: Centro de Faena, Catálogo, Producción, Inventario, Personal, HSEC; cuatro adicionales por giro infinito. Tap directo en cualquier gajo, snap controlado sin flechas. Cambios únicamente UI radial JS/CSS + tests/documentación. PR #115 abierto, CI focal V90/V92/V82/V86/V91 aprobada, preview Vercel READY. QA visual PC/Android y aprobación de producción pendientes.
+
 - **ChatGPT — V94 menú radial esquina (2026-11-12):** rama `chatgpt/v94-corner-radial-safe-touch`. Archivos `dist/chapter/semi-radial-dock-v90.mjs` y `semi-radial-command-v90.css` más tests/documentación. Cuatro sectores compactos, base integrada con botón de acción diferenciado, margen seguro, centros alineados con joystick, giro circular infinito sin flechas y snap al soltar. Pruebas JS y DOM simulados; PR/CI y Android pendientes. No cambiar `game.mjs`, misiones, economía ni Cloud Save.
 
 

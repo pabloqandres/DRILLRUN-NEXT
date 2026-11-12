@@ -523,3 +523,58 @@ body:not([data-phase="play"]) #hud #semiRadialDock{display:none!important}
  #hud #semiRadialDock .dr90Option,
  #hud #semiRadialDock .dr90Orbit{transition:none!important}
 }
+
+
+/* V95 - six compact sectors on a true quarter circle. */
+#hud #semiRadialDock .dr95Sector--fifth,
+#hud #semiRadialDock .dr95Sector--sixth{
+ fill:url(#dr90Side)!important;stroke:#78d8eda8!important;
+ filter:drop-shadow(0 2px 3px #031421b9)!important;
+}
+#hud #semiRadialDock .dr90Option{
+ left:-41px!important;top:-339px!important;
+ width:82px!important;height:70px!important;
+ transform-origin:41px 35px!important;
+ gap:3px!important;padding:0 2px!important;
+}
+#hud #semiRadialDock .dr90Icon{
+ width:32px!important;height:32px!important;flex-basis:32px!important;
+}
+#hud #semiRadialDock .dr90Icon .uiIcon{
+ width:31px!important;height:31px!important;stroke-width:1.85!important;
+}
+#hud #semiRadialDock .dr90Label{
+ width:82px!important;max-width:82px!important;max-height:34px!important;
+ font:850 14.2px/1.04 system-ui,sans-serif!important;
+ letter-spacing:-.035em!important;overflow-wrap:break-word!important;
+ text-align:center!important;
+}
+#hud #semiRadialDock.is-open .dr90Orbit[data-step="3"],
+#hud #semiRadialDock.is-open .dr90Orbit[data-step="4"]{
+ opacity:1!important;visibility:visible!important;pointer-events:auto!important;
+ filter:none!important;
+}
+#hud #semiRadialDock.is-open .dr90Orbit[data-step="3"] .dr90Option,
+#hud #semiRadialDock.is-open .dr90Orbit[data-step="4"] .dr90Option{
+ pointer-events:auto!important;
+}
+#hud #semiRadialDock:not(.is-open) .dr90Orbit[data-step="3"],
+#hud #semiRadialDock:not(.is-open) .dr90Orbit[data-step="4"]{
+ opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+}
+#hud #semiRadialDock .dr90Sector{
+ stroke-width:1.18!important;stroke-linejoin:round!important;
+}
+#hud #semiRadialDock .dr90Sector--center{stroke-width:1.7!important}
+#hud #semiRadialDock .dr92Glass{opacity:.88!important}
+#hud #semiRadialDock .dr92Glass--center{opacity:.94!important}
+#hud #semiRadialDock .dr92OuterRim{stroke-width:1.12!important}
+#hud #semiRadialDock .dr92InnerRim{stroke-width:.95!important}
+#hud #semiRadialDock .dr90Option:focus-visible{
+ outline:1.5px solid #ffdf9f!important;outline-offset:1px!important;
+ border-radius:8px!important;
+}
+@media(orientation:landscape) and (max-height:510px){
+ #hud #semiRadialDock .dr90Label{font-size:15px!important;line-height:1.02!important}
+ #hud #semiRadialDock .dr90Icon .uiIcon{width:32px!important;height:32px!important}
+}

@@ -1,31 +1,34 @@
-// V94 · Compact corner radial, four sectors, infinite touch rotation with precise snap.
+// V95 · Six compact precision annular controls on the SAME polar circle.
 // Navigation handlers remain the original game's source of truth.
 import {icon} from './icons.mjs';
 
 export const SEMI_RADIAL_ITEMS=Object.freeze([
+ Object.freeze({id:'overview',label:'Centro de Faena',symbol:'dock-gauge'}),
  Object.freeze({id:'catalog',label:'Catálogo',symbol:'dock-package'}),
  Object.freeze({id:'production',label:'Producción',symbol:'dock-zones'}),
  Object.freeze({id:'logistics',label:'Inventario',symbol:'inventory'}),
+ Object.freeze({id:'personnel',label:'Personal',symbol:'dock-users'}),
+ Object.freeze({id:'safety',label:'HSEC',symbol:'dock-hsec'}),
  Object.freeze({id:'workshop',label:'Taller',symbol:'wrench'}),
  Object.freeze({id:'fleet',label:'Patio y flota',symbol:'machine'}),
  Object.freeze({id:'contracts',label:'Contratos',symbol:'dock-clipboard'}),
- Object.freeze({id:'personnel',label:'Personal',symbol:'dock-users'}),
- Object.freeze({id:'safety',label:'HSEC',symbol:'dock-hsec'}),
- Object.freeze({id:'headquarters',label:'Casa Matriz',symbol:'store'}),
- Object.freeze({id:'overview',label:'Centro de Faena',symbol:'dock-gauge'})
+ Object.freeze({id:'headquarters',label:'Casa Matriz',symbol:'store'})
 ]);
 export const semiRadialWrap=(n,size)=>((n%size)+size)%size;
 export function semiRadialStep(itemIndex,centerIndex,total){
  if(!Number.isInteger(total)||total<5)return 'off';
  let delta=semiRadialWrap(itemIndex-centerIndex,total);
  if(delta>Math.floor(total/2))delta-=total;
- return Math.abs(delta)<=2?String(delta):'off';
+ return delta>=-1&&delta<=4?String(delta):'off';
 }
 export const RADIAL_GEOMETRY=Object.freeze({
- cx:500,cy:465,outerRadius:465,innerRadius:296,itemRadius:382,
- left:[-89,-68],center:[-67,-45],right:[-44,-22],outerRight:[-21,0],
- slotAngles:Object.freeze([-78.5,-56,-33,-10.5]),
- slotBounds:Object.freeze([[-89,-68],[-67,-45],[-44,-22],[-21,0]])
+ cx:500,cy:465,
+ outerRadius:365,innerRadius:244,itemRadius:304,
+ slotAngles:Object.freeze([-82.5,-67.5,-52.5,-37.5,-22.5,-7.5]),
+ // Every sector derives from the exact same polar center and pair of radii.
+ // Six 15-degree sectors with slender 0.8-degree seams, spanning a true 90° arc.
+ slotBounds:Object.freeze([[-90,-75.4],[-74.6,-60.4],
+   [-59.6,-45.4],[-44.6,-30.4],[-29.6,-15.4],[-14.6,0]])
 });
 export function radialPoint(angle,radius,geometry=RADIAL_GEOMETRY){
  const a=angle*Math.PI/180;
@@ -46,7 +49,7 @@ const arcPath=(from,to,r,g=RADIAL_GEOMETRY)=>
  'M'+point(radialPoint(from,r,g))+' A'+r+' '+r+' 0 0 1 '+point(radialPoint(to,r,g));
 function wheelSvg(){
  const g=RADIAL_GEOMETRY;
- const classes=['dr90Sector--left','dr90Sector--center','dr90Sector--right','dr94Sector--far'];
+ const classes=['dr90Sector--left','dr90Sector--center','dr90Sector--right','dr94Sector--far','dr95Sector--fifth','dr95Sector--sixth'];
  const sectors=g.slotBounds.map(([a,b],i)=>
   '<path class="dr90Sector '+classes[i]+'" d="'+radialSegmentPath(a,b)+'"/>').join('');
  const glass=g.slotBounds.map(([a,b],i)=>
@@ -61,8 +64,8 @@ function wheelSvg(){
   '<linearGradient id="dr92Glass" x1="0" y1="0" x2=".28" y2="1"><stop stop-color="#c5f4fb" stop-opacity=".20"/><stop offset=".36" stop-color="#65bdd4" stop-opacity=".045"/><stop offset=".85" stop-color="#041c29" stop-opacity=".09"/><stop offset="1" stop-color="#00131c" stop-opacity=".35"/></linearGradient>'+
   '<linearGradient id="dr92Rim" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#dcf8fb" stop-opacity=".92"/><stop offset="1" stop-color="#4c9fb6" stop-opacity=".4"/></linearGradient>'+
   '</defs>'+sectors+glass+rims+
-  '<path class="dr92InnerRim" d="'+arcPath(-89,0,g.innerRadius+3.5)+'"/>'+
-  '<path class="dr90CenterAccent" d="'+arcPath(-63,-49,g.outerRadius-6)+'"/>'+
+  '<path class="dr92InnerRim" d="'+arcPath(-90,0,g.innerRadius+3.5)+'"/>'+
+  '<path class="dr90CenterAccent" d="'+arcPath(-71,-64,g.outerRadius-6)+'"/>'+
   '</svg>';
 }
 const hubSvg='<svg class="dr90HubGlyph" viewBox="0 0 48 48" fill="currentColor" aria-hidden="true">'+
@@ -102,10 +105,10 @@ export function installSemiRadialDock({
  const hub=root.querySelector('.dr90Hub');
  const choices=root.querySelector('.dr90Choices');
  const nodes=Array.from(root.querySelectorAll('.dr90Orbit'));
- let centerIndex=0,open=false,destroyed=false,drag=null;
+ let centerIndex=1,open=false,destroyed=false,drag=null;
  let holdTimer=null,holding=false,longPressed=false,skipHubClick=false;
  let suppressChoiceClickUntil=0,lastWheelAt=0;
- const DRAG_STEP_DEG=23,DRAG_MIN_STEP_MS=145;
+ const DRAG_STEP_DEG=15,DRAG_MIN_STEP_MS=160;
  const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
  const normalizeAngle=d=>((d+540)%360)-180;
  const feedback=kind=>{try{onFeedback(kind);}catch{}};
@@ -120,7 +123,7 @@ export function installSemiRadialDock({
   if(destroyed)return;
   const vw=window.innerWidth||document.documentElement?.clientWidth||1280;
   const vh=window.innerHeight||document.documentElement?.clientHeight||720;
-  const scale=clamp(Math.min(1.16,vh/870,(vw-225)/550),.52,1.16);
+  const scale=clamp(Math.min(1.16,vh/870,(vw-225)/550),.65,1.16);
   root.style.setProperty('--dr94-scale',scale.toFixed(4));
   root.style.setProperty('--dr90-scale',scale.toFixed(4));
   root.style.setProperty('--dr94-dock-width',(550*scale).toFixed(2)+'px');
@@ -133,10 +136,10 @@ export function installSemiRadialDock({
    const node=nodes[i],item=node.querySelector('button');
    let delta=semiRadialWrap(i-centerIndex,SEMI_RADIAL_ITEMS.length);
    if(delta>SEMI_RADIAL_ITEMS.length/2)delta-=SEMI_RADIAL_ITEMS.length;
-   const visible=delta>=-1&&delta<=2;
-   const ghost=delta===-2||delta===3;
+   const visible=delta>=-1&&delta<=4;
+   const ghost=false;
    const angle=visible?RADIAL_GEOMETRY.slotAngles[delta+1]+fractionalAngle:
-    delta===-2?-112+fractionalAngle:delta===3?18+fractionalAngle:(delta<0?-124:40);
+    (delta<0?-108:14);
    node.dataset.step=visible||ghost?String(delta):'off';
    node.style.transform='rotate('+angle.toFixed(2)+'deg)';
    item.style.transform='rotate('+(-angle).toFixed(2)+'deg)';
@@ -167,8 +170,9 @@ export function installSemiRadialDock({
   const orbit=element.closest('.dr90Orbit');
   if(!orbit)return;
   const step=Number(orbit.dataset.step);
-  if(!Number.isInteger(step)||step< -1||step>2)return;
-  if(step!==0){rotate(step);return;}
+  if(!Number.isInteger(step)||step< -1||step>4)return;
+  // Each visible wedge is a real shortcut; one tap opens its destination.
+  // Dragging is exclusively for rotating the infinite carousel.
   if(onNavigate(element.dataset.semiId)===false)return;
   feedback('confirm');setOpen(false,true);
  };
@@ -205,7 +209,9 @@ export function installSemiRadialDock({
   const sectorStep=sector?.classList?.contains('dr90Sector--left')?-1:
    sector?.classList?.contains('dr90Sector--center')?0:
    sector?.classList?.contains('dr90Sector--right')?1:
-   sector?.classList?.contains('dr94Sector--far')?2:null;
+   sector?.classList?.contains('dr94Sector--far')?2:
+    sector?.classList?.contains('dr95Sector--fifth')?3:
+    sector?.classList?.contains('dr95Sector--sixth')?4:null;
   drag={id:event.pointerId,lastAngle:angleAt(event),offset:0,sectorStep,
    moved:false,lastShiftAt:Date.now()-DRAG_MIN_STEP_MS};
   root.classList.add('is-dragging');
@@ -233,7 +239,7 @@ export function installSemiRadialDock({
   if(!drag||event.pointerId!==drag.id)return;
   if(!cancelled&&!drag.moved){
    const delta=normalizeAngle(angleAt(event)-drag.lastAngle);
-   if(Math.abs(delta)>14){
+   if(Math.abs(delta)>10){
     centerIndex=semiRadialWrap(centerIndex-Math.sign(delta),SEMI_RADIAL_ITEMS.length);
     feedback('skill');drag.moved=true;
    }
