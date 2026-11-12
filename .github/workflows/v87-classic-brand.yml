@@ -1,0 +1,20 @@
+name: "V87 · Original white/orange DRILL RUN identity"
+on:
+  push:
+    branches: [chatgpt/v87-classic-white-orange-brand]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  classic-brand-v87:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Identity and startup regression checks
+        run: |
+          node --check dist/chapter/game.mjs
+          node --test tests/v87-classic-brand.test.mjs tests/v86-1-startup-continue.test.mjs tests/v86-premium-radial-rescue-personnel.test.mjs tests/v81-personnel-no-jitter.test.mjs
