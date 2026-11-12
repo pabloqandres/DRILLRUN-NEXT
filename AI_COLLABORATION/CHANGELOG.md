@@ -570,3 +570,9 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Solo se difuminan el gajo inferior (step –1) y superior (step 4); Inventario y los otros cuatro accesos interiores quedan nítidos pese al filtro heredado de V90.
 - Reducción del hub 100→84 unidades CSS locales y del botón acción ~16–18%; centros conservados exactamente en la línea inferior aprobada, con base ligeramente más pequeña y márgenes intactos. Tamaño del arco, giro táctil, destinos, joystick, misiones y saves sin cambios.
 - Prueba de regresión visual estructural V96 añadida al test V90, PR/preview antes de merge; QA de dispositivo pendiente.
+
+## 2026-11-12 — V97 · Corrección de continuidad óptica y botones internos
+- Los gajos de extensión V96 ahora son tres finos trazos SVG con centro y radios matemáticamente iguales a la rueda; `fill:none`, máscaras de degradado y sin captura de eventos. Desaparecen los bloques oscuros sólidos que invadían la imagen.
+- Base inferior más discreta (x290, y352, 248×111) contenida dentro del agujero circular. Hub 68×68 centrado en (332,392) sin sobresalir sobre ningún gajo; botón de acción reducido a 10dvh y recentrado manteniendo su propio icono dorado.
+- Los seis gajos V95, giro infinito V95/V96, joystick, panel de misión y lógica de juego permanecen sin cambios.
+- PR de V97 con tests estructurales V90; el usuario ordenó subir a main siempre tras las pruebas.
