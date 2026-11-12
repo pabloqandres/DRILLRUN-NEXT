@@ -13,7 +13,7 @@ test('V81: pictograms and leading role planilla are real markup for all candidat
  assert(a.includes('class="pvRoleTitleIcon"'));
  assert(a.includes('dock-clipboard'));
  assert.equal((a.match(/class="pvCandidateSkill"/g)||[]).length,9);
- assert.equal((a.match(/class="pvSkillGlyph"/g)||[]).length,12);
+ assert.equal((a.match(/class="pvSkillGlyph"/g)||[]).length,15); // V100 adds three quick-profile icons.
  assert(a.includes('class="pvStatGlyph"'));
  assert(a.includes('class="pvDetailHeroCopy"'));
  assert(a.includes('class="pvDetailSummary"'));
@@ -30,7 +30,7 @@ test('V81: all seven roles render pictograms without changing any data',()=>{
   const html=renderPersonnelPremium(s,role.id,undefined,icon);
   assert(html.includes('class="pvRoleTitleIcon"'),role.id);
   assert.equal((html.match(/class="pvCandidateSkill"/g)||[]).length,9,role.id);
-  assert.equal((html.match(/class="pvSkillGlyph"/g)||[]).length,12,role.id);
+  assert.equal((html.match(/class="pvSkillGlyph"/g)||[]).length,15,role.id); // Three new quick-profile icons.
  }
 });
 test('V81: identical Personnel render retains its DOM through periodic 2.6s calls',()=>{

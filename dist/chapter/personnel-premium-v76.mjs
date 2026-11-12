@@ -6,6 +6,7 @@
 import {PERSONNEL_GROUPS,PERSONNEL_SKILL_LABELS,candidatesForRole,candidateById,activePersonnelCount,personnelCapacity,personnelUnlockMission} from './personnel-candidates-v76.mjs';
 import {canHire} from '../mission3/personnel.mjs';
 import {canHirePatioStaff,hiredPatioStaff} from '../mission5/patio-staff.mjs';
+import './personnel-v100-interactions.mjs';
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icons={admin:'dock-clipboard',driller:'dock-hard-hat',helper:'dock-users',hsec:'dock-hsec',tecnicoDrillco:'wrench','m5-gate-security':'lock','m5-warehouse-tech':'dock-equipment'};
@@ -75,6 +76,8 @@ const portraitIllustration=(c,mode='card')=>{
  const art=V78_ADMIN_ART[c.id];
  const src=art?'./assets/npc-portraits-v80/'+esc(c.id)+'.svg':esc(c.portrait);
  const width=art?230:300,height=art?260:370;
+ // Preserve native source ratio. Never stretch the underlying illustrated art.
+ // Three approved admin frames are 230x260; other roles are scalable SVG.
  // All 21 fictional characters already have their own locally bundled SVGs.
  // Keep the higher-detail V80 illustrations for the three admin candidates.
  return `<span class="pvArtPortrait pvArtPortrait--${mode} ${art?'pvArtPortrait--'+art:'pvArtPortrait--classic'}" role="img" aria-label="Retrato ilustrado de ${esc(c.name)}"><img class="pvPortraitImage" src="${src}" alt="" draggable="false" loading="eager" decoding="async" width="${width}" height="${height}"></span>`;
@@ -103,7 +106,7 @@ const statTypes=Object.freeze({
 });
 const statIcon=key=>'<svg class="pvStatGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+statShapes[statTypes[key]||'analysis']+'</svg>';
 const tabIcon=key=>statIcon(({ficha:'reporting',desarrollo:'analysis',salario:'planning',historial:'response'})[key]||'reporting');
-const candidateSkillRows=c=>Object.entries(c?.skills||{}).map(([name,val])=>`<span class="pvCandidateSkill"><span class="pvSkillGlyph">${statIcon(name)}</span><span class="pvSkillLabel">${esc(PERSONNEL_SKILL_LABELS[name]||name)}</span><span class="pvMiniPips" aria-label="${val} de 5">${Array.from({length:5},(_,i)=>`<i class="${i<val?'on':''}"></i>`).join('')}</span></span>`).join('');
+const candidateSkillRows=c=>Object.entries(c?.skills||{}).map(([name,val])=>`<span class="pvCandidateSkill" title="${esc(PERSONNEL_SKILL_LABELS[name]||name)}: ${val}/5" aria-label="${esc(PERSONNEL_SKILL_LABELS[name]||name)} ${val} de 5"><span class="pvSkillGlyph">${statIcon(name)}</span><span class="pvSkillLabel">${esc(PERSONNEL_SKILL_LABELS[name]||name)}</span><span class="pvMiniPips" aria-label="${val} de 5">${Array.from({length:5},(_,i)=>`<i class="${i<val?'on':''}"></i>`).join('')}</span></span>`).join('');
 const skillRows=c=>Object.entries(c?.skills||{}).map(([name,val])=>
  `<div class="pvSkill" title="Habilidad registrada para progresión futura, sin bono económico activo"><span class="pvSkillGlyph">${statIcon(name)}</span><span class="pvSkillLabel">${esc(PERSONNEL_SKILL_LABELS[name]||name)}</span><span class="pvPips" aria-label="${val} de 5">${Array.from({length:5},(_,i)=>`<i class="${i<val?'on':''}"></i>`).join('')}</span><b>${val}/5</b></div>`
 ).join('');
@@ -139,12 +142,24 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon,view='recr
    <span class="pvCandidateState">${busy?'CONTRATADO':locked?'BLOQUEADO':'DISPONIBLE'}</span>
   </button>`;
  }).join('');
+ // V100: four mission-relevant shortcuts; all other roles remain accessible.
+ const preferred=['admin','driller','tecnicoDrillco','hsec','helper','m5-gate-security','m5-warehouse-tech'];
+ const primaryIds=preferred.filter(id=>PERSONNEL_GROUPS.some(g=>g.id===id)).slice(0,4);
+ // Keep the mockup's readable role order; bring any mission-required or
+ // manually selected role into the four shortcuts without hiding its content.
+ for(const id of [required,role.id]){
+  if(!primaryIds.includes(id)){primaryIds.pop();primaryIds.unshift(id);}
+ }
+ const primaryRoles=PERSONNEL_GROUPS.filter(g=>primaryIds.includes(g.id))
+  .sort((a,b)=>primaryIds.indexOf(a.id)-primaryIds.indexOf(b.id));
+ const moreRoles=PERSONNEL_GROUPS.filter(g=>!primaryIds.includes(g.id));
+ const slotCount=Math.max(capacity,team.length);
  const slots=Array.from({length:Math.max(capacity,team.length)},(_,i)=>{
   const p=team[i];
   if(p){const c=candidateById(p.candidateId);return `<button class="pvTeamSlot occupied" type="button" data-pv-roster="${esc(p.role)}" data-pv-person="${esc(p.candidateId||'')}" aria-label="Ver ${esc(p.name||roleById(p.role)?.label||'contratado')}">
    ${c?`${portraitIllustration(c,'team')}`:`<span class="pvTeamFallback">${icon('personnel')}</span>`}
-   <span><b>${esc(p.name||roleById(p.role)?.label||'Contratado')}</b><small>${esc(roleById(p.role)?.short||p.role)}</small></span><span class="pvHiredCheck">${icon('check')}</span></button>`;}
-  return `<span class="pvTeamSlot vacant"><span class="pvPlus">+</span><span>Disponible</span></span>`;
+   <span class="pvTeamIdentity"><b>${esc(p.name||roleById(p.role)?.label||'Contratado')}</b><small>${esc(roleById(p.role)?.short||p.role)}</small></span><span class="pvHiredCheck">${icon('check')}</span></button>`;}
+  return `<span class="pvTeamSlot vacant" role="listitem" aria-label="Vacante disponible"><span class="pvPlus">+</span><span>Disponible</span></span>`;
  }).join('');
  return `<section class="pvRoot" aria-label="Personal, contratación y equipo">
  <div class="pvMain">
@@ -154,17 +169,29 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon,view='recr
     <small>${hiredRole(s,required)?'Contratación completada':'Siguiente contratación requerida:'}</small>
     <span class="pvMissionTarget"><span>${icon(icons[required]||'personnel')}</span>${esc(requiredDef.label)}<b>${roleCount(s,required)}/1</b></span>
    </button>
-   <div class="pvRoleHeading">ROLES DISPONIBLES <span>${PERSONNEL_GROUPS.length}</span></div>
-   <nav class="pvRoles" aria-label="Categorías de contratación">${PERSONNEL_GROUPS.map(g=>navRole(s,g,role.id,icon)).join('')}</nav>
+   <div class="pvRoleHeading">ROLES PRINCIPALES <span>${primaryRoles.length}</span></div>
+   <nav class="pvRoles" aria-label="Roles principales por misión">${primaryRoles.map(g=>navRole(s,g,role.id,icon)).join('')}</nav>
+   <details class="pvRolesMore"><summary>Ver todos los roles <b>${PERSONNEL_GROUPS.length}</b></summary>
+    <nav class="pvRoles pvRolesExtra" aria-label="Otros roles disponibles">${moreRoles.map(g=>navRole(s,g,role.id,icon)).join('')}</nav>
+   </details>
   </aside>
   <section class="pvCenter" aria-label="Candidatos">
-   <div class="pvSectionHead"><div class="pvRoleTitle"><span class="pvRoleTitleIcon">${icon(icons[role.id]||'dock-clipboard')}</span><div class="pvRoleTitleCopy"><span class="pvEyebrow">${step?'OBJETIVO ACTUAL':'SELECCIÓN DE PERSONAL'}</span><h3>${esc(role.label)}</h3><p>${esc(role.description)}</p></div></div>
+   <div class="pvSectionHead"><div class="pvRoleTitle"><span class="pvRoleTitleIcon">${icon(icons[role.id]||'dock-clipboard')}</span><div class="pvRoleTitleCopy"><span class="pvEyebrow">${step?'CONTRATACIÓN PRIORITARIA':'CANDIDATOS DISPONIBLES'}</span><h3>${esc(role.short||role.label)} <small>· ${entries.length} candidatos</small></h3></div></div>
    <div class="pvCarouselControls"><button type="button" data-pv-prev aria-label="Candidato anterior">‹</button><span>${entries.findIndex(x=>x.id===selected.id)+1} / 3</span><button type="button" data-pv-next aria-label="Siguiente candidato">›</button></div></div>
    <div class="pvCandidates">${entryCards}</div>
   </section>
   <aside class="pvDetail" aria-label="Ficha del candidato seleccionado">
    <div class="pvDetailHero">${portraitIllustration(selected,'detail')}<div class="pvDetailHeroCopy"><h3>${esc(selected.name)}</h3><span class="pvRoleBadge">${esc(role.short)}</span><span class="pvCandidateStars">${'★'.repeat(selected.grade)}<span>${'★'.repeat(5-selected.grade)}</span></span><p class="pvDetailSummary">${esc(selected.description)}</p></div></div>
-   <nav class="pvDetailTabs" aria-label="Datos del candidato">${[['ficha','Ficha'],['desarrollo','Desarrollo'],['salario','Salario'],['historial','Historial']].map(([id,label])=>`<button type="button" data-pv-detail-tab="${id}" class="${activeTab===id?'active':''}" aria-pressed="${activeTab===id}">${tabIcon(id)}<span>${label}</span></button>`).join('')}</nav>
+   <div class="pvSkillsHeader">HABILIDADES CLAVE <span>NIVEL 1–5</span></div>
+   <div class="pvQuickSkills" aria-label="Tres habilidades principales">
+   ${Object.entries(selected.skills||{}).slice(0,3).map(([name,val])=>`<div class="pvQuickSkill" title="${esc(PERSONNEL_SKILL_LABELS[name]||name)}: ${val}/5">
+     <span class="pvSkillGlyph">${statIcon(name)}</span><span class="pvQuickSkillLabel">${esc(PERSONNEL_SKILL_LABELS[name]||name)}</span>
+     <span class="pvMiniPips" aria-label="${val} de 5">${Array.from({length:5},(_,i)=>`<i class="${i<val?'on':''}"></i>`).join('')}</span>
+    </div>`).join('')}
+   </div>
+   <details class="pvMoreDetails" ${activeTab!=='ficha'?'open':''}>
+    <summary>Más detalles <span>Desarrollo · Salario · Historial</span></summary>
+    <nav class="pvDetailTabs" aria-label="Datos del candidato">${[['ficha','Ficha'],['desarrollo','Desarrollo'],['salario','Salario'],['historial','Historial']].map(([id,label])=>`<button type="button" data-pv-detail-tab="${id}" class="${activeTab===id?'active':''}" aria-pressed="${activeTab===id}">${tabIcon(id)}<span>${label}</span></button>`).join('')}</nav>
    <div class="pvDetailBody">
    ${activeTab==='ficha'? `<div class="pvSkillsHeader">HABILIDADES <span>NIVEL INICIAL</span></div>
     <div class="pvSkills">${skillRows(selected)}</div>
@@ -173,14 +200,22 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon,view='recr
     activeTab==='salario'? `<div class="pvTabTitle">Condiciones económicas</div><div class="pvDetailMetric"><span>Contratación única</span><b>${money(selected.hireCost)}</b></div><div class="pvDetailMetric"><span>Salario propuesto por turno</span><b>${money(selected.salaryPerShift)}</b></div><p class="pvTabNote">Información de referencia: no existen cargos salariales automáticos.</p>`:
     `<div class="pvTabTitle">Historial del personaje</div><p class="pvTabNote">${employed?'Ya forma parte de tu equipo.':'Aún no has contratado a este candidato.'} Los pagos y mejoras se registrarán cuando estén disponibles.</p>`}
    </div>
+   </details>
    <div class="pvHireActions"><span class="pvHirePrice"><small>COSTO ÚNICO</small><b>${money(selected.hireCost)}</b></span>
     <button class="pvHire ${blocked?'blocked':''}" data-pv-hire type="button" ${blocked?'disabled':''}>${icon(blocked?'lock':'personnel')} ${employed?'Contratado':blocked?'No disponible':'Contratar'}</button></div>
    ${blocked?`<small class="pvHireReason">${esc(warning)}</small>`:''}
   </aside>
  </div>
- <footer class="pvTeam"><div class="pvTeamCount"><span>${icon('dock-users')}</span><span>Equipo activo<strong>${countTxt}</strong></span></div>
- <div class="pvTeamList" aria-label="Personal contratado y plazas">${slots}</div>
- <button class="pvTeamManage" data-pv-team-open type="button">${icon('dock-users')} Gestionar equipo</button></footer>
+ <footer class="pvTeam pvTeam--v100">
+  <div class="pvTeamCount"><span>${icon('dock-users')}</span><span>Equipo activo<strong>${countTxt}</strong></span></div>
+  <div class="pvTeamViewport"><div class="pvTeamList" aria-label="Personal contratado y plazas" tabindex="0">${slots}</div></div>
+  <div class="pvTeamPager" role="group" aria-label="Desplazar plazas del equipo">
+   <button type="button" data-pv-team-scroll="-1" aria-label="Tres plazas anteriores" disabled>‹</button>
+   <span class="pvTeamPage" aria-live="polite">1 / ${Math.max(1,Math.ceil(slotCount/3))}</span>
+   <button type="button" data-pv-team-scroll="1" aria-label="Tres plazas siguientes" ${slotCount<=3?'disabled':''}>›</button>
+  </div>
+  <button class="pvTeamManage" data-pv-team-open type="button" aria-label="Gestionar equipo" title="Gestionar equipo">${icon('dock-users')}<span>Gestionar</span></button>
+ </footer>
  </section>`;
 }
 
