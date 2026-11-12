@@ -578,3 +578,80 @@ body:not([data-phase="play"]) #hud #semiRadialDock{display:none!important}
  #hud #semiRadialDock .dr90Label{font-size:15px!important;line-height:1.02!important}
  #hud #semiRadialDock .dr90Icon .uiIcon{width:32px!important;height:32px!important}
 }
+
+/* V96 · Infinite radial continuity, two fading ends, smaller centred hub/action.
+   Do not change wheel dimensions, 90° geometry or the joystick.
+   Tails use the exact SVG polar geometry and are inert to pointer input. */
+#hud #semiRadialDock,
+#hud #semiRadialDock .dr90Stage,
+#hud #semiRadialDock .dr90Ring{
+ overflow:visible!important;
+}
+#hud #semiRadialDock .dr96FadeTail{
+ fill:url(#dr90Side)!important;
+ stroke:#72d1deaf!important;
+ stroke-width:1.35!important;
+ stroke-linejoin:round!important;
+ vector-effect:non-scaling-stroke;
+ filter:drop-shadow(0 0 8px #61cee363)!important;
+ pointer-events:none!important;
+}
+/* Only the first and last painted wedge softly disappear at the screen edges.
+   The four middle sectors (including Inventory) remain entirely sharp. */
+#hud #semiRadialDock.is-open .dr90Orbit[data-step="-1"],
+#hud #semiRadialDock.is-open .dr90Orbit[data-step="0"],
+#hud #semiRadialDock.is-open .dr90Orbit[data-step="1"],
+#hud #semiRadialDock.is-open .dr90Orbit[data-step="2"],
+#hud #semiRadialDock.is-open .dr90Orbit[data-step="3"],
+#hud #semiRadialDock.is-open .dr90Orbit[data-step="4"]{
+ opacity:1!important;
+ filter:none!important;
+ visibility:visible!important;
+}
+#hud #semiRadialDock .dr90Orbit[data-step="-1"] .dr90Option{
+ -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 24%,#000a 58%,transparent 100%)!important;
+ mask-image:linear-gradient(to bottom,#000 0%,#000 24%,#000a 58%,transparent 100%)!important;
+}
+#hud #semiRadialDock .dr90Orbit[data-step="4"] .dr90Option{
+ -webkit-mask-image:linear-gradient(to right,#000 0%,#000 24%,#000a 58%,transparent 100%)!important;
+ mask-image:linear-gradient(to right,#000 0%,#000 24%,#000a 58%,transparent 100%)!important;
+}
+#hud #semiRadialDock .dr90Orbit[data-step="0"] .dr90Option,
+#hud #semiRadialDock .dr90Orbit[data-step="1"] .dr90Option,
+#hud #semiRadialDock .dr90Orbit[data-step="2"] .dr90Option,
+#hud #semiRadialDock .dr90Orbit[data-step="3"] .dr90Option{
+ -webkit-mask-image:none!important;
+ mask-image:none!important;
+ opacity:1!important;
+ filter:none!important;
+}
+/* The two control centres stay EXACTLY on the previous action/hub centreline.
+   Only their diameters and the surrounding decorative plinth decrease. */
+#hud{
+ --dr96-action-half:clamp(35px,5.8dvh,59px);
+}
+#hud #handButton,
+#hud #handButton.available{
+ width:clamp(70px,11.6dvh,118px)!important;
+ height:clamp(70px,11.6dvh,118px)!important;
+ min-height:clamp(70px,11.6dvh,118px)!important;
+ right:calc(var(--dr94-safe-right) + var(--dr94-action-half) - var(--dr96-action-half))!important;
+ bottom:calc(var(--dr94-control-line) - var(--dr96-action-half))!important;
+}
+#hud #handButton svg,
+#hud #handButton .uiIcon{
+ width:clamp(30px,5.1dvh,43px)!important;
+ height:clamp(30px,5.1dvh,43px)!important;
+}
+#hud #semiRadialDock .dr90Hub{
+ left:263px!important;top:350px!important;
+ width:84px!important;height:84px!important;min-height:84px!important;
+}
+#hud #semiRadialDock .dr90HubGlyph{
+ width:45px!important;height:45px!important;
+}
+#hud #semiRadialDock .dr94Base{
+ left:250px!important;top:335px!important;
+ width:280px!important;height:124px!important;
+}
+/* End of V96 visual-only overrides. */

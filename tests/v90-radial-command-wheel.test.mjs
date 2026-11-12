@@ -79,3 +79,38 @@ test('V94: unrelated missions and saved-state systems stay wired',()=>{
   "if(nav==='m3-contract'){openFaena('contracts');return;}"
  ])assert(game.includes(term),term);
 });
+
+test('V96: only the two radial endpoints fade, and the endless extensions remain inert',()=>{
+ const js=read('dist/chapter/semi-radial-dock-v90.mjs');
+ const css=read('dist/chapter/semi-radial-command-v90.css');
+ for(const key of [
+  "radialSegmentPath(-103,-90)",
+  "radialSegmentPath(0,17)",
+  'dr96TailLower','dr96TailUpper',
+  'dr96FadeLower','dr96FadeUpper',
+  'dr96FadeTail--lower','dr96FadeTail--upper',
+  "arcPath(-90,-75,g.innerRadius+3.5)",
+  "arcPath(-15,0,g.innerRadius+3.5)"
+ ])assert(js.includes(key),key);
+ for(const key of [
+  '#hud #semiRadialDock .dr96FadeTail{',
+  'pointer-events:none!important',
+  'overflow:visible!important',
+  '.dr90Orbit[data-step="-1"] .dr90Option',
+  '.dr90Orbit[data-step="4"] .dr90Option',
+  '.dr90Orbit[data-step="2"] .dr90Option',
+  'filter:none!important',
+  'left:263px!important;top:350px!important',
+  'width:84px!important;height:84px!important',
+  '--dr96-action-half:clamp(35px,5.8dvh,59px)',
+  'right:calc(var(--dr94-safe-right) + var(--dr94-action-half) - var(--dr96-action-half))',
+  'bottom:calc(var(--dr94-control-line) - var(--dr96-action-half))'
+ ])assert(css.includes(key),key);
+ assert.equal(RADIAL_GEOMETRY.outerRadius,365);
+ assert.equal(RADIAL_GEOMETRY.innerRadius,244);
+ assert.equal(RADIAL_GEOMETRY.slotBounds.length,6);
+ // Masks/glows change only paint, never ID routing or gesture logic.
+ assert(js.includes("onNavigate(element.dataset.semiId)"));
+ assert(js.includes("window.addEventListener('pointermove',moveDrag"));
+ assert(!js.includes('dr90Prev'));
+});

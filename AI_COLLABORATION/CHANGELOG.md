@@ -564,3 +564,9 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Orden inicial visible: Centro de Faena, Catálogo, Producción, Inventario, Personal, HSEC. Taller, Patio y flota, Contratos y Casa Matriz siguen en los 10 accesos mediante giro infinito, sin crear rutas nuevas.
 - Íconos y etiquetas adaptados a sectores más estrechos; giro con ajuste a 15° y freno intencional, clic/touch directo sobre cualquier gajo. Fondo y botón de acción permanecen independientes y alineados, sin cambios de joystick, misiones, economía, Cloud Save ni game.mjs.
 - Rama `chatgpt/v95-compact-six-radial`; pruebas focales V90/V92 actualizadas, QA en navegador/Android pendiente.
+
+## 2026-11-12 — V96 · Extremos radiales infinitos, botones centrados
+- Implementación directamente sobre V95 en `dist/chapter/semi-radial-dock-v90.mjs` y `semi-radial-command-v90.css`: dos continuaciones anulares matemáticamente congruentes más allá del viewport (–103° y +17°) con máscaras SVG, no interactivas.
+- Solo se difuminan el gajo inferior (step –1) y superior (step 4); Inventario y los otros cuatro accesos interiores quedan nítidos pese al filtro heredado de V90.
+- Reducción del hub 100→84 unidades CSS locales y del botón acción ~16–18%; centros conservados exactamente en la línea inferior aprobada, con base ligeramente más pequeña y márgenes intactos. Tamaño del arco, giro táctil, destinos, joystick, misiones y saves sin cambios.
+- Prueba de regresión visual estructural V96 añadida al test V90, PR/preview antes de merge; QA de dispositivo pendiente.
