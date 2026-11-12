@@ -1,0 +1,79 @@
+/* V88: illustration & composition pass, only Personal window.
+   Underlying mission, hire actions, skills, payroll and state are untouched. */
+#faenaCenter .faenaDialog.pvDialog{
+ width:min(1470px,calc(100vw - 14px))!important;
+ height:min(880px,calc(100dvh - 10px))!important;
+ border:1.5px solid #4e9fbe!important;border-radius:13px!important;
+ background:linear-gradient(145deg,#0c3047,#071c30 84%)!important;
+ box-shadow:0 15px 40px #001424b5!important;
+}
+#faenaCenter .pvDialog .faenaHeader{
+ background:linear-gradient(90deg,#0b2d45,#081c30)!important;
+ border-bottom:1.5px solid #4cb6d4!important;
+}
+#faenaCenter .pvRoot{grid-template-rows:minmax(0,1fr) clamp(78px,13dvh,105px)!important}
+#faenaCenter .pvMain{
+ grid-template-columns:minmax(168px,22.5%) minmax(0,1fr) minmax(235px,29%)!important;
+ gap:clamp(7px,.8vw,14px)!important;padding:clamp(7px,.8vw,13px)!important;
+}
+#faenaCenter .pvSidebar,#faenaCenter .pvCenter,#faenaCenter .pvDetail{
+ border:1px solid #44839caa!important;border-radius:11px!important;
+ background:linear-gradient(155deg,#10344c,#091f31 85%)!important;
+ box-shadow:inset 0 1px #d8faff23!important;
+}
+#faenaCenter .pvMission{
+ border:1.3px solid #caad71!important;box-shadow:none!important;
+ background:linear-gradient(100deg,#16485fdf,#0a2b43db),url('../assets/personnel-missions-v79/m3.svg') center/cover!important;
+}
+#faenaCenter .pvRole{
+ background:#12364ceb!important;border:1px solid #356c84b7!important;
+ border-radius:8px!important;box-shadow:none!important;
+}
+#faenaCenter .pvRole.selected{
+ background:linear-gradient(90deg,#614b2a82,#17364d)!important;
+ border:1.5px solid #edc36e!important;box-shadow:inset 3px 0 #ecc571!important;
+}
+#faenaCenter .pvSectionHead{min-height:clamp(43px,7dvh,66px)!important;padding-bottom:5px!important;border-bottom:1px solid #498ca88c!important}
+#faenaCenter .pvCandidates{
+ grid-template-rows:minmax(0,1fr)!important;
+ grid-auto-columns:minmax(116px,1fr)!important;
+ gap:clamp(6px,.8vw,12px)!important;
+ overflow-x:auto!important;overflow-y:hidden!important;
+}
+#faenaCenter .pvCandidate{
+ background:linear-gradient(#14384f,#0c263a)!important;
+ border:1.2px solid #4388a0!important;border-radius:10px!important;
+ box-shadow:none!important;
+}
+#faenaCenter .pvCandidate.selected{border:2px solid #ecc16f!important;box-shadow:0 0 0 1px #dcb66870!important}
+#faenaCenter .pvPortrait{flex:1 1 47%!important;min-height:62px!important;overflow:hidden!important;background:#173e52!important}
+#faenaCenter .pvArtPortrait,#faenaCenter .pvArtPortrait .pvPortraitImage{
+ display:block!important;width:100%!important;height:100%!important;min-height:0!important;
+}
+#faenaCenter .pvArtPortrait .pvPortraitImage{
+ object-fit:cover!important;object-position:center 20%!important;
+}
+#faenaCenter .pvCandidateName{font-size:clamp(10px,1vw,14px)!important;font-weight:900!important}
+#faenaCenter .pvCandidateCost{background:#14384e!important;border-top:1px solid #4a829985!important}
+#faenaCenter .pvDetail{overflow:hidden!important;padding:clamp(6px,.75vw,11px)!important;gap:clamp(5px,.6dvh,8px)!important}
+#faenaCenter .pvDetailHero{flex:0 0 clamp(95px,20dvh,188px)!important;border-bottom:1px solid #4c8aa181!important}
+#faenaCenter .pvDetailBody{flex:1 1 0!important;min-height:0!important;overflow-y:auto!important}
+#faenaCenter .pvTeam{border-top:1.5px solid #4aa9ca!important;background:linear-gradient(90deg,#0b2e46,#0a2238)!important}
+#faenaCenter .pvTeamSlot{border-radius:8px!important}
+#faenaCenter .pvTeamList{overflow-x:auto!important}
+#faenaCenter .pvTeamManage{border-radius:8px!important;box-shadow:none!important}
+@media(min-width:1170px) and (min-height:590px){
+ #faenaCenter .pvCandidates{grid-auto-columns:minmax(0,1fr)!important;overflow-x:hidden!important}
+}
+@media(orientation:landscape) and (max-height:530px){
+ #faenaCenter .faenaDialog.pvDialog{height:calc(100dvh - 7px)!important}
+ #faenaCenter .pvRoot{grid-template-rows:minmax(0,1fr) 62px!important}
+ #faenaCenter .pvMain{gap:5px!important;padding:4px!important}
+ #faenaCenter .pvDetailHero{flex:0 0 clamp(62px,19dvh,105px)!important}
+ #faenaCenter .pvCandidates{grid-auto-columns:minmax(80px,1fr)!important}
+}
+@media(orientation:landscape) and (max-height:380px){
+ #faenaCenter .pvRoot{grid-template-rows:minmax(0,1fr) 54px!important}
+ #faenaCenter .pvDetailHero{flex-basis:57px!important}
+ #faenaCenter .pvCandidateMetrics{display:none!important}
+}

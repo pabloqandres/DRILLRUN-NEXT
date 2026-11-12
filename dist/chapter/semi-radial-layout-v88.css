@@ -1,0 +1,134 @@
+/* V88 · DRILL RUN: single aligned arc, no double inner rim. */
+#hud #semiRadialDock{
+ width:min(400px,calc(100vw - 244px))!important;
+ height:130px!important;bottom:max(5px,env(safe-area-inset-bottom,0px))!important;
+}
+#hud #semiRadialDock .drSemiFan{
+ inset:0 0 auto!important;top:0!important;bottom:auto!important;
+ width:100%!important;height:104px!important;overflow:visible!important;
+}
+#hud #semiRadialDock .drSemiArc,
+#hud #semiRadialDock .drSemiWedge,
+#hud #semiRadialDock .drSemiRim{display:none!important}
+#hud #semiRadialDock .drSemiRibbon{
+ position:absolute!important;inset:0!important;
+ width:100%!important;height:100%!important;
+ transform:translateY(11px) scale(.96,.93)!important;
+ transform-origin:50% 100%!important;
+ transition:transform .55s cubic-bezier(.2,.75,.25,1),opacity .38s ease!important;
+}
+#hud #semiRadialDock.is-open .drSemiRibbon{transform:translateY(0) scale(1)!important}
+#hud #semiRadialDock .drSemiRibbon .drSemiSegment{stroke:none!important;stroke-width:0!important}
+#hud #semiRadialDock .drSemiRibbon .drSemiSegmentLeft,
+#hud #semiRadialDock .drSemiRibbon .drSemiSegmentRight{fill:url(#drSemiSideFill)!important}
+#hud #semiRadialDock .drSemiRibbon .drSemiSegmentActive{fill:url(#drSemiCenterFill)!important}
+#hud #semiRadialDock .drSemiRibbon .drSemiOutline,
+#hud #semiRadialDock .drSemiRibbon .drSemiBottom,
+#hud #semiRadialDock .drSemiRibbon .drSemiCaps{
+ stroke:#53c3db;stroke-width:2;fill:none;vector-effect:non-scaling-stroke;
+}
+#hud #semiRadialDock .drSemiRibbon .drSemiDividers{
+ stroke:#e9c16d;stroke-width:2.1;fill:none;vector-effect:non-scaling-stroke;
+}
+/* Single geometry: five positions tied to the four-hundred-unit ribbon. */
+#hud #semiRadialDock .drSemiItem,
+#hud #semiRadialDock.is-open .drSemiItem[data-step]{
+ position:absolute!important;bottom:auto!important;
+ width:24%!important;height:42%!important;min-height:0!important;min-width:0!important;
+ padding:0 2px!important;gap:2px!important;
+ border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;
+ transform:translate(-50%,-50%) scale(.88)!important;
+ transition:left .55s cubic-bezier(.2,.75,.25,1),top .55s cubic-bezier(.2,.75,.25,1),
+ transform .55s cubic-bezier(.2,.75,.25,1),opacity .38s ease,filter .35s ease!important;
+}
+#hud #semiRadialDock.is-open .drSemiItem[data-step="0"]{
+ left:50%!important;top:36%!important;
+ transform:translate(-50%,-50%) scale(1)!important;
+ opacity:1!important;visibility:visible!important;
+}
+#hud #semiRadialDock.is-open .drSemiItem[data-step="-1"]{
+ left:25%!important;top:56%!important;
+ transform:translate(-50%,-50%) scale(.96)!important;
+ opacity:1!important;visibility:visible!important;
+}
+#hud #semiRadialDock.is-open .drSemiItem[data-step="1"]{
+ left:75%!important;top:56%!important;
+ transform:translate(-50%,-50%) scale(.96)!important;
+ opacity:1!important;visibility:visible!important;
+}
+#hud #semiRadialDock.is-open .drSemiItem[data-step="-2"]{
+ left:3%!important;top:67%!important;
+ transform:translate(-50%,-50%) scale(.76)!important;
+ opacity:.18!important;visibility:visible!important;filter:blur(1px)!important;
+}
+#hud #semiRadialDock.is-open .drSemiItem[data-step="2"]{
+ left:97%!important;top:67%!important;
+ transform:translate(-50%,-50%) scale(.76)!important;
+ opacity:.18!important;visibility:visible!important;filter:blur(1px)!important;
+}
+#hud #semiRadialDock .drSemiItem .drSemiGlyph{
+ width:28px!important;height:28px!important;flex:0 0 28px!important;
+ color:#e6f5fc!important;margin:0!important;
+}
+#hud #semiRadialDock .drSemiItem .drSemiGlyph .uiIcon{
+ width:26px!important;height:26px!important;stroke-width:2!important;filter:none!important;
+}
+#hud #semiRadialDock .drSemiItem[data-step="0"] .drSemiGlyph{color:#ffdc8c!important}
+#hud #semiRadialDock .drSemiItem .drSemiLabel{
+ width:100%!important;max-width:100%!important;
+ font-size:clamp(9px,.84vw,12px)!important;
+ font-weight:850!important;line-height:1.04!important;letter-spacing:-.02em!important;
+ margin:0!important;padding:0!important;color:#f3faff!important;
+ text-align:center!important;text-shadow:0 1px 3px #031522c9!important;
+}
+#hud #semiRadialDock .drSemiTrigger{
+ bottom:0!important;width:46px!important;height:46px!important;min-height:46px!important;
+ border:1.8px solid #dec073!important;
+ box-shadow:0 0 0 3px #0b2738e2,0 3px 11px #0009!important;
+}
+#hud #semiRadialDock .drSemiTrigger .drSemiHubIcon{width:27px!important;height:27px!important}
+/* Discoverability for PC: explicit prev/next plus total-module hint. */
+#hud #semiRadialDock .drSemiBrowse{
+ position:absolute!important;left:50%!important;bottom:4px!important;
+ transform:translateX(-50%)!important;width:176px!important;height:30px!important;
+ display:flex!important;justify-content:space-between!important;align-items:center!important;
+ z-index:4!important;pointer-events:none!important;opacity:0;visibility:hidden;
+ transition:opacity .25s ease!important;
+}
+#hud #semiRadialDock.is-open .drSemiBrowse{opacity:1;visibility:visible}
+#hud #semiRadialDock .drSemiBrowse button{
+ pointer-events:auto!important;display:grid!important;place-items:center!important;
+ width:27px!important;height:27px!important;min-height:27px!important;
+ border:1px solid #69b6cd99!important;border-radius:50%!important;
+ padding:0!important;margin:0!important;background:#0d2e43ed!important;
+ box-shadow:none!important;color:#d3f1fa!important;
+ font:850 21px/1 system-ui!important;cursor:pointer!important;
+}
+#hud #semiRadialDock .drSemiBrowse .drSemiCount{display:none!important}
+#hud #semiRadialDock .drSemiBrowse::after{
+ content:"10 SECCIONES · RUEDA / FLECHAS";
+ position:absolute;top:26px;left:50%;transform:translateX(-50%);
+ white-space:nowrap;pointer-events:none;
+ color:#c8e4e9;font:750 8px/1 system-ui;letter-spacing:.07em;
+}
+@media(hover:none),(pointer:coarse){#hud #semiRadialDock .drSemiBrowse::after{display:none}}
+@media(max-height:520px),(max-width:900px){
+ #hud #semiRadialDock{width:min(354px,calc(100vw - 197px))!important;height:119px!important;bottom:4px!important}
+ #hud #semiRadialDock .drSemiFan{height:93px!important}
+ #hud #semiRadialDock .drSemiItem .drSemiGlyph{width:23px!important;height:23px!important;flex-basis:23px!important}
+ #hud #semiRadialDock .drSemiItem .drSemiGlyph .uiIcon{width:22px!important;height:22px!important}
+ #hud #semiRadialDock .drSemiItem .drSemiLabel{font-size:9px!important}
+ #hud #semiRadialDock .drSemiTrigger{width:43px!important;height:43px!important;min-height:43px!important}
+ #hud #semiRadialDock .drSemiBrowse{width:150px!important;bottom:3px!important}
+ #hud #semiRadialDock .drSemiBrowse button{width:25px!important;height:25px!important;min-height:25px!important}
+}
+@media(max-width:670px){
+ #hud #semiRadialDock{width:calc(100vw - 147px)!important;height:108px!important}
+ #hud #semiRadialDock .drSemiFan{height:82px!important}
+ #hud #semiRadialDock .drSemiItem .drSemiGlyph{width:21px!important;height:21px!important;flex-basis:21px!important}
+ #hud #semiRadialDock .drSemiItem .drSemiGlyph .uiIcon{width:20px!important;height:20px!important}
+ #hud #semiRadialDock .drSemiItem .drSemiLabel{font-size:8px!important}
+ #hud #semiRadialDock .drSemiTrigger{width:40px!important;height:40px!important;min-height:40px!important}
+ #hud #semiRadialDock .drSemiBrowse{width:128px!important}
+}
+@media(prefers-reduced-motion:reduce){#hud #semiRadialDock .drSemiItem,#hud #semiRadialDock .drSemiRibbon{transition:none!important}}
