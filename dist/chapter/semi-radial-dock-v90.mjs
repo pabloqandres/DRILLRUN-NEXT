@@ -27,8 +27,8 @@ export function semiRadialStep(itemIndex,centerIndex,total){
 // Shared concentric-circle geometry: all sector edges and item positions are
 // derived from one polar centre, rather than hand-drawn Bezier coordinates.
 export const RADIAL_GEOMETRY=Object.freeze({
- cx:200,cy:164,outerRadius:154,innerRadius:89,itemRadius:121,
- left:[-68,-23.5],center:[-22.5,22.5],right:[23.5,68]
+ cx:350,cy:164,outerRadius:154,innerRadius:89,itemRadius:121,
+ left:[-88,-62],center:[-60,-34],right:[-32,-6]
 });
 export function radialPoint(angle,radius,geometry=RADIAL_GEOMETRY){
  const a=angle*Math.PI/180;
@@ -62,12 +62,12 @@ function wheelSvg(){
   '<path class="dr92Glass dr92Glass--left" d="'+radialSegmentPath(...g.left)+'"/>'+
   '<path class="dr92Glass dr92Glass--center" d="'+radialSegmentPath(...g.center)+'"/>'+
   '<path class="dr92Glass dr92Glass--right" d="'+radialSegmentPath(...g.right)+'"/>'+
-  '<path class="dr92OuterRim" d="'+arcPath(-67.4,-24, g.outerRadius-3.2)+'"/>'+
-  '<path class="dr92OuterRim dr92OuterRim--selected" d="'+arcPath(-21.8,21.8,g.outerRadius-3.2)+'"/>'+
-  '<path class="dr92OuterRim" d="'+arcPath(24,67.4,g.outerRadius-3.2)+'"/>'+
-  '<path class="dr92InnerRim" d="'+arcPath(-67.4,67.4,g.innerRadius+3.7)+'"/>'+
-  '<path class="dr90CenterAccent" d="M'+point(radialPoint(-12,g.outerRadius-6))+
-   ' A'+(g.outerRadius-6)+' '+(g.outerRadius-6)+' 0 0 1 '+point(radialPoint(12,g.outerRadius-6))+'"/>'+
+  '<path class="dr92OuterRim" d="'+arcPath(-87.4,-62.6, g.outerRadius-3.2)+'"/>'+
+  '<path class="dr92OuterRim dr92OuterRim--selected" d="'+arcPath(-59.4,-34.6,g.outerRadius-3.2)+'"/>'+
+  '<path class="dr92OuterRim" d="'+arcPath(-31.4,-6.6,g.outerRadius-3.2)+'"/>'+
+  '<path class="dr92InnerRim" d="'+arcPath(-87.4,-6.6,g.innerRadius+3.7)+'"/>'+
+  '<path class="dr90CenterAccent" d="M'+point(radialPoint(-54,g.outerRadius-6))+
+   ' A'+(g.outerRadius-6)+' '+(g.outerRadius-6)+' 0 0 1 '+point(radialPoint(-40,g.outerRadius-6))+'"/>'+
   '</svg>';
 }
 const hubSvg='<svg class="dr90HubGlyph" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+
@@ -130,7 +130,7 @@ export function installSemiRadialDock({
    const step=semiRadialStep(i,centerIndex,total);
    let delta=semiRadialWrap(i-centerIndex,total);
    if(delta>Math.floor(total/2))delta-=total;
-   const angle=step==='off'?(delta<0?-111:111):Number(step)*45;
+   const angle=step==='off'?(delta<0?-112:18):-47+Number(step)*28;
    node.dataset.step=step;
    node.style.transform='rotate('+angle+'deg)';
    item.style.transform='rotate('+(-angle)+'deg)';
