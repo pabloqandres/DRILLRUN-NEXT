@@ -497,3 +497,6 @@ Personal recibe un layout de filas explícitas y pie de 57px en Android horizont
 
 ## 2026-11-12 — V86.1 hotfix startup crítico
 V86 retiró el botón HUD `cameraHome` pero dejó su referencia en `applyText()`. El `null.setAttribute` resultante aborta el arranque, impidiendo actualizar `Continuar` y el estado de Google. Corrección mínima: quitar la entrada del mapeo de accesibilidad en el arranque y usar `?.setAttribute` para los demás elementos. No relajar las restricciones de propiedad del guardado ni alterar Firestore, Google Auth, Cloud Save, estado del juego, misiones, economía o diseño V86. El usuario reportó bloqueo real y pidió recuperar la partida.
+
+## 2026-11-12 — V87 identidad DRILL RUN original blanco/naranjo
+El usuario aprueba utilizar como base el **primer logo de texto simple**: DRILL blanco, RUN naranjo y rechaza el logotipo futurista/metálico. Debe ser coherente en inicio, carga, selector, puente del minijuego e ícono de aplicación. Se elimina el WebP incrustado de V64, no solo se oculta. El diseño se implementa recuperando la fuente textual original de `dist/index.html` y aplicando un CSS de marca único al final. Se conserva NEXT GENERATION como subtítulo, sin reintroducir logos de DRILLCO/PUMA. No tocar mecánicas ni Cloud Save.

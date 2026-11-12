@@ -522,3 +522,9 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Fix crítico: referencia a `cameraHome` inexistente tras V86 causaba excepción al cargar `applyText()`; retirado de etiquetas y añadido encadenamiento opcional para elementos UI opcionales.
 - Recupera flujo normal de actualización de `Continuar` y estados de sincronización Google (sin modificar políticas de Cloud Save).
 - Prueba inicialización de accesibilidad / IDs, regresiones de Personal, Faena y semirradial.
+
+## 2026-11-12 — V87 DRILL RUN vuelve a blanco/naranjo
+- Restaurado logo tipográfico clásico DRILL blanco / RUN naranja en inicio y loading, sin textura futurista, relieve ni brillo.
+- Unificada la identidad en selección del avatar, puente del minijuego, favicon y manifiesto PWA.
+- Retirada del código la imagen WebP metálica incrustada V64 (no solo oculta), CSS simple V87 final.
+- Pruebas focales y regresiones de inicio V86.1; no se modifica `game.mjs`, Auth, Cloud Save, misiones o economía.

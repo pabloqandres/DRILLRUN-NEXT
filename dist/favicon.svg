@@ -1,1 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#142d3d"/><path d="M12 46 28 15h12l12 31H38l-4-12-6 12Z" fill="#ff902d"/><path d="m26 47 9-13" stroke="#fff" stroke-width="4"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="DRILL RUN">
+ <rect width="64" height="64" rx="12" fill="#102635"/>
+ <text x="8" y="43" fill="#ffffff" font-family="Arial Black,Impact,sans-serif" font-style="italic" font-weight="900" font-size="35" letter-spacing="-2">D</text>
+ <text x="30" y="43" fill="#ff7d24" font-family="Arial Black,Impact,sans-serif" font-style="italic" font-weight="900" font-size="35" letter-spacing="-2">R</text>
+</svg>
