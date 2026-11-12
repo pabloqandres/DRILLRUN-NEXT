@@ -6,6 +6,7 @@
 import {PERSONNEL_GROUPS,PERSONNEL_SKILL_LABELS,candidatesForRole,candidateById,activePersonnelCount,personnelCapacity,personnelUnlockMission} from './personnel-candidates-v76.mjs';
 import {canHire} from '../mission3/personnel.mjs';
 import {canHirePatioStaff,hiredPatioStaff} from '../mission5/patio-staff.mjs';
+import './personnel-v100-interactions.mjs';
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icons={admin:'dock-clipboard',driller:'dock-hard-hat',helper:'dock-users',hsec:'dock-hsec',tecnicoDrillco:'wrench','m5-gate-security':'lock','m5-warehouse-tech':'dock-equipment'};
@@ -105,7 +106,7 @@ const statTypes=Object.freeze({
 });
 const statIcon=key=>'<svg class="pvStatGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+statShapes[statTypes[key]||'analysis']+'</svg>';
 const tabIcon=key=>statIcon(({ficha:'reporting',desarrollo:'analysis',salario:'planning',historial:'response'})[key]||'reporting');
-const candidateSkillRows=c=>Object.entries(c?.skills||{}).map(([name,val])=>`<span class="pvCandidateSkill"><span class="pvSkillGlyph">${statIcon(name)}</span><span class="pvSkillLabel">${esc(PERSONNEL_SKILL_LABELS[name]||name)}</span><span class="pvMiniPips" aria-label="${val} de 5">${Array.from({length:5},(_,i)=>`<i class="${i<val?'on':''}"></i>`).join('')}</span></span>`).join('');
+const candidateSkillRows=c=>Object.entries(c?.skills||{}).map(([name,val])=>`<span class="pvCandidateSkill" title="${esc(PERSONNEL_SKILL_LABELS[name]||name)}: ${val}/5" aria-label="${esc(PERSONNEL_SKILL_LABELS[name]||name)} ${val} de 5"><span class="pvSkillGlyph">${statIcon(name)}</span><span class="pvSkillLabel">${esc(PERSONNEL_SKILL_LABELS[name]||name)}</span><span class="pvMiniPips" aria-label="${val} de 5">${Array.from({length:5},(_,i)=>`<i class="${i<val?'on':''}"></i>`).join('')}</span></span>`).join('');
 const skillRows=c=>Object.entries(c?.skills||{}).map(([name,val])=>
  `<div class="pvSkill" title="Habilidad registrada para progresión futura, sin bono económico activo"><span class="pvSkillGlyph">${statIcon(name)}</span><span class="pvSkillLabel">${esc(PERSONNEL_SKILL_LABELS[name]||name)}</span><span class="pvPips" aria-label="${val} de 5">${Array.from({length:5},(_,i)=>`<i class="${i<val?'on':''}"></i>`).join('')}</span><b>${val}/5</b></div>`
 ).join('');
