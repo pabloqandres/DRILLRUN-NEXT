@@ -194,7 +194,7 @@ export function installSemiRadialDock({
  watch.observe(anchor,{attributes:true,attributeFilter:['class']});
  watch.observe(document.body,{attributes:true,attributeFilter:['class']});
  const api={
-  get open(){return open;},
+  get isOpen(){return open;},
   get selected(){return SEMI_RADIAL_ITEMS[centerIndex].id;},
   open:()=>setOpen(true),
   close:()=>setOpen(false),
