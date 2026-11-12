@@ -512,3 +512,9 @@ El usuario solicita una base reusable y pantalla para consultar los ingresos que
 
 ## 2026-11-12 — V92 · Tacto y capas del semirradial V90
 El usuario observó en captura Android que V90 se ve demasiado baja y plana y solo responde a las flechas, no al swipe; forma e iconografía ya aprobadas. Se modifica exclusivamente el componente visual V90 y su CSS único. El gesto debe originarse en cualquiera de los 3 segmentos SVG o sus iconos; arrastre global mientras está activo para no perder touch al salir de las tarjetas. Reducir umbral a 30 px, respetar click vs arrastre y limpiar event listeners al destruir. Subir el control ~26px y añadir capas de cristal, biseles y glow comedido conservando la geometría, rutas, sonido y accesibilidad. No tocar juego/Google/economía/finanzas/Personal.
+
+## 2026-11-12 — V98 HUD inmersivo al movimiento, sin cambiar motor de juego
+
+**Instrucción del usuario:** la rueda radial desplegada y tarjeta de misión deben retraerse al iniciar movimiento (joystick/WASD/flechas). Se conserva el clic manual para abrir misión, la rueda radial y todos los destinos originales. La base común de acción y menú debe adoptar forma de dos burbujas circulares con unión ondulada, relieve y borde más grueso. El botón de acción deshabilitado nunca puede quedar semitransparente bajo la base.
+
+**Límite de propiedad compartida:** `game.mjs` pertenece a Claude Code y no se modifica. ChatGPT implementa el comportamiento puramente visual en el módulo del menú `semi-radial-dock-v90.mjs`, mediante listeners pasivos sobre los controles existentes y tecla de movimiento; solo aplica `.collapsed` a `#objective` y `setOpen(false,true)`. No hace escritura de estado, cambios en input del juego, misiones, navegación, Cloud Save ni economía. Los controles y lógica de estado de `game.mjs` permanecen autoridad. Los cambios se limitan al menú y su CSS, así que no se requiere modificar ningún archivo funcional de Claude Code.

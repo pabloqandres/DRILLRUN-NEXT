@@ -137,3 +137,47 @@ test('V97: both buttons smaller, visually contained inside the 244px inner radiu
  assert(baseCornerDist<g.innerRadius,'plinth upper-left corner is inside annular hole');
  assert.equal(hub.y,392,'aligned with action centreline at local y=392');
 });
+
+test('V98: connected bubble outline, defined rings and disabled action readability',()=>{
+ const src=read('dist/chapter/semi-radial-dock-v90.mjs');
+ const css=read('dist/chapter/semi-radial-command-v90.css');
+ assert(src.includes('dr94Base dr98BubbleBase'));
+ assert(src.includes('dr98BubbleShell'));
+ assert(src.includes('dr98BubbleGlow'));
+ assert(src.includes('dr98BubbleInset'));
+ assert(src.includes('d="M332 345 C303 345 286 366 286 392'));
+ assert(src.includes('C360 352 347 345 332 345 Z'));
+ for(const key of [
+  '.dr94Base.dr98BubbleBase',
+  '#hud #semiRadialDock .dr98BubbleShell',
+  'stroke-width:3.6px!important',
+  '#hud #handButton:disabled',
+  'opacity:1!important',
+  'z-index:43!important',
+  '#hud #objective:not(.hidden)',
+  'transition:transform .32s'
+ ])assert(css.includes(key),key);
+ // Geometrically both controls and their shared lobe remain inside
+ // the free inner circular space; the six sector positions are unchanged.
+ const g=RADIAL_GEOMETRY;
+ const points=[[286,392],[332,345],[514,392],[455,334]];
+ for(const [x,y] of points)
+  assert(Math.hypot(x-g.cx,y-g.cy)<g.innerRadius,JSON.stringify({x,y}));
+ assert.deepEqual(g.slotAngles,[-82.5,-67.5,-52.5,-37.5,-22.5,-7.5]);
+});
+
+test('V98: movement only affects HUD presentation, never mission logic',()=>{
+ const src=read('dist/chapter/semi-radial-dock-v90.mjs');
+ for(const key of [
+  "document.getElementById('joystick')",
+  "document.getElementById('objective')",
+  'minimizeDuringMovement',
+  "objective.classList.add('collapsed')",
+  'setOpen(false,true)',
+  "joystick.addEventListener('pointermove',joyMove",
+  "document.addEventListener('keydown',movementKey,true)",
+  "document.removeEventListener('keydown',movementKey,true)"
+ ])assert(src.includes(key),key);
+ assert(!src.includes('save()'));
+ assert(!src.includes('game.mjs'));
+});

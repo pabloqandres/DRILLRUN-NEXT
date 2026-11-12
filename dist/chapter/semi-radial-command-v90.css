@@ -728,3 +728,82 @@ body:not([data-phase="play"]) #hud #semiRadialDock{display:none!important}
  height:clamp(27px,4.3dvh,39px)!important;
 }
 /* V97 ends: no changed joystick, ring radii or HUD mission layout. */
+
+/* V98 · Two circular glass bubbles connected by one smooth wavy neck.
+   Both controls remain fully inside the existing arc's open central well. */
+#hud #semiRadialDock .dr94Base.dr98BubbleBase{
+ position:absolute!important;
+ left:0!important;top:0!important;right:auto!important;bottom:auto!important;
+ width:550px!important;height:470px!important;
+ min-height:0!important;
+ max-width:none!important;
+ border:0!important;border-radius:0!important;
+ background:none!important;box-shadow:none!important;
+ padding:0!important;margin:0!important;
+ display:block!important;overflow:visible!important;
+ pointer-events:none!important;
+ transform:none!important;filter:none!important;
+ z-index:2!important;
+}
+#hud #semiRadialDock .dr94Base.dr98BubbleBase::before{
+ display:none!important;content:none!important;
+}
+#hud #semiRadialDock .dr98BubbleGlow{
+ fill:none!important;
+ stroke:#64d3e3a8!important;stroke-width:9px!important;
+ filter:blur(6px)!important;
+ pointer-events:none!important;
+}
+#hud #semiRadialDock .dr98BubbleShell{
+ fill:url(#dr98BubbleFill)!important;
+ stroke:url(#dr98BubbleEdge)!important;
+ stroke-width:3.6px!important;
+ stroke-linecap:round!important;
+ stroke-linejoin:round!important;
+ filter:drop-shadow(0 5px 9px #00111cc4)!important;
+ pointer-events:none!important;
+}
+#hud #semiRadialDock .dr98BubbleInset{
+ fill:none!important;
+ stroke:#c0ecf19c!important;
+ stroke-width:1.35px!important;
+ stroke-linecap:round!important;
+ stroke-linejoin:round!important;
+ pointer-events:none!important;
+}
+/* The game writes inline opacity .45 when no action is nearby. Keep the
+   INACTIVE BUTTON visible ABOVE the bubble, without enabling its click. */
+#hud #handButton,
+#hud #handButton:disabled{
+ opacity:1!important;
+ z-index:43!important;
+ isolation:isolate!important;
+}
+#hud #handButton:disabled{
+ filter:none!important;
+ border-color:#d8bd80!important;
+ background:radial-gradient(circle at 31% 20%,#416f81 0%,#1a4259 32%,#0b2d44 66%,#071a2e 100%)!important;
+ box-shadow:inset 0 2px 2px #e8fcff9e,
+  inset 0 -8px 12px #000e1dd4,
+  0 0 0 3px #071b2de9,
+  0 0 0 5px #d9bf868c,
+  0 4px 13px #0009,
+  0 0 10px #e0b96e4c!important;
+}
+#hud #handButton:disabled svg,
+#hud #handButton:disabled .uiIcon{
+ opacity:.76!important;filter:drop-shadow(0 0 3px #e9c37e61)!important;
+}
+#hud #semiRadialDock .dr90Hub{
+ z-index:8!important;
+}
+/* Smooth accordion slide, keeping the existing visible edge tab accessible.
+   Movement logic only adds .collapsed and never opens/closes a mission. */
+#hud #objective:not(.hidden){
+ transition:transform .32s cubic-bezier(.2,.72,.3,1),
+            opacity .25s ease!important;
+}
+@media(prefers-reduced-motion:reduce){
+ #hud #objective:not(.hidden){transition:none!important}
+}
+/* End V98. */
