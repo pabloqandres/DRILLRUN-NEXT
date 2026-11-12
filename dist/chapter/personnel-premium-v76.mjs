@@ -210,9 +210,9 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon,view='recr
   <div class="pvTeamCount"><span>${icon('dock-users')}</span><span>Equipo activo<strong>${countTxt}</strong></span></div>
   <div class="pvTeamViewport"><div class="pvTeamList" aria-label="Personal contratado y plazas" tabindex="0">${slots}</div></div>
   <div class="pvTeamPager" role="group" aria-label="Desplazar plazas del equipo">
-   <button type="button" data-pv-team-scroll="-1" aria-label="Tres plazas anteriores" disabled>‹</button>
+   <button type="button" data-pv-team-scroll="-1" aria-label="Tres plazas anteriores" disabled><svg class="pvTeamChevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15.5 5 L8.5 12 L15.5 19"/></svg></button>
    <span class="pvTeamPage" aria-live="polite">1 / ${Math.max(1,Math.ceil(slotCount/3))}</span>
-   <button type="button" data-pv-team-scroll="1" aria-label="Tres plazas siguientes" ${slotCount<=3?'disabled':''}>›</button>
+   <button type="button" data-pv-team-scroll="1" aria-label="Tres plazas siguientes" ${slotCount<=3?'disabled':''}><svg class="pvTeamChevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8.5 5 L15.5 12 L8.5 19"/></svg></button>
   </div>
   <button class="pvTeamManage" data-pv-team-open type="button" aria-label="Gestionar equipo" title="Gestionar equipo">${icon('dock-users')}<span>Gestionar</span></button>
  </footer>
