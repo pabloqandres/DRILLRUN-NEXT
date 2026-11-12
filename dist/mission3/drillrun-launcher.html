@@ -8,14 +8,14 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#1a1a2e;color:#fff;font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh}
 .bridge{text-align:center;max-width:400px;padding:2rem}
-.bridge h1{font-size:1.4rem;margin-bottom:1rem;color:#f0c040}
+.bridge h1{font-family:"Arial Black",Impact,system-ui,sans-serif;font-style:italic;font-weight:950;letter-spacing:-.055em;font-size:clamp(1.4rem,3.8vw,2.4rem);margin-bottom:1rem;color:#fff}.bridge h1 em{color:#ff7d24;font-style:inherit}
 .bridge p{font-size:.9rem;opacity:.7;margin-bottom:1.5rem}
 iframe{border:none;width:100vw;height:100vh;position:fixed;top:0;left:0;z-index:10}
 </style>
 </head>
 <body>
 <div class="bridge" id="bridge">
- <h1>DRILL RUN</h1>
+ <h1>DRILL <em>RUN</em></h1>
  <p>Minigame integration bridge — Phase 1 skeleton.<br>
  The full minigame will be loaded here during gameplay via the drillrun-bridge.mjs module.</p>
  <p style="font-size:.75rem;opacity:.5">Config received via postMessage from parent window.</p>
