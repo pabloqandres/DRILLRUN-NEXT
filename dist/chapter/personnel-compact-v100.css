@@ -1,0 +1,576 @@
+/* V100 · DRILL RUN Personnel: concise premium UI, native portrait geometry.
+   Designed for first-party illustrations: never stretch, squash, pixelate
+   with nearest-neighbour, or apply a forced warp to a portrait. */
+#faenaCenter .faenaDialog.pvDialog{
+ width:min(1320px,85vw)!important;
+ height:min(760px,84dvh)!important;
+ max-width:calc(100vw - 24px)!important;
+ max-height:calc(100dvh - 22px)!important;
+ border:1.5px solid #52b7d0!important;
+ border-radius:16px!important;
+ box-shadow:0 20px 70px #000b,inset 0 1px #c5f2ff55!important;
+ background:linear-gradient(145deg,#0b3047,#071b30 88%)!important;
+}
+#faenaCenter .pvDialog .faenaHeader{
+ height:49px!important;min-height:49px!important;
+ padding:5px 14px!important;
+ border-bottom:1px solid #56c4da!important;
+}
+#faenaCenter .pvScreenIdentity{gap:8px!important}
+#faenaCenter .pvScreenIdentity h2{font-size:clamp(21px,1.9vw,28px)!important}
+#faenaCenter .pvScreenIdentity small{display:none!important}
+#faenaCenter .pvRoot{
+ grid-template-rows:minmax(0,1fr) clamp(75px,11.9dvh,94px)!important;
+ gap:0!important;
+}
+#faenaCenter .pvMain{
+ grid-template-columns:minmax(155px,19.5%) minmax(0,1fr) minmax(240px,31%)!important;
+ gap:clamp(6px,.7vw,11px)!important;
+ padding:clamp(7px,.8vw,11px)!important;
+}
+#faenaCenter .pvSidebar,
+#faenaCenter .pvCenter,
+#faenaCenter .pvDetail{
+ min-width:0!important;min-height:0!important;
+ border:1px solid #347c9db3!important;
+ border-radius:13px!important;
+ background:linear-gradient(165deg,#10364df0,#081d31f4)!important;
+ box-shadow:inset 0 1px #c6f6ff24!important;
+}
+#faenaCenter .pvSidebar{
+ display:flex!important;flex-direction:column!important;
+ padding:clamp(6px,.7vw,10px)!important;
+ gap:7px!important;
+ overflow-y:auto!important;overscroll-behavior-y:contain!important;
+}
+#faenaCenter .pvMission{
+ min-height:58px!important;max-height:75px!important;
+ padding:6px 8px!important;gap:2px!important;
+ border:1px solid #a9956e90!important;
+ background:linear-gradient(115deg,#164259d9,#0c2b3ebd)!important;
+}
+#faenaCenter .pvMissionBadge{font-size:9px!important}
+#faenaCenter .pvMission>b{font-size:clamp(9px,.87vw,12px)!important}
+#faenaCenter .pvMission>small{display:none!important}
+#faenaCenter .pvMissionTarget{
+ min-height:0!important;padding:2px 4px!important;
+ font-size:clamp(8px,.78vw,11px)!important;
+}
+#faenaCenter .pvRoleHeading{
+ font-size:clamp(10px,.86vw,12px)!important;
+ border-bottom:1px solid #3d789475!important;
+ padding:4px 2px!important;
+}
+#faenaCenter .pvRoles{
+ display:flex!important;flex-direction:column!important;
+ gap:7px!important;min-height:0!important;
+ overflow:visible!important;flex:0 0 auto!important;
+}
+#faenaCenter .pvRole{
+ min-height:43px!important;max-height:none!important;
+ padding:7px 9px!important;gap:8px!important;
+ border:1px solid #376d89!important;border-radius:10px!important;
+ background:linear-gradient(125deg,#123c54,#0e2d43)!important;
+}
+#faenaCenter .pvRole.selected{
+ background:linear-gradient(105deg,#614b319c,#16364d)!important;
+ border:1.7px solid #f4ca72!important;
+ box-shadow:inset 3px 0 #ffd475,0 0 8px #e2bb6336!important;
+}
+#faenaCenter .pvRoleLabel{
+ font-size:clamp(10px,.97vw,13px)!important;
+ white-space:normal!important;
+ overflow:hidden!important;
+ display:-webkit-box!important;
+ -webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;
+ line-height:1.12!important;
+}
+#faenaCenter .pvRoleCounter{
+ min-width:26px!important;padding:4px 5px!important;
+ font-size:11px!important;
+}
+#faenaCenter .pvRolesMore{
+ min-height:0!important;flex:0 0 auto!important;
+ border:1px solid #316884aa!important;border-radius:10px!important;
+ background:linear-gradient(150deg,#153a53,#0b2a40)!important;
+ overflow:hidden!important;
+}
+#faenaCenter .pvRolesMore summary{
+ cursor:pointer;color:#acd7e7!important;font-weight:850!important;
+ font-size:clamp(10px,.85vw,12px)!important;
+ padding:8px 11px!important;
+ display:flex!important;justify-content:space-between!important;align-items:center!important;
+ list-style:none!important;
+}
+#faenaCenter .pvRolesMore summary::-webkit-details-marker{display:none}
+#faenaCenter .pvRolesMore summary::before{content:"+";color:#79dfef;margin-right:7px;font-size:17px}
+#faenaCenter .pvRolesMore[open] summary::before{content:"−"}
+#faenaCenter .pvRolesMore summary b{color:#e1c57b;font-size:11px}
+#faenaCenter .pvRolesMore .pvRolesExtra{
+ max-height:min(160px,21dvh)!important;overflow-y:auto!important;
+ padding:4px 5px 7px!important;touch-action:pan-y!important;
+}
+#faenaCenter .pvRolesMore .pvRole{
+ min-height:38px!important;padding:4px 6px!important;
+}
+/* Candidates: exactly three first-party portraits, minimal data. */
+#faenaCenter .pvCenter{
+ padding:clamp(6px,.65vw,10px)!important;
+ gap:6px!important;
+}
+#faenaCenter .pvSectionHead{
+ min-height:42px!important;max-height:54px!important;
+ padding-bottom:5px!important;
+}
+#faenaCenter .pvSectionHead h3{
+ font-size:clamp(14px,1.25vw,19px)!important;
+ margin-top:1px!important;line-height:1.1!important;
+}
+#faenaCenter .pvSectionHead h3 small{
+ color:#99c5d6;font-size:.65em;font-weight:650;
+}
+#faenaCenter .pvEyebrow{
+ font-size:clamp(8px,.7vw,10px)!important;
+ letter-spacing:.08em!important;
+}
+#faenaCenter .pvCarouselControls{
+ font-size:12px!important;gap:5px!important;
+}
+#faenaCenter .pvCandidates{
+ display:grid!important;
+ grid-auto-flow:column!important;
+ grid-auto-columns:minmax(0,1fr)!important;
+ grid-template-rows:minmax(0,1fr)!important;
+ gap:clamp(5px,.65vw,10px)!important;
+ overflow-x:hidden!important;overflow-y:hidden!important;
+ padding:2px!important;
+}
+#faenaCenter .pvCandidate{
+ display:grid!important;
+ grid-template-rows:minmax(80px,1fr) auto auto auto auto auto!important;
+ min-width:0!important;max-width:none!important;
+ border:1.3px solid #387fa1!important;border-radius:12px!important;
+ background:linear-gradient(172deg,#19465f,#082237 80%)!important;
+ padding:0 0 4px!important;gap:0!important;
+ overflow:hidden!important;
+ filter:none!important;
+}
+#faenaCenter .pvCandidate.unavailable{filter:none!important;opacity:.87!important}
+#faenaCenter .pvCandidate.selected{
+ border:2px solid #f0c86f!important;
+ box-shadow:0 0 0 1px #f0c87360,0 0 12px #eec26942!important;
+}
+#faenaCenter .pvPortrait{
+ position:relative!important;display:block!important;
+ min-height:0!important;height:100%!important;
+ width:100%!important;overflow:hidden!important;
+ background:radial-gradient(ellipse at 45% 42%,#235a74,#0b3048 76%)!important;
+}
+#faenaCenter .pvPortrait>.pvArtPortrait,
+#faenaCenter .pvPortrait>.pvEmptyPortrait{
+ position:absolute!important;inset:0!important;
+ width:100%!important;height:100%!important;
+ overflow:hidden!important;transform:none!important;
+ border:0!important;border-radius:9px 9px 0 0!important;
+}
+/* Critical: the frame has fixed aspect ratio, and CSS only clips/crops.
+   No "scaleX/Y", stretched background atlas, cover + independent transforms,
+   or image-rendering:pixelated. Scalable v76 SVG keeps perfect sharp edges. */
+#faenaCenter .pvArtPortrait{
+ background-image:none!important;
+ background-color:#17384c!important;
+ filter:none!important;
+}
+#faenaCenter .pvArtPortrait>.pvPortraitImage{
+ position:absolute!important;inset:0!important;
+ display:block!important;
+ width:100%!important;height:100%!important;
+ max-width:none!important;max-height:none!important;
+ aspect-ratio:auto!important;
+ object-fit:contain!important;object-position:center center!important;
+ image-rendering:auto!important;
+ transform:none!important;scale:none!important;
+ filter:none!important;
+ opacity:1!important;
+}
+#faenaCenter .pvPortrait::after{
+ content:""!important;display:block!important;
+ position:absolute!important;inset:70% 0 0!important;
+ background:linear-gradient(transparent,#081e31d9)!important;
+ pointer-events:none!important;
+}
+#faenaCenter .pvCandidateName{
+ margin:0!important;position:relative!important;
+ padding:4px 3px 0!important;
+ font-size:clamp(10px,.95vw,13px)!important;
+ white-space:normal!important;
+ display:-webkit-box!important;-webkit-box-orient:vertical!important;
+ -webkit-line-clamp:2!important;line-height:1.1!important;
+ overflow:hidden!important;max-height:33px!important;
+}
+#faenaCenter .pvCandidateStars{
+ font-size:clamp(10px,1vw,14px)!important;
+ line-height:1.1!important;
+}
+#faenaCenter .pvCandidateMetrics{
+ display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+ gap:clamp(3px,.4vw,6px)!important;
+ padding:4px 7px!important;
+ align-items:center!important;
+}
+#faenaCenter .pvCandidateSkill{
+ display:flex!important;flex-direction:column!important;
+ align-items:center!important;justify-content:center!important;
+ gap:3px!important;min-width:0!important;
+ font-size:0!important;
+}
+#faenaCenter .pvCandidateSkill .pvSkillGlyph{
+ flex:0 0 auto!important;width:clamp(14px,1.4vw,21px)!important;
+ height:clamp(14px,1.4vw,21px)!important;
+ color:#b5ecf9!important;
+}
+#faenaCenter .pvCandidateSkill .pvSkillGlyph svg{
+ width:100%!important;height:100%!important;stroke-width:2.1!important;
+}
+#faenaCenter .pvCandidateSkill .pvSkillLabel{
+ display:none!important;
+}
+#faenaCenter .pvMiniPips{
+ display:flex!important;justify-content:center!important;gap:2px!important;
+ white-space:nowrap!important;
+}
+#faenaCenter .pvMiniPips i{
+ display:inline-block!important;flex:0 0 auto!important;
+ width:clamp(4px,.44vw,6px)!important;
+ height:clamp(4px,.44vw,6px)!important;
+ border-radius:50%!important;
+ background:#38566b!important;
+}
+#faenaCenter .pvMiniPips i.on{
+ background:#4be0ef!important;box-shadow:0 0 5px #61e5ef9c!important;
+}
+#faenaCenter .pvCandidateCost{
+ margin:0!important;padding:4px 2px!important;
+ font-size:clamp(11px,1.06vw,15px)!important;
+ font-weight:900!important;
+ background:#102f46b5!important;
+}
+#faenaCenter .pvCandidateState{
+ padding:3px!important;
+ font-size:clamp(8px,.65vw,10px)!important;
+}
+/* Candidate detail: short hero + exactly 3 prominent icon/dot skills.
+   Full historical information exists under explicit More details. */
+#faenaCenter .pvDetail{
+ display:flex!important;flex-direction:column!important;
+ padding:clamp(7px,.75vw,12px)!important;
+ gap:7px!important;overflow:hidden!important;
+}
+#faenaCenter .pvDetailHero{
+ flex:0 0 clamp(88px,15dvh,148px)!important;
+ min-height:0!important;gap:9px!important;
+ overflow:hidden!important;
+ border-bottom:1px solid #397d9799!important;
+}
+#faenaCenter .pvDetailHero>.pvArtPortrait,
+#faenaCenter .pvDetailHero>.pvEmptyPortrait{
+ position:relative!important;
+ width:34%!important;max-width:34%!important;
+ flex:0 0 34%!important;height:100%!important;
+ overflow:hidden!important;border:0!important;
+ border-radius:10px!important;background:#17384c!important;
+}
+#faenaCenter .pvDetailHero h3{
+ font-size:clamp(14px,1.3vw,20px)!important;
+ line-height:1.09!important;margin:0 0 3px!important;
+}
+#faenaCenter .pvDetailSummary{
+ display:-webkit-box!important;-webkit-line-clamp:2!important;
+ -webkit-box-orient:vertical!important;overflow:hidden!important;
+ font-size:clamp(9px,.8vw,12px)!important;
+ line-height:1.24!important;
+}
+#faenaCenter .pvSkillsHeader{
+ flex:0 0 auto!important;min-height:20px!important;
+ padding:3px 0!important;border-top:0!important;
+ font-size:clamp(10px,.9vw,12px)!important;
+}
+#faenaCenter .pvQuickSkills{
+ flex:0 0 auto!important;
+ display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+ gap:clamp(4px,.45vw,8px)!important;min-width:0!important;
+}
+#faenaCenter .pvQuickSkill{
+ display:flex!important;flex-direction:column!important;
+ align-items:center!important;justify-content:space-between!important;
+ gap:4px!important;
+ min-width:0!important;
+ min-height:clamp(68px,10dvh,99px)!important;
+ padding:6px 3px!important;
+ background:linear-gradient(155deg,#10405a,#0c2e46)!important;
+ border:1px solid #398cab!important;border-radius:10px!important;
+ color:#eafaff!important;
+}
+#faenaCenter .pvQuickSkill .pvSkillGlyph{
+ flex:0 0 auto!important;
+ width:clamp(19px,1.8vw,28px)!important;height:clamp(19px,1.8vw,28px)!important;
+ color:#a5f3fc!important;
+}
+#faenaCenter .pvQuickSkill .pvSkillGlyph svg{width:100%!important;height:100%!important}
+#faenaCenter .pvQuickSkillLabel{
+ display:block!important;width:100%!important;
+ min-width:0!important;text-align:center!important;
+ font-size:clamp(8px,.73vw,11px)!important;line-height:1.1!important;
+ white-space:normal!important;overflow:hidden!important;
+}
+#faenaCenter .pvQuickSkill .pvMiniPips i{
+ width:clamp(4px,.55vw,7px)!important;
+ height:clamp(4px,.55vw,7px)!important;
+}
+#faenaCenter .pvMoreDetails{
+ display:block!important;
+ flex:0 1 auto!important;min-height:0!important;
+ border:1px solid #345e78a6!important;
+ border-radius:8px!important;
+ background:#0d293e!important;
+ overflow-y:auto!important;scrollbar-width:thin!important;
+}
+#faenaCenter .pvMoreDetails summary{
+ cursor:pointer;padding:6px 9px!important;
+ color:#d6f4ff;font-weight:800;font-size:clamp(10px,.85vw,12px)!important;
+ display:flex!important;gap:6px!important;justify-content:space-between!important;
+ list-style:none;
+}
+#faenaCenter .pvMoreDetails summary::-webkit-details-marker{display:none}
+#faenaCenter .pvMoreDetails summary::before{
+ content:"+";color:#62d7ed;font-size:16px;margin-right:4px;
+}
+#faenaCenter .pvMoreDetails[open] summary::before{content:"−"}
+#faenaCenter .pvMoreDetails summary span{
+ font-size:clamp(7px,.66vw,10px)!important;color:#7faabd;
+ white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+}
+#faenaCenter .pvMoreDetails .pvDetailTabs{
+ display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+ margin:2px 4px!important;padding:2px!important;
+}
+#faenaCenter .pvMoreDetails .pvDetailTabs button{
+ font-size:clamp(8px,.72vw,10px)!important;
+}
+#faenaCenter .pvMoreDetails .pvDetailBody{
+ padding:4px 6px!important;
+ min-height:0!important;max-height:105px!important;
+ overflow-y:auto!important;
+}
+#faenaCenter .pvHireActions{
+ display:grid!important;
+ grid-template-columns:minmax(0,39%) minmax(0,61%)!important;
+ gap:7px!important;padding:6px 0 0!important;
+ margin-top:auto!important;
+ min-width:0!important;overflow:hidden!important;
+ flex:0 0 auto!important;
+}
+#faenaCenter button.pvHire{
+ min-width:0!important;min-height:37px!important;
+ font-size:clamp(10px,1vw,13px)!important;
+ padding:5px 8px!important;
+}
+/* Staff: exactly THREE visible cells per native swipe/paged scroll.
+   Keep actual capacity/mission rules authoritative; no phantom vacancies. */
+#faenaCenter .pvTeam.pvTeam--v100{
+ display:flex!important;align-items:stretch!important;justify-content:flex-start!important;
+ width:100%!important;min-width:0!important;
+ height:100%!important;max-height:100%!important;min-height:0!important;
+ gap:clamp(5px,.6vw,10px)!important;
+ padding:clamp(5px,.7dvh,9px) clamp(7px,.8vw,13px)!important;
+ border-top:1.5px solid #54c0d7!important;
+ background:linear-gradient(90deg,#0c324a,#09273c 80%)!important;
+}
+#faenaCenter .pvTeamCount{
+ flex:0 0 clamp(100px,10.3vw,151px)!important;
+ min-width:0!important;padding-right:6px!important;
+ gap:7px!important;
+}
+#faenaCenter .pvTeamCount strong{
+ font-size:clamp(17px,1.7vw,24px)!important;
+ line-height:1.08!important;
+}
+#faenaCenter .pvTeamViewport{
+ min-width:0!important;flex:0 1 clamp(330px,36vw,555px)!important;
+ display:flex!important;overflow:hidden!important;
+}
+#faenaCenter .pvTeamViewport .pvTeamList{
+ display:flex!important;align-items:stretch!important;
+ width:100%!important;height:100%!important;min-height:0!important;
+ min-width:0!important;gap:7px!important;
+ flex:1 1 auto!important;
+ overflow-x:auto!important;overflow-y:hidden!important;
+ overscroll-behavior-x:contain!important;
+ scroll-snap-type:x mandatory!important;
+ scrollbar-width:none!important;
+ touch-action:pan-x!important;
+}
+#faenaCenter .pvTeamViewport .pvTeamList::-webkit-scrollbar{display:none!important}
+#faenaCenter .pvTeamViewport .pvTeamSlot{
+ flex:0 0 calc((100% - 14px)/3)!important;
+ width:calc((100% - 14px)/3)!important;
+ max-width:calc((100% - 14px)/3)!important;
+ min-width:0!important;
+ height:100%!important;min-height:0!important;max-height:100%!important;
+ display:flex!important;align-items:center!important;gap:7px!important;
+ padding:5px 6px!important;overflow:hidden!important;
+ box-sizing:border-box!important;border-radius:10px!important;
+ scroll-snap-align:start!important;
+}
+#faenaCenter .pvTeamSlot.occupied{
+ background:linear-gradient(120deg,#124058,#0e2c42)!important;
+ border:1.2px solid #569bb1!important;
+}
+#faenaCenter .pvTeamSlot .pvArtPortrait--team,
+#faenaCenter .pvTeamSlot .pvEmptyPortrait--team{
+ position:relative!important;
+ flex:0 0 clamp(32px,3.05vw,46px)!important;
+ width:clamp(32px,3.05vw,46px)!important;
+ min-width:clamp(32px,3.05vw,46px)!important;
+ height:clamp(32px,3.05vw,46px)!important;
+ min-height:clamp(32px,3.05vw,46px)!important;
+ max-height:clamp(32px,3.05vw,46px)!important;
+ border-radius:50%!important;
+ overflow:hidden!important;
+ border:1.2px solid #83cad8!important;
+ background:#17384c!important;
+}
+#faenaCenter .pvTeamSlot .pvArtPortrait--team .pvPortraitImage{
+ object-fit:cover!important;object-position:center 30%!important;
+}
+#faenaCenter .pvTeamIdentity{
+ min-width:0!important;max-width:100%!important;
+ display:flex!important;flex:1 1 auto!important;
+ flex-direction:column!important;gap:2px!important;
+ overflow:hidden!important;
+}
+#faenaCenter .pvTeamIdentity b{
+ font-size:clamp(9px,.9vw,13px)!important;
+ line-height:1.11!important;white-space:normal!important;
+ display:-webkit-box!important;-webkit-line-clamp:2!important;
+ -webkit-box-orient:vertical!important;
+ overflow:hidden!important;
+}
+#faenaCenter .pvTeamIdentity small{
+ font-size:clamp(8px,.75vw,10px)!important;
+ line-height:1.1!important;white-space:nowrap!important;
+ overflow:hidden!important;text-overflow:ellipsis!important;
+}
+#faenaCenter .pvHiredCheck{display:none!important}
+#faenaCenter .pvTeamSlot.vacant{
+ color:#b1d3e1!important;
+ border:1.5px dashed #558ba6!important;
+ background:#12314683!important;
+ flex-direction:row!important;justify-content:center!important;
+}
+#faenaCenter .pvTeamSlot.vacant .pvPlus{
+ flex:0 0 clamp(23px,2.2vw,31px)!important;
+ width:clamp(23px,2.2vw,31px)!important;
+ height:clamp(23px,2.2vw,31px)!important;
+ border-radius:50%!important;
+}
+#faenaCenter .pvTeamPager{
+ flex:0 0 auto!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ gap:5px!important;color:#f6d27d!important;
+ font-weight:900!important;
+}
+#faenaCenter .pvTeamPager button{
+ display:grid!important;place-items:center!important;
+ min-height:34px!important;min-width:31px!important;
+ width:31px!important;height:34px!important;
+ border-radius:9px!important;border:1px solid #60b9d3!important;
+ background:#113951!important;color:#e7f8ff!important;
+ font-size:23px!important;line-height:1!important;cursor:pointer!important;
+}
+#faenaCenter .pvTeamPage{min-width:32px!important;text-align:center!important;font-size:12px!important}
+#faenaCenter .pvTeamManage{
+ flex:0 0 clamp(74px,7.5vw,108px)!important;
+ min-width:0!important;max-width:108px!important;height:100%!important;
+ padding:5px 7px!important;
+ display:flex!important;flex-direction:column!important;
+ gap:4px!important;font-size:clamp(9px,.82vw,11px)!important;
+ line-height:1.12!important;
+ border-radius:10px!important;border:1px solid #5aaccc!important;
+ background:linear-gradient(145deg,#175674,#0c324a)!important;
+}
+#faenaCenter .pvTeamManage .uiIcon{
+ width:clamp(17px,1.7vw,25px)!important;
+ height:clamp(17px,1.7vw,25px)!important;
+}
+/* Desktop remains elegantly inset; short Android landscape is nearly full
+   screen so controls and portraits stay readable without clipping. */
+@media(orientation:landscape) and (max-height:560px){
+ #faenaCenter .faenaDialog.pvDialog{
+  width:calc(100vw - 14px)!important;
+  height:calc(100dvh - 8px)!important;
+  max-width:calc(100vw - 14px)!important;
+  max-height:calc(100dvh - 8px)!important;
+ }
+ #faenaCenter .pvDialog .faenaHeader{min-height:40px!important;height:40px!important}
+ #faenaCenter .pvRoot{grid-template-rows:minmax(0,1fr) 65px!important}
+ #faenaCenter .pvMain{
+  grid-template-columns:minmax(125px,22%) minmax(0,1fr) minmax(188px,30%)!important;
+  padding:4px!important;gap:5px!important;
+ }
+ #faenaCenter .pvSidebar,#faenaCenter .pvCenter,#faenaCenter .pvDetail{
+  padding:4px!important;gap:4px!important;
+ }
+ #faenaCenter .pvMission{min-height:45px!important;max-height:55px!important}
+ #faenaCenter .pvRole{min-height:33px!important;padding:3px 5px!important}
+ #faenaCenter .pvRoles{gap:3px!important}
+ #faenaCenter .pvRoleHeading{font-size:9px!important;padding:2px!important}
+ #faenaCenter .pvRolesMore summary{padding:4px 6px!important;font-size:9px!important}
+ #faenaCenter .pvSectionHead{min-height:29px!important;max-height:40px!important;padding:0!important}
+ #faenaCenter .pvCandidate{grid-template-rows:minmax(76px,1fr) auto auto auto auto auto!important}
+ #faenaCenter .pvCandidateMetrics{display:grid!important;padding:2px!important}
+ #faenaCenter .pvCandidateName{font-size:clamp(9px,1.05vw,12px)!important}
+ #faenaCenter .pvDetailHero{flex:0 0 clamp(60px,17dvh,90px)!important;gap:4px!important}
+ #faenaCenter .pvQuickSkill{min-height:55px!important;padding:3px 1px!important;gap:2px!important}
+ #faenaCenter .pvQuickSkillLabel{font-size:8px!important}
+ #faenaCenter .pvQuickSkill .pvSkillGlyph{width:18px!important;height:18px!important}
+ #faenaCenter .pvMoreDetails summary{padding:4px 5px!important;font-size:9px!important}
+ #faenaCenter .pvMoreDetails summary span{display:none!important}
+ #faenaCenter .pvHireActions{padding-top:3px!important;gap:4px!important}
+ #faenaCenter button.pvHire{min-height:29px!important}
+ #faenaCenter .pvTeamViewport{flex-basis:clamp(260px,41vw,390px)!important}
+ #faenaCenter .pvTeamSlot .pvArtPortrait--team,
+ #faenaCenter .pvTeamSlot .pvEmptyPortrait--team{
+  width:30px!important;height:30px!important;min-width:30px!important;
+  min-height:30px!important;flex-basis:30px!important;
+ }
+ #faenaCenter .pvTeamIdentity b{font-size:9px!important}
+ #faenaCenter .pvTeamCount{flex-basis:94px!important}
+ #faenaCenter .pvTeamManage{flex-basis:62px!important}
+ #faenaCenter .pvTeamManage span{display:none!important}
+ #faenaCenter .pvTeamPager button{width:25px!important;min-width:25px!important;height:29px!important;min-height:29px!important}
+}
+@media(orientation:portrait){
+ #faenaCenter .faenaDialog.pvDialog{
+  width:calc(100vw - 10px)!important;
+  height:calc(100dvh - 14px)!important;
+ }
+ #faenaCenter .pvMain{
+  grid-template-columns:minmax(105px,25%) minmax(0,1fr)!important;
+  grid-template-rows:minmax(0,44%) minmax(0,56%)!important;
+ }
+ #faenaCenter .pvSidebar{grid-row:1/span 2!important}
+ #faenaCenter .pvCenter{grid-column:2;grid-row:1}
+ #faenaCenter .pvDetail{grid-column:2;grid-row:2}
+ #faenaCenter .pvTeamCount{flex-basis:80px!important}
+ #faenaCenter .pvTeamViewport{flex:1 1 0!important}
+ #faenaCenter .pvTeamPager{gap:2px!important}
+ #faenaCenter .pvTeamManage{flex-basis:44px!important}
+ #faenaCenter .pvTeamManage span{display:none!important}
+}
+@media(prefers-reduced-motion:reduce){
+ #faenaCenter .pvCandidate,
+ #faenaCenter .pvArtPortrait,
+ #faenaCenter .pvPortraitImage,
+ #faenaCenter .pvTeamSlot{transition:none!important;animation:none!important}
+}
