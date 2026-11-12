@@ -7,7 +7,7 @@ import {renderPersonnelPremium} from '../dist/chapter/personnel-premium-v76.mjs'
 const icon=name=>'<i data-icon="'+name+'"></i>';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const state=()=>{const s=newGame('es','operator01');s.cash=50000;s.office={status:'built',level:2};s.mission3={phase:'setup'};s.hsec={employee:{id:'hsec01',level:1,state:'idle'},assets:[{id:'shed-1',type:'shed',status:'built'}]};return s;};
-test('V77: neutral placeholders remain for unillustrated roles, three skill rows on cards',()=>{
+test('V88: all already-illustrated roles render three unique brandless candidate portraits',()=>{
  assert.equal(PERSONNEL_CANDIDATES.length,21);
  for(const role of PERSONNEL_GROUPS.filter(r=>r.id!=='admin')){
   const s=state(),cards=candidatesForRole(role.id);
@@ -16,8 +16,8 @@ test('V77: neutral placeholders remain for unillustrated roles, three skill rows
   assert.equal((html.match(/class="pvCandidate /g)||[]).length,3,role.id);
   assert.equal((html.match(/class="pvCandidateSkill"/g)||[]).length,9,role.id);
   assert.equal((html.match(/class="pvPortrait"/g)||[]).length,3,role.id);
-  assert(!/<img\b/i.test(html),'no unapproved candidate images shown for '+role.id);
-  assert(html.includes('RETRATO PENDIENTE'));
+  assert.equal((html.match(/class="pvPortraitImage"/g)||[]).length>=4,true,role.id);
+  for(const candidate of cards)assert(html.includes(candidate.portrait),'missing original portrait '+candidate.id);
   assert(html.includes('data-pv-hire'));
   for(const c of cards){
    assert(html.includes(c.name),c.name);
@@ -30,7 +30,8 @@ test('V77: roster selects stored candidate ID without changing original hiring',
  s.personnel=[{id:'adm-matias-torres',candidateId:'adm-matias-torres',name:'Matías Torres',role:'admin',level:1,state:'idle'}];
  const html=renderPersonnelPremium(s,'admin','adm-matias-torres',icon);
  assert(html.includes('data-pv-person="adm-matias-torres"'));
- assert(html.includes('pvEmptyPortrait--team'));
+ assert(html.includes('pvArtPortrait--team'));
+ assert(html.includes('npc-portraits-v76/hsec01.svg'));
  assert(html.includes('pvArtPortrait--detail'));
  assert(html.includes('npc-portraits-v80/adm-matias-torres.svg'));
  const handler=read('dist/chapter/faena-center.mjs');
