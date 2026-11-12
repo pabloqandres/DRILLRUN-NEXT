@@ -45,16 +45,27 @@ export function radialSegmentPath(from,to,geometry=RADIAL_GEOMETRY){
   ' L'+point(innerB)+
   ' A'+geometry.innerRadius+' '+geometry.innerRadius+' 0 0 0 '+point(innerA)+' Z';
 }
+const arcPath=(from,to,r,geometry=RADIAL_GEOMETRY)=>
+ 'M'+point(radialPoint(from,r,geometry))+' A'+r+' '+r+' 0 0 1 '+point(radialPoint(to,r,geometry));
 function wheelSvg(){
  const g=RADIAL_GEOMETRY;
  return '<svg class="dr90Ring" viewBox="0 0 400 165" aria-hidden="true" fill="none">'+
   '<defs>'+
    '<linearGradient id="dr90Side" x1="0" y1="0" x2=".1" y2="1"><stop stop-color="#21465b"/><stop offset=".53" stop-color="#102e43"/><stop offset="1" stop-color="#091c30"/></linearGradient>'+
-   '<linearGradient id="dr90Selected" x1="0" y1="0" x2=".2" y2="1"><stop stop-color="#745d33"/><stop offset=".55" stop-color="#35465a"/><stop offset="1" stop-color="#142c42"/></linearGradient>'+
+   '<linearGradient id="dr90Selected" x1="0" y1="0" x2=".2" y2="1"><stop stop-color="#74603e"/><stop offset=".46" stop-color="#3a4d60"/><stop offset="1" stop-color="#0b263a"/></linearGradient>'+
+   '<linearGradient id="dr92Glass" x1="0" y1="0" x2=".28" y2="1"><stop stop-color="#c5f4fb" stop-opacity=".20"/><stop offset=".36" stop-color="#65bdd4" stop-opacity=".045"/><stop offset=".85" stop-color="#041c29" stop-opacity=".09"/><stop offset="1" stop-color="#00131c" stop-opacity=".35"/></linearGradient>'+
+   '<linearGradient id="dr92Rim" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#dcf8fb" stop-opacity=".92"/><stop offset="1" stop-color="#4c9fb6" stop-opacity=".4"/></linearGradient>'+
   '</defs>'+
   '<path class="dr90Sector dr90Sector--left" d="'+radialSegmentPath(...g.left)+'"/>'+
   '<path class="dr90Sector dr90Sector--center" d="'+radialSegmentPath(...g.center)+'"/>'+
   '<path class="dr90Sector dr90Sector--right" d="'+radialSegmentPath(...g.right)+'"/>'+
+  '<path class="dr92Glass dr92Glass--left" d="'+radialSegmentPath(...g.left)+'"/>'+
+  '<path class="dr92Glass dr92Glass--center" d="'+radialSegmentPath(...g.center)+'"/>'+
+  '<path class="dr92Glass dr92Glass--right" d="'+radialSegmentPath(...g.right)+'"/>'+
+  '<path class="dr92OuterRim" d="'+arcPath(-67.4,-24, g.outerRadius-3.2)+'"/>'+
+  '<path class="dr92OuterRim dr92OuterRim--selected" d="'+arcPath(-21.8,21.8,g.outerRadius-3.2)+'"/>'+
+  '<path class="dr92OuterRim" d="'+arcPath(24,67.4,g.outerRadius-3.2)+'"/>'+
+  '<path class="dr92InnerRim" d="'+arcPath(-67.4,67.4,g.innerRadius+3.7)+'"/>'+
   '<path class="dr90CenterAccent" d="M'+point(radialPoint(-12,g.outerRadius-6))+
    ' A'+(g.outerRadius-6)+' '+(g.outerRadius-6)+' 0 0 1 '+point(radialPoint(12,g.outerRadius-6))+'"/>'+
   '</svg>';
@@ -104,6 +115,7 @@ export function installSemiRadialDock({
  let centerIndex=0,open=false,destroyed=false;
  let pointerDown=false,holdOpened=false,moved=false,startX=0;
  let holdTimer=null,skipHubClick=false,drag=null,suppressChoiceClickUntil=0,lastDragAt=0,lastWheelAt=0;
+ const SWIPE_PX=30, SWIPE_DETENT_MS=165;
  const feedback=kind=>{try{onFeedback(kind);}catch{}};
  const visibleStep=step=>step==='0'||step==='-1'||step==='1';
  const resize=()=>{
@@ -172,7 +184,7 @@ export function installSemiRadialDock({
  hub.addEventListener('pointermove',event=>{
   if(!pointerDown)return;
   const dx=event.clientX-startX;
-  if(Math.abs(dx)<44||Date.now()-lastDragAt<320)return;
+  if(Math.abs(dx)<SWIPE_PX||Date.now()-lastDragAt<SWIPE_DETENT_MS)return;
   lastDragAt=Date.now();clearTimeout(holdTimer);moved=true;
   if(!open)setOpen(true);
   rotate(dx<0?1:-1);
@@ -193,21 +205,42 @@ export function installSemiRadialDock({
  });
  prev.addEventListener('click',()=>rotate(-1));
  next.addEventListener('click',()=>rotate(1));
- choices.addEventListener('pointerdown',event=>{
-  if(open&&event.button===0)drag={x:event.clientX,moved:false};
+ // All three painted sectors AND the icon buttons are touch surfaces.
+ // Pointer events continue on window after the finger leaves the original icon.
+ // CSS touch-action:none on the arc stops the world camera from stealing a swipe.
+ stage.addEventListener('pointerdown',event=>{
+  if(!open||(event.pointerType==='mouse'&&event.button!==0))return;
+  if(event.target.closest('.dr90Hub,.dr90Arrows'))return;
+  if(!event.target.closest('.dr90Sector,.dr90Option'))return;
+  drag={id:event.pointerId,x:event.clientX,startX:event.clientX,turned:false};
  });
- choices.addEventListener('pointermove',event=>{
-  if(!open||!drag)return;
+ const moveDrag=event=>{
+  if(!drag||!open||event.pointerId!==drag.id)return;
   const dx=event.clientX-drag.x;
-  if(Math.abs(dx)<44||Date.now()-lastDragAt<320)return;
-  lastDragAt=Date.now();drag.moved=true;
-  suppressChoiceClickUntil=Date.now()+350;
-  rotate(dx<0?1:-1);drag.x=event.clientX;
- });
- choices.addEventListener('pointerup',()=>{drag=null;});
- choices.addEventListener('pointercancel',()=>{drag=null;});
+  if(Math.abs(dx)<SWIPE_PX||Date.now()-lastDragAt<SWIPE_DETENT_MS)return;
+  lastDragAt=Date.now();
+  drag.turned=true;
+  suppressChoiceClickUntil=Date.now()+460;
+  rotate(dx<0?1:-1);
+  drag.x=event.clientX;
+  if(event.cancelable)event.preventDefault();
+ };
+ const finishDrag=(event,cancelled=false)=>{
+  if(!drag||event.pointerId!==drag.id)return;
+  // Fast gestures can have only down/up events; don't lose their last detent.
+  const dx=event.clientX-drag.startX;
+  if(!cancelled&&!drag.turned&&open&&Math.abs(dx)>=SWIPE_PX){
+   rotate(dx<0?1:-1);
+   suppressChoiceClickUntil=Date.now()+460;
+  }
+  drag=null;
+ };
+ window.addEventListener('pointermove',moveDrag,{passive:false});
+ window.addEventListener('pointerup',finishDrag);
+ const cancelDrag=event=>finishDrag(event,true);
+ window.addEventListener('pointercancel',cancelDrag);
  choices.addEventListener('click',event=>{
-  if(Date.now()<suppressChoiceClickUntil)return;
+  if(Date.now()<suppressChoiceClickUntil){event.preventDefault();return;}
   select(event.target.closest('.dr90Option'));
  });
  root.addEventListener('wheel',event=>{
@@ -245,6 +278,9 @@ export function installSemiRadialDock({
   select:()=>select(nodes[centerIndex].querySelector('button')),
   destroy:()=>{
    destroyed=true;clearTimeout(holdTimer);ro?.disconnect();watch.disconnect();
+   window.removeEventListener('pointermove',moveDrag);
+   window.removeEventListener('pointerup',finishDrag);
+   window.removeEventListener('pointercancel',cancelDrag);
    if(!ro)removeEventListener('resize',resize);
    document.removeEventListener('pointerdown',outside);
    document.removeEventListener('keydown',keydown);
