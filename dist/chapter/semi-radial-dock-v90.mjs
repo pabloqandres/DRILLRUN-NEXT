@@ -22,10 +22,10 @@ export function semiRadialStep(itemIndex,centerIndex,total){
  return Math.abs(delta)<=2?String(delta):'off';
 }
 export const RADIAL_GEOMETRY=Object.freeze({
- cx:395,cy:247,outerRadius:211,innerRadius:132,itemRadius:171,
- left:[-90,-68],center:[-67,-45],right:[-44,-22],outerRight:[-21,1],
- slotAngles:Object.freeze([-79,-56,-33,-10]),
- slotBounds:Object.freeze([[-90,-68],[-67,-45],[-44,-22],[-21,1]])
+ cx:500,cy:465,outerRadius:465,innerRadius:296,itemRadius:382,
+ left:[-89,-68],center:[-67,-45],right:[-44,-22],outerRight:[-21,0],
+ slotAngles:Object.freeze([-78.5,-56,-33,-10.5]),
+ slotBounds:Object.freeze([[-89,-68],[-67,-45],[-44,-22],[-21,0]])
 });
 export function radialPoint(angle,radius,geometry=RADIAL_GEOMETRY){
  const a=angle*Math.PI/180;
@@ -54,14 +54,14 @@ function wheelSvg(){
  const rims=g.slotBounds.map(([a,b],i)=>
   '<path class="dr92OuterRim '+(i===1?'dr92OuterRim--selected':'')+
   '" d="'+arcPath(a+.8,b-.8,g.outerRadius-3)+'"/>').join('');
- return '<svg class="dr90Ring" viewBox="0 0 440 285" aria-hidden="true" fill="none">'+
+ return '<svg class="dr90Ring" viewBox="0 0 550 470" aria-hidden="true" fill="none">'+
   '<defs>'+
   '<linearGradient id="dr90Side" x1="0" y1="0" x2=".1" y2="1"><stop stop-color="#21465b"/><stop offset=".53" stop-color="#102e43"/><stop offset="1" stop-color="#091c30"/></linearGradient>'+
   '<linearGradient id="dr90Selected" x1="0" y1="0" x2=".2" y2="1"><stop stop-color="#74603e"/><stop offset=".46" stop-color="#3a4d60"/><stop offset="1" stop-color="#0b263a"/></linearGradient>'+
   '<linearGradient id="dr92Glass" x1="0" y1="0" x2=".28" y2="1"><stop stop-color="#c5f4fb" stop-opacity=".20"/><stop offset=".36" stop-color="#65bdd4" stop-opacity=".045"/><stop offset=".85" stop-color="#041c29" stop-opacity=".09"/><stop offset="1" stop-color="#00131c" stop-opacity=".35"/></linearGradient>'+
   '<linearGradient id="dr92Rim" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#dcf8fb" stop-opacity=".92"/><stop offset="1" stop-color="#4c9fb6" stop-opacity=".4"/></linearGradient>'+
   '</defs>'+sectors+glass+rims+
-  '<path class="dr92InnerRim" d="'+arcPath(-90,1,g.innerRadius+3.5)+'"/>'+
+  '<path class="dr92InnerRim" d="'+arcPath(-89,0,g.innerRadius+3.5)+'"/>'+
   '<path class="dr90CenterAccent" d="'+arcPath(-63,-49,g.outerRadius-6)+'"/>'+
   '</svg>';
 }
@@ -111,7 +111,7 @@ export function installSemiRadialDock({
  const feedback=kind=>{try{onFeedback(kind);}catch{}};
  const angleAt=e=>{
   const rect=stage.getBoundingClientRect();
-  const scale=rect.width/440;
+  const scale=rect.width/550;
   const x=rect.left+RADIAL_GEOMETRY.cx*scale;
   const y=rect.top+RADIAL_GEOMETRY.cy*scale;
   return Math.atan2(e.clientX-x,y-e.clientY)*180/Math.PI;
@@ -120,13 +120,13 @@ export function installSemiRadialDock({
   if(destroyed)return;
   const vw=window.innerWidth||document.documentElement?.clientWidth||1280;
   const vh=window.innerHeight||document.documentElement?.clientHeight||720;
-  const scale=clamp(Math.min(1,(vh-103)/285,(vw-190)/440),.77,1);
+  const scale=clamp(Math.min(1.16,vh/870,(vw-225)/550),.52,1.16);
   root.style.setProperty('--dr94-scale',scale.toFixed(4));
   root.style.setProperty('--dr90-scale',scale.toFixed(4));
-  root.style.setProperty('--dr94-dock-width',(440*scale).toFixed(2)+'px');
-  root.style.setProperty('--dr94-dock-height',(285*scale).toFixed(2)+'px');
-  root.style.setProperty('--dr94-center-offset',(45*scale).toFixed(2)+'px');
-  root.style.setProperty('--dr94-bottom-offset',(38*scale).toFixed(2)+'px');
+  root.style.setProperty('--dr94-dock-width',(550*scale).toFixed(2)+'px');
+  root.style.setProperty('--dr94-dock-height',(470*scale).toFixed(2)+'px');
+  root.style.setProperty('--dr94-center-offset',(95*scale).toFixed(2)+'px');
+  root.style.setProperty('--dr94-bottom-offset',(78*scale).toFixed(2)+'px');
  };
  const render=(fractionalAngle=0)=>{
   for(let i=0;i<nodes.length;i++){
@@ -136,7 +136,7 @@ export function installSemiRadialDock({
    const visible=delta>=-1&&delta<=2;
    const ghost=delta===-2||delta===3;
    const angle=visible?RADIAL_GEOMETRY.slotAngles[delta+1]+fractionalAngle:
-    delta===-2?-104+fractionalAngle:delta===3?14+fractionalAngle:(delta<0?-120:33);
+    delta===-2?-112+fractionalAngle:delta===3?18+fractionalAngle:(delta<0?-124:40);
    node.dataset.step=visible||ghost?String(delta):'off';
    node.style.transform='rotate('+angle.toFixed(2)+'deg)';
    item.style.transform='rotate('+(-angle).toFixed(2)+'deg)';
