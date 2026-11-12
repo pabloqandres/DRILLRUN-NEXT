@@ -1,4 +1,4 @@
-// V97 · Six-sector exact polar wheel with delicate rim-only infinity traces.
+// V98 · Six-sector polar wheel: continuous bubble base and movement-clean HUD.
 // Navigation handlers remain the original game's source of truth.
 import {icon} from './icons.mjs';
 
@@ -124,7 +124,25 @@ export function installSemiRadialDock({
    '<span class="dr90Label">'+item.label+'</span></button></div>').join('');
  root.innerHTML='<div class="dr90Stage">'+wheelSvg()+
   '<div class="dr90Choices" role="group" aria-label="Accesos de la faena">'+orbital+'</div>'+
-  '<div class="dr94Base" aria-hidden="true"></div>'+
+  // One wavy, two-lobe glass shell behind BOTH controls. Never a solid rectangle.
+  '<svg class="dr94Base dr98BubbleBase" viewBox="0 0 550 470" fill="none" aria-hidden="true">'+
+   '<defs>'+
+    '<linearGradient id="dr98BubbleFill" x1="0" y1="0" x2="1" y2="1">'+
+     '<stop stop-color="#154a62" stop-opacity=".89"/>'+
+     '<stop offset=".49" stop-color="#092b44" stop-opacity=".87"/>'+
+     '<stop offset="1" stop-color="#061b30" stop-opacity=".92"/>'+
+    '</linearGradient>'+
+    '<linearGradient id="dr98BubbleEdge" x1="0" y1="0" x2="1" y2="1">'+
+     '<stop stop-color="#d4f7ff"/>'+
+     '<stop offset=".43" stop-color="#73d2e5"/>'+
+     '<stop offset=".76" stop-color="#efc87f"/>'+
+     '<stop offset="1" stop-color="#fff0b2"/>'+
+    '</linearGradient>'+
+   '</defs>'+
+   '<path class="dr98BubbleGlow" d="M332 345 C303 345 286 366 286 392 C286 418 306 439 332 439 C348 439 361 432 371 424 C392 443 414 450 455 450 C488 450 514 425 514 392 C514 358 488 334 455 334 C416 334 390 350 371 360 C360 352 347 345 332 345 Z"/>'+
+   '<path class="dr98BubbleShell" d="M332 345 C303 345 286 366 286 392 C286 418 306 439 332 439 C348 439 361 432 371 424 C392 443 414 450 455 450 C488 450 514 425 514 392 C514 358 488 334 455 334 C416 334 390 350 371 360 C360 352 347 345 332 345 Z"/>'+
+   '<path class="dr98BubbleInset" d="M332 352 C309 352 293 369 293 392 C293 415 311 432 332 432 C350 432 362 422 371 416 C394 435 417 442 455 442 C484 442 507 419 507 392 C507 363 484 341 455 341 C416 341 393 357 371 368 C360 358 348 352 332 352 Z"/>'+
+  '</svg>'+
   '<button class="dr90Hub" type="button" aria-expanded="false" aria-label="Abrir menú de la faena" title="Menú de la faena">'+
   hubSvg+'<span class="dr90HubNotch" aria-hidden="true"></span></button></div>';
  anchor.insertAdjacentElement('afterend',root);
@@ -307,6 +325,45 @@ export function installSemiRadialDock({
    event.preventDefault();select(nodes[centerIndex].querySelector('button'));
   }
  };
+ // V98 movement-clean HUD (presentation only). Read existing input surfaces;
+ // do not write game movement, economy, save or mission progression state.
+ const joystick=document.getElementById('joystick');
+ const objective=document.getElementById('objective');
+ let travelPointer=null;
+ const inGameplay=()=>document.body?.dataset?.phase==='play'&&
+  !['phoneOpen','builderOpen','faenaOpen','placing'].some(x=>document.body.classList.contains(x));
+ const minimizeDuringMovement=()=>{
+  if(!inGameplay())return;
+  if(open)setOpen(false,true);
+  if(objective&&!objective.classList.contains('hidden'))objective.classList.add('collapsed');
+ };
+ const movementKey=event=>{
+  const key=String(event.key||'').toLowerCase();
+  if(!['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(key))return;
+  if(event.altKey||event.ctrlKey||event.metaKey||event.isComposing)return;
+  if(event.target?.isContentEditable||
+    event.target?.closest?.('input,textarea,select,[contenteditable],#phone,#modal,#builderPanel,#faenaPanel'))return;
+  minimizeDuringMovement();
+ };
+ const joystickIntent=event=>{
+  if(travelPointer!==event.pointerId||!inGameplay()||!joystick)return;
+  const rect=joystick.getBoundingClientRect();
+  if(!rect.width||!rect.height)return;
+  const dx=event.clientX-rect.left-rect.width/2;
+  const dy=event.clientY-rect.top-rect.height/2;
+  if(Math.hypot(dx,dy)>Math.max(6,rect.width*.065))minimizeDuringMovement();
+ };
+ const joyDown=event=>{travelPointer=event.pointerId;joystickIntent(event);};
+ const joyMove=event=>{if(event.pointerId===travelPointer)joystickIntent(event);};
+ const joyEnd=event=>{if(event.pointerId===travelPointer)travelPointer=null;};
+ if(joystick){
+  joystick.addEventListener('pointerdown',joyDown,{passive:true});
+  joystick.addEventListener('pointermove',joyMove,{passive:true});
+  joystick.addEventListener('pointerup',joyEnd);
+  joystick.addEventListener('pointercancel',joyEnd);
+  joystick.addEventListener('lostpointercapture',joyEnd);
+ }
+ document.addEventListener('keydown',movementKey,true);
  document.addEventListener('pointerdown',outside);
  document.addEventListener('keydown',keydown);
  const watch=new MutationObserver(()=>{
@@ -329,6 +386,14 @@ export function installSemiRadialDock({
    if(!ro)window.removeEventListener('resize',resize);
    document.removeEventListener('pointerdown',outside);
    document.removeEventListener('keydown',keydown);
+   document.removeEventListener('keydown',movementKey,true);
+   if(joystick){
+    joystick.removeEventListener('pointerdown',joyDown);
+    joystick.removeEventListener('pointermove',joyMove);
+    joystick.removeEventListener('pointerup',joyEnd);
+    joystick.removeEventListener('pointercancel',joyEnd);
+    joystick.removeEventListener('lostpointercapture',joyEnd);
+   }
    root.remove();
   }
  };
