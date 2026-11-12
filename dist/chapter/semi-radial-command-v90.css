@@ -807,3 +807,97 @@ body:not([data-phase="play"]) #hud #semiRadialDock{display:none!important}
  #hud #objective:not(.hidden){transition:none!important}
 }
 /* End V98. */
+
+/* V99 · PUMA burgundy 3D contextual action. The button is SOLID regardless
+   of availability; only lighting and intensity signal when it can be used.
+   Never changes its size, position, hit target or disabled behavior. */
+#hud #handButton{
+ opacity:1!important;
+ background:radial-gradient(ellipse at 34% 18%,
+  #9e4056 0%,#73223b 28%,#51162c 65%,#2b101e 100%)!important;
+ border:2px solid #b66b79!important;
+ color:#fbe9d9!important;
+ box-shadow:
+  inset 0 2px 3px #ffdee082,
+  inset 0 -8px 13px #190713e0,
+  0 0 0 3px #180e1af0,
+  0 0 0 5px #ae687073,
+  0 5px 13px #0009,
+  0 0 9px #9c405c42!important;
+ filter:none!important;
+ transition:background .22s ease,box-shadow .22s ease,border-color .22s ease!important;
+}
+#hud #handButton::before{
+ inset:5px!important;border:1.6px solid #f4a2a5ba!important;
+ box-shadow:inset 0 1px #ffe8df70,0 0 5px #d8758170!important;
+}
+#hud #handButton svg,
+#hud #handButton .uiIcon{
+ color:#fff0e0!important;
+ stroke:#fff0e0!important;
+ fill:none!important;
+ stroke-width:1.9!important;
+ filter:drop-shadow(0 1px 2px #220911cc)!important;
+}
+/* Inactive: dark burgundy, readable and always above the dual bubble.
+   Disabled is still controlled solely by the original game's renderHUD. */
+#hud #handButton:disabled,
+#hud #handButton.blocked{
+ opacity:1!important;
+ border-color:#7f4857!important;
+ background:radial-gradient(ellipse at 33% 18%,
+  #743649 0%,#501e32 34%,#351728 67%,#1d111f 100%)!important;
+ box-shadow:
+  inset 0 2px 2px #eeb5bf42,
+  inset 0 -8px 11px #150a16d2,
+  0 0 0 3px #120f19f2,
+  0 0 0 5px #8b53635c,
+  0 5px 13px #0008!important;
+ filter:none!important;
+}
+#hud #handButton:disabled::before,
+#hud #handButton.blocked::before{
+ border-color:#b77f8a77!important;
+ box-shadow:inset 0 1px #f8c3c343!important;
+}
+#hud #handButton:disabled svg,
+#hud #handButton:disabled .uiIcon,
+#hud #handButton.blocked svg,
+#hud #handButton.blocked .uiIcon{
+ color:#d1a7b1!important;stroke:#d1a7b1!important;
+ opacity:.79!important;filter:none!important;
+}
+/* Available: prominent, dimensional deep PUMA red, focused light and
+   controlled pulse. No external logo or competing brand appears. */
+#hud #handButton.available:not(:disabled){
+ opacity:1!important;
+ border-color:#ffd0c2!important;
+ background:radial-gradient(ellipse at 33% 18%,
+  #e46571 0%,#b72948 28%,#8d1735 57%,#480f28 89%,#330d20 100%)!important;
+ box-shadow:
+  inset 0 3px 3px #fff4dc96,
+  inset 0 -9px 12px #310919e8,
+  0 0 0 3px #2c0b1eeb,
+  0 0 0 5px #f1aeafbd,
+  0 7px 15px #000a,
+  0 0 20px #e346669e!important;
+ filter:none!important;
+}
+#hud #handButton.available:not(:disabled)::before{
+ border-color:#ffe3c7f2!important;
+ box-shadow:inset 0 1px #fffbebae,0 0 8px #ffb9a7ad!important;
+}
+#hud #handButton.available:not(:disabled) svg,
+#hud #handButton.available:not(:disabled) .uiIcon{
+ color:#fff9ea!important;stroke:#fff9ea!important;opacity:1!important;
+ filter:drop-shadow(0 0 5px #ffd8bbbf)!important;
+}
+#hud #handButton.available:not(:disabled)::after{
+ border-color:#f88e9e9e!important;
+ box-shadow:0 0 8px #e93d6080!important;
+}
+@media(prefers-reduced-motion:reduce){
+ #hud #handButton{transition:none!important}
+ #hud #handButton.available::after{animation:none!important}
+}
+/* End V99. */
