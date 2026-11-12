@@ -18,6 +18,9 @@ function gestureHarness(){
   }
  });
  const root=make('root'),stage=make('stage'),hub=make('hub'),choices=make('choices');
+ const joystick=make('joystick'),objective=make('objective'),doc=make('document');
+ joystick.getBoundingClientRect=()=>({left:0,top:0,width:100,height:100});
+ objective.classList={set:new Set(),add(k){this.set.add(k);},remove(k){this.set.delete(k);},contains(k){return this.set.has(k);}};
  root.classList={set:new Set(),add(k){this.set.add(k);},
   remove(k){this.set.delete(k);},
   toggle(k,v){v?this.set.add(k):this.set.delete(k);},
@@ -46,18 +49,17 @@ function gestureHarness(){
  const old={window:globalThis.window,document:globalThis.document,
   ResizeObserver:globalThis.ResizeObserver,MutationObserver:globalThis.MutationObserver};
  globalThis.window=world;
- globalThis.document={
-  getElementById:()=>null,createElement:()=>root,
-  body:{classList:{contains:()=>false}},
-  addEventListener(){},removeEventListener(){}
- };
+ doc.getElementById=id=>id==='joystick'?joystick:id==='objective'?objective:null;
+ doc.createElement=()=>root;
+ doc.body={dataset:{phase:'play'},classList:{set:new Set(),contains(k){return this.set.has(k);},add(k){this.set.add(k);},remove(k){this.set.delete(k);}}};
+ globalThis.document=doc;
  globalThis.ResizeObserver=class{observe(){}disconnect(){}};
  globalThis.MutationObserver=class{observe(){}disconnect(){}};
  const chosen=[],sounds=[];
  const api=installSemiRadialDock({anchor,onNavigate:id=>{chosen.push(id);return true;},
   onFeedback:id=>sounds.push(id)});
  const restore=()=>{api.destroy();Object.assign(globalThis,old);};
- return {root,stage,hub,choices,orbits,sector,world,chosen,sounds,api,restore};
+ return {root,stage,hub,choices,orbits,sector,world,document:doc,joystick,objective,chosen,sounds,api,restore};
 }
 
 test('V94: finger drag follows actual polar angle, snaps without inertia',()=>{
@@ -161,3 +163,48 @@ test('V94: responsive safe margins, absence of arrows, event handler cleanup',()
  assert.equal(x.world.handlers.pointermove.length,0);
  assert.equal(x.world.handlers.pointerup.length,0);
 });
+
+test('V98: joystick travel retracts the mission and closes the radial without blocking input',()=>{
+ const x=gestureHarness();
+ try{
+  x.hub.emit('click');
+  assert.equal(x.api.isOpen,true);
+  x.joystick.emit('pointerdown',{clientX:50,clientY:50});
+  assert.equal(x.api.isOpen,true,'touch at neutral joystick center is not travel');
+  assert.equal(x.objective.classList.contains('collapsed'),false);
+  x.joystick.emit('pointermove',{clientX:72,clientY:50});
+  assert.equal(x.api.isOpen,false,'first actual travel closes radial');
+  assert.equal(x.objective.classList.contains('collapsed'),true,'mission accordion auto-collapses');
+  x.joystick.emit('pointerup',{clientX:72,clientY:50});
+  // Stopping must not make either panel reopen automatically.
+  assert.equal(x.api.isOpen,false);
+  assert.equal(x.objective.classList.contains('collapsed'),true);
+ }finally{x.restore();}
+});
+
+test('V98: keyboard travel cleans UI, but typing and foreground panels do not',()=>{
+ const x=gestureHarness();
+ try{
+  x.hub.emit('click');
+  x.document.emit('keydown',{key:'w',target:{closest:()=>true}});
+  assert.equal(x.api.isOpen,true,'typing is not a gameplay movement');
+  assert.equal(x.objective.classList.contains('collapsed'),false);
+  x.document.emit('keydown',{key:'ArrowUp',target:x.document});
+  assert.equal(x.api.isOpen,false);
+  assert.equal(x.objective.classList.contains('collapsed'),true);
+  x.objective.classList.remove('collapsed');
+  x.hub.emit('click');
+  x.document.body.classList.add('phoneOpen');
+  x.document.emit('keydown',{key:'w'});
+  assert.equal(x.objective.classList.contains('collapsed'),false,'no reaction inside phone');
+ }finally{x.restore();}
+});
+
+test('V98: movement listeners are cleaned up when radial is destroyed',()=>{
+ const x=gestureHarness();
+ x.restore();
+ for(const name of ['pointerdown','pointermove','pointerup','pointercancel','lostpointercapture'])
+  assert.equal((x.joystick.handlers[name]||[]).length,0,name);
+ assert.equal((x.document.handlers.keydown||[]).length,0);
+});
+
