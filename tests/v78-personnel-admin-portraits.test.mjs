@@ -14,15 +14,15 @@ test('V78 first 3 Administration candidates have distinct illustration identifie
  for(const style of ['camila','matias','sofia'])assert(html.includes('pvArtPortrait--'+style));
  assert.equal((html.match(/pvArtPortrait--card/g)||[]).length,3);
  assert(html.includes('pvArtPortrait--detail'));
- assert(html.includes('pvEmptyPortrait--team'),'existing HSEC employee remains placeholder');
+ assert(html.includes('pvArtPortrait--team'),'HSEC employee uses already present original illustration');
  assert(html.includes('data-pv-hire'));
 });
-test('V78 other 18 candidates remain placeholders with all attributes and costs',()=>{
+test('V88 all other 18 candidates use existing original role-specific SVG portraits',()=>{
  const s=state();
  for(const role of ['driller','helper','hsec','tecnicoDrillco','m5-gate-security','m5-warehouse-tech']){
   const first=candidatesForRole(role)[0],html=renderPersonnelPremium(s,role,first.id,icon);
-  assert.equal((html.match(/pvEmptyPortrait--card/g)||[]).length,3);
-  assert(!html.includes('pvArtPortrait--card'));
+  assert.equal((html.match(/pvArtPortrait--card/g)||[]).length,3);
+  for(const candidate of candidatesForRole(role))assert(html.includes(candidate.portrait),candidate.id);
   assert.equal((html.match(/class="pvCandidateSkill"/g)||[]).length,9);
  }
 });

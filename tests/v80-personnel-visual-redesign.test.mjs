@@ -15,7 +15,7 @@ test('V80: real per-person portrait frames keep intrinsic aspect-ratio',()=>{
   assert(!/<text\b|DRILLCO|PUMA|®|logo/i.test(svg),id);
  }
  const html=renderPersonnelPremium(setup(),'admin','adm-camila-rojas',ico);
- assert.equal((html.match(/class="pvPortraitImage"/g)||[]).length,4);
+ assert.equal((html.match(/class="pvPortraitImage"/g)||[]).length,5);
  assert(html.includes('src="./assets/npc-portraits-v80/adm-camila-rojas.svg"'));
  assert(html.includes('src="./assets/npc-portraits-v80/adm-matias-torres.svg"'));
  assert(html.includes('src="./assets/npc-portraits-v80/adm-sofia-ibarra.svg"'));

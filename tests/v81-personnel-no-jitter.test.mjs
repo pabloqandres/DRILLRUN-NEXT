@@ -21,7 +21,7 @@ test('V81: pictograms and leading role planilla are real markup for all candidat
  assert(a.includes('data-pv-detail-tab="historial"'));
  assert(a.includes('loading="eager"'));
  assert(a.includes('width="230" height="260"'));
- assert.equal((a.match(/class="pvPortraitImage"/g)||[]).length,4);
+ assert.equal((a.match(/class="pvPortraitImage"/g)||[]).length,5);
  assert.equal(JSON.stringify(s),snapshot);
 });
 test('V81: all seven roles render pictograms without changing any data',()=>{

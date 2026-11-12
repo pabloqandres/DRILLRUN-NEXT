@@ -528,3 +528,9 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Unificada la identidad en selección del avatar, puente del minijuego, favicon y manifiesto PWA.
 - Retirada del código la imagen WebP metálica incrustada V64 (no solo oculta), CSS simple V87 final.
 - Pruebas focales y regresiones de inicio V86.1; no se modifica `game.mjs`, Auth, Cloud Save, misiones o economía.
+
+## 2026-11-12 — V88 · Arco y Personal: corrección visible en PC
+- Arco con tres secciones, una sola línea perimetral, iconos y textos alineados al sector, botón principal separado.
+- Navegación PC visible mediante flechas y leyenda «10 secciones», sin perder soporte táctil ni sonido.
+- Personal muestra retratos originales individuales para 21 candidatos, no placeholders en 18; mantiene datos y permisos originales. CSS de PC + Android con pie no cortado.
+- Regresiones focales y CI; no alterar Cloud Save ni misiones.
