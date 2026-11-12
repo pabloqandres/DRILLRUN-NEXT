@@ -144,8 +144,12 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon,view='recr
  }).join('');
  // V100: four mission-relevant shortcuts; all other roles remain accessible.
  const preferred=['admin','driller','tecnicoDrillco','hsec','helper','m5-gate-security','m5-warehouse-tech'];
- const primaryIds=[...new Set([required,role.id,...preferred])]
-  .filter(id=>PERSONNEL_GROUPS.some(g=>g.id===id)).slice(0,4);
+ const primaryIds=preferred.filter(id=>PERSONNEL_GROUPS.some(g=>g.id===id)).slice(0,4);
+ // Keep the mockup's readable role order; bring any mission-required or
+ // manually selected role into the four shortcuts without hiding its content.
+ for(const id of [required,role.id]){
+  if(!primaryIds.includes(id)){primaryIds.pop();primaryIds.unshift(id);}
+ }
  const primaryRoles=PERSONNEL_GROUPS.filter(g=>primaryIds.includes(g.id))
   .sort((a,b)=>primaryIds.indexOf(a.id)-primaryIds.indexOf(b.id));
  const moreRoles=PERSONNEL_GROUPS.filter(g=>!primaryIds.includes(g.id));
@@ -206,9 +210,9 @@ export function renderPersonnelPremium(s,selectedRole,selectedId,icon,view='recr
   <div class="pvTeamCount"><span>${icon('dock-users')}</span><span>Equipo activo<strong>${countTxt}</strong></span></div>
   <div class="pvTeamViewport"><div class="pvTeamList" aria-label="Personal contratado y plazas" tabindex="0">${slots}</div></div>
   <div class="pvTeamPager" role="group" aria-label="Desplazar plazas del equipo">
-   <button type="button" data-pv-team-scroll="-1" aria-label="Tres plazas anteriores">‹</button>
+   <button type="button" data-pv-team-scroll="-1" aria-label="Tres plazas anteriores" disabled>‹</button>
    <span class="pvTeamPage" aria-live="polite">1 / ${Math.max(1,Math.ceil(slotCount/3))}</span>
-   <button type="button" data-pv-team-scroll="1" aria-label="Tres plazas siguientes">›</button>
+   <button type="button" data-pv-team-scroll="1" aria-label="Tres plazas siguientes" ${slotCount<=3?'disabled':''}>›</button>
   </div>
   <button class="pvTeamManage" data-pv-team-open type="button" aria-label="Gestionar equipo" title="Gestionar equipo">${icon('dock-users')}<span>Gestionar</span></button>
  </footer>
