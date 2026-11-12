@@ -1,0 +1,259 @@
+/* V84 — True segmented shallow semi-radial.  A correction to V83.
+   Continuous wedge geometry, not floating rounded cards.
+   All overrides intentionally scoped to the game dock only. */
+
+#hud #semiRadialDock{
+ width:min(360px,calc(100vw - 230px))!important;
+ height:115px!important;
+ bottom:max(6px,env(safe-area-inset-bottom,0px))!important;
+}
+#hud #semiRadialDock .drSemiFan{
+ inset:0 0 11px!important;
+ overflow:visible!important;
+}
+#hud #semiRadialDock .drSemiArc{
+ width:320px!important;
+ height:82px!important;
+ bottom:6px!important;
+ opacity:0!important;
+ background:none!important;
+ box-shadow:none!important;
+ border:0!important;
+ border-top:1.6px solid transparent!important;
+ border-image:none!important;
+ pointer-events:none!important;
+ transform:translateX(-50%) scale(.92,.8)!important;
+ transition:opacity .21s ease,transform .29s cubic-bezier(.22,.87,.2,1)!important;
+}
+#hud #semiRadialDock.is-open .drSemiArc{
+ opacity:.8!important;
+ border-top:1.6px solid #63dcf0b9!important;
+ border-radius:55% 55% 0 0 / 100% 100% 0 0!important;
+ transform:translateX(-50%) scale(1,.83)!important;
+ filter:drop-shadow(0 0 5px #34def589);
+}
+#hud #semiRadialDock .drSemiItem{
+ --semi-x:0px;--semi-y:0px;--semi-scale:.62;
+ display:flex!important;
+ position:absolute!important;
+ left:50%!important;bottom:0!important;
+ width:120px!important;height:94px!important;
+ min-height:0!important;
+ padding:18px 14px 13px!important;
+ gap:3px!important;
+ border:0!important;
+ border-radius:0!important;
+ background:none!important;
+ box-shadow:none!important;
+ overflow:visible!important;
+ color:#eaf8fe!important;
+ isolation:isolate!important;
+ transform:translate3d(calc(-50% + var(--semi-x)),var(--semi-y),0) scale(var(--semi-scale))!important;
+ transition:transform .32s cubic-bezier(.19,.83,.22,1),
+            opacity .24s ease,filter .32s ease,
+            visibility .23s ease!important;
+}
+#hud #semiRadialDock .drSemiItem::before{display:none!important}
+#hud #semiRadialDock .drSemiItem::after{display:none!important}
+#hud #semiRadialDock .drSemiItem .drSemiWedge{
+ position:absolute!important;
+ inset:0!important;
+ display:block!important;
+ width:100%!important;
+ height:100%!important;
+ z-index:0!important;
+ overflow:visible!important;
+ pointer-events:none!important;
+ filter:drop-shadow(0 4px 6px #000c)
+        drop-shadow(0 0 3px #37cee77b)!important;
+ transition:filter .24s ease!important;
+}
+#hud #semiRadialDock .drSemiItem .drSemiShape{
+ fill:#0b2334ee;
+ stroke:#45cdec;
+ stroke-width:2.4px;
+ stroke-linecap:round;
+ stroke-linejoin:round;
+ vector-effect:non-scaling-stroke;
+}
+#hud #semiRadialDock .drSemiItem .drSemiShapeCenter{display:none}
+#hud #semiRadialDock .drSemiItem[data-step="0"] .drSemiShapeCenter{display:block}
+#hud #semiRadialDock .drSemiItem[data-step="0"] .drSemiShapeSide{display:none}
+#hud #semiRadialDock .drSemiItem[data-step="1"] .drSemiWedge,
+#hud #semiRadialDock .drSemiItem[data-step="2"] .drSemiWedge{
+ transform:scaleX(-1)!important;
+}
+#hud #semiRadialDock .drSemiItem[data-step="0"] .drSemiShape{
+ fill:#422c13;
+ stroke:#ffd263;
+ stroke-width:3.2px;
+}
+#hud #semiRadialDock .drSemiItem[data-step="0"] .drSemiWedge{
+ filter:drop-shadow(0 3px 5px #0009)
+        drop-shadow(0 0 7px #ffbb3abb)
+        drop-shadow(0 0 2px #ffe17fc9)!important;
+}
+#hud #semiRadialDock .drSemiItem .drSemiGlyph{
+ z-index:2!important;
+ display:grid!important;
+ place-items:center!important;
+ flex:0 0 33px!important;
+ width:33px!important;
+ height:33px!important;
+ margin:1px 0 0!important;
+ color:#edfaff!important;
+ pointer-events:none!important;
+}
+#hud #semiRadialDock .drSemiItem .drSemiGlyph .uiIcon{
+ width:30px!important;height:30px!important;
+ color:inherit!important;
+ stroke-width:2.5!important;
+ filter:drop-shadow(0 0 3px #69e4fd72)!important;
+}
+#hud #semiRadialDock .drSemiItem .drSemiLabel{
+ z-index:2!important;
+ display:block!important;
+ position:relative!important;
+ width:100%!important;
+ max-width:100%!important;
+ padding:0 2px!important;
+ margin:0!important;
+ color:#f6faff!important;
+ font-size:11px!important;
+ font-weight:950!important;
+ line-height:1.05!important;
+ text-shadow:0 2px 5px #00101c;
+ text-align:center!important;
+ letter-spacing:-.03em!important;
+ pointer-events:none!important;
+}
+#hud #semiRadialDock.is-open .drSemiItem[data-step="-1"],
+#hud #semiRadialDock.is-open .drSemiItem[data-step="1"]{
+ --semi-y:-18px!important;
+ --semi-scale:.96!important;
+ opacity:1!important;visibility:visible!important;
+ filter:none!important;
+ border:0!important;background:none!important;box-shadow:none!important;
+}
+#hud #semiRadialDock.is-open .drSemiItem[data-step="-1"]{--semi-x:-96px!important}
+#hud #semiRadialDock.is-open .drSemiItem[data-step="1"]{--semi-x:96px!important}
+#hud #semiRadialDock.is-open .drSemiItem[data-step="0"]{
+ --semi-x:0px!important;
+ --semi-y:-44px!important;
+ --semi-scale:1!important;
+ opacity:1!important;visibility:visible!important;
+ filter:none!important;
+ border:0!important;background:none!important;box-shadow:none!important;
+ z-index:3!important;
+}
+#hud #semiRadialDock .drSemiItem[data-step="0"] .drSemiGlyph{color:#ffdc85!important}
+#hud #semiRadialDock.is-open .drSemiItem[data-step="-2"],
+#hud #semiRadialDock.is-open .drSemiItem[data-step="2"]{
+ --semi-y:-7px!important;--semi-scale:.72!important;
+ opacity:.27!important;filter:blur(1.5px)!important;
+ visibility:visible!important;
+ border:0!important;
+ background:none!important;
+ box-shadow:none!important;
+ pointer-events:auto!important;
+ mask-image:radial-gradient(ellipse 75% 85% at 50% 46%,#000 15%,transparent 89%)!important;
+ -webkit-mask-image:radial-gradient(ellipse 75% 85% at 50% 46%,#000 15%,transparent 89%)!important;
+}
+#hud #semiRadialDock.is-open .drSemiItem[data-step="-2"]{--semi-x:-176px!important}
+#hud #semiRadialDock.is-open .drSemiItem[data-step="2"]{--semi-x:176px!important}
+#hud #semiRadialDock.is-open .drSemiItem[data-step="-2"] .drSemiWedge,
+#hud #semiRadialDock.is-open .drSemiItem[data-step="2"] .drSemiWedge{
+ filter:drop-shadow(0 0 1px #1fdff677)!important;
+}
+#hud #semiRadialDock .drSemiTrigger{
+ bottom:0!important;left:50%!important;
+ width:53px!important;height:53px!important;min-height:53px!important;
+ border:2.7px solid #72edfd!important;
+ border-radius:50%!important;
+ background:radial-gradient(circle at 36% 28%,#255a77,#082037 74%)!important;
+ box-shadow:0 0 0 4px #09283bd8,0 0 11px #43e4f0a3,
+            0 5px 13px #000c,inset 0 1px #d8ffff77!important;
+ z-index:6!important;
+}
+#hud #semiRadialDock .drSemiTrigger .drSemiExcavator{
+ display:block!important;
+ width:37px!important;height:36px!important;
+ color:#ffcf63!important;
+ filter:drop-shadow(0 0 4px #e5ad488c)!important;
+ pointer-events:none!important;
+}
+#hud #semiRadialDock .drSemiTriggerMark{
+ color:#76f0ff!important;
+ font-size:16px!important;
+ top:-3px!important;right:-2px!important;
+}
+#hud #semiRadialDock.is-open .drSemiTrigger{
+ border-color:#ffdc6f!important;
+ box-shadow:0 0 0 3px #082c42d9,0 0 13px #f4ba519e,0 3px 12px #000c!important;
+}
+#hud #semiRadialDock .drSemiProgress{display:none!important}
+/* Compact landscape scaling: low rise, broad segments, no rectangular badges. */
+@media(max-height:520px),(max-width:900px){
+ #hud #semiRadialDock{
+  width:min(339px,calc(100vw - 200px))!important;
+  height:105px!important;
+  bottom:max(3px,env(safe-area-inset-bottom,0px))!important;
+ }
+ #hud #semiRadialDock .drSemiFan{inset:0 0 9px!important}
+ #hud #semiRadialDock .drSemiItem{
+  width:108px!important;height:85px!important;
+  padding:16px 11px 10px!important;
+  gap:2px!important;
+ }
+ #hud #semiRadialDock .drSemiItem .drSemiGlyph{
+  width:27px!important;height:27px!important;flex-basis:27px!important;
+ }
+ #hud #semiRadialDock .drSemiItem .drSemiGlyph .uiIcon{
+  width:26px!important;height:26px!important;
+ }
+ #hud #semiRadialDock .drSemiItem .drSemiLabel{
+  font-size:9px!important;line-height:1.03!important;
+ }
+ #hud #semiRadialDock.is-open .drSemiItem[data-step="-1"]{--semi-x:-85px!important}
+ #hud #semiRadialDock.is-open .drSemiItem[data-step="1"]{--semi-x:85px!important}
+ #hud #semiRadialDock.is-open .drSemiItem[data-step="-2"]{--semi-x:-151px!important}
+ #hud #semiRadialDock.is-open .drSemiItem[data-step="2"]{--semi-x:151px!important}
+ #hud #semiRadialDock.is-open .drSemiItem[data-step="0"]{--semi-y:-41px!important}
+ #hud #semiRadialDock.is-open .drSemiItem[data-step="-1"],
+ #hud #semiRadialDock.is-open .drSemiItem[data-step="1"]{--semi-y:-19px!important}
+ #hud #semiRadialDock .drSemiTrigger{
+  width:49px!important;height:49px!important;min-height:49px!important;
+ }
+ #hud #semiRadialDock .drSemiTrigger .drSemiExcavator{
+  width:34px!important;height:33px!important;
+ }
+ #hud #semiRadialDock .drSemiArc{width:296px!important;height:72px!important}
+}
+@media(max-width:670px){
+ #hud #semiRadialDock{width:calc(100vw - 146px)!important;height:94px!important}
+ #hud #semiRadialDock .drSemiItem{
+  width:88px!important;height:76px!important;
+  padding:14px 8px 9px!important;
+ }
+ #hud #semiRadialDock .drSemiItem .drSemiGlyph{
+  width:24px!important;height:24px!important;flex-basis:24px!important;
+ }
+ #hud #semiRadialDock .drSemiItem .drSemiGlyph .uiIcon{
+  width:22px!important;height:22px!important;
+ }
+ #hud #semiRadialDock .drSemiItem .drSemiLabel{font-size:8px!important}
+ #hud #semiRadialDock.is-open .drSemiItem[data-step="-1"]{--semi-x:-70px!important}
+ #hud #semiRadialDock.is-open .drSemiItem[data-step="1"]{--semi-x:70px!important}
+ #hud #semiRadialDock.is-open .drSemiItem[data-step="-2"]{--semi-x:-119px!important}
+ #hud #semiRadialDock.is-open .drSemiItem[data-step="2"]{--semi-x:119px!important}
+ #hud #semiRadialDock.is-open .drSemiItem[data-step="0"]{--semi-y:-37px!important}
+ #hud #semiRadialDock .drSemiArc{width:240px!important;height:66px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ #hud #semiRadialDock .drSemiItem,
+ #hud #semiRadialDock .drSemiWedge,
+ #hud #semiRadialDock .drSemiTrigger{
+  transition:none!important;
+  animation:none!important;
+ }
+}
