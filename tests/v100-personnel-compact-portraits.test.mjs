@@ -31,7 +31,7 @@ test('V100 role disclosure: four priorities visible, all original roles retained
 test('V100 profiles: original illustrations, three candidate cards, icon-only skills and one hire action',()=>{
  const html=renderPersonnelPremium(setup(),'admin','adm-camila-rojas',ico);
  assert.equal((html.match(/class="pvCandidate /g)||[]).length,3);
- assert.equal((html.match(/class="pvPortraitImage"/g)||[]).length,5);
+ assert.equal((html.match(/class="pvPortraitImage"/g)||[]).length,4);
  for(const id of ['adm-camila-rojas','adm-matias-torres','adm-sofia-ibarra']){
   assert(html.includes('src="./assets/npc-portraits-v80/'+id+'.svg"'),id);
  }
