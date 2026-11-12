@@ -46,7 +46,9 @@ test('V84 · renders a coherent curved three-sector arc, not rectangular floatin
 });
 test('V84 · no destructive navigation/audio changes; CSS ordered after V83',()=>{
  const html=read('dist/index.html'),module=read('dist/chapter/semi-radial-dock-v83.mjs');
- assert(html.indexOf('semi-radial-geometry-v84.css')>html.indexOf('semi-radial-dock-v83.css'));
+ assert(html.includes('semi-radial-command-v90.css'));
+ assert(!html.includes('semi-radial-geometry-v84.css'));
+ assert(read('dist/chapter/game.mjs').includes('semi-radial-dock-v90.mjs'));
  assert(module.includes("const root=document.createElement('div');"));
  assert(module.includes("feedback('confirm')"));
  assert(module.includes("feedback('skill')"));
