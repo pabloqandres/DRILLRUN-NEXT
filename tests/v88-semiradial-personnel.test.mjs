@@ -56,7 +56,8 @@ test('V88 · 21 existing independent illustrated portraits now render, without s
   const html=renderPersonnelPremium(s,group.id,cards[0].id,icon);
   assert.equal((html.match(/class="pvCandidate /g)||[]).length,3,group.id);
   for(const c of cards){
-   assert(html.includes(c.portrait),'Missing existing portrait '+c.id);
+   const expected=c.role==='admin'?'./assets/npc-portraits-v80/'+c.id+'.svg':c.portrait;
+   assert(html.includes(expected),'Missing existing portrait '+c.id);
    assert(html.includes(c.name),'Missing candidate '+c.id);
   }
   assert(!html.includes('RETRATO PENDIENTE'),'Do not regress to silhouettes: '+group.id);
