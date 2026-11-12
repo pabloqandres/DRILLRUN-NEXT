@@ -188,3 +188,5 @@ _Nothing blocked._
 - **2026-11-12 · V87 marca blanca/naranja**: `chatgpt/v87-classic-white-orange-brand`. Sustituir exclusivamente acabado del logotipo DRILL RUN (inicio, carga, selector, puente, favicon). Retirar logo metálico base64 V64; preservar partida/Google/funcionalidad. CI y verificación Vercel antes de confirmar.
 
 - **2026-11-12 — V90 radial command wheel:** `chatgpt/v90-radial-command-wheel`. Reemplazo completo de V83/V88 como UI (nuevo módulo+CSS único), import compartido de `game.mjs` y enlace `dist/index.html`, sin cambios económicos. Pruebas y previsualización pendientes antes de publicar. **Finanzas V89** es una tarea separada, rama `chatgpt/v89-financial-history`, no mezclar estados ni tocar saldo.
+
+- **2026-11-12 — V91 historial financiero:** `chatgpt/v91-financial-history`. Read-model central sobre `s.ledger` + vista Centro Faena y saldo, sin pagos nuevos ni mutaciones de `state.mjs`. CI propio y QA de producción pendientes.

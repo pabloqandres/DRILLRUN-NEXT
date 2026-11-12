@@ -540,3 +540,9 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Botones orbitan realmente en curva y mantienen sus íconos/textos derechos por contrarrotación. 3 destinos definidos + 2 difusos, flechas y sonido preservados, contador eliminado.
 - Eliminados los cuatro CSS radiales anteriores de la carga; un CSS V90 único. Sólo cambió el import correspondiente en `game.mjs`.
 - CI V90 y regresiones de Google/inicio, Personal y Centro de Faena; QA visual Android/PC posterior.
+
+## 2026-11-12 — V91 · Historial financiero
+- Consulta pura de movimientos `ledger`, con fecha, concepto, tipo e importe; ingresos, gastos, transferencias y eventos sin cargo. Totales de solo movimientos guardados, caja y banco reales. No se reescriben saldos, payouts ni guardados.
+- Centro de Faena añade acceso «Historial financiero»; tocar el saldo HUD abre la consulta. Filtros Todos, Ingresos, Gastos, Transferencias, Eventos.
+- Historial conservado limitado a 100 registros y posibles operaciones antiguas faltantes, informados dentro de la pantalla. Módulo exportable para futuras apps.
+- Tests de pureza, filtros, clasificación y arranque. Producción sujeta a verificación.
