@@ -1,0 +1,405 @@
+/* V82 · Centro de Faena: premium, cohesive operational dashboard.
+   Scoped ONLY to the overview route, preserving original M3/M4/M5 controls.
+   8 photographic WebP background assets; 14 original brandless icon SVG assets.
+   Mobile landscape is the primary layout. */
+#faenaCenter .faenaDialog.fcOverviewDialog{
+ width:min(1490px,calc(100vw - 18px))!important;
+ height:min(870px,calc(100dvh - 16px))!important;
+ min-height:0!important;
+ max-width:none!important;
+ overflow:hidden!important;
+ display:grid!important;
+ grid-template-rows:clamp(59px,9.8dvh,88px) minmax(0,1fr)!important;
+ border:2px solid #42c0e9!important;
+ border-radius:20px!important;
+ background:linear-gradient(157deg,#0c2b43,#051829 73%)!important;
+ box-shadow:0 25px 100px #000d,0 0 27px #1582c75c,
+ inset 0 1px #d5f7ff6b!important;
+}
+#faenaCenter .fcOverviewDialog .faenaHeader{
+ min-width:0!important;display:flex!important;
+ gap:clamp(8px,1.7vw,25px)!important;
+ padding:clamp(7px,1vw,14px) clamp(11px,1.35vw,21px)!important;
+ background:
+ linear-gradient(95deg,#071c33ed,#0b3558e5 56%,#071c34eb),
+ url('../assets/faena-v82/production.webp') center 35%/cover!important;
+ border-bottom:2px solid #2dc5e2!important;
+ box-sizing:border-box!important;
+}
+#faenaCenter .fcHeaderIdentity{display:flex;gap:clamp(7px,1vw,15px);
+ align-items:center;min-width:0;flex:1 1 auto;overflow:hidden}
+#faenaCenter .fcHeaderEmblem{
+ display:grid;place-items:center;flex:0 0 clamp(41px,4vw,63px);
+ width:clamp(41px,4vw,63px);height:clamp(41px,4vw,63px);
+ filter:drop-shadow(0 0 7px #27dbf3b5);
+}
+#faenaCenter .fcHeaderEmblem img{display:block;width:100%;height:100%;object-fit:contain}
+#faenaCenter .fcHeaderIdentity>span:last-child{display:flex;flex-direction:column;min-width:0;gap:1px}
+#faenaCenter .fcHeaderIdentity small{
+ font-size:clamp(8px,.83vw,12px)!important;
+ line-height:1!important;letter-spacing:.15em!important;
+ color:#b4dfed!important;font-weight:850!important;
+}
+#faenaCenter .fcHeaderIdentity h2{
+ font-size:clamp(20px,2.65vw,36px)!important;
+ line-height:1.05!important;font-weight:950!important;
+ letter-spacing:-.025em!important;white-space:nowrap;
+ overflow:hidden;text-overflow:ellipsis;
+ text-shadow:0 3px 10px #000b;
+}
+#faenaCenter .fcOverviewDialog .faenaHeaderActions{
+ min-width:0;display:flex;align-items:center;gap:clamp(5px,.7vw,10px)!important;
+ flex:0 0 auto;
+}
+#faenaCenter .fcHeaderCash,#faenaCenter .fcHeaderEnergy{
+ display:flex;align-items:center;justify-content:center;
+ gap:clamp(5px,.7vw,10px);min-width:0;
+ padding:clamp(5px,.6vw,10px) clamp(8px,.85vw,13px);
+ border:1.5px solid #59bde8;border-radius:14px;
+ background:linear-gradient(130deg,#061f33db,#113956de);
+ box-shadow:inset 0 1px #bff7ff4b,0 2px 9px #00121e9c;
+ font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+#faenaCenter .fcHeaderCash>span{font-size:clamp(8px,.7vw,10px);color:#9ccee2}
+#faenaCenter .fcHeaderCash strong{font-size:clamp(12px,1.45vw,23px);color:#ffd34a;font-weight:950}
+#faenaCenter .fcHeaderEnergy .uiIcon{color:#2de1f3;width:clamp(13px,1.5vw,24px);height:clamp(13px,1.5vw,24px)}
+#faenaCenter .fcHeaderEnergy strong{font-size:clamp(11px,1.25vw,20px);font-weight:900;color:#d8f9ff}
+#faenaCenter .fcOverviewDialog .faenaHeader button[data-faena-close]{
+ display:grid;place-items:center;flex:0 0 clamp(38px,4vw,55px);
+ width:clamp(38px,4vw,55px);height:clamp(38px,4vw,55px);
+ padding:0!important;border-radius:13px!important;
+ border:1.5px solid #67c7e7!important;color:white;
+ background:linear-gradient(150deg,#245976,#0d2e49)!important;
+ font-size:clamp(23px,2.4vw,34px)!important;
+ box-shadow:inset 0 1px #ffffff5f,0 1px 9px #04121ca0;
+}
+#faenaCenter .fcOverviewDialog .faenaBody{
+ min-width:0!important;min-height:0!important;
+ height:100%!important;overflow:hidden!important;
+ overscroll-behavior:contain;
+}
+#faenaCenter .fcOverviewDialog .faenaContent{
+ min-width:0!important;height:100%!important;min-height:0!important;
+ padding:0!important;box-sizing:border-box!important;overflow:hidden!important;
+}
+#faenaCenter .fcHub,#faenaCenter .fcHub *{box-sizing:border-box}
+#faenaCenter .fcHub{width:100%;height:100%;min-height:0;min-width:0;overflow:hidden}
+#faenaCenter .fcHubWorkspace{
+ width:100%;height:100%;min-width:0;min-height:0;overflow:hidden;
+ display:grid;grid-template-columns:minmax(195px,25%) minmax(0,1fr);
+ gap:clamp(7px,.85vw,14px);
+ padding:clamp(8px,1vw,15px);
+ background:radial-gradient(ellipse at 46% 2%,#1a658842,transparent 65%),
+ linear-gradient(145deg,#0b263f,#061629 72%);
+}
+#faenaCenter .fcHubRail{
+ min-width:0;min-height:0;display:flex;flex-direction:column;
+ gap:clamp(7px,.76vw,11px);
+ padding-right:clamp(5px,.5vw,8px);
+ border-right:1.5px solid #2b85aa8c;
+ overflow-y:auto;overflow-x:hidden;
+ scrollbar-width:thin;scrollbar-color:#4b9db3 transparent;
+ touch-action:pan-y;
+}
+#faenaCenter .fcMission{
+ position:relative;isolation:isolate;
+ display:flex;flex-direction:column;align-items:flex-start;
+ flex:0 0 clamp(145px,22dvh,206px)!important;
+ width:100%;min-width:0;overflow:hidden!important;
+ border:2px solid #4cd1fa!important;border-radius:15px!important;
+ padding:clamp(9px,1vw,15px)!important;gap:clamp(5px,.5dvh,8px);
+ color:#f4faff!important;background:#173b5a!important;
+ text-align:left;cursor:pointer;
+ box-shadow:0 0 13px #22ade26b,inset 0 1px #f2fbff55!important;
+}
+#faenaCenter .fcMissionArt{
+ position:absolute;inset:0;z-index:-1;
+ background-image:linear-gradient(100deg,#061e35d6 3%,#071c35aa 65%,#07324c2d),
+ url('../assets/personnel-missions-v79/m3.svg');
+ background-size:cover;background-position:center;
+}
+#faenaCenter .fcMission[data-fc-stage="1"] .fcMissionArt{background-image:linear-gradient(100deg,#071f35e2,#071f35a3),url('../assets/personnel-missions-v79/m1.svg')}
+#faenaCenter .fcMission[data-fc-stage="2"] .fcMissionArt{background-image:linear-gradient(100deg,#071f35e2,#071f35a3),url('../assets/personnel-missions-v79/m2.svg')}
+#faenaCenter .fcMission[data-fc-stage="4"] .fcMissionArt{background-image:linear-gradient(100deg,#071f35e2,#071f35a3),url('../assets/personnel-missions-v79/m4.svg')}
+#faenaCenter .fcMission[data-fc-stage="5"] .fcMissionArt{background-image:linear-gradient(100deg,#071f35e2,#071f35a3),url('../assets/personnel-missions-v79/m5.svg')}
+#faenaCenter .fcMissionBadge{
+ display:inline-flex;align-items:center;min-width:0;
+ padding:3px 11px;border-radius:8px;background:#ffca39;
+ border:1px solid #ffefb5;box-shadow:0 0 12px #f4bd4e83;
+ color:#192a3e;font-weight:950;font-size:clamp(10px,1vw,15px);line-height:1.13;
+}
+#faenaCenter .fcMission>strong{
+ font-size:clamp(15px,1.6vw,23px);
+ line-height:1.1;letter-spacing:-.025em;font-weight:950;
+ text-shadow:0 2px 6px #06101bd9;
+}
+#faenaCenter .fcMission>small{
+ display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+ overflow:hidden;color:#d9eef4;font-size:clamp(10px,.93vw,14px);
+ line-height:1.28;max-width:100%;
+}
+#faenaCenter .fcMissionAction{
+ margin-top:auto;font-size:clamp(9px,.86vw,12px);font-weight:900;
+ color:#ffe4a2;
+}
+#faenaCenter .fcMissionAction span{font-size:17px;vertical-align:-1px}
+#faenaCenter .fcRailTitle{
+ color:#5ee4f4;letter-spacing:.1em;font-size:clamp(10px,1.13vw,16px);
+ font-weight:950;padding-left:3px;
+}
+#faenaCenter .fcRailMetrics{display:grid;gap:clamp(4px,.54dvh,8px)}
+#faenaCenter .fcRailMetric{
+ display:grid;align-items:center;
+ grid-template-columns:clamp(27px,2.6vw,40px) minmax(0,1fr) auto;
+ gap:clamp(4px,.44vw,9px);
+ min-width:0;min-height:clamp(32px,5.4dvh,48px);
+ padding:3px clamp(6px,.6vw,9px);
+ border:1px solid #2d8db6;border-radius:10px;
+ background:linear-gradient(100deg,#124567dc,#082641c7);
+ box-shadow:inset 0 1px #99e8f52b;
+}
+#faenaCenter .fcRailMetric .fcIcon{width:100%;height:100%;max-height:34px;object-fit:contain}
+#faenaCenter .fcRailMetric span{font-size:clamp(9px,.88vw,12px);
+ color:#d8edf5;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#faenaCenter .fcRailMetric b{
+ font-size:clamp(10px,1.1vw,16px);color:#ffe08a;
+ font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;
+}
+#faenaCenter .fcNextStep{
+ display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
+ gap:clamp(4px,.5dvh,8px);width:100%;min-width:0;flex:1 1 75px;
+ padding:clamp(8px,.8vw,13px);
+ border-radius:13px;border:1.5px solid #4ab9dd;
+ background:linear-gradient(115deg,#0d3554,#09223b);
+ color:#e8f8fd;text-align:left;cursor:pointer;
+ box-shadow:inset 0 1px #b8f0fb45,0 2px 8px #0008;
+}
+#faenaCenter .fcNextLabel{font-size:clamp(8px,.75vw,11px);font-weight:950;color:#53dce9;letter-spacing:.1em}
+#faenaCenter .fcNextStep b{font-size:clamp(10px,1.05vw,14px);
+ line-height:1.2;font-weight:900;overflow-wrap:anywhere}
+#faenaCenter .fcNextStep>span:last-child{font-size:clamp(8px,.8vw,11px);color:#ffdc79;font-weight:850}
+#faenaCenter .fcHubBoard{
+ display:flex;flex-direction:column;gap:clamp(5px,.64dvh,10px);
+ min-width:0;min-height:0;height:100%;
+ overflow-y:auto;overflow-x:hidden;
+ padding:2px clamp(4px,.55vw,9px) 6px 2px;
+ scrollbar-width:thin;scrollbar-color:#67b9d3 transparent;
+ touch-action:pan-y;overscroll-behavior:contain;
+}
+#faenaCenter .fcGroupTitle{
+ display:flex;gap:10px;align-items:baseline;justify-content:space-between;
+ padding:3px 4px 1px;border-bottom:1px solid #4aadc981;
+ color:#67e3f4;font-size:clamp(11px,1.1vw,17px);
+ letter-spacing:.07em;font-weight:950;flex:0 0 auto;
+}
+#faenaCenter .fcGroupTitle small{font-size:clamp(8px,.76vw,11px);letter-spacing:0;font-weight:700;color:#9dbfd0}
+#faenaCenter .fcOperationGrid{
+ min-width:0;display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ grid-template-rows:repeat(2,minmax(158px,1fr));
+ gap:clamp(7px,.75vw,12px);
+ flex:1 0 342px;
+}
+#faenaCenter .fcManagementGrid{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+ gap:clamp(7px,.7vw,11px);
+ flex:0 0 clamp(112px,16dvh,160px);
+ min-width:0;
+}
+#faenaCenter .fcTile{
+ position:relative;isolation:isolate;min-width:0;min-height:0;max-width:100%;
+ display:block;padding:0!important;overflow:hidden!important;
+ border:2px solid #39c7ef!important;border-radius:15px!important;
+ background:#0e3651!important;cursor:pointer;text-align:left;color:#fff;
+ box-shadow:0 2px 10px #000a,inset 0 1px #ffffff59!important;
+ transition:border-color .17s ease,box-shadow .17s ease!important;
+ transform:none!important;animation:none!important;
+}
+#faenaCenter .fcTile--featured{
+ border:3px solid #ffd35e!important;
+ box-shadow:0 0 0 1px #fff2b69a,0 0 18px #ffb52fba,inset 0 0 14px #ffde6556!important;
+}
+#faenaCenter .fcTilePhoto{
+ position:absolute;inset:0;z-index:-1;
+ background-image:linear-gradient(0deg,#06192af4 0%,#061b2cdb 26%,#08203745 68%,transparent 95%),var(--fc-photo);
+ background-position:center,center;
+ background-size:cover,cover;
+ background-repeat:no-repeat;
+ transition:filter .17s ease!important;
+}
+#faenaCenter .fcTile[data-fc-art="production"]{--fc-photo:url('../assets/faena-v82/production.webp')}
+#faenaCenter .fcTile[data-fc-art="logistics"]{--fc-photo:url('../assets/faena-v82/logistics.webp')}
+#faenaCenter .fcTile[data-fc-art="workshop"]{--fc-photo:url('../assets/faena-v82/workshop.webp')}
+#faenaCenter .fcTile[data-fc-art="fleet"]{--fc-photo:url('../assets/faena-v82/fleet.webp')}
+#faenaCenter .fcTile[data-fc-art="contracts"]{--fc-photo:url('../assets/faena-v82/contracts.webp')}
+#faenaCenter .fcTile[data-fc-art="personnel"]{--fc-photo:url('../assets/faena-v82/personnel.webp')}
+#faenaCenter .fcTile[data-fc-art="safety"]{--fc-photo:url('../assets/faena-v82/safety.webp')}
+#faenaCenter .fcTile[data-fc-art="headquarters"]{--fc-photo:url('../assets/faena-v82/headquarters.webp')}
+#faenaCenter .fcTileCopy{
+ position:absolute;bottom:clamp(20px,3.5dvh,30px);
+ left:clamp(7px,.85vw,15px);right:clamp(6px,.9vw,14px);
+ display:flex;align-items:center;gap:clamp(6px,.75vw,11px);
+ width:auto;min-width:0;
+}
+#faenaCenter .fcTileBadge{
+ width:clamp(39px,4vw,58px);height:clamp(39px,4vw,58px);
+ flex:0 0 clamp(39px,4vw,58px);
+ display:grid;place-items:center;
+ filter:drop-shadow(0 0 6px #41def377);
+}
+#faenaCenter .fcTileBadge .fcIcon{display:block;width:100%;height:100%;object-fit:contain}
+#faenaCenter .fcTileWords{
+ display:flex;flex-direction:column;gap:clamp(3px,.46dvh,6px);
+ flex:1 1 auto;min-width:0;
+}
+#faenaCenter .fcTileWords b{
+ display:block;font-size:clamp(13px,1.45vw,21px);line-height:1.06;
+ font-weight:950;letter-spacing:-.035em;
+ text-shadow:0 2px 5px #001020e8;overflow-wrap:anywhere;
+}
+#faenaCenter .fcTileWords small{
+ display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+ overflow:hidden;max-width:100%;
+ font-size:clamp(9px,.91vw,12px);line-height:1.16;
+ color:#d4edf6;text-shadow:0 1px 3px #001526cc;
+}
+#faenaCenter .fcTileArrow{
+ flex:0 0 clamp(25px,2.9vw,39px);
+ width:clamp(25px,2.9vw,39px);height:clamp(25px,2.9vw,39px);
+ display:grid;place-items:center;border-radius:50%;
+ background:#123d5ccf;border:1px solid #74b6d2;
+ font-size:clamp(20px,2.2vw,30px);line-height:1;
+ box-shadow:inset 0 1px #c5efff55;
+}
+#faenaCenter .fcTileStatus{
+ position:absolute;top:clamp(6px,.68vw,10px);right:clamp(7px,.7vw,12px);
+ max-width:calc(100% - 20px);
+ padding:3px 7px;border-radius:7px;
+ font-size:clamp(8px,.74vw,10px);font-weight:800;white-space:nowrap;
+ overflow:hidden;text-overflow:ellipsis;
+ background:#061f34bd;border:1px solid #6facc787;
+ color:#e2f6ff;
+}
+#faenaCenter .fcTile--featured .fcTileStatus{
+ color:#ffe8af;border-color:#ffe091c4;
+}
+#faenaCenter .fcTile--management .fcTilePhoto{
+ background-image:linear-gradient(0deg,#061a2bf7 0%,#071c2dca 35%,#09203736 90%),var(--fc-photo);
+}
+#faenaCenter .fcTile--management .fcTileCopy{
+ bottom:clamp(12px,1.7dvh,20px);left:clamp(5px,.6vw,9px);
+ right:clamp(5px,.5vw,9px);gap:clamp(4px,.45vw,7px);
+}
+#faenaCenter .fcTile--management .fcTileBadge{
+ width:clamp(31px,3vw,42px);height:clamp(31px,3vw,42px);flex-basis:clamp(31px,3vw,42px);
+}
+#faenaCenter .fcTile--management .fcTileWords b{
+ font-size:clamp(10px,1.15vw,17px);
+}
+#faenaCenter .fcTile--management .fcTileWords small{font-size:clamp(8px,.71vw,10px)}
+#faenaCenter .fcTile--management .fcTileArrow{
+ width:clamp(20px,1.8vw,29px);height:clamp(20px,1.8vw,29px);
+ flex-basis:clamp(20px,1.8vw,29px);
+ font-size:clamp(15px,1.5vw,22px);
+}
+#faenaCenter .fcTile--management .fcTileStatus{font-size:8px;padding:2px 5px;top:5px;right:6px}
+#faenaCenter .fcTile:hover,#faenaCenter .fcMission:hover,#faenaCenter .fcNextStep:hover{
+ border-color:#ffe6a4!important;box-shadow:0 0 15px #ffd27b7b,inset 0 1px #ffffff7b!important;
+}
+#faenaCenter .fcTile:focus-visible,#faenaCenter .fcMission:focus-visible,
+#faenaCenter .fcNextStep:focus-visible,#faenaCenter .fcOverviewDialog .faenaHeader button:focus-visible{
+ outline:2px solid #ffdf82;outline-offset:2px;
+}
+/* Mid-size 1100×620: retain photo-rich operation cards; management still one row. */
+@media(max-height:690px){
+ #faenaCenter .fcOperationGrid{flex:0 0 auto;grid-template-rows:repeat(2,minmax(142px,1fr))}
+ #faenaCenter .fcManagementGrid{flex:0 0 auto;grid-auto-rows:minmax(95px,1fr)}
+}
+/* Phone landscape: two strong operation columns and two compact management rows.
+   Board scrolls vertically, rail separately. Avoid overflows and 2.6 s DOM rebuilds. */
+@media(orientation:landscape) and (max-height:500px){
+ #faenaCenter .faenaDialog.fcOverviewDialog{
+  width:calc(100vw - 8px)!important;height:calc(100dvh - 8px)!important;
+  grid-template-rows:clamp(44px,12dvh,54px) minmax(0,1fr)!important;
+  border-radius:12px!important;
+ }
+ #faenaCenter .fcOverviewDialog .faenaHeader{padding:4px 8px!important;gap:5px!important}
+ #faenaCenter .fcHeaderIdentity{gap:5px}
+ #faenaCenter .fcHeaderEmblem{width:30px;height:30px;flex-basis:30px}
+ #faenaCenter .fcHeaderIdentity small{font-size:7px!important}
+ #faenaCenter .fcHeaderIdentity h2{font-size:clamp(16px,2.3vw,22px)!important}
+ #faenaCenter .fcOverviewDialog .faenaHeaderActions{gap:4px!important}
+ #faenaCenter .fcHeaderCash,#faenaCenter .fcHeaderEnergy{padding:3px 5px;border-radius:8px;gap:3px}
+ #faenaCenter .fcHeaderCash>span{display:none}
+ #faenaCenter .fcHeaderCash strong{font-size:clamp(11px,1.65vw,15px)}
+ #faenaCenter .fcHeaderEnergy strong{font-size:clamp(9px,1.35vw,13px)}
+ #faenaCenter .fcHeaderEnergy .uiIcon{width:14px;height:14px}
+ #faenaCenter .fcOverviewDialog .faenaHeader button[data-faena-close]{
+  width:32px;height:32px;flex-basis:32px;font-size:24px!important;border-radius:9px!important
+ }
+ #faenaCenter .fcHubWorkspace{
+  grid-template-columns:minmax(150px,25%) minmax(0,1fr);
+  gap:5px;padding:6px;
+ }
+ #faenaCenter .fcHubRail{gap:4px;padding-right:4px}
+ #faenaCenter .fcMission{flex-basis:95px!important;min-height:95px;
+  border-width:1.5px!important;border-radius:9px!important;
+  padding:6px!important;gap:2px}
+ #faenaCenter .fcMissionBadge{font-size:9px;padding:2px 6px;border-radius:6px}
+ #faenaCenter .fcMission>strong{font-size:clamp(11px,1.5vw,14px)}
+ #faenaCenter .fcMission>small{font-size:8px;-webkit-line-clamp:1}
+ #faenaCenter .fcMissionAction{font-size:8px}
+ #faenaCenter .fcRailTitle{font-size:9px;padding-left:2px}
+ #faenaCenter .fcRailMetrics{gap:3px}
+ #faenaCenter .fcRailMetric{
+  grid-template-columns:20px minmax(0,1fr) auto;gap:3px;min-height:25px;
+  padding:2px 4px;border-radius:6px}
+ #faenaCenter .fcRailMetric .fcIcon{max-height:20px}
+ #faenaCenter .fcRailMetric span{font-size:8px}
+ #faenaCenter .fcRailMetric b{font-size:9px}
+ #faenaCenter .fcNextStep{flex:0 0 59px;gap:2px;padding:5px;border-radius:7px}
+ #faenaCenter .fcNextLabel{font-size:7px}
+ #faenaCenter .fcNextStep b{font-size:9px}
+ #faenaCenter .fcNextStep>span:last-child{font-size:8px}
+ #faenaCenter .fcHubBoard{gap:3px;padding:0 4px 4px 0}
+ #faenaCenter .fcGroupTitle{padding:2px 3px 1px;font-size:9px}
+ #faenaCenter .fcGroupTitle small{font-size:7px}
+ #faenaCenter .fcOperationGrid{grid-template-rows:repeat(2,116px);gap:5px}
+ #faenaCenter .fcManagementGrid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-auto-rows:78px;gap:5px;
+ }
+ #faenaCenter .fcTile{border-width:1.5px!important;border-radius:9px!important}
+ #faenaCenter .fcTile--featured{border-width:2.5px!important}
+ #faenaCenter .fcTileCopy{bottom:15px;left:5px;right:5px;gap:4px}
+ #faenaCenter .fcTileBadge{width:32px;height:32px;flex-basis:32px}
+ #faenaCenter .fcTileWords b{font-size:clamp(10px,1.25vw,13px);line-height:1}
+ #faenaCenter .fcTileWords small{font-size:8px;-webkit-line-clamp:1;line-height:1.12}
+ #faenaCenter .fcTileArrow{width:22px;height:22px;flex-basis:22px;font-size:18px}
+ #faenaCenter .fcTileStatus{top:4px;right:4px;font-size:7px;padding:2px 4px}
+ #faenaCenter .fcTile--management .fcTileCopy{bottom:8px;gap:4px}
+ #faenaCenter .fcTile--management .fcTileBadge{width:24px;height:24px;flex-basis:24px}
+ #faenaCenter .fcTile--management .fcTileWords b{font-size:10px}
+ #faenaCenter .fcTile--management .fcTileWords small{display:none}
+ #faenaCenter .fcTile--management .fcTileStatus{font-size:7px}
+}
+/* Very short landscape views: retain all 8 routes through vertical scroll. */
+@media(orientation:landscape) and (max-height:340px){
+ #faenaCenter .fcMission{flex-basis:80px!important;min-height:80px}
+ #faenaCenter .fcRailMetric{min-height:22px}
+ #faenaCenter .fcNextStep{flex-basis:51px}
+ #faenaCenter .fcOperationGrid{grid-template-rows:repeat(2,101px)}
+ #faenaCenter .fcManagementGrid{grid-auto-rows:65px}
+}
+/* Portrait isn't the game's primary orientation, but routes remain reachable. */
+@media(orientation:portrait){
+ #faenaCenter .faenaDialog.fcOverviewDialog{grid-template-rows:60px minmax(0,1fr)!important}
+ #faenaCenter .fcHubWorkspace{grid-template-columns:1fr;grid-template-rows:38% minmax(0,1fr);gap:8px}
+ #faenaCenter .fcHubRail{border-right:none;border-bottom:1px solid #4aa4ba;padding-right:0;padding-bottom:7px}
+ #faenaCenter .fcOperationGrid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,132px)}
+ #faenaCenter .fcManagementGrid{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:82px}
+ #faenaCenter .fcHeaderEnergy{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+ #faenaCenter .fcTile,#faenaCenter .fcTilePhoto{transition:none!important}
+}
