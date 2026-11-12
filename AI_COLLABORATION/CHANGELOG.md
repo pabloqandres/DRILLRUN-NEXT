@@ -552,3 +552,9 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - Menú desplazado hacia arriba, con margen visible respecto al borde del teléfono, sin cambiar la forma del arco.
 - Tres gajos con glass/reflejos de borde precisos, centro resaltado y hub con aro más trabajado, sin incorporar capas CSS extra o pictogramas nuevos.
 - Solo `semi-radial-dock-v90.mjs`, `semi-radial-command-v90.css`, pruebas y documentación; código financiero y de misión intactos.
+
+## 2026-11-12 — V94 · Menú radial de esquina aprobado
+- Adaptado el semirradial V90 a cuatro sectores geométricos compactos alineados con el botón de acción y joystick, márgenes seguros y base compartida; botón acción es más protagonista y conserva su comportamiento.
+- Sin flechas visibles: drag angular continuo con freno intencional (145 ms por categoría), ciclo infinito de diez destinos y snap preciso al soltar, sin inercia. Cuadrícula en hub independiente de retícula de acción.
+- Sin cambios a `game.mjs`, misiones, HSEC, economía, modelos, Google o Cloud Save. JS/geométrico y DOM simulado comprobados; CI y QA visual Android pendientes.
+- Rama `chatgpt/v94-corner-radial-safe-touch`, registro `CHANGES/2026-11-12_v94_corner-radial-safe-touch.md`.

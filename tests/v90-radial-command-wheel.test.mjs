@@ -1,114 +1,78 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {SEMI_RADIAL_ITEMS,semiRadialStep,radialPoint,radialSegmentPath,RADIAL_GEOMETRY,installSemiRadialDock} from '../dist/chapter/semi-radial-dock-v90.mjs';
+import {SEMI_RADIAL_ITEMS,semiRadialWrap,semiRadialStep,radialPoint,radialSegmentPath,RADIAL_GEOMETRY,installSemiRadialDock} from '../dist/chapter/semi-radial-dock-v90.mjs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
-test('V90: real concentric circle geometry, correct radii and symmetric segments',()=>{
+test('V94: approved corner annulus uses four concentric segments with safe geometry',()=>{
  const g=RADIAL_GEOMETRY;
- assert.equal(g.cx,200);
- assert.equal(g.cy,164);
- assert.equal(g.outerRadius,154);
- assert.equal(g.innerRadius,89);
- for(const r of [g.outerRadius,g.innerRadius,g.itemRadius]){
-  for(const angle of [-85,-68,-45,-23.5,0,22.5,45,68,85]){
-   const p=radialPoint(angle,r);
-   assert(Math.abs(Math.hypot(p.x-g.cx,p.y-g.cy)-r)<.00001,'wrong radius at '+angle);
-  }
- }
- for(const range of [g.left,g.center,g.right]){
-  const path=radialSegmentPath(...range);
-  assert.match(path,/^M.+ A154 154 0 0 1 .+ L.+ A89 89 0 0 0 .+ Z$/);
+ assert.equal(g.cx,500);
+ assert.equal(g.cy,465);
+ assert.equal(g.outerRadius,465);
+ assert.equal(g.innerRadius,296);
+ assert.deepEqual(g.slotBounds,[[-89,-68],[-67,-45],[-44,-22],[-21,0]]);
+ assert.equal(g.slotAngles.length,4);
+ for(const [a,b] of g.slotBounds){
+  const path=radialSegmentPath(a,b);
+  assert.match(path,/^M.+ A465 465 0 0 1 .+ L.+ A296 296 0 0 0 .+ Z$/);
   assert(!path.includes('NaN'));
  }
- assert.deepEqual(g.left,[-68,-23.5]);
- assert.deepEqual(g.center,[-22.5,22.5]);
- assert.deepEqual(g.right,[23.5,68]);
- assert.equal(installSemiRadialDock(),null,'safe when no browser DOM');
-});
-
-test('V90: ten routes; 3 accessible and 2 ghost choices around any index',()=>{
- assert.equal(SEMI_RADIAL_ITEMS.length,10);
- assert.equal(new Set(SEMI_RADIAL_ITEMS.map(x=>x.id)).size,10);
- for(let selected=0;selected<10;selected++){
-  const steps=SEMI_RADIAL_ITEMS.map((_,i)=>semiRadialStep(i,selected,10));
-  for(const key of ['-2','-1','0','1','2'])
-   assert.equal(steps.filter(v=>v===key).length,1,selected+':'+key);
-  assert.equal(steps.filter(v=>v==='off').length,5);
+ for(const angle of [-89,-56,-33,-10,0]){
+  for(const r of [g.outerRadius,g.innerRadius,g.itemRadius]){
+   const p=radialPoint(angle,r);
+   assert(Math.abs(Math.hypot(p.x-g.cx,p.y-g.cy)-r)<.00001);
+  }
  }
- const src=read('dist/chapter/semi-radial-dock-v90.mjs');
- assert(src.includes("const angle=step==='off'?(delta<0?-111:111):Number(step)*45"));
- assert(src.includes("node.style.transform='rotate('+angle+'deg)'"));
- assert(src.includes("item.style.transform='rotate('+(-angle)+'deg)'"));
- assert(src.includes("button type=\"button\" class=\"dr90Option\""));
+ assert.equal(installSemiRadialDock(),null,'no DOM stays safe');
 });
 
-test('V90: old patch-stack is NOT loaded and the fresh dock is active',()=>{
- const html=read('dist/index.html');
+test('V94: original ten distinct routes remain cyclic and preserve gameplay authority',()=>{
+ assert.equal(SEMI_RADIAL_ITEMS.length,10);
+ assert.equal(new Set(SEMI_RADIAL_ITEMS.map(item=>item.id)).size,10);
+ assert.equal(semiRadialWrap(-1,10),9);
+ assert.equal(semiRadialWrap(10,10),0);
+ assert.equal(semiRadialStep(9,0,10),'-1');
+ const src=read('dist/chapter/semi-radial-dock-v90.mjs');
  const game=read('dist/chapter/game.mjs');
- for(const old of ['semi-radial-dock-v83.css','semi-radial-geometry-v84.css',
-  'semi-radial-premium-v86.css','semi-radial-layout-v88.css'])
-  assert(!html.includes(old),'obsolete overlay stylesheet '+old);
- assert.equal((html.match(/semi-radial-command-v90\.css/g)||[]).length,1);
- assert(game.includes("import {installSemiRadialDock} from './semi-radial-dock-v90.mjs';"));
+ assert(src.includes('data-semi-id'));
+ assert(src.includes('dr94Base'));
+ assert(src.includes('viewBox="0 0 550 470"'));
+ assert(src.includes('render(drag.offset)'));
+ assert(src.includes('render();')&&src.includes('root.classList.remove(\'is-dragging\')'));
+ assert(!src.includes('dr90Prev')&&!src.includes('dr90Next'));
+ assert(game.includes("import {installSemiRadialDock} from './semi-radial-dock-v90.mjs'"));
  assert(game.includes('installSemiRadialDock({'));
  assert(game.includes('onFeedback:kind=>selectorFeedback.play(kind)'));
- assert(game.includes("original.click()"),'gameplay authority stays on legacy nav');
- assert(html.includes('id="bottomNav"'));
- assert(html.includes('id="joystick"'));
- assert(!html.includes('id="cameraHome"'));
+ assert(game.includes('original.click()'));
 });
 
-test('V90: no counter, thin segment strokes, layered hub and view-safe margins',()=>{
- const src=read('dist/chapter/semi-radial-dock-v90.mjs');
+test('V94: visually distinct action control, safe-area alignment and no arrow UI',()=>{
  const css=read('dist/chapter/semi-radial-command-v90.css');
- assert(!src.includes('drSemiCount'));
- assert(!src.includes('1 / 10'));
- assert(!css.includes('10 SECCIONES'));
- assert(!css.includes('drSemiRibbon'));
- assert(src.includes('class="dr90Prev"'));
- assert(src.includes('class="dr90Next"'));
- assert(src.includes('class="dr90Hub"'));
- assert(css.includes('border-radius:50%!important'));
- assert(css.includes('stroke-width:1.15'));
- assert(css.includes('stroke-width:1.45'));
- assert(css.includes('bottom:clamp(46px,7dvh,66px)'));
- assert(css.includes('.dr90Hub::before'));
- assert(css.includes('.dr90CenterAccent'));
- assert(css.includes('font:850 10.4px/1.07'));
- assert(css.includes('width:89px!important'));
- assert(css.includes('pointer-events:none!important'));
- assert(css.includes('prefers-reduced-motion:reduce'));
-});
-
-test('V90: real orbit (not linear interpolation) with keyboard, pointer, wheel and native sound',()=>{
- const src=read('dist/chapter/semi-radial-dock-v90.mjs');
- const css=read('dist/chapter/semi-radial-command-v90.css');
- for(const key of [
-  'pointerdown','pointermove','pointerup','lostpointercapture',
-  "prev.addEventListener('click'", "next.addEventListener('click'",
-  "event.key==='ArrowRight'", "event.key==='ArrowLeft'",
-  "event.key==='Escape'", "event.key==='Enter'",
-  "root.addEventListener('wheel'",'ResizeObserver',
-  "feedback('skill')","feedback('confirm')",
-  "onNavigate(element.dataset.semiId)",
-  "new MutationObserver"
- ])assert(src.includes(key),key);
- assert(css.includes('.dr90Orbit{'));
- assert(css.includes('transition:transform .59s cubic-bezier(.19,.70,.22,1)'));
- assert(css.includes('transform-origin:47px 24px'));
- assert(css.includes('top:-148px'));
- assert(css.includes('top:164px'));
+ const html=read('dist/index.html');
+ assert(css.includes('--dr94-safe-bottom'));
+ assert(css.includes('--dr94-safe-right'));
+ assert(css.includes('--dr94-joy-half'));
+ assert(css.includes('--dr94-action-half'));
+ assert(css.includes('var(--dr94-center-offset,95px)'));
+ assert(css.includes('var(--dr94-bottom-offset,78px)'));
+ assert(css.includes('.dr94Base'));
+ assert(css.includes('.dr94Sector--far'));
+ assert(css.includes('#hud #handButton.available'));
+ assert(css.includes('#hud #semiRadialDock .dr90Arrows{display:none!important}'));
  assert(css.includes('touch-action:none!important'));
+ assert(css.includes('@media(prefers-reduced-motion:reduce)'));
+ assert(html.includes('id="joystick"')&&html.includes('id="handButton"'));
+ assert(html.includes('id="bottomNav"'));
+ assert(!html.includes('id="cameraHome"'));
+ assert.equal((html.match(/semi-radial-command-v90\.css/g)||[]).length,1);
 });
 
-test('V90: game cash, cloud, and mission handlers remain reachable',()=>{
+test('V94: unrelated missions and saved-state systems stay wired',()=>{
  const game=read('dist/chapter/game.mjs');
- for(const key of [
-  'initCloudSave(value,async user=>',
+ for(const term of ['initCloudSave(value,async user=>',
   "$('#play').onclick=async()=>",
   'function rescueStuckPlayer(){',
   "if(nav==='m3-personnel'){openFaena('personnel');return;}",
   "if(nav==='m3-contract'){openFaena('contracts');return;}"
- ])assert(game.includes(key),key);
+ ])assert(game.includes(term),term);
 });

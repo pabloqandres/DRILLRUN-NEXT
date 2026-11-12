@@ -345,3 +345,181 @@ body:not([data-phase="play"]) #hud #semiRadialDock{display:none!important}
 #hud #handButton.available svg{stroke:#ffe2a5!important;filter:drop-shadow(0 0 4px #ffd28485)!important}
 #hud #handButton:disabled{filter:saturate(.67);opacity:.74}
 #hud #handButton:focus-visible{outline:2px solid #ffe2a5!important;outline-offset:5px}
+
+/* V94 visual correction · match the explicitly approved corner reference.
+   Polar geometry: stage 550 × 470; center (500,465), radius 465/296.
+   Controls keep a common centerline; only the annular arc rotates. */
+#hud{
+ --dr94-safe-bottom:max(20px,env(safe-area-inset-bottom,0px) + 16px);
+ --dr94-safe-right:max(22px,env(safe-area-inset-right,0px) + 15px);
+ --dr94-safe-left:max(22px,env(safe-area-inset-left,0px) + 15px);
+ --dr94-control-line:clamp(67px,11dvh,106px);
+ --dr94-joy-half:clamp(46px,8dvh,87px);
+ --dr94-action-half:clamp(42px,7dvh,70px);
+}
+#hud #joystick{
+ left:var(--dr94-safe-left)!important;
+ bottom:calc(var(--dr94-control-line) - var(--dr94-joy-half))!important;
+ width:clamp(92px,16dvh,174px)!important;
+ height:clamp(92px,16dvh,174px)!important;
+}
+#hud #handButton{
+ right:var(--dr94-safe-right)!important;
+ bottom:calc(var(--dr94-control-line) - var(--dr94-action-half))!important;
+ width:clamp(84px,14dvh,140px)!important;
+ height:clamp(84px,14dvh,140px)!important;
+ min-height:clamp(84px,14dvh,140px)!important;
+ z-index:41!important;
+ border:2.5px solid #efcf88!important;border-radius:50%!important;
+ background:radial-gradient(circle at 31% 20%,#54889b 0%,#22536b 27%,#0b314c 58%,#03182c 100%)!important;
+ box-shadow:inset 0 2px 2px #e9fbffd0,inset 0 -9px 13px #001222e5,
+  0 0 0 3px #071c2e,0 0 0 5px #9acddb80,
+  0 7px 18px #00101fd9,0 0 18px #f0c57996!important;
+}
+#hud #handButton::before{
+ inset:6px!important;border:2px solid #f6db9cdd!important;
+ box-shadow:0 0 5px #f1cf8a9c,inset 0 1px #fff3a66b!important;
+}
+#hud #handButton svg,
+#hud #handButton .uiIcon{
+ width:clamp(36px,6.2dvh,54px)!important;
+ height:clamp(36px,6.2dvh,54px)!important;
+ color:#ffe0a1!important;stroke:#ffe0a1!important;stroke-width:2.05!important;
+ filter:drop-shadow(0 0 5px #f6c671b0)!important;
+}
+#hud #handButton.available{
+ border-color:#ffe6a7!important;
+ box-shadow:inset 0 2px #f0faffd0,inset 0 -9px 14px #00111fe5,
+  0 0 0 3px #071c2e,0 0 0 5px #efc87b9e,
+  0 7px 18px #000d,0 0 22px #fbd78bc0!important;
+}
+#hud #semiRadialDock{
+ left:auto!important;
+ right:calc(var(--dr94-safe-right) + var(--dr94-action-half) - var(--dr94-center-offset,95px))!important;
+ bottom:calc(var(--dr94-control-line) - var(--dr94-bottom-offset,78px))!important;
+ width:var(--dr94-dock-width,550px)!important;
+ height:var(--dr94-dock-height,470px)!important;
+ max-width:none!important;
+ transform:none!important;
+ pointer-events:none!important;z-index:36!important;
+}
+#hud #semiRadialDock .dr90Stage{
+ position:absolute!important;right:0!important;left:auto!important;bottom:0!important;
+ width:550px!important;height:470px!important;
+ transform:scale(var(--dr94-scale,1))!important;
+ transform-origin:right bottom!important;
+ pointer-events:none!important;
+}
+#hud #semiRadialDock .dr90Ring{
+ width:550px!important;height:470px!important;
+ left:0!important;top:0!important;
+ transform-origin:500px 465px!important;
+}
+#hud #semiRadialDock .dr90Choices{width:550px!important;height:470px!important}
+#hud #semiRadialDock .dr90Orbit{
+ left:500px!important;top:465px!important;
+ transition:transform .32s cubic-bezier(.20,.74,.27,1),
+  opacity .24s ease,visibility .24s ease!important;
+}
+#hud #semiRadialDock .dr90Option{
+ left:-68px!important;top:-415px!important;
+ width:136px!important;height:66px!important;
+ transform-origin:68px 33px!important;
+ padding:0 3px!important;gap:4px!important;
+ transition:transform .32s cubic-bezier(.20,.74,.27,1),
+  color .2s ease!important;
+}
+#hud #semiRadialDock.is-dragging .dr90Orbit,
+#hud #semiRadialDock.is-dragging .dr90Option{transition:none!important}
+#hud #semiRadialDock .dr90Icon{
+ width:38px!important;height:38px!important;flex-basis:38px!important;
+ filter:drop-shadow(0 0 4px #9adbf48c)!important;
+}
+#hud #semiRadialDock .dr90Icon .uiIcon{
+ width:37px!important;height:37px!important;stroke-width:1.85!important;
+}
+#hud #semiRadialDock .dr90Label{
+ width:136px!important;max-width:136px!important;
+ max-height:37px!important;
+ font:850 18px/1.06 system-ui,sans-serif!important;
+ letter-spacing:-.04em!important;
+ color:#f1f9ff!important;
+ text-shadow:0 2px 4px #00101eea!important;
+}
+#hud #semiRadialDock .dr90Orbit[data-step="2"]{
+ opacity:1!important;visibility:visible!important;pointer-events:auto!important;
+}
+#hud #semiRadialDock .dr90Orbit[data-step="2"] .dr90Option{pointer-events:auto!important}
+#hud #semiRadialDock:not(.is-open) .dr90Orbit[data-step="2"]{
+ opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+}
+#hud #semiRadialDock .dr90Orbit[data-step="-2"],
+#hud #semiRadialDock .dr90Orbit[data-step="3"]{
+ opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+}
+#hud #semiRadialDock .dr94Sector--far{
+ fill:url(#dr90Side)!important;stroke:#78d8eda8!important;
+ filter:drop-shadow(0 2px 3px #031421b9);
+}
+#hud #semiRadialDock .dr90Sector{
+ stroke-width:1.4!important;touch-action:none!important;
+}
+#hud #semiRadialDock .dr90Sector--center{
+ stroke:#ffe0a7ed!important;stroke-width:1.9!important;
+ filter:drop-shadow(0 0 9px #e7b96897)!important;
+}
+#hud #semiRadialDock .dr92OuterRim{
+ stroke-width:1.3!important;opacity:.87!important;
+}
+#hud #semiRadialDock .dr92OuterRim--selected{
+ stroke-width:1.65!important;opacity:1!important;
+ filter:drop-shadow(0 0 4px #ffd18cce)!important;
+}
+#hud #semiRadialDock .dr92InnerRim{stroke-width:1.05!important;opacity:.73!important}
+#hud #semiRadialDock .dr90Hub{
+ left:255px!important;top:342px!important;
+ width:100px!important;height:100px!important;min-height:100px!important;
+ border:2px solid #e3b66b!important;
+ background:radial-gradient(circle at 31% 21%,#477a92 0%,#20536a 27%,#0a2e47 64%,#051628 100%)!important;
+ box-shadow:inset 0 2px 2px #e5fbffaf,inset 0 -9px 15px #00111fe0,
+  0 0 0 3px #061c2ded,0 0 0 5px #6bc3dc82,
+  0 7px 18px #000d,0 0 15px #5bcced69!important;
+ z-index:7!important;
+}
+#hud #semiRadialDock .dr90Hub::before{
+ inset:8px!important;border:1.5px solid #9ee5f6bd!important;
+ box-shadow:0 0 6px #67cde17d,inset 0 1px #eafaff58!important;
+}
+#hud #semiRadialDock .dr90HubGlyph{
+ width:52px!important;height:52px!important;color:#fff1c4!important;
+ filter:drop-shadow(0 0 5px #e4c57d6a)!important;
+}
+#hud #semiRadialDock .dr90HubNotch{display:none!important}
+#hud #semiRadialDock .dr94Base{
+ position:absolute!important;
+ left:244px!important;top:330px!important;
+ width:296px!important;height:133px!important;
+ border:1.5px solid #a0d9e5b4!important;
+ border-bottom-color:#c6a46f94!important;
+ border-radius:80px 84px 42px 42px!important;
+ background:linear-gradient(156deg,#174d6592 0%,#092d4492 42%,#061a2ba8 76%,#021121b9 100%)!important;
+ box-shadow:inset 0 2px #dbfaff73,0 -3px 12px #1a61754b,0 8px 18px #0005!important;
+ pointer-events:none!important;
+}
+#hud #semiRadialDock .dr94Base::before{
+ content:"";position:absolute;inset:9px 12px 12px;
+ border-top:1px solid #f4d08b85;border-radius:75px 75px 30px 30px;
+ pointer-events:none;
+}
+#hud #semiRadialDock .dr90Arrows{display:none!important}
+#hud #semiRadialDock.is-open .dr90Sector{pointer-events:visiblePainted!important}
+#hud #semiRadialDock .dr90Option{touch-action:none!important}
+@media(orientation:landscape) and (max-height:510px){
+ #hud{--dr94-safe-bottom:max(20px,env(safe-area-inset-bottom,0px) + 16px);
+      --dr94-safe-right:max(19px,env(safe-area-inset-right,0px) + 14px)}
+ #hud #semiRadialDock{max-width:none!important}
+}
+@media(prefers-reduced-motion:reduce){
+ #hud #semiRadialDock .dr90Option,
+ #hud #semiRadialDock .dr90Orbit{transition:none!important}
+}

@@ -1,13 +1,11 @@
-// V90 · DRILL RUN precision radial command wheel.
-// Visual-only navigation. Mission gates, economy and sound remain in game.mjs.
-// Ten actions; three legible options + two low-contrast previews.
-// Radial orbit and text counter-rotation use matching easing, not linear x/y motion.
+// V94 · Compact corner radial, four sectors, infinite touch rotation with precise snap.
+// Navigation handlers remain the original game's source of truth.
 import {icon} from './icons.mjs';
 
 export const SEMI_RADIAL_ITEMS=Object.freeze([
  Object.freeze({id:'catalog',label:'Catálogo',symbol:'dock-package'}),
  Object.freeze({id:'production',label:'Producción',symbol:'dock-zones'}),
- Object.freeze({id:'logistics',label:'Logística',symbol:'inventory'}),
+ Object.freeze({id:'logistics',label:'Inventario',symbol:'inventory'}),
  Object.freeze({id:'workshop',label:'Taller',symbol:'wrench'}),
  Object.freeze({id:'fleet',label:'Patio y flota',symbol:'machine'}),
  Object.freeze({id:'contracts',label:'Contratos',symbol:'dock-clipboard'}),
@@ -23,12 +21,11 @@ export function semiRadialStep(itemIndex,centerIndex,total){
  if(delta>Math.floor(total/2))delta-=total;
  return Math.abs(delta)<=2?String(delta):'off';
 }
-
-// Shared concentric-circle geometry: all sector edges and item positions are
-// derived from one polar centre, rather than hand-drawn Bezier coordinates.
 export const RADIAL_GEOMETRY=Object.freeze({
- cx:350,cy:164,outerRadius:154,innerRadius:89,itemRadius:121,
- left:[-88,-62],center:[-60,-34],right:[-32,-6]
+ cx:500,cy:465,outerRadius:465,innerRadius:296,itemRadius:382,
+ left:[-89,-68],center:[-67,-45],right:[-44,-22],outerRight:[-21,0],
+ slotAngles:Object.freeze([-78.5,-56,-33,-10.5]),
+ slotBounds:Object.freeze([[-89,-68],[-67,-45],[-44,-22],[-21,0]])
 });
 export function radialPoint(angle,radius,geometry=RADIAL_GEOMETRY){
  const a=angle*Math.PI/180;
@@ -45,44 +42,43 @@ export function radialSegmentPath(from,to,geometry=RADIAL_GEOMETRY){
   ' L'+point(innerB)+
   ' A'+geometry.innerRadius+' '+geometry.innerRadius+' 0 0 0 '+point(innerA)+' Z';
 }
-const arcPath=(from,to,r,geometry=RADIAL_GEOMETRY)=>
- 'M'+point(radialPoint(from,r,geometry))+' A'+r+' '+r+' 0 0 1 '+point(radialPoint(to,r,geometry));
+const arcPath=(from,to,r,g=RADIAL_GEOMETRY)=>
+ 'M'+point(radialPoint(from,r,g))+' A'+r+' '+r+' 0 0 1 '+point(radialPoint(to,r,g));
 function wheelSvg(){
  const g=RADIAL_GEOMETRY;
- return '<svg class="dr90Ring" viewBox="0 0 400 165" aria-hidden="true" fill="none">'+
+ const classes=['dr90Sector--left','dr90Sector--center','dr90Sector--right','dr94Sector--far'];
+ const sectors=g.slotBounds.map(([a,b],i)=>
+  '<path class="dr90Sector '+classes[i]+'" d="'+radialSegmentPath(a,b)+'"/>').join('');
+ const glass=g.slotBounds.map(([a,b],i)=>
+  '<path class="dr92Glass '+(i===1?'dr92Glass--center':'')+'" d="'+radialSegmentPath(a,b)+'"/>').join('');
+ const rims=g.slotBounds.map(([a,b],i)=>
+  '<path class="dr92OuterRim '+(i===1?'dr92OuterRim--selected':'')+
+  '" d="'+arcPath(a+.8,b-.8,g.outerRadius-3)+'"/>').join('');
+ return '<svg class="dr90Ring" viewBox="0 0 550 470" aria-hidden="true" fill="none">'+
   '<defs>'+
-   '<linearGradient id="dr90Side" x1="0" y1="0" x2=".1" y2="1"><stop stop-color="#21465b"/><stop offset=".53" stop-color="#102e43"/><stop offset="1" stop-color="#091c30"/></linearGradient>'+
-   '<linearGradient id="dr90Selected" x1="0" y1="0" x2=".2" y2="1"><stop stop-color="#74603e"/><stop offset=".46" stop-color="#3a4d60"/><stop offset="1" stop-color="#0b263a"/></linearGradient>'+
-   '<linearGradient id="dr92Glass" x1="0" y1="0" x2=".28" y2="1"><stop stop-color="#c5f4fb" stop-opacity=".20"/><stop offset=".36" stop-color="#65bdd4" stop-opacity=".045"/><stop offset=".85" stop-color="#041c29" stop-opacity=".09"/><stop offset="1" stop-color="#00131c" stop-opacity=".35"/></linearGradient>'+
-   '<linearGradient id="dr92Rim" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#dcf8fb" stop-opacity=".92"/><stop offset="1" stop-color="#4c9fb6" stop-opacity=".4"/></linearGradient>'+
-  '</defs>'+
-  '<path class="dr90Sector dr90Sector--left" d="'+radialSegmentPath(...g.left)+'"/>'+
-  '<path class="dr90Sector dr90Sector--center" d="'+radialSegmentPath(...g.center)+'"/>'+
-  '<path class="dr90Sector dr90Sector--right" d="'+radialSegmentPath(...g.right)+'"/>'+
-  '<path class="dr92Glass dr92Glass--left" d="'+radialSegmentPath(...g.left)+'"/>'+
-  '<path class="dr92Glass dr92Glass--center" d="'+radialSegmentPath(...g.center)+'"/>'+
-  '<path class="dr92Glass dr92Glass--right" d="'+radialSegmentPath(...g.right)+'"/>'+
-  '<path class="dr92OuterRim" d="'+arcPath(-87.4,-62.6, g.outerRadius-3.2)+'"/>'+
-  '<path class="dr92OuterRim dr92OuterRim--selected" d="'+arcPath(-59.4,-34.6,g.outerRadius-3.2)+'"/>'+
-  '<path class="dr92OuterRim" d="'+arcPath(-31.4,-6.6,g.outerRadius-3.2)+'"/>'+
-  '<path class="dr92InnerRim" d="'+arcPath(-87.4,-6.6,g.innerRadius+3.7)+'"/>'+
-  '<path class="dr90CenterAccent" d="M'+point(radialPoint(-54,g.outerRadius-6))+
-   ' A'+(g.outerRadius-6)+' '+(g.outerRadius-6)+' 0 0 1 '+point(radialPoint(-40,g.outerRadius-6))+'"/>'+
+  '<linearGradient id="dr90Side" x1="0" y1="0" x2=".1" y2="1"><stop stop-color="#21465b"/><stop offset=".53" stop-color="#102e43"/><stop offset="1" stop-color="#091c30"/></linearGradient>'+
+  '<linearGradient id="dr90Selected" x1="0" y1="0" x2=".2" y2="1"><stop stop-color="#74603e"/><stop offset=".46" stop-color="#3a4d60"/><stop offset="1" stop-color="#0b263a"/></linearGradient>'+
+  '<linearGradient id="dr92Glass" x1="0" y1="0" x2=".28" y2="1"><stop stop-color="#c5f4fb" stop-opacity=".20"/><stop offset=".36" stop-color="#65bdd4" stop-opacity=".045"/><stop offset=".85" stop-color="#041c29" stop-opacity=".09"/><stop offset="1" stop-color="#00131c" stop-opacity=".35"/></linearGradient>'+
+  '<linearGradient id="dr92Rim" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#dcf8fb" stop-opacity=".92"/><stop offset="1" stop-color="#4c9fb6" stop-opacity=".4"/></linearGradient>'+
+  '</defs>'+sectors+glass+rims+
+  '<path class="dr92InnerRim" d="'+arcPath(-89,0,g.innerRadius+3.5)+'"/>'+
+  '<path class="dr90CenterAccent" d="'+arcPath(-63,-49,g.outerRadius-6)+'"/>'+
   '</svg>';
 }
-const hubSvg='<svg class="dr90HubGlyph" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+
- '<circle cx="24" cy="24" r="15.5" stroke-width="1.6" opacity=".9"/>'+
- '<path d="M24 5.5v7m0 23v7M5.5 24h7m23 0h7" stroke-width="2"/>'+
- '<path d="M24 16.5 31.5 24 24 31.5 16.5 24Z" stroke-width="2"/>'+
- '<circle cx="24" cy="24" r="2.5" fill="currentColor" stroke="none"/>'+
- '</svg>';
-const arrowSvg=left=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+
- '<path d="'+(left?'M14.5 5 7.5 12l7 7':'m9.5 5 7 7-7 7')+'"/></svg>';
+const hubSvg='<svg class="dr90HubGlyph" viewBox="0 0 48 48" fill="currentColor" aria-hidden="true">'+
+ '<rect x="10" y="10" width="7" height="7" rx="1.5"/>'+
+ '<rect x="20.5" y="10" width="7" height="7" rx="1.5"/>'+
+ '<rect x="31" y="10" width="7" height="7" rx="1.5"/>'+
+ '<rect x="10" y="20.5" width="7" height="7" rx="1.5"/>'+
+ '<rect x="20.5" y="20.5" width="7" height="7" rx="1.5"/>'+
+ '<rect x="31" y="20.5" width="7" height="7" rx="1.5"/>'+
+ '<rect x="10" y="31" width="7" height="7" rx="1.5"/>'+
+ '<rect x="20.5" y="31" width="7" height="7" rx="1.5"/>'+
+ '<rect x="31" y="31" width="7" height="7" rx="1.5"/></svg>';
 
 export function installSemiRadialDock({
  anchor=typeof document!=='undefined'?document.getElementById('bottomNav'):null,
- onNavigate=()=>false,
- onFeedback=()=>{}
+ onNavigate=()=>false,onFeedback=()=>{}
 }={}){
  if(!anchor||typeof document==='undefined')return null;
  const old=document.getElementById('semiRadialDock');
@@ -93,57 +89,66 @@ export function installSemiRadialDock({
  root.setAttribute('aria-label','Menú radial de la faena');
  const orbital=SEMI_RADIAL_ITEMS.map(item=>
   '<div class="dr90Orbit" data-semi-id="'+item.id+'" data-step="off" aria-hidden="true">'+
-  '<button type="button" class="dr90Option" data-semi-id="'+item.id+'" tabindex="-1">'+
-  '<span class="dr90Icon">'+icon(item.symbol)+'</span>'+
-  '<span class="dr90Label">'+item.label+'</span></button></div>').join('');
- root.innerHTML='<div class="dr90Stage">'+
-  wheelSvg()+
+   '<button type="button" class="dr90Option" data-semi-id="'+item.id+'" tabindex="-1">'+
+   '<span class="dr90Icon">'+icon(item.symbol)+'</span>'+
+   '<span class="dr90Label">'+item.label+'</span></button></div>').join('');
+ root.innerHTML='<div class="dr90Stage">'+wheelSvg()+
   '<div class="dr90Choices" role="group" aria-label="Accesos de la faena">'+orbital+'</div>'+
-  '<div class="dr90Arrows" role="group" aria-label="Girar menú">'+
-   '<button class="dr90Prev" type="button" aria-label="Acceso anterior" tabindex="-1">'+arrowSvg(true)+'</button>'+
-   '<button class="dr90Next" type="button" aria-label="Acceso siguiente" tabindex="-1">'+arrowSvg(false)+'</button>'+
-  '</div>'+
+  '<div class="dr94Base" aria-hidden="true"></div>'+
   '<button class="dr90Hub" type="button" aria-expanded="false" aria-label="Abrir menú de la faena" title="Menú de la faena">'+
-   hubSvg+'<span class="dr90HubNotch" aria-hidden="true"></span></button>'+
-  '</div>';
+  hubSvg+'<span class="dr90HubNotch" aria-hidden="true"></span></button></div>';
  anchor.insertAdjacentElement('afterend',root);
  const stage=root.querySelector('.dr90Stage');
  const hub=root.querySelector('.dr90Hub');
- const prev=root.querySelector('.dr90Prev'),next=root.querySelector('.dr90Next');
  const choices=root.querySelector('.dr90Choices');
  const nodes=Array.from(root.querySelectorAll('.dr90Orbit'));
- let centerIndex=0,open=false,destroyed=false;
- let pointerDown=false,holdOpened=false,moved=false,startX=0;
- let holdTimer=null,skipHubClick=false,drag=null,suppressChoiceClickUntil=0,lastDragAt=0,lastWheelAt=0;
- const SWIPE_PX=30, SWIPE_DETENT_MS=165;
+ let centerIndex=0,open=false,destroyed=false,drag=null;
+ let holdTimer=null,holding=false,longPressed=false,skipHubClick=false;
+ let suppressChoiceClickUntil=0,lastWheelAt=0;
+ const DRAG_STEP_DEG=23,DRAG_MIN_STEP_MS=145;
+ const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+ const normalizeAngle=d=>((d+540)%360)-180;
  const feedback=kind=>{try{onFeedback(kind);}catch{}};
- const visibleStep=step=>step==='0'||step==='-1'||step==='1';
+ const angleAt=e=>{
+  const rect=stage.getBoundingClientRect();
+  const scale=rect.width/550;
+  const x=rect.left+RADIAL_GEOMETRY.cx*scale;
+  const y=rect.top+RADIAL_GEOMETRY.cy*scale;
+  return Math.atan2(e.clientX-x,y-e.clientY)*180/Math.PI;
+ };
  const resize=()=>{
   if(destroyed)return;
-  const scale=Math.min(1,Math.max(.65,root.getBoundingClientRect().width/400));
+  const vw=window.innerWidth||document.documentElement?.clientWidth||1280;
+  const vh=window.innerHeight||document.documentElement?.clientHeight||720;
+  const scale=clamp(Math.min(1.16,vh/870,(vw-225)/550),.52,1.16);
+  root.style.setProperty('--dr94-scale',scale.toFixed(4));
   root.style.setProperty('--dr90-scale',scale.toFixed(4));
+  root.style.setProperty('--dr94-dock-width',(550*scale).toFixed(2)+'px');
+  root.style.setProperty('--dr94-dock-height',(470*scale).toFixed(2)+'px');
+  root.style.setProperty('--dr94-center-offset',(95*scale).toFixed(2)+'px');
+  root.style.setProperty('--dr94-bottom-offset',(78*scale).toFixed(2)+'px');
  };
- const render=()=>{
-  const total=SEMI_RADIAL_ITEMS.length;
+ const render=(fractionalAngle=0)=>{
   for(let i=0;i<nodes.length;i++){
    const node=nodes[i],item=node.querySelector('button');
-   const step=semiRadialStep(i,centerIndex,total);
-   let delta=semiRadialWrap(i-centerIndex,total);
-   if(delta>Math.floor(total/2))delta-=total;
-   const angle=step==='off'?(delta<0?-112:18):-47+Number(step)*28;
-   node.dataset.step=step;
-   node.style.transform='rotate('+angle+'deg)';
-   item.style.transform='rotate('+(-angle)+'deg)';
-   const visible=open&&visibleStep(step);
-   item.tabIndex=visible?0:-1;
-   node.setAttribute('aria-hidden',String(!visible));
-   item.setAttribute('aria-label',(step==='0'?'Abrir ':'Ir a ')+SEMI_RADIAL_ITEMS[i].label);
-   item.setAttribute('aria-current',String(step==='0'));
+   let delta=semiRadialWrap(i-centerIndex,SEMI_RADIAL_ITEMS.length);
+   if(delta>SEMI_RADIAL_ITEMS.length/2)delta-=SEMI_RADIAL_ITEMS.length;
+   const visible=delta>=-1&&delta<=2;
+   const ghost=delta===-2||delta===3;
+   const angle=visible?RADIAL_GEOMETRY.slotAngles[delta+1]+fractionalAngle:
+    delta===-2?-112+fractionalAngle:delta===3?18+fractionalAngle:(delta<0?-124:40);
+   node.dataset.step=visible||ghost?String(delta):'off';
+   node.style.transform='rotate('+angle.toFixed(2)+'deg)';
+   item.style.transform='rotate('+(-angle).toFixed(2)+'deg)';
+   const active=open&&visible;
+   item.tabIndex=active?0:-1;
+   node.setAttribute('aria-hidden',String(!active));
+   item.setAttribute('aria-label',(delta===0?'Abrir ':'Ir a ')+SEMI_RADIAL_ITEMS[i].label);
+   item.setAttribute('aria-current',String(delta===0));
   }
-  prev.tabIndex=next.tabIndex=open?0:-1;
  };
  const setOpen=(value,silent=false)=>{
-  if(destroyed||value&&anchor.classList.contains('hidden'))return;
+  if(destroyed||(value&&anchor.classList.contains('hidden')))return;
   if(open===value)return;
   open=!!value;
   root.classList.toggle('is-open',open);
@@ -153,17 +158,16 @@ export function installSemiRadialDock({
   if(!silent)feedback(open?'select':'back');
  };
  const rotate=offset=>{
-  if(!open||!offset)return;
-  centerIndex=semiRadialWrap(centerIndex+Math.sign(offset),SEMI_RADIAL_ITEMS.length);
-  render();
-  feedback('skill');
+  if(!open||!Number.isFinite(offset)||!offset)return;
+  centerIndex=semiRadialWrap(centerIndex+Math.trunc(offset),SEMI_RADIAL_ITEMS.length);
+  render();feedback('skill');
  };
  const select=element=>{
   if(!open||!element)return;
-  const orb=element.closest('.dr90Orbit');
-  if(!orb)return;
-  const step=Number(orb.dataset.step);
-  if(!Number.isInteger(step)||Math.abs(step)>1)return;
+  const orbit=element.closest('.dr90Orbit');
+  if(!orbit)return;
+  const step=Number(orbit.dataset.step);
+  if(!Number.isInteger(step)||step< -1||step>2)return;
   if(step!==0){rotate(step);return;}
   if(onNavigate(element.dataset.semiId)===false)return;
   feedback('confirm');setOpen(false,true);
@@ -171,69 +175,79 @@ export function installSemiRadialDock({
  render();resize();
  const ro=typeof ResizeObserver!=='undefined'?new ResizeObserver(resize):null;
  if(ro)ro.observe(root);
- else addEventListener('resize',resize);
-
- // Tap opens/closes; long-press opens and holds; lateral swipe scrolls one step
- // per deliberate detent. The game feedback callback owns all UI sounds.
+ else window.addEventListener('resize',resize);
  hub.addEventListener('pointerdown',event=>{
   if(event.button!==0&&event.pointerType!=='touch')return;
-  pointerDown=true;holdOpened=false;moved=false;startX=event.clientX;
+  holding=true;longPressed=false;
   clearTimeout(holdTimer);
-  holdTimer=setTimeout(()=>{if(pointerDown){holdOpened=true;setOpen(true);}},280);
- });
- hub.addEventListener('pointermove',event=>{
-  if(!pointerDown)return;
-  const dx=event.clientX-startX;
-  if(Math.abs(dx)<SWIPE_PX||Date.now()-lastDragAt<SWIPE_DETENT_MS)return;
-  lastDragAt=Date.now();clearTimeout(holdTimer);moved=true;
-  if(!open)setOpen(true);
-  rotate(dx<0?1:-1);
-  startX=event.clientX;
+  holdTimer=setTimeout(()=>{if(holding){longPressed=true;setOpen(true);}},280);
  });
  const finishHub=()=>{
   clearTimeout(holdTimer);
-  if(holdOpened||moved)skipHubClick=true;
-  pointerDown=false;
+  if(longPressed)skipHubClick=true;
+  holding=false;
  };
  hub.addEventListener('pointerup',finishHub);
  hub.addEventListener('pointercancel',finishHub);
- hub.addEventListener('lostpointercapture',()=>{clearTimeout(holdTimer);pointerDown=false;});
+ hub.addEventListener('lostpointercapture',finishHub);
  hub.addEventListener('click',event=>{
   event.preventDefault();
   if(skipHubClick){skipHubClick=false;return;}
   setOpen(!open);
  });
- prev.addEventListener('click',()=>rotate(-1));
- next.addEventListener('click',()=>rotate(1));
- // All three painted sectors AND the icon buttons are touch surfaces.
- // Pointer events continue on window after the finger leaves the original icon.
- // CSS touch-action:none on the arc stops the world camera from stealing a swipe.
+ // Rotate continuously with the finger, but never with inertia on release.
+ // One detent requires deliberate angular travel and at least 145ms.
  stage.addEventListener('pointerdown',event=>{
   if(!open||(event.pointerType==='mouse'&&event.button!==0))return;
-  if(event.target.closest('.dr90Hub,.dr90Arrows'))return;
+  if(event.target.closest('.dr90Hub'))return;
   if(!event.target.closest('.dr90Sector,.dr90Option'))return;
-  drag={id:event.pointerId,x:event.clientX,startX:event.clientX,turned:false};
+  const sector=event.target.closest('.dr90Sector');
+  const sectorStep=sector?.classList?.contains('dr90Sector--left')?-1:
+   sector?.classList?.contains('dr90Sector--center')?0:
+   sector?.classList?.contains('dr90Sector--right')?1:
+   sector?.classList?.contains('dr94Sector--far')?2:null;
+  drag={id:event.pointerId,lastAngle:angleAt(event),offset:0,sectorStep,
+   moved:false,lastShiftAt:Date.now()-DRAG_MIN_STEP_MS};
+  root.classList.add('is-dragging');
  });
  const moveDrag=event=>{
   if(!drag||!open||event.pointerId!==drag.id)return;
-  const dx=event.clientX-drag.x;
-  if(Math.abs(dx)<SWIPE_PX||Date.now()-lastDragAt<SWIPE_DETENT_MS)return;
-  lastDragAt=Date.now();
-  drag.turned=true;
-  suppressChoiceClickUntil=Date.now()+460;
-  rotate(dx<0?1:-1);
-  drag.x=event.clientX;
+  const now=Date.now(),next=angleAt(event);
+  const diff=clamp(normalizeAngle(next-drag.lastAngle),-18,18);
+  drag.lastAngle=next;
+  if(Math.abs(diff)<.3)return;
+  drag.offset=clamp(drag.offset+diff,-DRAG_STEP_DEG,DRAG_STEP_DEG);
+  if(Math.abs(drag.offset)>DRAG_STEP_DEG/2&&now-drag.lastShiftAt>=DRAG_MIN_STEP_MS){
+   const direction=Math.sign(drag.offset);
+   centerIndex=semiRadialWrap(centerIndex-direction,SEMI_RADIAL_ITEMS.length);
+   drag.offset-=direction*DRAG_STEP_DEG;
+   drag.lastShiftAt=now;
+   feedback('skill');
+  }
+  drag.moved=true;
+  suppressChoiceClickUntil=now+440;
+  render(drag.offset);
   if(event.cancelable)event.preventDefault();
  };
  const finishDrag=(event,cancelled=false)=>{
   if(!drag||event.pointerId!==drag.id)return;
-  // Fast gestures can have only down/up events; don't lose their last detent.
-  const dx=event.clientX-drag.startX;
-  if(!cancelled&&!drag.turned&&open&&Math.abs(dx)>=SWIPE_PX){
-   rotate(dx<0?1:-1);
-   suppressChoiceClickUntil=Date.now()+460;
+  if(!cancelled&&!drag.moved){
+   const delta=normalizeAngle(angleAt(event)-drag.lastAngle);
+   if(Math.abs(delta)>14){
+    centerIndex=semiRadialWrap(centerIndex-Math.sign(delta),SEMI_RADIAL_ITEMS.length);
+    feedback('skill');drag.moved=true;
+   }
   }
-  drag=null;
+  if(!cancelled&&!drag.moved&&drag.sectorStep!==null){
+   // Whole painted wedge is a target, not only the small icon.
+   const index=semiRadialWrap(centerIndex+drag.sectorStep,SEMI_RADIAL_ITEMS.length);
+   const option=nodes[index].querySelector('button');
+   drag=null;root.classList.remove('is-dragging');render();
+   select(option);
+   return;
+  }
+  if(drag.moved)suppressChoiceClickUntil=Date.now()+440;
+  drag=null;root.classList.remove('is-dragging');render();
  };
  window.addEventListener('pointermove',moveDrag,{passive:false});
  window.addEventListener('pointerup',finishDrag);
@@ -254,8 +268,8 @@ export function installSemiRadialDock({
  const keydown=event=>{
   if(!open)return;
   if(event.key==='Escape'){event.preventDefault();setOpen(false);hub.focus();return;}
-  if(event.key==='ArrowRight'){event.preventDefault();rotate(1);}
-  else if(event.key==='ArrowLeft'){event.preventDefault();rotate(-1);}
+  if(event.key==='ArrowRight'||event.key==='ArrowDown'){event.preventDefault();rotate(1);}
+  else if(event.key==='ArrowLeft'||event.key==='ArrowUp'){event.preventDefault();rotate(-1);}
   else if(event.key==='Enter'&&document.activeElement===hub){
    event.preventDefault();select(nodes[centerIndex].querySelector('button'));
   }
@@ -272,16 +286,14 @@ export function installSemiRadialDock({
  const api={
   get isOpen(){return open;},
   get selected(){return SEMI_RADIAL_ITEMS[centerIndex].id;},
-  open:()=>setOpen(true),
-  close:()=>setOpen(false),
-  rotate,
+  open:()=>setOpen(true),close:()=>setOpen(false),rotate,
   select:()=>select(nodes[centerIndex].querySelector('button')),
   destroy:()=>{
    destroyed=true;clearTimeout(holdTimer);ro?.disconnect();watch.disconnect();
    window.removeEventListener('pointermove',moveDrag);
    window.removeEventListener('pointerup',finishDrag);
    window.removeEventListener('pointercancel',cancelDrag);
-   if(!ro)removeEventListener('resize',resize);
+   if(!ro)window.removeEventListener('resize',resize);
    document.removeEventListener('pointerdown',outside);
    document.removeEventListener('keydown',keydown);
    root.remove();

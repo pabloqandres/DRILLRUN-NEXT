@@ -4,6 +4,9 @@
 
 ## Currently Active
 
+- **ChatGPT — V94 menú radial esquina (2026-11-12):** rama `chatgpt/v94-corner-radial-safe-touch`. Archivos `dist/chapter/semi-radial-dock-v90.mjs` y `semi-radial-command-v90.css` más tests/documentación. Cuatro sectores compactos, base integrada con botón de acción diferenciado, margen seguro, centros alineados con joystick, giro circular infinito sin flechas y snap al soltar. Pruebas JS y DOM simulados; PR/CI y Android pendientes. No cambiar `game.mjs`, misiones, economía ni Cloud Save.
+
+
 - **ChatGPT — V50 DrillTruck® personal:** rama
   `chatgpt/v50-personal-drilltruck-driving`.
   Segundo vehículo comprado en Casa Matriz, entrega real, M5 seis pasos,
