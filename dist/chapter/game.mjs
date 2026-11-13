@@ -86,6 +86,7 @@ import {AvatarRoster} from './avatar-roster.mjs';
 import {avatarDefinition} from './avatars.mjs';
 import {BuilderUI} from './builder-ui.mjs';
 import {renderWorkshopCard} from './workshop-card-view.mjs';
+import {nearWorkshopDoor,workshopTapZone,workshopHasExtension,workshopReady} from './workshop-world-access-v103.mjs';
 import {BuildingBlueprint} from './building-blueprint.mjs';
 import {ConstructionHologram} from './construction-hologram.mjs';
 import {MODULES,moduleDefinition,pendingConstruction,moduleAvailability} from './module-catalog.mjs';
@@ -344,7 +345,14 @@ async function ensureWorld(forSelection=false){
      (p&&Math.hypot(p.x-m4DthModel.position.x,p.z-m4DthModel.position.z)<2.25))){
    target=null;hideDrillCard();hideWorkshopCard();showDthDrillCard();return;
  }
- if(!p)return;if(placement){placement.pose.x=Math.round((p.x+6)/CONFIG.grid)*CONFIG.grid;placement.pose.z=Math.round(p.z/CONFIG.grid)*CONFIG.grid;renderPlacement();}else if(hsecActive(s)&&hsecWorld){const hitAsset=hsecWorld.hitTestAsset(p.x,p.z);if(hitAsset){hsecWorld.showAssetCard(hitAsset);return;}}if(m3DrillModel&&s.drill&&Math.hypot(p.x-m3DrillModel.position.x,p.z-m3DrillModel.position.z)<3.5&&Math.hypot(s.position.x-m3DrillModel.position.x,s.position.z-m3DrillModel.position.z)<6){hideDrillCard();hideWorkshopCard();showDrillCard();return;}if(s.workshop?.status!=='building'&&s.workshop&&s.mission3&&s.mission3.phase!=='inactive'&&Math.hypot(p.x+7.6,p.z+9.3)<6&&Math.hypot(s.position.x+7.6,s.position.z+9.3)<9){hideDrillCard();hideWorkshopCard();openFaena('workshop');return;}
+ // L2 extension belongs to the same Workshop. Direct taps on its 3D
+ // geometry work from the side-door approach, even if ground ray misses.
+ if(!placement&&!s.inside&&workshopHasExtension(s)&&s.mission3&&s.mission3.phase!=='inactive'&&
+    world._workshopExt&&world.ray.intersectObject(world._workshopExt,true).length>0&&
+    workshopTapZone(s,p,s.position,{extensionMeshHit:true})){
+   target=null;hideDrillCard();hideWorkshopCard();openFaena('workshop');return;
+ }
+ if(!p)return;if(placement){placement.pose.x=Math.round((p.x+6)/CONFIG.grid)*CONFIG.grid;placement.pose.z=Math.round(p.z/CONFIG.grid)*CONFIG.grid;renderPlacement();}else if(hsecActive(s)&&hsecWorld){const hitAsset=hsecWorld.hitTestAsset(p.x,p.z);if(hitAsset){hsecWorld.showAssetCard(hitAsset);return;}}if(m3DrillModel&&s.drill&&Math.hypot(p.x-m3DrillModel.position.x,p.z-m3DrillModel.position.z)<3.5&&Math.hypot(s.position.x-m3DrillModel.position.x,s.position.z-m3DrillModel.position.z)<6){hideDrillCard();hideWorkshopCard();showDrillCard();return;}if(!s.inside&&s.mission3&&s.mission3.phase!=='inactive'&&workshopTapZone(s,p,s.position)){hideDrillCard();hideWorkshopCard();openFaena('workshop');return;}
  // Building-only tap: the yard's other ground stays click-to-move.
  if(s.mission5?.status==='operational'&&Math.hypot(p.x+69.5,p.z+20)<4.2&&Math.hypot(s.position.x+69.5,s.position.z+20)<10){openFaena('logistics');return;}if(drillCardOpen)hideDrillCard();if(workshopCardOpen)hideWorkshopCard();if(!world.isBlocked(p.x,p.z,avatarDefinition(s.character).radius))target={x:p.x,z:p.z};}});
  cinematic=new CinematicDirector({world,host:$('#intro'),translate:()=>t,sound:()=>prefs.sound,onSound:()=>{sound('transition');wind.set(prefs.sound);},onComplete:()=>{beginPlay(cinemaReview);if(cinemaRecorder)setTimeout(()=>cinemaRecorder.stop(),500);}});
@@ -1128,7 +1136,7 @@ function nearInteraction(){if(!s)return null;
   return {kind:'personalTruck',label:ride.mode==='driving'?'Salir de DrillTruck®':'Ingresar a DrillTruck®'};
  const nearest=CLEARABLES.filter(o=>!s.cleared.includes(o.id)).map(o=>({...o,distance:Math.hypot(o.x-s.position.x,o.z-s.position.z)})).filter(o=>o.distance<1.6).sort((a,b)=>a.distance-b.distance)[0];if(nearest)return {kind:'clear',object:nearest,label:'clearAction',blocked:s.energy<CONFIG.clearCost};
  if(!s.inside&&Math.hypot(s.position.x+7.99,s.position.z-2.9)<1.55)return pendingConstruction(s)?{kind:'boost',label:'accelerate'}:{kind:s.office.status==='built'?'enter':'build',label:s.office.status==='built'?'enter':'buildAction'};
- if(!s.inside&&s.workshop?.status!=='building'&&s.workshop&&Math.hypot(s.position.x+6.8,s.position.z+5.4)<2.5)return {kind:'workshop',label:'TALLER'};
+ if(!s.inside&&workshopReady(s)&&nearWorkshopDoor(s,s.position))return {kind:'workshop',label:'TALLER'};
  if(!s.inside&&s.mission5?.status==='operational'&&Math.hypot(s.position.x+69.5,s.position.z+20)<4.6)return {kind:'warehouse',label:'BODEGA'};
  if(s.inside){if(Math.hypot(s.position.x+7.99,s.position.z-.8)<1.0)return {kind:'exit',label:'exit'};const computer=s.furniture.find(f=>s.inventory.find(v=>v.id===f.id)?.product==='computer');if(computer&&Math.hypot(s.position.x+6-computer.x,s.position.z-computer.z)<1.5)return {kind:'computer',label:'useComputer'};}
  if(!s.inside&&m5NpcWorld){
