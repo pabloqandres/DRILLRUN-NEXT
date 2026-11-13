@@ -611,3 +611,12 @@ Modelo visual independiente de carga M4, localizador de flota y recuperación en
 - `faena-center.mjs` cambia solo la ruta Taller; actualiza el contador por segundo mientras la ventana está abierta, detiene el intervalo al navegar/cerrar y reutiliza el handler original `data-faena-workshop-upgrade`.
 - `construction-callout.mjs` añade segundo cartel independiente anclado al techo de taller con proyección Three.js, barra, porcentaje y timer; no altera cartel de oficinas ni `game.mjs`. Es visible solo con construcción real y cámara enfocada al edificio.
 - Estilo exclusivo `workshop-dashboard-v102.css` al final de `dist/index.html`, legible en computador y landscape móvil. Tests V102 y suites previas Taller/V73/M4. Sin cambio de costo, duración, nivel máximo, booster, logística o estado guardado.
+
+## 2026-11-13 — V103 · Taller gráfico y puerta de ampliación reconocida
+- Usuario detectó dos fallas de V102: header con etiquetas y contadores superpuestos, pantalla excesivamente textual, y acceso imposible desde el ala nueva del Taller Nv.2.
+- Diagnóstico: el JSX HTML de V102 utilizaba `<header>` internos afectados por los estilos globales de `header`, lo que desplazaba títulos y valores a la barra superior. Se elimina completamente ese patrón de la vista actual V103.
+- `workshop-v103-view.mjs`: reemplaza tarjetas textuales por foto/asset de Taller del juego, aro SVG de plazas **libres** derivado de `workshopFree`, tres estaciones grandes y plegables de bits, martillos y kits, actividad compacta, DTH secundario, estados auténticos y CTA original 8.000/05:00 donde aplique. No se añaden marcas ni diseños ficticios.
+- `workshop-world-access-v103.mjs`: regla pura de apertura desde puerta original (-6.8,-5.4) y lateral L2 (-2.45,-6.05), así como suelo/modelo 3D de ala extendida; mantiene distancia de interacción segura y no crea segundo edificio.
+- `game.mjs`: edición mínima de dos comprobaciones de apertura (mano / tap), protegida por misión, estado y proximidad; conserva `openFaena('workshop')` y no altera colisiones o avance. Documentado previamente en DECISIONS.
+- `faena-center.mjs`: solo ruta `workshop` pasa a V103, cabecera aislada `ws103Dialog`; el reloj V102 sigue leyendo progreso real. `workshop-visual-v103.css` último en index con presentación responsive más compacta y safe areas.
+- `tests/v103-workshop-access-graphic.test.mjs`, workflow V103, actualización de una aserción V102 que nombraba el renderizador anterior. Validar preview, CI y producción main sin inventar éxito.
