@@ -7,7 +7,7 @@ const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const ico=(fn,name)=>'<span class="ws103Icon" aria-hidden="true">'+fn(name)+'</span>';
 const link=(route,label)=>'<button type="button" data-faena-route="'+route+'">'+esc(label)+' <span aria-hidden="true">›</span></button>';
 function capacityDial(used,capacity,free){
- const fraction=capacity?Math.max(0,Math.min(1,used/capacity)):0;
+ const fraction=capacity?Math.max(0,Math.min(1,free/capacity)):0;
  const circumference=2*Math.PI*40,fill=Math.round(fraction*circumference*100)/100;
  return '<div class="ws103CapacityDial" role="img" aria-label="'+used+' de '+capacity+' plazas ocupadas, '+free+' libres">'+
  '<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">'+
