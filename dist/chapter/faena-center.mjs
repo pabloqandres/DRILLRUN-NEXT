@@ -11,6 +11,8 @@ import {hiredPatioStaff,gateChecked,warehouseChecked} from '../mission5/patio-st
 import {REPAIR_KITS,workshopRecoverySummary} from '../mission5/workshop-recovery.mjs';
 import {workshopLevel,workshopUpgradeJob,WORKSHOP_LEVELS} from '../mission3/inventory.mjs';
 import {fleetOccupancy} from '../mission5/fleet-base.mjs';
+import {renderWorkshopDashboard} from './workshop-v102-view.mjs';
+import {workshopConstructionReadout} from './workshop-progress-v102.mjs';
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'🪙 '+Math.round(Number(n)||0).toLocaleString('es-CL');
@@ -55,7 +57,7 @@ function personalTruckActions(s){
 export class FaenaCenterUI{
  constructor({host,state,translate,format,icon,onClose,onAppAction,onKitOrder,onRecovery,onHsec,onLocate,onLocatePersonalTruck,onRecoverPersonalTruck,onFeedback}){
   Object.assign(this,{host,state,translate,format,icon,onClose,onAppAction,onKitOrder,onRecovery,onHsec,onLocate,onLocatePersonalTruck,onRecoverPersonalTruck,onFeedback});
-  this.route='overview';this.view='';this.lastKey='';
+  this.route='overview';this.view='';this.lastKey='';this.workshopClock=null;
   this.personnelRole=null;this.personnelCandidate=null;this.personnelView='recruit';this.personnelDetailTab='ficha';this.financialFilter='all';
   host.addEventListener('click',event=>this.handle(event));
  }
@@ -71,8 +73,32 @@ export class FaenaCenterUI{
   this.view=route.startsWith('m3-')||route.startsWith('m4-')?route:'';
   this.host.classList.remove('hidden');this.host.hidden=false;
   this.render();
+  this.syncWorkshopClock();
  }
- close(){this.host.classList.add('hidden');this.host.hidden=true;this.onClose?.();}
+ close(){this.host.classList.add('hidden');this.host.hidden=true;this.stopWorkshopClock();this.onClose?.();}
+ stopWorkshopClock(){if(this.workshopClock!==null){clearInterval(this.workshopClock);this.workshopClock=null;}}
+ syncWorkshopClock(){
+  this.stopWorkshopClock();
+  if(this.route==='workshop'&&!this.view&&this.visible){
+   this.updateWorkshopClock();
+   this.workshopClock=setInterval(()=>this.updateWorkshopClock(),1000);
+  }
+ }
+ updateWorkshopClock(now=Date.now()){
+  if(!this.visible||this.route!=='workshop'||this.view)return;
+  const progress=this.host.querySelector('[data-ws102-progress]');
+  if(!progress)return;
+  const data=workshopConstructionReadout(this.state(),now);
+  if(!data)return;
+  const remaining=progress.querySelector('[data-ws102-remaining]');
+  const percent=progress.querySelector('[data-ws102-percent]');
+  const fill=progress.querySelector('[data-ws102-fill]');
+  const track=progress.querySelector('[role="progressbar"]');
+  if(remaining)remaining.textContent=data.remainingLabel;
+  if(percent)percent.textContent=data.progress+'%';
+  if(fill)fill.style.width=data.progress+'%';
+  if(track)track.setAttribute('aria-valuenow',String(data.progress));
+ }
  navigate(route){
   if(route==='messages'){this.onAppAction?.('navigatePhone','messages');return;}
   this.open(route);
@@ -118,27 +144,7 @@ export class FaenaCenterUI{
      '<nav class="faenaQuickLinks">'+button('headquarters','Casa Matriz · productos')+button('workshop','Taller · recuperación')+'</nav>'+
      section('Pedidos y entregas',m3('m3-orders'));
    }
-   case 'workshop':{
-    const info=workshopRecoverySummary(s),lvl=workshopLevel(s);
-    const states={needsRepairKit:'Sin kit disponible',noWorkshopCapacity:'Sin capacidad',toolNotWornEnough:'Herramienta aún útil',recoveryLimit:'Recuperación agotada',toolNotRecoverable:'No recuperable',patioNotReady:'Requiere Patio L1',workshopNotBuilt:'Construye el Taller'};
-    const jobs=info.jobs.map(j=>'<div class="faenaStockRow"><span><b>'+esc(j.toolId)+'</b><small>Recuperación técnica en curso</small></span><b>'+Math.floor(j.remainingSeconds/60).toString().padStart(2,'0')+':'+(j.remainingSeconds%60).toString().padStart(2,'0')+'</b></div>').join('');
-    const stock=info.candidates.map(tool=>'<div class="faenaOrderRow"><span><b>'+esc(tool.model)+'</b><small>'+esc(tool.type==='bit'?'Reafilado de bit':'Reparación de martillo')+' · '+Math.round((tool.lifeRemaining||0)/Math.max(1,tool.lifeTotal||1)*100)+'% vida · '+(tool.recoveryCount||0)+' recuperaciones</small></span><button data-faena-recover="'+esc(tool.id)+'" '+(tool.blocked?'disabled':'')+'>'+esc(tool.blocked?states[tool.blocked]||tool.blocked:'Recuperar')+'</button></div>').join('');
-    const active=lvl>0;
-    const upgrade=workshopUpgradeJob(s),nextLevel=WORKSHOP_LEVELS.find(x=>x.level===lvl+1);
-    const upgradePanel=upgrade?
-     section('Ampliación técnica','<p>Ampliando a nivel '+upgrade.targetLevel+' · termina en '+stamp(upgrade.ends)+'</p>'):
-     nextLevel?section('Ampliación técnica','<p>Más capacidad de herramientas y equipos para mantenimiento.</p>'+
-      '<button data-faena-workshop-upgrade '+(s.cash<nextLevel.upgradeCost?'disabled':'')+'>Ampliar a nivel '+nextLevel.level+' · '+money(nextLevel.upgradeCost)+'</button>'):'';
-    return '<p class="faenaLead">El Taller ya no es otra bodega. Reafila bits, repara martillos con kits y devuelve herramientas recuperadas a la operación.</p>'+
-     '<div class="faenaMetrics">'+small('Nivel técnico',lvl)+small('Trabajos pendientes',info.jobs.length)+small('Recuperaciones realizadas',info.completed)+'</div>'+
-     (!active?'<p class="faenaHint">Construye el Taller desde Catálogo para habilitarlo.</p>':
-     upgradePanel+
-     section('Trabajos de recuperación',jobs||'<p class="faenaHint">No hay trabajos en proceso.</p>')+
-     section('Herramientas para recuperar',stock||'<p class="faenaHint">No hay piezas desgastadas para recuperar. El material agotado que vuelva de perforación aparecerá aquí.</p>')+
-     section('Kits en el Taller',Object.values(REPAIR_KITS).map(k=>small(k.label,info.kits[k.id]||0)).join('')+button('logistics','Solicitar kits en Bodega'))+
-     section('Instalación y mantenimiento DTH',s.mission4&&s.mission4.phase!=='inactive'?m4('m4-workshop'):'<p class="faenaHint">La perforadora DTH se habilita en la Misión 4.</p>')+
-     '<nav class="faenaQuickLinks">'+button('logistics','Ver inventario de Bodega')+button('headquarters','Casa Matriz')+'</nav>');
-   }
+   case 'workshop':return renderWorkshopDashboard(s,{icon,money,m4,now:Date.now()});
    case 'fleet':{
     const yard=fleetOccupancy(s),truck=s.mission5?.personalTruck;
     return '<p class="faenaLead">El Patio administra plazas de estacionamiento, vehículos y circulación segura. El Taller se ocupa exclusivamente de trabajos técnicos.</p>'+
@@ -260,6 +266,7 @@ export class FaenaCenterUI{
   const currentScroll=this.lastKey===route+':'+this.view?this.host.querySelector('.faenaBody')?.scrollTop||0:0;
   const isPersonnel=route==='personnel'&&!this.view;
   const isHub=route==='overview'&&!this.view;
+  const isWorkshop=route==='workshop'&&!this.view;
   const pageMarkup=this.pageHtml(s,t,fmt,icon);
   if(isHub&&this._lastHubPage===pageMarkup&&this.host.querySelector('.fcHub')){
    const cash=this.host.querySelector('.fcHeaderCash strong');
@@ -279,7 +286,7 @@ export class FaenaCenterUI{
   const personnelCash=isPersonnel?'<span class="pvHeaderFunds" aria-label="Saldo actual">'+money(s.cash)+'</span>':'';
   const hubTitle=isHub?'<div class="fcHeaderIdentity"><span class="fcHeaderEmblem"><img src="./assets/faena-v82/icons/hub.svg" alt="" width="64" height="64"></span><span><small>OPERACIÓN DEL PROYECTO</small><h2>Centro de Faena</h2></span></div>':null;
   const hubResources=isHub?'<span class="fcHeaderCash"><span>Saldo</span><strong>'+money(s.cash)+'</strong></span><span class="fcHeaderEnergy"><span>'+icon('energy')+'</span><strong>'+Math.round(s.energy||0)+'/20'+'</strong></span>':'';
-  this.host.innerHTML='<div class="faenaDialog '+(isPersonnel?'pvDialog':isHub?'fcOverviewDialog':'')+'" role="dialog" aria-modal="true" aria-label="Centro de Faena">'+
+  this.host.innerHTML='<div class="faenaDialog '+(isPersonnel?'pvDialog':isHub?'fcOverviewDialog':isWorkshop?'ws102Dialog':'')+'" role="dialog" aria-modal="true" aria-label="Centro de Faena">'+
    '<header class="faenaHeader">'+(hubTitle||personnelTitle)+
    '<div class="faenaHeaderActions">'+(isHub?hubResources:personnelCash)+(prev?'<button data-faena-back aria-label="Volver">‹ Volver</button>':'')+
    '<button data-faena-close aria-label="Cerrar Centro de Faena">✕</button></div></header>'+
@@ -298,6 +305,7 @@ export class FaenaCenterUI{
    }
   }
   this.lastKey=route+':'+this.view;
+  if(isWorkshop)this.updateWorkshopClock();
  }
  handle(e){
   const b=e.target.closest('button');
