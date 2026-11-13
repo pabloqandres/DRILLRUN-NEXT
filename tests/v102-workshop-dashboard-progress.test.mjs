@@ -129,7 +129,8 @@ test('V102 world tag shares same job and camera roof projection; no game-loop ed
   'data-ws102-world-percent',
   'this.updateWorkshop(s,enabled)'
  ])assert(world.includes(token),token);
- assert(ui.includes("renderWorkshopDashboard(s,{icon,money,m4,now:Date.now()})"));
+ assert(ui.includes("renderWorkshopVisualV103(s,{icon,money,m4,now:Date.now()})"),
+  'V103 remains driven by original persisted progress; V102 readout stays available');
  assert(ui.includes("this.workshopClock=setInterval(()=>this.updateWorkshopClock(),1000)"));
  assert(ui.includes("this.stopWorkshopClock();"));
  assert(ui.includes("this.onAppAction?.('m3','upgradeWorkshop',null)"));
