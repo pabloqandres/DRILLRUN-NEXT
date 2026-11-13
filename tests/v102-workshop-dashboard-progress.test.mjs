@@ -13,7 +13,7 @@ const cash=n=>'🪙 '+Math.round(n).toLocaleString('es-CL');
 const fixture=()=>{
  const s=newGame('es','operator01',start);
  s.cash=95458;s.office.level=2;
- s.hsec.completedAt=start;
+ s.hsec??={};s.hsec.completedAt=start;
  s.mission3={phase:'workshop'};
  s.toolInventory=[];s.spentMaterials=[];
  s.mission5={status:'inactive'};
