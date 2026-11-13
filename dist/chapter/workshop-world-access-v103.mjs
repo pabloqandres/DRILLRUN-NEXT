@@ -22,15 +22,18 @@ export function nearWorkshopDoor(s,pos,radius=2.7){
 }
 export function workshopTapZone(s,ground,player,{extensionMeshHit=false}={}){
  if(!workshopReady(s)||!player)return null;
+ if(workshopHasExtension(s)){
+  const r=WORKSHOP_L2_FOOTPRINT;
+  const extGround=ground&&ground.x>=r.minX&&ground.x<=r.maxX&&
+   ground.z>=r.minZ&&ground.z<=r.maxZ;
+  const nearExtension=distance(player,WORKSHOP_DOORS.extension)<10;
+  // Check the new actual bay FIRST: the old 6m circular click radius
+  // overlaps its footprint and used to claim taps on the new door.
+  if(nearExtension&&(extGround||extensionMeshHit))return 'extension';
+ }
  const baseCenter={x:-7.6,z:-9.3};
- const baseHit=ground&&distance(ground,baseCenter)<6;
+ const baseHit=ground&&ground.x<=-3.75&&distance(ground,baseCenter)<6;
  const closeBase=distance(player,baseCenter)<9;
  if(baseHit&&closeBase)return 'base';
- if(!workshopHasExtension(s))return null;
- const r=WORKSHOP_L2_FOOTPRINT;
- const extGround=ground&&ground.x>=r.minX&&ground.x<=r.maxX&&
-  ground.z>=r.minZ&&ground.z<=r.maxZ;
- const nearExtension=distance(player,WORKSHOP_DOORS.extension)<10;
- if(nearExtension&&(extGround||extensionMeshHit))return 'extension';
  return null;
 }
