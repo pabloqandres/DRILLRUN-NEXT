@@ -11,7 +11,7 @@ import {hiredPatioStaff,gateChecked,warehouseChecked} from '../mission5/patio-st
 import {REPAIR_KITS,workshopRecoverySummary} from '../mission5/workshop-recovery.mjs';
 import {workshopLevel,workshopUpgradeJob,WORKSHOP_LEVELS} from '../mission3/inventory.mjs';
 import {fleetOccupancy} from '../mission5/fleet-base.mjs';
-import {renderWorkshopDashboard} from './workshop-v102-view.mjs';
+import {renderWorkshopVisualV103} from './workshop-v103-view.mjs';
 import {workshopConstructionReadout} from './workshop-progress-v102.mjs';
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -144,7 +144,7 @@ export class FaenaCenterUI{
      '<nav class="faenaQuickLinks">'+button('headquarters','Casa Matriz · productos')+button('workshop','Taller · recuperación')+'</nav>'+
      section('Pedidos y entregas',m3('m3-orders'));
    }
-   case 'workshop':return renderWorkshopDashboard(s,{icon,money,m4,now:Date.now()});
+   case 'workshop':return renderWorkshopVisualV103(s,{icon,money,m4,now:Date.now()});
    case 'fleet':{
     const yard=fleetOccupancy(s),truck=s.mission5?.personalTruck;
     return '<p class="faenaLead">El Patio administra plazas de estacionamiento, vehículos y circulación segura. El Taller se ocupa exclusivamente de trabajos técnicos.</p>'+
@@ -282,11 +282,11 @@ export class FaenaCenterUI{
    return;
   }
   this._lastPersonnelPage=isPersonnel?pageMarkup:null;
-  const personnelTitle=isPersonnel?'<div class="pvScreenIdentity"><span class="pvScreenGlyph">'+icon('dock-users')+'</span><div><h2>Personal</h2><small>CONTRATACIÓN Y GESTIÓN DEL EQUIPO</small></div></div>':'<div><small>DRILL RUN · OPERACIÓN</small><h2>'+esc(title||'Centro de Faena')+'</h2></div>';
+  const personnelTitle=isPersonnel?'<div class="pvScreenIdentity"><span class="pvScreenGlyph">'+icon('dock-users')+'</span><div><h2>Personal</h2><small>CONTRATACIÓN Y GESTIÓN DEL EQUIPO</small></div></div>':isWorkshop?'<div class="ws103ScreenIdentity"><span class="ws103ScreenGlyph">'+icon('wrench')+'</span><div><small>CONTROL DE INSTALACIÓN</small><h2>Taller técnico</h2></div></div>':'<div><small>DRILL RUN · OPERACIÓN</small><h2>'+esc(title||'Centro de Faena')+'</h2></div>';
   const personnelCash=isPersonnel?'<span class="pvHeaderFunds" aria-label="Saldo actual">'+money(s.cash)+'</span>':'';
   const hubTitle=isHub?'<div class="fcHeaderIdentity"><span class="fcHeaderEmblem"><img src="./assets/faena-v82/icons/hub.svg" alt="" width="64" height="64"></span><span><small>OPERACIÓN DEL PROYECTO</small><h2>Centro de Faena</h2></span></div>':null;
   const hubResources=isHub?'<span class="fcHeaderCash"><span>Saldo</span><strong>'+money(s.cash)+'</strong></span><span class="fcHeaderEnergy"><span>'+icon('energy')+'</span><strong>'+Math.round(s.energy||0)+'/20'+'</strong></span>':'';
-  this.host.innerHTML='<div class="faenaDialog '+(isPersonnel?'pvDialog':isHub?'fcOverviewDialog':isWorkshop?'ws102Dialog':'')+'" role="dialog" aria-modal="true" aria-label="Centro de Faena">'+
+  this.host.innerHTML='<div class="faenaDialog '+(isPersonnel?'pvDialog':isHub?'fcOverviewDialog':isWorkshop?'ws103Dialog':'')+'" role="dialog" aria-modal="true" aria-label="Centro de Faena">'+
    '<header class="faenaHeader">'+(hubTitle||personnelTitle)+
    '<div class="faenaHeaderActions">'+(isHub?hubResources:personnelCash)+(prev?'<button data-faena-back aria-label="Volver">‹ Volver</button>':'')+
    '<button data-faena-close aria-label="Cerrar Centro de Faena">✕</button></div></header>'+

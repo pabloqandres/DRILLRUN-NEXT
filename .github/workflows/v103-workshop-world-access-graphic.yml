@@ -1,0 +1,23 @@
+name: "V103 Taller: extended door and graphical dashboard"
+on:
+  push:
+    branches: [chatgpt/v103-workshop-world-access-visual]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  workshop-v103:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Verify safe L2 interaction, compact layout and original workshop timer
+        run: |
+          node --check dist/chapter/workshop-world-access-v103.mjs
+          node --check dist/chapter/workshop-v103-view.mjs
+          node --check dist/chapter/game.mjs
+          node --check dist/chapter/faena-center.mjs
+          node --test tests/v103-workshop-access-graphic.test.mjs tests/v102-workshop-dashboard-progress.test.mjs tests/v73-workshop-build-m3-sms.test.mjs tests/workshop-access-and-puma-color.test.mjs tests/workshop-card-v37.test.mjs
