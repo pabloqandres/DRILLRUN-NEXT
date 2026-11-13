@@ -1,0 +1,23 @@
+name: "V102 Taller dashboard and real construction progress"
+on:
+  push:
+    branches: [chatgpt/v102-workshop-dashboard-progress]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  workshop-v102:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Validate workshop dashboard, timers and original game contracts
+        run: |
+          node --check dist/chapter/workshop-progress-v102.mjs
+          node --check dist/chapter/workshop-v102-view.mjs
+          node --check dist/chapter/faena-center.mjs
+          node --check dist/chapter/construction-callout.mjs
+          node --test tests/v102-workshop-dashboard-progress.test.mjs tests/v73-workshop-build-m3-sms.test.mjs tests/workshop-card-v37.test.mjs tests/workshop-card-v38.test.mjs tests/workshop-boost-economy-v22.test.mjs tests/universal-building-blueprint-v36.test.mjs tests/mission4-operation-v24.test.mjs
